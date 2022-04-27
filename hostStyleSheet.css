@@ -1,0 +1,165 @@
+﻿
+body
+{
+    font-family: Lucida Sans Unicode, Verdana, Arial, Geneva, Sans-Serif;
+    font-size: 11px;
+    width: 660px;
+    margin: 25px auto 0 auto;
+    padding: 0;
+}
+
+div.background
+{
+    width: 660px; 
+    margin: 0;
+    padding: 25px;
+    background-color: #EEEEEE;
+    border: 1px solid black;
+}
+
+hr
+{
+    border-style: none;
+    height: 4px;
+    background-color: #AAA;
+}
+
+.boldTitle
+{
+	font-weight: bold;
+	font-size:14px;
+}
+
+.boldSubtitle
+{
+	font-weight: bold;
+}
+
+.midiMessagesTable
+{
+	font-size: 11px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.commandsTable
+{
+    border-bottom: 3px solid #999;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.left
+{
+	text-align:right;
+}
+
+.inputDeviceSelect
+{
+	font-size: 11px;
+	width: 180px;
+	height: 18px;
+	margin-left: 0;
+}
+
+.webAudioFontSelect
+{
+	font-size: 11px;
+	width: 275px;
+	height: 18px;
+	margin-left: 0;
+}
+
+.presetSelect
+{
+	font-size: 11px;
+	width: 300px;
+	height: 18px;
+	margin: 0 4px auto auto;
+}
+
+.tuningGroupSelect
+{
+	font-size: 11px;
+	width: 220px;
+	height: 18px;
+	margin-left: 0;
+}
+
+.tuningSelect
+{
+	font-size: 11px;
+	width: 305px;
+	height: 18px;
+	margin: 0 0 auto auto;
+}
+
+.A4FrequencySelect
+{
+	font-size: 11px;
+	width: 46px;
+	height: 18px;
+	margin: 0 4px auto auto;
+}
+
+.triggerKeySelect
+{
+	font-size: 11px;
+	width: 67px;
+	height: 18px;
+	margin-left: 0;
+}
+
+.triggerActionSelect
+{
+	font-size: 11px;
+	width: 582px;
+	height: 18px;
+	margin: 0 4px auto auto;
+}
+
+.valueSelector
+{
+    font-size: 11px; 
+    width: 45px;
+    margin-left: 0;
+	margin-right: 4px;
+}
+
+.number
+{
+    font-size: 11px;
+    width: 41px;
+    margin-left: 0;
+	margin-right: 4px;
+}
+
+.sendAgainButton
+{
+    font-size: 11px;
+	height:18px;
+}
+
+.sendButton
+{
+    font-size: 11px;
+	height:18px;
+	width:45px;
+    margin-right:5px;
+}
+
+.smallButton
+{
+	font-size:11px;
+	height:22px;
+}
+
+.largeButton
+{
+	font-size:12px;
+	height:24px;
+	width:80px;
+	margin-top:10px;
+}
+
+

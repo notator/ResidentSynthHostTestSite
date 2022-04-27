@@ -1,0 +1,284 @@
+﻿<!DOCTYPE HTML>
+<html lang="en"
+	  xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>ResidentWAFSynthHost</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" /> <!-- workaround to prevent "favicon not found" exceptions in Chrome.-->
+    <link href="sliderStyleSheet.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="hostStyleSheet.css" media="all" rel="stylesheet" type="text/css" />
+    <!-- Javascript files are included at the end of the body element -->
+</head>
+<body>
+    <div class="background">
+        <div id="topDiv" style="margin:0;">
+            <table>
+                <colgroup>
+                    <col style="width:300px;" />
+                    <col style="width:225px; text-align:right" />
+                    <col style="width:185px;" />
+                </colgroup>
+                <tr>
+                    <td style="padding-left:0"><span class="boldTitle">ResidentWAFSynth Host</span></td>
+                    <td style="text-align:right"><span class="boldSubtitle">Input Device:</span></td>
+                    <td>
+                        <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="WebMIDI.host.onInputDeviceSelectChanged()"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:top" rowspan="2">
+                        <input class="smallButton" type="button" value="GitHub" style="width:80px" onclick="WebMIDI.host.gitHubButtonClick()" />
+                    </td>
+                    <td style="text-align:right">
+                        <span class="boldSubtitle">Output Device:</span>
+                    </td>
+                    <td>
+                        <span class="boldSubtitle">ResidentWAFSynth</span>
+                        <input class="smallButton" type="button" value="website" onclick="WebMIDI.host.synthWebsiteButtonClick()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right">
+                        <span>synth channel:</span>
+                    </td>
+                    <td>
+                        <select id="channelSelect" class="valueSelector" onchange="WebMIDI.host.onChannelSelectChanged()">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                        </select>
+                        <span>(multichannel synth)</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="startupDivs">
+            <div id="loadingMsgDiv" style="text-align:center; margin-top: 15px;">
+                <span>configuring synthesizer...</span>
+            </div>
+            <div id="continueAtStartButtonDiv" style="text-align:center; display:none;">
+                <input class="largeButton" type="button" value="continue" onclick="WebMIDI.host.onContinueAtStartClicked()" />
+            </div>
+        </div>
+
+        <div id="webAudioFontDiv" style="display:none">
+            <hr />
+            <table>
+                <colgroup>
+                    <col style="width:75px" />
+                    <col />
+                </colgroup>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">WebAudioFont: </span>
+                        <!--<input class="smallButton" type="button" value="website" onclick="WebMIDI.host.webAudioFontWebsiteButtonClick()" />-->
+                    </td>
+                    <td>
+                        <span class="boldSubtitle">preset: </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <select id="webAudioFontSelect" class="webAudioFontSelect" onchange="WebMIDI.host.onWebAudioFontSelectChanged()" />
+                    </td>
+                    <td id="presetSelectCell">
+                        <!--
+                        <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
+                        sendAgainButton
+                    -->
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="tuningDiv" style="display:none">
+            <hr />
+            <table>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">Tuning group: </span>
+                    </td>
+                    <td>
+                        <span class="boldSubtitle">tuning: </span>
+                    </td>
+                    <td>
+                        <span class="boldSubtitle">A4: </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <select id="tuningGroupSelect" class="tuningGroupSelect" onchange="WebMIDI.host.onTuningGroupSelectChanged()" />
+                    </td>
+                    <td id="tuningSelectCell">
+                        <!--
+                        <select id="tuningSelect" class="tuningSelect" onchange="WebMIDI.host.onTuningSelectChanged()" />
+                        sendAgainButton
+                    -->
+                    </td>
+                    <td id="A4FrequencySelectCell">
+                        <select id="A4FrequencySelect" class="A4FrequencySelect" onchange="WebMIDI.host.onA4FrequencySelectChanged()"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="triggersDiv" style="display:none">
+            <hr />
+            <table>
+                <colgroup>
+                    <col style="width:74px" />
+                    <col />
+                </colgroup>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">Trigger key: </span>
+                    </td>
+                    <td>
+                        <span class="boldSubtitle">action: </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <select id="triggerKeySelect" class="triggerKeySelect" onchange="WebMIDI.host.onTriggerKeySelectChanged()" />
+                    </td>
+                    <td id="triggerActionCell">
+                        <!-- <select id="triggerActionSelect" class="triggerActionSelect" /> -->
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="commandsAndControlsDiv" style="display:none">
+            <hr />
+            <span class="boldSubtitle">Commands and Controls:</span>
+            <table id="commandsTable" class="midiMessagesTable commandsTable"></table>
+            <table id="controlsTable" class="midiMessagesTable"></table>
+        </div>
+        <div id="notesDiv" style="display:none;">
+            <hr />
+            <table style="margin:10px auto 0 auto;">
+                <colgroup>
+                    <col style="width:50px" />
+                    <col />
+                </colgroup>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">Notes:</span>
+                    </td>
+                    <td>
+                        <span>note</span>
+                        <input id="notesDivIndexInput1" type="number" name="value" class="number" min="0" max="127" value="68" />
+                        <span>velocity</span>
+                        <input id="notesDivVelocityInput1" type="number" name="value" class="number" min="0" max="127" value="100" />
+                        <input type="checkbox" id="sendNote1Checkbox" style="vertical-align:middle" onclick="WebMIDI.host.noteCheckboxClicked()" />
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td>
+                        <span>&nbsp;</span>
+                    </td>
+                    <td>
+                        <span>note</span>
+                        <input id="notesDivIndexInput2" type="number" name="value" class="number" min="0" max="127" value="64" />
+                        <span>velocity</span>
+                        <input id="notesDivVelocityInput2" type="number" name="value" class="number" min="0" max="127" value="100" />
+                        <input type="checkbox" id="sendNote2Checkbox" style="vertical-align:middle" onclick="WebMIDI.host.noteCheckboxClicked()" checked="checked" />
+                        <input id="sendButton" type="button" class="sendButton" value="send" onmousedown="WebMIDI.host.doNotesOn()" onmouseup="WebMIDI.host.doNotesOff()" />
+                        <label><input type="checkbox" id="holdCheckbox" value="hold" style="vertical-align:middle" onclick="WebMIDI.host.holdCheckboxClicked()" />hold</label>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="WebMIDI/namespace.js" type="text/javascript"></script>
+    <script src="WebMIDI/constants.js" type="text/javascript"></script>	<!-- contains PitchWheelDeviation constants -->
+
+    <!-- The following scripts define all the presets used by the residentWAFSynth in this application -->
+    <script src="synthConfig/webAudioFontFiles/0000_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0000_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0060_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0060_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0080_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0080_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0090_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0090_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0100_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0100_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0110_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0110_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0120_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0120_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0130_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0130_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0140_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0140_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0150_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0160_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0160_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0240_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0250_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0260_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0270_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <!-- new, interesting Fluid presets -->
+    <script src="synthConfig/webAudioFontFiles/0460_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0530_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0580_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0790_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0890_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0920_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0930_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0950_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <!-- some Fluid winds -->
+    <script src="synthConfig/webAudioFontFiles/0600_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0660_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0680_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0700_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0710_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/0730_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <!-- Percussion -->
+    <script src="synthConfig/webAudioFontFiles/12841_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12845_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12848_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12856_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12859_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12860_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12861_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12862_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12863_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12870_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12873_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12874_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12875_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12876_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12877_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+    <script src="synthConfig/webAudioFontFiles/12881_0_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
+
+    <script src="synthConfig/webAudioFontDefs.js" type="text/javascript"></script>
+    <script src="synthConfig/tuningDefs.js" type="text/javascript"></script>
+    <script src="synthConfig/mixtureDefs.js" type="text/javascript"></script>
+    <script src="synthConfig/triggerActionDefs.js" type="text/javascript"></script>
+
+    <script src="residentWAFSynth/wafReverberator.js" type="text/javascript"></script>
+    <script src="residentWAFSynth/webAudioFont.js" type="text/javascript"></script>
+    <script src="residentWAFSynth/tuningsFactory.js" type="text/javascript"></script>
+
+    <script src="residentWAFSynth/residentWAFSynth.js" type="text/javascript"></script>
+    <script src="residentWAFSynth/residentWAFSynthNote.js" type="text/javascript"></script>
+
+    <script src="host.js" type="text/javascript"></script>
+</body>
+</html>
+

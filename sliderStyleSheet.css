@@ -1,0 +1,57 @@
+﻿/*
+    Developed beginning at the following two sites:
+    https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_rangeslider
+    https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/ 
+    The verticalAlignMiddle and midiSlider classes are to be used in html as follows:
+    <div class="verticalAlignMiddle">
+        <input type="range" class="midiSlider" id="myRange" min="0" max="127" value="64">
+    </div>
+*/
+.verticalAlignMiddle
+{
+    vertical-align: middle;
+}
+
+.midiSlider
+{
+    -webkit-appearance: none;
+    width: 262px; /* (2*127) + thumb width */
+    height: 12px;
+    margin-right: 4px;
+    outline: none;
+    background: #aaa; /* was e8e8e8 */
+    border-style: solid;
+    border-width: 1px;
+    border-color: #444;
+    vertical-align: middle;
+    opacity: 0.4;
+    -webkit-transition: .1s;
+    transition: opacity .1s;
+}
+
+.midiSlider:hover
+{
+    opacity: 1;
+}
+
+.midiSlider::-webkit-slider-thumb
+{
+    -webkit-appearance: none;
+    width: 6px;
+    height: 10px;
+    background: #000;
+    cursor: pointer;
+}
+
+/* 26.03.20 This firefox style is not working.*/
+.slider::-moz-range-thumb
+{
+    width: 7px;
+    height: 12px;
+    background: #777;
+    border-style: solid;
+    border-radius: 0;
+    border-width: 1px;
+    border-color: #444;
+    cursor: pointer;
+}
