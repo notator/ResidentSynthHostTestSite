@@ -7,23 +7,23 @@
 *
 * All this code is licensed under MIT
 *
-* The WebMIDI.residentWAFSynthNote namespace containing the following constructor:
+* The WebMIDI.residentSynthNote namespace containing the following constructor:
 *
-*        ResidentWAFSynthNote(ctx, gainMaster, keyLayers) 
+*        ResidentSynthNote(ctx, gainMaster, keyLayers) 
 */
 
-WebMIDI.namespace('residentWAFSynthNote');
+WebMIDI.namespace('residentSynthNote');
 
-WebMIDI.residentWAFSynthNote = (function()
+WebMIDI.residentSynthNote = (function()
 {
     "use strict";
 
 	var
-		ResidentWAFSynthNote = function(audioContext, zone, midi, channelControls, channelAudioNodes)
+		ResidentSynthNote = function(audioContext, zone, midi, channelControls, channelAudioNodes)
 		{
-			if(!(this instanceof ResidentWAFSynthNote))
+			if(!(this instanceof ResidentSynthNote))
 			{
-				return new ResidentWAFSynthNote(audioContext, noteGainNode, zone, midi);
+				return new ResidentSynthNote(audioContext, noteGainNode, zone, midi);
 			}
 
 			let noteGainNode = audioContext.createGain(),
@@ -51,10 +51,10 @@ WebMIDI.residentWAFSynthNote = (function()
 
 	API =
 	{
-		ResidentWAFSynthNote: ResidentWAFSynthNote // constructor
+		ResidentSynthNote: ResidentSynthNote // constructor
 	};
 
-	ResidentWAFSynthNote.prototype.noteOn = function()
+	ResidentSynthNote.prototype.noteOn = function()
 	{
 		function setNoteEnvelope(gain, now, velocityFactor, vEnvData)
 		{
@@ -126,7 +126,7 @@ WebMIDI.residentWAFSynthNote = (function()
 		this.bufferSourceNode.start(now, zone.delay, this.envelopeDuration + 0.5);
 	};
 
-	ResidentWAFSynthNote.prototype.noteOff = function()
+	ResidentSynthNote.prototype.noteOff = function()
 	{
 		let
 			noteGainNode = this.noteGainNode,
@@ -142,7 +142,7 @@ WebMIDI.residentWAFSynthNote = (function()
 
 	// This function is called when the bufferSourceNode has just been created, and
 	// can be called again to shift the pitch while the note is still playing.
-	ResidentWAFSynthNote.prototype.updatePlaybackRate = function()
+	ResidentSynthNote.prototype.updatePlaybackRate = function()
 	{
 		if((this.startTime + this.envelopeDuration) > this.audioContext.currentTime)
 		{
@@ -158,7 +158,7 @@ WebMIDI.residentWAFSynthNote = (function()
 	// This function is called when the bufferSourceNode has just been created, and
 	// can be called again to shift the pitch while the note is still playing.
 	// The pitchWheel14Bit argument is a 14-bit int value (in range [-8192..+8191]).
-	ResidentWAFSynthNote.prototype.updatePitchWheel = function(pitchWheel14Bit)
+	ResidentSynthNote.prototype.updatePitchWheel = function(pitchWheel14Bit)
 	{
 		this.pitchWheel14Bit = pitchWheel14Bit;
 		this.updatePlaybackRate();
@@ -166,13 +166,13 @@ WebMIDI.residentWAFSynthNote = (function()
 
 	// The argument will be added to the pitchWheel14Bit (from the pitchWheel value) to give
 	// the pitch deviation
-	ResidentWAFSynthNote.prototype.updateAftertouch = function(aftertouch14Bit)
+	ResidentSynthNote.prototype.updateAftertouch = function(aftertouch14Bit)
 	{
 		this.aftertouch14Bit = aftertouch14Bit;
 		this.updatePlaybackRate();
 	};
 
-	ResidentWAFSynthNote.prototype.updateModWheel = function(modNode, modGainNode, value)
+	ResidentSynthNote.prototype.updateModWheel = function(modNode, modGainNode, value)
 	{
 		let modVal = value / 127,
 			modulationFrequency = Math.pow(this.keyPitch, 1 + modVal) + modVal,

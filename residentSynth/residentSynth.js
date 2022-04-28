@@ -14,15 +14,15 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* WebMIDI.residentWAFSynth namespace containing a ResidentWAFSynth constructor.
+/* WebMIDI.residentSynth namespace containing a ResidentSynth constructor.
  * 
  * The original object of creating this code was to be able to discuss and improve the interface.
  * See the discussion at https://github.com/WebAudio/web-midi-api/issues/124
  */
 
-WebMIDI.namespace('residentWAFSynth');
+WebMIDI.namespace('residentSynth');
 
-WebMIDI.residentWAFSynth = (function(window)
+WebMIDI.residentSynth = (function(window)
 {
 	"use strict";
 	const
@@ -91,7 +91,7 @@ WebMIDI.residentWAFSynth = (function(window)
 							}
 
 							// 13.01.2020 -- ji
-							// The original preset files used by the ResidentWAFSynth all have a zone.file attribute
+							// The original preset files used by the ResidentSynth all have a zone.file attribute
 							// but neither zone.buffer nor zone.sample attributes. I have therefore deleted the
 							// original (Surikov) code for coping with those cases.
 							// (This code creates and sets the zone.buffer attribute.)
@@ -569,7 +569,7 @@ WebMIDI.residentWAFSynth = (function(window)
 							zones = preset.zones;
 
 						setZonesToMaximumRange(presetName, presetGMIndex, zones);
-						// The residentWAFSynth is going to use the zone.vEnvData attributes
+						// The residentSynth is going to use the zone.vEnvData attributes
 						//(which are set below) instead of the original zone.ahdsr attributes.
 						// The zone.ahdsr attributes are deleted here to avoid confusion.
 						deleteZoneAHDSRs(zones);
@@ -899,7 +899,7 @@ WebMIDI.residentWAFSynth = (function(window)
 		// The frequency of the modMode depends on the frequency of the note...
 		updateModWheel = function(channel, value)
 		{
-			console.log("ResidentWAFSynth: ModWheel channel:" + channel + " value:" + value);
+			console.log("ResidentSynth: ModWheel channel:" + channel + " value:" + value);
 
 			if(value === 0)
 			{
@@ -935,12 +935,12 @@ WebMIDI.residentWAFSynth = (function(window)
 		{
 			channelAudioNodes[channel].reverberator.setValueAtTime(reverberation, audioContext.currentTime);
 		},
-		// This function must always be called immediately before calling ResidentWAFSynth.prototype.dataEntry(...)
+		// This function must always be called immediately before calling ResidentSynth.prototype.dataEntry(...)
 		registeredParameter = function(channel, value)
 		{
 			channelControls[channel].registeredParameter = value;
 		},
-		// ResidentWAFSynth.prototype.registeredParameter must always be called immediately before calling this function.
+		// ResidentSynth.prototype.registeredParameter must always be called immediately before calling this function.
 		dataEntry = function(channel, value)
 		{
 			switch(channelControls[channel].registeredParameter)
@@ -1010,7 +1010,7 @@ WebMIDI.residentWAFSynth = (function(window)
 				}
 
 				// note on
-				note = new WebMIDI.residentWAFSynthNote.ResidentWAFSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
+				note = new WebMIDI.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
 				note.noteOn();
 				chanControls.currentNoteOns.push(note);
 			}
@@ -1119,7 +1119,7 @@ WebMIDI.residentWAFSynth = (function(window)
 				CMD.PRESET,
 				//CMD.CHANNEL_PRESSURE,
 				// It is very unlikely that this synth will ever need to implement CHANNEL_PRESSURE, so
-                // CHANNEL_PRESSURE has been eliminated from the ResidentWAFSynthHost development environment.
+                // CHANNEL_PRESSURE has been eliminated from the ResidentSynthHost development environment.
 				CMD.PITCHWHEEL,
 				CMD.SYSEX
 			],
@@ -1130,7 +1130,7 @@ WebMIDI.residentWAFSynth = (function(window)
 
 				// The WebMIDISynthHost GUI manages banks using the preset selector, so it does not provide a separate banks
 				// control in the controls section of its GUI.
-				// ResidentWAFSynth.prototype.send(message, ignoredTimestamp) _does_, however, use the
+				// ResidentSynth.prototype.send(message, ignoredTimestamp) _does_, however, use the
 				// WebMIDI.constants.CONTROL.BANK definition to call setBank(channel, data2) via handleControl(channel, data1, data2).
 				// The bank can be set by other applications by sending the appropriate message.
 				CTL.BANK,
@@ -1146,19 +1146,19 @@ WebMIDI.residentWAFSynth = (function(window)
 				CTL.ALL_SOUND_OFF
 			],
 
-		ResidentWAFSynth = function()
+		ResidentSynth = function()
 		{
-			if(!(this instanceof ResidentWAFSynth))
+			if(!(this instanceof ResidentSynth))
 			{
-				return new ResidentWAFSynth();
+				return new ResidentSynth();
 			}
 
 			// WebMIDIAPI §4.6 -- MIDIPort interface
 			// See https://github.com/notator/WebMIDISynthHost/issues/23
 			// and https://github.com/notator/WebMIDISynthHost/issues/24
-			Object.defineProperty(this, "id", { value: "ResidentWAFSynth_v1", writable: false });
+			Object.defineProperty(this, "id", { value: "ResidentSynth_v1", writable: false });
 			Object.defineProperty(this, "manufacturer", { value: "james ingram (with thanks to sergey surikov)", writable: false });
-			Object.defineProperty(this, "name", { value: "ResidentWAFSynth", writable: false });
+			Object.defineProperty(this, "name", { value: "ResidentSynth", writable: false });
 			Object.defineProperty(this, "type", { value: "output", writable: false });
 			Object.defineProperty(this, "version", { value: "1", writable: false });
 			Object.defineProperty(this, "ondisconnect", { value: null, writable: false }); // Do we need this at all? Is it correct to set it to null?
@@ -1192,7 +1192,7 @@ WebMIDI.residentWAFSynth = (function(window)
 			Object.defineProperty(this, "supportsGeneralMIDI", { value: true, writable: false });
 
 			/**********************************************************************************************/
-			// attributes specific to this ResidentWAFSynth
+			// attributes specific to this ResidentSynth
 			let AudioContextFunc = (window.AudioContext || window.webkitAudioContext);
 
 			audioContext = new AudioContextFunc();
@@ -1208,7 +1208,7 @@ WebMIDI.residentWAFSynth = (function(window)
 
 		API =
 		{
-			ResidentWAFSynth: ResidentWAFSynth // constructor
+			ResidentSynth: ResidentSynth // constructor
 		};
 
 	// end var
@@ -1217,7 +1217,7 @@ WebMIDI.residentWAFSynth = (function(window)
 	// See https://github.com/notator/WebMIDISynthHost/issues/24
 	// This is called after user interaction with the page.
 	// This function sets internal default values for all the synth's commands, and controls in all channels.
-	ResidentWAFSynth.prototype.open = function()
+	ResidentSynth.prototype.open = function()
 	{
 		function getDefaultTuning()
 		{
@@ -1236,7 +1236,7 @@ WebMIDI.residentWAFSynth = (function(window)
 			let channelInfo = {};			
 			
 			channelInfo.panNode = audioContext.createStereoPanner();
-			channelInfo.reverberator = new WebMIDI.wafReverberator.WAFReverberator(audioContext);
+			channelInfo.reverberator = new WebMIDI.reverberator.Reverberator(audioContext);
 			channelInfo.modNode = audioContext.createOscillator(),
 			channelInfo.modGainNode = audioContext.createGain();
 			channelInfo.gainNode = audioContext.createGain();
@@ -1300,7 +1300,7 @@ WebMIDI.residentWAFSynth = (function(window)
 				setPresetDefaultIndices(channelControls[i], defaultPreset);
 			}
 
-			console.log("residentWAFSynth WebAudioFont set.");
+			console.log("residentSynth WebAudioFont set.");
 		}
 
 		let defaultTuning = getDefaultTuning();
@@ -1321,12 +1321,12 @@ WebMIDI.residentWAFSynth = (function(window)
 
 		setSoundFont(this.webAudioFonts[0]);
 
-		console.log("residentWAFSynth opened.");
+		console.log("residentSynth opened.");
 	};
 
 	// WebMIDIAPI §4.6 -- MIDIPort interface
 	// See https://github.com/notator/WebMIDISynthHost/issues/24
-	ResidentWAFSynth.prototype.close = function()
+	ResidentSynth.prototype.close = function()
     {
         if(channelAudioNodes.length > 0)
         {
@@ -1338,13 +1338,13 @@ WebMIDI.residentWAFSynth = (function(window)
             }
             channelAudioNodes.finalGainNode.disconnect();
             channelAudioNodes.length = 0;
-            console.log("residentWAFSynth closed.");
+            console.log("residentSynth closed.");
         }
 	};
 
 	// WebMIDIAPI MIDIOutput send()
 	// This synth does not yet support timestamps (05.11.2015)
-	ResidentWAFSynth.prototype.send = function(messageData, ignoredTimestamp)
+	ResidentSynth.prototype.send = function(messageData, ignoredTimestamp)
 	{
 		var
 			command = messageData[0] & 0xF0,
@@ -1370,13 +1370,13 @@ WebMIDI.residentWAFSynth = (function(window)
 		function handleNoteOff(channel, data1, data2)
 		{
 			checkCommandExport(CMD.NOTE_OFF);
-			// console.log("residentWAFSynth NoteOff: channel:" + channel + " note:" + data1 + " velocity:" + data2);
+			// console.log("residentSynth NoteOff: channel:" + channel + " note:" + data1 + " velocity:" + data2);
 			noteOff(channel, data1, data2);
 		}
 		function handleNoteOn(channel, data1, data2)
 		{
 			checkCommandExport(CMD.NOTE_ON);
-			// console.log("residentWAFSynth NoteOn: channel:" + channel + " note:" + data1 + " velocity:" + data2);
+			// console.log("residentSynth NoteOn: channel:" + channel + " note:" + data1 + " velocity:" + data2);
             if(data2 === 0)
             {
                 noteOff(channel, data1, 100);
@@ -1386,13 +1386,13 @@ WebMIDI.residentWAFSynth = (function(window)
                 noteOn(channel, data1, data2);
             }
 		}
-		// The AFTERTOUCH command can be sent from the ResidentWAFSynthHost's GUI and, potentially,
+		// The AFTERTOUCH command can be sent from the ResidentSynthHost's GUI and, potentially,
 		// from the AssistantPerformer, but it is never sent from my EMU keyboard.
 		// It is implemented as a (single note) pitch bend parallel to the normal (channel) pitchWheel.
 		function handleAftertouch(channel, key, value)
 		{
 			checkCommandExport(CMD.AFTERTOUCH);
-			//console.log("residentWAFSynth Aftertouch: channel:" + channel + " key:" + key + " value:" + value);
+			//console.log("residentSynth Aftertouch: channel:" + channel + " key:" + key + " value:" + value);
 			updateAftertouch(channel, key, value);
         }
 		function handleControl(channel, data1, data2)
@@ -1417,38 +1417,38 @@ WebMIDI.residentWAFSynth = (function(window)
 				checkControlExport(CTL.BANK);
 
 				channelControls[channel].bankIndex = value;
-				// console.log("residentWAFSynth Bank: channel:" + channel + " value:" + value);
+				// console.log("residentSynth Bank: channel:" + channel + " value:" + value);
 			}
 			function setModwheel(channel, value)
 			{
 				checkControlExport(CTL.MODWHEEL);
-				// console.log("residentWAFSynth ModWheel: channel:" + channel + " value:" + value);
+				// console.log("residentSynth ModWheel: channel:" + channel + " value:" + value);
 				updateModWheel(channel, value);
 			}
 			function setVolume(channel, value)
 			{
 				checkControlExport(CTL.VOLUME);
-				// console.log("residentWAFSynth Volume: channel:" + channel + " value:" + value);
+				// console.log("residentSynth Volume: channel:" + channel + " value:" + value);
 				updateVolume(channel, value);
 			}
 			function setPan(channel, value)
 			{
 				checkControlExport(CTL.PAN);
-				// console.log("residentWAFSynth Pan: channel:" + channel + " value:" + value);
+				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
 				updatePan(channel, value);
 			}
 
 			function setReverberation(channel, value)
 			{
 				checkControlExport(CTL.REVERBERATION);
-				// console.log("residentWAFSynth Reverberation: channel:" + channel + " value:" + value);
+				// console.log("residentSynth Reverberation: channel:" + channel + " value:" + value);
 				updateReverberation(channel, value);
 			}
 
 			function allControllersOff(channel)
 			{
 				checkControlExport(CTL.ALL_CONTROLLERS_OFF);
-				// console.log("residentWAFSynth AllControllersOff: channel:" + channel);
+				// console.log("residentSynth AllControllersOff: channel:" + channel);
 
 				allSoundOff(channel);
 				setControllerDefaults(this, channel);
@@ -1456,7 +1456,7 @@ WebMIDI.residentWAFSynth = (function(window)
 			function setAllSoundOff(channel)
 			{
 				checkControlExport(CTL.ALL_SOUND_OFF);
-				// console.log("residentWAFSynth AllSoundOff: channel:" + channel);
+				// console.log("residentSynth AllSoundOff: channel:" + channel);
 				allSoundOff(channel);
 			}
 
@@ -1464,14 +1464,14 @@ WebMIDI.residentWAFSynth = (function(window)
 			function setRegisteredParameter(channel, value)
 			{
 				checkControlExport(CTL.REGISTERED_PARAMETER);
-				// console.log("residentWAFSynth RegisteredParameter: channel:" + channel + " value:" + value);
+				// console.log("residentSynth RegisteredParameter: channel:" + channel + " value:" + value);
 				registeredParameter(channel, value);
 			}
 			// setRegisteredParameter(...) must always be called immediately before calling this function.
 			function setDataEntry(channel, value)
 			{
 				checkControlExport(CTL.DATA_ENTRY);
-				// console.log("residentWAFSynth DataEntry: channel:" + channel + " value:" + semitones);
+				// console.log("residentSynth DataEntry: channel:" + channel + " value:" + semitones);
 				dataEntry(channel, value);
 			}
 
@@ -1519,20 +1519,20 @@ WebMIDI.residentWAFSynth = (function(window)
 			checkCommandExport(CMD.PRESET);
 
 			channelControls[channel].presetIndex = data1;
-			// console.log("residentWAFSynth Preset: channel:" + channel, " value:" + data1);
+			// console.log("residentSynth Preset: channel:" + channel, " value:" + data1);
 		}
-		// The CHANNEL_PRESSURE command can be sent from my EMU keyboard, but is never sent from the ResidentWAFSynthHost GUI.
+		// The CHANNEL_PRESSURE command can be sent from my EMU keyboard, but is never sent from the ResidentSynthHost GUI.
 		// It could be implemented later, to do something different from the other controls.
 		function handleChannelPressure(channel, data1)
 		{
 			//let warnMessage = "Channel pressure: channel:" + channel + " pressure:" + data1 +
-			//	" (The ResidentWAFSynth does not implement the channelPressure (0x" + CMD.CHANNEL_PRESSURE.toString(16) + ") command.)";
+			//	" (The ResidentSynth does not implement the channelPressure (0x" + CMD.CHANNEL_PRESSURE.toString(16) + ") command.)";
 			//console.warn(warnMessage);
 		}
 		function handlePitchWheel(channel, data1, data2)
 		{
 			checkCommandExport(CMD.PITCHWHEEL);
-			//console.log("residentWAFSynth PitchWheel: channel:" + channel + " data1:" + data1 + " data2:" + data2);
+			//console.log("residentSynth PitchWheel: channel:" + channel + " data1:" + data1 + " data2:" + data2);
 			updatePitchWheel(channel, data1, data2);
 		}
 		function handleSysEx(message)
@@ -1627,7 +1627,7 @@ WebMIDI.residentWAFSynth = (function(window)
 	};
 
 	// see close() above...
-	ResidentWAFSynth.prototype.disconnect = function()
+	ResidentSynth.prototype.disconnect = function()
 	{
 		throw "Not implemented error.";
 	};	

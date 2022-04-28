@@ -201,7 +201,7 @@ WebMIDI.webAudioFont = (function()
         // This constructor checks for (and if necesary corrects) errors in the WebAudioFont preset files,
         // and then returns a WebAudioFont containing presets whose format and attributes are the same as
         // those returned by Surikov's decodeAfterLoading() function (e.g. zone.ahdsr).
-        // Enhancements are done later (in the ResidentWAFSynth code).
+        // Enhancements are done later (in the ResidentSynth code).
         WebAudioFont = function(name, allPresetsPerBank, presetNamesPerBank)
 		{
 			if(!(this instanceof WebAudioFont))

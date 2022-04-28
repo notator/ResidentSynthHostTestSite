@@ -14,12 +14,12 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* WebMIDI.wafReverberator namespace containing a WAFReverberator constructor.
+/* WebMIDI.reverberator namespace containing a Reverberator constructor.
  */
 
-WebMIDI.namespace('wafReverberator');
+WebMIDI.namespace('reverberator');
 
-WebMIDI.wafReverberator = (function()
+WebMIDI.reverberator = (function()
 {
 	"use strict";
 
@@ -78,11 +78,11 @@ WebMIDI.wafReverberator = (function()
             });
         },
 
-		WAFReverberator = function(audioContext)
+		Reverberator = function(audioContext)
         {
-            if (!(this instanceof WAFReverberator))
+            if (!(this instanceof Reverberator))
             {
-                return new WAFReverberator(audioContext);
+                return new Reverberator(audioContext);
             }
 
             constructGraph(audioContext);
@@ -97,11 +97,11 @@ WebMIDI.wafReverberator = (function()
 
 		API =
 		{
-            WAFReverberator: WAFReverberator // constructor
+            Reverberator: Reverberator // constructor
 		};
 	    // end var
 
-    WAFReverberator.prototype.setValueAtTime = function(midiValue, atTime)
+    Reverberator.prototype.setValueAtTime = function(midiValue, atTime)
     {
         let r1 = midiValue / 127, // in range [0..1]
             r2 = 1 - r1,
@@ -118,7 +118,7 @@ WebMIDI.wafReverberator = (function()
         this.wet.gain.setValueAtTime(wetValue, atTime);
     };
 
-    WAFReverberator.prototype.disconnect = function()
+    Reverberator.prototype.disconnect = function()
     {
         this.input.disconnect();
         this.output.disconnect();

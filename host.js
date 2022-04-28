@@ -148,7 +148,7 @@ WebMIDI.host = (function(document)
                             break;
                         case CMD.PITCHWHEEL:
                             // This host uses pitchwheel values in range 0..127, so data[1] (the fine byte) is ignored here.
-                            // But note that the residentWAFSynth _does_ use both data[1] and data[2] when responding
+                            // But note that the residentSynth _does_ use both data[1] and data[2] when responding
                             // to PITCHWHEEL messages (including those that come from the E-MU keyboard), so PITCHWHEEL
                             // messages sent from this host's GUI use a data[1] value that is calculated on the fly.
                             updateGUI_CommandsTable(cmdIndex, data[2]);
@@ -206,7 +206,7 @@ WebMIDI.host = (function(document)
         // exported
         gitHubButtonClick = function()
         {
-            var url = "https://github.com/notator/ResidentWAFSynthHost";
+            var url = "https://github.com/notator/ResidentSynthHost";
             openInNewTab(url);
         },
 
@@ -1348,7 +1348,7 @@ WebMIDI.host = (function(document)
                     webAudioFontSelect = getElem("webAudioFontSelect"),
                     tuningGroupSelect = getElem("tuningGroupSelect");
 
-                console.assert(synth.name === "ResidentWAFSynth", "Error: this app only uses the ResidentWAFSynth");
+                console.assert(synth.name === "ResidentSynth", "Error: this app only uses the ResidentSynth");
 
                 let webAudioFontOptions = getWebAudioFontOptions(synth.webAudioFonts);
                 appendPresetMixtures(webAudioFontOptions[0].presetOptionsArray, synth.presetMixtures);
@@ -1569,7 +1569,7 @@ WebMIDI.host = (function(document)
             }
             
             setupInputDevice();
-            synth = new WebMIDI.residentWAFSynth.ResidentWAFSynth(); // loads definitions from synthConfig.
+            synth = new WebMIDI.residentSynth.ResidentSynth(); // loads definitions from synthConfig.
 			setInitialDivsDisplay();
 		},
 
