@@ -959,9 +959,10 @@ WebMIDI.residentSynth = (function(window)
 		},
 		allSoundOff = function(channel)
 		{
-			function reconnectChannelInput(that)
+			function reconnectChannelInput()
 			{
-				chanAudioNodes.inputNode = that.audioContext.createStereoPanner();
+				// chanAudioNodes and audioContext are inherited
+				chanAudioNodes.inputNode = audioContext.createStereoPanner();
 				chanAudioNodes.panNode = chanAudioNodes.inputNode;
 				chanAudioNodes.inputNode.connect(chanAudioNodes.reverberator.input);
 			}
@@ -971,13 +972,13 @@ WebMIDI.residentSynth = (function(window)
 				inputNode = chanAudioNodes.inputNode,
 				now = 0, stopTime = 0;
 
+			inputNode.disconnect();
 			while(currentNoteOns.length > 0)
 			{
-				inputNode.disconnect();
 				now = audioContext.currentTime;
 				stopTime = noteOff(channel, currentNoteOns[0].keyPitch, 0);
-				setTimeout(reconnectChannelInput(this), stopTime - now);
 			}
+			setTimeout(reconnectChannelInput(), stopTime - now);
 		},
 		noteOn = function(channel, key, velocity)
 		{

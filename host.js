@@ -835,20 +835,27 @@ WebMIDI.host = (function(document)
 
                     function sendShortControl(controlIndex)
                     {
-                        function resetHostGUI()
+                        function resetHostGUI(controlIndex)
                         {
-                            var i;
-
-                            for(i = 0; i < allLongInputControls.length; ++i)
+                            let sendButton = getElem("sendButton");
+                            if(sendButton.disabled === true)
                             {
-                                let longInputControl = allLongInputControls[i];
-                                longInputControl.setValue(longInputControl.numberInputElem.defaultValue);
+                                sendButton.disabled = false;
+                            }
+
+                            if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
+                            {
+                                for(let i = 0; i < allLongInputControls.length; ++i)
+                                {
+                                    let longInputControl = allLongInputControls[i];
+                                    longInputControl.setValue(longInputControl.numberInputElem.defaultValue);
+                                }
                             }
                         }
 
-                        if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
+                        if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === WebMIDI.constants.CONTROL.ALL_SOUND_OFF)
                         {
-                            resetHostGUI();
+                            resetHostGUI(controlIndex);
                         }
 
                         sendCommand(CMD.CONTROL_CHANGE, controlIndex);
