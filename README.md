@@ -1,13 +1,15 @@
-### ResidentWAFSynthHost
-This is a Web Audio application, written in HTML5 and Javascript, within which the ResidentWAFSynth is being developed.<br />
-It can be tried out at https://james-ingram-act-two.de/open-source/ResidentWAFSynthHost/host.html <br />
+### ResidentSynthHost
+This is a Web Audio application, written in HTML5 and Javascript, within which the _ResidentSynth_ is being developed.<br />
+It can be tried out at https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html <br />
 The host uses the Web MIDI API's _Input Device_ interface so that an attached hardware MIDI input device can be used to control the synthesizer. This is, however, not absolutely necessary.<br />
+For illustration purposes, this host uses a deliberately large number of [WebAudioFont](https://github.com/surikov/webaudiofont) presets. Other installations would typically use less.<br />
 <br />
-**ResidentWAFSynth**<br />
+**ResidentSynth**<br />
 This a GUI-less software synth, written entirely in Javascript, that uses the Web _Audio_ API to implement the Web _MIDI_ API's _Output Device_ interface. Such software synths can be included in websites as a substitute for end-user hardware MIDI Output devices, so they should be especially useful on mobile devices. Also, since they themselves provide the MIDI Output Device interface, they don't depend on browser implementations of the Web MIDI API.<br />
-The _Resident**WAF**synth_ is a development of the _Resident**Sf2**Synth_ (see WebMIDISynthHost [2] below), that uses [WebAudioFont](https://github.com/surikov/webaudiofont) presets. These load much faster than the equivalent Sf2 SoundFont files. For illustration purposes, the host in this repository uses a deliberately large number of fonts. Other installations would typically use fewer fonts.<br />
-The code for the _ResidentWAFSynth_ owes a lot to Sergey Surikov's [WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). Not only is its code for loading and adjusting presets very similar to his `WebAudioFontLoader`, but its reverberation control is practically a clone of his `WebAudioFontReverberator`.<br />
-Apart from having a MIDI interface, the main difference between the ResidentWAFSynth and Surikov's WebAudioFontPlayer is in the approach to note envelopes: The _ResidentWAFSynth_ allows custom envelope settings to be provided for each preset zone. At a more general level, there are three types of (General MIDI) preset: Those that loop indefinitely (such as wind instruments, organs etc.) those that decay slowly (pianos, vibraphones etc.) and percussion instruments (which decay without looping, using their original sample).<br />
+The _ResidentSynth_ inherits code from, and supercedes, both the _Resident**WAF**Synth_ and the _Resident**Sf2**Synth_. The latter synths are no longer being developed, but still exist as part of the archived _WebMIDISynthHost_ ([repository](https://github.com/notator/WebMIDISynthHost) and [application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)).<br />
+The _ResidentSynth_'s inherited code owes a lot to Sergey Surikov's [WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his `WebAudioFontReverberator`.<br />
+
+Apart from having a MIDI interface and support for both mixtures and microtones, the main difference between the ResidentSynth and Surikov's WebAudioFontPlayer is in the approach to note envelopes: The _ResidentSynth_ allows custom envelope settings to be provided for each preset zone.<br />
 #### Configuration
 The synth is designed to be used both with an external, hardware MIDI Input device such as a keyboard, and for playing scores stored on a website (such as my _AssistantPerformer_ [3]).<br />
 It can be configured by editing the files in the _synthConfig_ folder. This currently contains:<br />
