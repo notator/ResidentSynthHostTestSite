@@ -50,11 +50,6 @@ Currently, a trigger can change one or more of the following:
 
 This synthesizer is still being developed. Please raise any issues, or make pull requests etc., here in this repository.<br />
 
-#### Other Applications that use the ResidentWAFSynth:
-1. [SimpleWebAudioFontSynthHost](https://james-ingram-act-two.de/open-source/SimpleWebAudioFontSynthHost/host.html): This is simple demo application, showing how to embed the synth in web pages.<br />
-2. WebMIDISynthHost ([repository](https://github.com/notator/WebMIDISynthHost) and [application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)): This application began as a response to a discussion about software synths in [Web MIDI API issue 124](https://github.com/WebAudio/web-midi-api/issues/124).<br />
-3. AssistantPerformer ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
-
 James Ingram<br />
 May 2022<br />
 
