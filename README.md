@@ -32,3 +32,30 @@ In the current host, PresetMixtures are added to the preset selector. Abstract m
 A _tuning_ associates each of the 127 MIDI keys with a pitch value (expressed as cents above MIDI C0).<br />
 The following types of tuning can be created by the synth using the (configurable) definitions provided in tuningDefs.js: 
 - constant factor : e.g. Equal temperament can be created using the 12th root of 2.
+- Partch : tunings (on different root pitches) like Harry Partch's
+- warped octaves : Tunings containing internally warped octaves
+- free keyboard : warped tunings in which the only restriction is that pitches ascend from left to right of the keyboard
+
+Internally, tunings are activated using MIDI RegisteredParameter and DataEntry controls (see host.js), but this detail is hidden from end-users by the GUI.
+This host application provides a tuning selector, parallel to the preset selector.  
+
+##### Trigger Stacks
+A trigger is a MIDI key that changes the synth's configuration when pressed under certain circumstances.<br />
+Currently, such triggers are defined (in triggerDefs.js) using their MIDI key number and a `fireOnHitNumber` attribute. The trigger is released when the key has been hit `fireOnHitNumber` times. Such trigger definitions can be put in a sequence (a stack) designed to be used with a particular score. And it doesn't matter if the score is being played live or automatically on a website...<br />
+
+Currently, a trigger can change one or more of the following:
+- preset (with or without mixture)
+- tuning (the whole keyboard)
+- tuning overlay (a section of the keyboard)
+
+This synthesizer is still being developed. Please raise any issues, or make pull requests etc., here in this repository.<br />
+
+#### Other Applications that use the ResidentWAFSynth:
+1. [SimpleWebAudioFontSynthHost](https://james-ingram-act-two.de/open-source/SimpleWebAudioFontSynthHost/host.html): This is simple demo application, showing how to embed the synth in web pages.<br />
+2. WebMIDISynthHost ([repository](https://github.com/notator/WebMIDISynthHost) and [application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)): This application began as a response to a discussion about software synths in [Web MIDI API issue 124](https://github.com/WebAudio/web-midi-api/issues/124).<br />
+3. AssistantPerformer ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
+
+James Ingram<br />
+May 2022<br />
+
+
