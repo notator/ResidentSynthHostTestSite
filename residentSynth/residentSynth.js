@@ -326,7 +326,6 @@ WebMIDI.residentSynth = (function(window)
 					}
 				}
 
-
 				function deleteZoneAHDSRs(zones)
 				{
 					for(var i = 0; i < zones.length; i++)
@@ -336,7 +335,6 @@ WebMIDI.residentSynth = (function(window)
 							console.warn("Failed to delete preset.ahdsr.");
 						}
 					}
-
 				}
 
 				function setZoneVEnvData(presetName, presetIndex, zones)
@@ -351,13 +349,13 @@ WebMIDI.residentSynth = (function(window)
 
 					function presetEnvType(isPercussion, presetIndex)
 					{
-						const shortEnvs = [
-							13,
-							45, 47,
-							55,
-							112, 113, 114, 115, 116, 117, 118, 119,
-							120, 123, 127
-						],
+						const shortEnvs =
+							[	13,
+								45, 47,
+								55,
+								112, 113, 114, 115, 116, 117, 118, 119,
+								120, 123, 127
+							],
 							longEnvs = [
 								0, 1, 2, 3, 4, 5, 6, 7,
 								8, 9, 10, 11, 12, 14, 15,
