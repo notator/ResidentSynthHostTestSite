@@ -523,10 +523,10 @@ WebMIDI.host = (function(document)
                 presetSelect = getElem("presetSelect"),
                 channelOptions = channelSelect.options[channelSelect.selectedIndex],
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
-                //soundFont = selectedSoundFontOption.soundFont,
+                soundFont = selectedSoundFontOption.soundFont,
                 presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
 
-            //synth.setSoundFont(soundFont); I think this is now redundant!
+            synth.setSoundFont(soundFont);
 
             setOptions(presetSelect, presetOptionsArray);
 

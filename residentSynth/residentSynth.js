@@ -218,7 +218,7 @@ WebMIDI.residentSynth = (function(window)
 				}
 			}
 
-			function finalizeAllPresetsPerWAFBank(webAudioFontDef, percussionPresets)
+			function finalizeAllPresetsPerBank(webAudioFontDef, percussionPresets)
 			{
 				// returns a string of the form "000:000 - " + standardGMPresetName + " (" + soundFontSourceName + ")"
 				// where the "000" groups are the bank and preset indices.
@@ -300,7 +300,7 @@ WebMIDI.residentSynth = (function(window)
 				return allPresetsPerBank;
 			}
 
-			function adjustForWAFSynth(webAudioFont)
+			function adjustForResidentSynth(webAudioFont)
 			{
 				function setZonesToMaximumRange(presetName, presetGMIndex, zones)
 				{
@@ -614,17 +614,17 @@ WebMIDI.residentSynth = (function(window)
 
 			adjustAllPresetVariables();
 
-			for(let wafIndex = 0; wafIndex < webAudioFontDefs.length; ++wafIndex)
+			for(let fontIndex = 0; fontIndex < webAudioFontDefs.length; ++fontIndex)
 			{
-				let webAudioFontDef = webAudioFontDefs[wafIndex],
+				let webAudioFontDef = webAudioFontDefs[fontIndex],
 					name = webAudioFontDef.name,
-					allPresetsPerBank = finalizeAllPresetsPerWAFBank(webAudioFontDef, percussionPresets),
+					allPresetsPerBank = finalizeAllPresetsPerBank(webAudioFontDef, percussionPresets),
 					presetNamesPerBank = webAudioFontDef.presetNamesPerBank,
 					webAudioFont = new WebMIDI.webAudioFont.WebAudioFont(name, allPresetsPerBank, presetNamesPerBank);
 
 				// The webAudioFont's zone.file attributes need not have been completely adjusted (=unpacked) when
 				// this function is called since neither the zone.file nor the binary zone.buffer attributes are accessed.
-				let adjustedWebAudioFont = adjustForWAFSynth(webAudioFont);
+				let adjustedWebAudioFont = adjustForResidentSynth(webAudioFont);
 
 				webAudioFonts.push(adjustedWebAudioFont);
 			}
@@ -1214,6 +1214,44 @@ WebMIDI.residentSynth = (function(window)
 
 	// end var
 
+	ResidentSynth.prototype.setSoundFont = function(webAudioFont)
+	{
+		function setPresetDefaultIndices(channelInfo, defaultPreset)
+		{
+			channelInfo.bankIndex = defaultPreset.bankIndex;
+			channelInfo.presetIndex = defaultPreset.presetIndex;   // the presetIndex argument is the General MIDI presetIndex
+			channelInfo.mixtureIndex = defaultPreset.mixtureIndex; // can be undefined
+		}
+
+		if(!webAudioFont.isReady())
+		{
+			throw "This function should not be called before the webAudioFont is ready!";
+		}
+
+		banks = [];
+		for(var i = 0; i < webAudioFont.banks.length; i++)
+		{
+			let wafBank = webAudioFont.banks[i],
+				bank = [];
+
+			for(var j = 0; j < wafBank.length; j++)	
+			{
+				let preset = wafBank[j];
+				bank[preset.presetIndex] = preset;
+			}
+			banks.push(bank);
+		}
+
+		let defaultPreset = webAudioFont.banks[0][0];
+		for(let i = 0; i < 16; ++i)
+		{
+			// set default bankIndex, presetIndex and mixtureIndex.
+			setPresetDefaultIndices(channelControls[i], defaultPreset);
+		}
+
+		console.log("residentSynth WebAudioFont set.");
+	}
+
 	// WebMIDIAPI §4.6 -- MIDIPort interface
 	// See https://github.com/notator/WebMIDISynthHost/issues/24
 	// This is called after user interaction with the page.
@@ -1266,44 +1304,6 @@ WebMIDI.residentSynth = (function(window)
 			controlState.currentNoteOns = [];
 		}
 
-		function setSoundFont(webAudioFont)
-		{
-			function setPresetDefaultIndices(channelInfo, defaultPreset)
-			{
-				channelInfo.bankIndex = defaultPreset.bankIndex;
-				channelInfo.presetIndex = defaultPreset.presetIndex;   // the presetIndex argument is the General MIDI presetIndex
-				channelInfo.mixtureIndex = defaultPreset.mixtureIndex; // can be undefined
-			}
-
-			if(!webAudioFont.isReady())
-			{
-				throw "This function should not be called before the webAudioFont is ready!";
-			}
-
-			banks = [];
-			for(var i = 0; i < webAudioFont.banks.length; i++)
-			{
-				let wafBank = webAudioFont.banks[i],
-					bank = [];
-
-				for(var j = 0; j < wafBank.length; j++)	
-				{
-					let preset = wafBank[j];
-					bank[preset.presetIndex] = preset;
-				}
-				banks.push(bank);
-			}
-
-			let defaultPreset = webAudioFont.banks[0][0];
-			for(let i = 0; i < 16; ++i)
-			{
-				// set default bankIndex, presetIndex and mixtureIndex.
-				setPresetDefaultIndices(channelControls[i], defaultPreset);
-			}
-
-			console.log("residentSynth WebAudioFont set.");
-		}
-
 		let defaultTuning = getDefaultTuning();
 
 		audioContext.resume().then(() => { console.log('AudioContext resumed successfully'); });
@@ -1320,7 +1320,7 @@ WebMIDI.residentSynth = (function(window)
 			initializeChannelControlState(this, i, defaultTuning);
 		}
 
-		setSoundFont(this.webAudioFonts[0]);
+		this.setSoundFont(this.webAudioFonts[0]);
 
 		console.log("residentSynth opened.");
 	};
