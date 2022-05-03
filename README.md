@@ -6,14 +6,18 @@ This _**ResidentSynthHost**_ uses the Web MIDI [_MIDIInput_ interface](https://w
 The _ResidentSynth_ is used not only by this [_ResidentSynthHost_ application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html), but also by my [_AssistantPerformer_](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html).
 
 ### ResidentSynth
-The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ and _Resident**Sf2**Synth_. These are no longer being developed, but are still installed in the archived _WebMIDISynthHost_ ([repository](https://github.com/notator/WebMIDISynthHost) and [application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)).<br />
+The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ and _Resident**Sf2**Synth_.<br />
+These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ ([repository](https://github.com/notator/WebMIDISynthHost) and [application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)).<br />
 The inherited code owes a lot to Sergey Surikov's [WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his `WebAudioFontReverberator`.<br />
-#### Configuration
-Apart from having a MIDI interface and support for both mixtures and microtones, the main difference between the ResidentSynth and Surikov's WebAudioFontPlayer is in the approach to note envelopes: The _ResidentSynth_ allows custom envelope settings to be provided for each preset zone.<br />
+Differences include:
+- Implementation of the Web MIDI _MIDIOutput_ interface
+- Groups of presets are collected into custom, selectable sound fonts 
+- Envelope settings are customised for each zone in the loaded presets
+- Support for both mixtures, microtones and triggers (see below)
 
-The synth is designed to be used both with an external, hardware MIDI Input device such as a keyboard, and for playing scores stored on a website (such as my _AssistantPerformer_ [3]).<br />
-It can be configured by editing the files in the _synthConfig_ folder. This currently contains:<br />
-- webAudioFontFiles : a folder containing the required preset definitions (javascript files)
+#### Configuration
+The _ResidentSynth_ can be configured by editing the files in the _synthConfig_ folder. This currently contains:<br />
+- webAudioFontFiles : a folder containing the required preset definitions (clones of Surikov's files)
 - webAudioFontDefs.js : a file that allocates the available presets to bank and preset addresses in the synth
 - mixtureDefs.js : mixture definitions (see below)
 - tuningDefs.js : tuning definitions (see below)
