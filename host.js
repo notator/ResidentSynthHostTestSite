@@ -233,20 +233,13 @@ WebMIDI.host = (function(document)
                 let fontSelectIndex = channelGUIState.fontSelectIndex, // index in webAudioFontSelect
                     presetSelectIndex = channelGUIState.presetSelectIndex, // index in presetSelect
                     fontSelect = getElem("webAudioFontSelect"),
-                    presetSelect = getElem("presetSelect"),
-                    selectedSoundFontOption,
-                    presetOptionsArray;
+                    presetSelect = getElem("presetSelect");
 
                 fontSelect.selectedIndex = fontSelectIndex;
+                onWebAudioFontSelectChanged(); // sets the soundFont in the synth
 
-                selectedSoundFontOption = fontSelect[fontSelect.selectedIndex];
-
-                presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
-                setOptions(presetSelect, presetOptionsArray);
-
-                presetSelect.selectedIndex = presetSelectIndex; // sets the select
-
-                onPresetSelectChanged(); // sets the preset in the synth
+                presetSelect.selectedIndex = presetSelectIndex; // sets the presetSelect
+                onPresetSelectChanged();  // sets the preset in the synth
             }
 
             function setAndSendTuningFromState(channelGUIState)
@@ -280,6 +273,8 @@ WebMIDI.host = (function(document)
                     triggerActionSelect = getElem("triggerActionSelect");
 
                 triggerKeySelect.selectedIndex = triggerKeySelectIndex;
+                triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
+
                 triggerActionSelect.selectedIndex = triggerActionSelectIndex;
             }
 
