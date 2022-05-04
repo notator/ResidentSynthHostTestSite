@@ -272,6 +272,17 @@ WebMIDI.host = (function(document)
                 onTuningSelectChanged(); // sets the tuning in the synth (reads the channelSelect)
             }
 
+            function setTriggerSelectsFromState(channelGUIState)
+            {
+                let triggerKeySelectIndex = channelGUIState.triggerKeySelectIndex,
+                    triggerActionSelectIndex = channelGUIState.triggerActionSelectIndex,
+                    triggerKeySelect = getElem("triggerKeySelect"),
+                    triggerActionSelect = getElem("triggerActionSelect");
+
+                triggerKeySelect.selectedIndex = triggerKeySelectIndex;
+                triggerActionSelect.selectedIndex = triggerActionSelectIndex;
+            }
+
             function setAndSendLongControlsFromState(channelGUIState)
             {
                 let aftertouchLC = getElem("aftertouchLongControl"),
@@ -299,6 +310,7 @@ WebMIDI.host = (function(document)
 
             setAndSendPresetFromState(channelGUIState);
             setAndSendTuningFromState(channelGUIState);
+            setTriggerSelectsFromState(channelGUIState);
 
             setAndSendLongControlsFromState(channelGUIState);
         },
@@ -351,7 +363,7 @@ WebMIDI.host = (function(document)
             synth.send(mixtureMsgs.regParam);
             synth.send(mixtureMsgs.dataEntry); // If mixtureMsgs.dataEntry.length is 2, the mixture index is set to undefined in the synth.
 
-            channelSelect.options[channel].presetSelectIndex = presetSelect.selectedIndex;
+            channelSelect.options[channel].guiState.presetSelectIndex = presetSelect.selectedIndex;
         },
 
         // exported
@@ -446,8 +458,8 @@ WebMIDI.host = (function(document)
 
             synth.send(sysExMsg, performance.now());
 
-            channelOptions.A4FrequencySelectIndex = A4FrequencySelect.selectedIndex;
-            channelOptions.tuningSelectIndex = tuningSelectIndex;
+            channelOptions.guiState.tuningSelectIndex = tuningSelectIndex;
+            channelOptions.guiState.A4FrequencySelectIndex = A4FrequencySelect.selectedIndex;
         },
 
         //exported
@@ -520,8 +532,8 @@ WebMIDI.host = (function(document)
         {
             let webAudioFontSelect = getElem("webAudioFontSelect"),
                 channelSelect = getElem("channelSelect"),
+                channel = channelSelect.selectedIndex,
                 presetSelect = getElem("presetSelect"),
-                channelOptions = channelSelect.options[channelSelect.selectedIndex],
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
                 presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
@@ -530,10 +542,10 @@ WebMIDI.host = (function(document)
 
             setOptions(presetSelect, presetOptionsArray);
 
-            channelOptions.fontSelectIndex = webAudioFontSelect.selectedIndex;
-
             presetSelect.selectedIndex = 0;
             onPresetSelectChanged();
+
+            channelSelect.options[channel].guiState.fontSelectIndex = webAudioFontSelect.selectedIndex;
         },
 
         // exported (c.f. onWebAudioFontSelectChanged() )
@@ -544,14 +556,13 @@ WebMIDI.host = (function(document)
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 A4FrequencySelect = getElem("A4FrequencySelect"),
                 tuningSelect = getElem("tuningSelect"),
-                channelOptions = channelSelect.options[channel],
                 selectedTuningGroupOption = tuningGroupSelect[tuningGroupSelect.selectedIndex],
                 selectedTuningGroupName = selectedTuningGroupOption.innerHTML,
                 tuningOptionsArray = selectedTuningGroupOption.tuningOptionsArray;
 
             setOptions(tuningSelect, tuningOptionsArray);
 
-            channelOptions.tuningGroupSelectIndex = tuningGroupSelect.selectedIndex;
+            channelSelect.options[channel].guiState.tuningGroupSelectIndex = tuningGroupSelect.selectedIndex;
 
             A4FrequencySelect.disabled = selectedTuningGroupName.includes("warped");
             A4FrequencySelect.selectedIndex = 0;
@@ -563,10 +574,23 @@ WebMIDI.host = (function(document)
         // exported (c.f. onTuningSelectChanged() )
         onTriggerKeySelectChanged = function()
         {
-            let triggerKeySelect = getElem("triggerKeySelect");
+            let triggerKeySelect = getElem("triggerKeySelect"),
+                channelSelect = getElem("channelSelect"),
+                channel = channelSelect.selectedIndex,
+                guiState = channelSelect.options[channel].guiState;
 
             triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
+            guiState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
+        },
 
+        // exported (c.f. onTuningSelectChanged() )
+        onTriggerActionSelectChanged = function()
+        {
+            let triggerActionSelect = getElem("triggerActionSelect"),
+                channelSelect = getElem("channelSelect"),
+                channel = channelSelect.selectedIndex;
+
+                channelSelect.options[channel].guiState.triggerActionSelectIndex = triggerActionSelect.selectedIndex;
         },
 
         // exported
@@ -755,6 +779,7 @@ WebMIDI.host = (function(document)
                         triggerActionSelect = document.createElement("select");
                         triggerActionSelect.id = "triggerActionSelect";
                         triggerActionSelect.className = "triggerActionSelect";
+                        triggerActionSelect.onchange = onTriggerActionSelectChanged;
                         setOptions(triggerActionSelect, triggerActionOptions);
                         triggerActionCell.appendChild(triggerActionSelect);
                     }
@@ -1598,6 +1623,7 @@ WebMIDI.host = (function(document)
             onTuningSelectChanged: onTuningSelectChanged,
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
             onTriggerKeySelectChanged: onTriggerKeySelectChanged,
+            onTriggerActionSelectChanged: onTriggerActionSelectChanged,
 
 			noteCheckboxClicked: noteCheckboxClicked,
 			holdCheckboxClicked: holdCheckboxClicked,
