@@ -90,7 +90,7 @@ WebMIDI.host = (function(document)
                     {
                         return; // no action
                     }
-                    else if(actionOption.presetIndex < 0
+                    else if(actionOption.presetSelectIndex < 0
                         || actionOption.tuningSelectIndex < 0
                         || actionOption.presetSelectIndex >= presetSelect.options.length
                         || actionOption.tuningSelectIndex >= tuningSelect.options.length)
@@ -345,6 +345,7 @@ WebMIDI.host = (function(document)
                 channelSelect = getElem("channelSelect"),
                 presetSelect = getElem("presetSelect"),
                 channel = channelSelect.selectedIndex,
+                channelGUIState = channelSelect.options[channel].guiState,
                 preset = presetSelect.options[presetSelect.selectedIndex].preset,
                 bankIndex = preset.bankIndex,
                 presetIndex = preset.presetIndex,
@@ -358,7 +359,7 @@ WebMIDI.host = (function(document)
             synth.send(mixtureMsgs.regParam);
             synth.send(mixtureMsgs.dataEntry); // If mixtureMsgs.dataEntry.length is 2, the mixture index is set to undefined in the synth.
 
-            channelSelect.options[channel].guiState.presetSelectIndex = presetSelect.selectedIndex;
+            channelGUIState.presetSelectIndex = presetSelect.selectedIndex;
         },
 
         // exported
@@ -440,7 +441,7 @@ WebMIDI.host = (function(document)
                 tuningSelect = getElem("tuningSelect"),
                 tuningSelectIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
-                channelOptions = channelSelect.options[channel],
+                channelGUIState = channelSelect.options[channel].guiState,
                 tuning = synth.tuningGroups[tuningGroupSelectIndex][tuningSelectIndex];
 
             if(A4FrequencySelect.disabled === false)
@@ -453,8 +454,8 @@ WebMIDI.host = (function(document)
 
             synth.send(sysExMsg, performance.now());
 
-            channelOptions.guiState.tuningSelectIndex = tuningSelectIndex;
-            channelOptions.guiState.A4FrequencySelectIndex = A4FrequencySelect.selectedIndex;
+            channelGUIState.tuningSelectIndex = tuningSelectIndex;
+            channelGUIState.A4FrequencySelectIndex = A4FrequencySelect.selectedIndex;
         },
 
         //exported
@@ -528,6 +529,7 @@ WebMIDI.host = (function(document)
             let webAudioFontSelect = getElem("webAudioFontSelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
+                channelGUIState = channelSelect.options[channel].guiState,
                 presetSelect = getElem("presetSelect"),
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
@@ -540,7 +542,7 @@ WebMIDI.host = (function(document)
             presetSelect.selectedIndex = 0;
             onPresetSelectChanged();
 
-            channelSelect.options[channel].guiState.fontSelectIndex = webAudioFontSelect.selectedIndex;
+            channelGUIState.fontSelectIndex = webAudioFontSelect.selectedIndex;
         },
 
         // exported (c.f. onWebAudioFontSelectChanged() )
@@ -548,6 +550,7 @@ WebMIDI.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
+                channelGUIState = channelSelect.options[channel].guiState,
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 A4FrequencySelect = getElem("A4FrequencySelect"),
                 tuningSelect = getElem("tuningSelect"),
@@ -557,7 +560,7 @@ WebMIDI.host = (function(document)
 
             setOptions(tuningSelect, tuningOptionsArray);
 
-            channelSelect.options[channel].guiState.tuningGroupSelectIndex = tuningGroupSelect.selectedIndex;
+            channelGUIState.tuningGroupSelectIndex = tuningGroupSelect.selectedIndex;
 
             A4FrequencySelect.disabled = selectedTuningGroupName.includes("warped");
             A4FrequencySelect.selectedIndex = 0;
@@ -572,10 +575,10 @@ WebMIDI.host = (function(document)
             let triggerKeySelect = getElem("triggerKeySelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                guiState = channelSelect.options[channel].guiState;
+                channelGUIState = channelSelect.options[channel].guiState;
 
             triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
-            guiState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
+            channelGUIState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
         },
 
         // exported (c.f. onTuningSelectChanged() )
@@ -583,9 +586,10 @@ WebMIDI.host = (function(document)
         {
             let triggerActionSelect = getElem("triggerActionSelect"),
                 channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex;
+                channel = channelSelect.selectedIndex,
+                channelGUIState = channelSelect.options[channel].guiState;
 
-                channelSelect.options[channel].guiState.triggerActionSelectIndex = triggerActionSelect.selectedIndex;
+            channelGUIState.triggerActionSelectIndex = triggerActionSelect.selectedIndex;
         },
 
         // exported
@@ -808,34 +812,34 @@ WebMIDI.host = (function(document)
                 function setChannelGUIStateFromLongControl(longControl, value)
                 {
                     let channelSelect = getElem("channelSelect"),
-                        guiState = channelSelect.options[channelSelect.selectedIndex].guiState;
+                        channelGUIState = channelSelect.options[channelSelect.selectedIndex].guiState;
 
-                    if(guiState !== undefined)
+                    if(channelGUIState !== undefined)
                     {
                         let longControlID = longControl.id;
 
                         switch(longControlID)
                         {
                             case "aftertouchLongControl":
-                                guiState.aftertouchValue = value;
+                                channelGUIState.aftertouchValue = value;
                                 break;
                             case "pitchWheelLongControl":
-                                guiState.pitchWheelValue = value;
+                                channelGUIState.pitchWheelValue = value;
                                 break;
                             case "modWheelLongControl":
-                                guiState.modWheelValue = value;
+                                channelGUIState.modWheelValue = value;
                                 break;
                             case "volumeLongControl":
-                                guiState.volumeValue = value;
+                                channelGUIState.volumeValue = value;
                                 break;
                             case "panLongControl":
-                                guiState.panValue = value;
+                                channelGUIState.panValue = value;
                                 break;
                             case "reverberationLongControl":
-                                guiState.reverberationValue = value;
+                                channelGUIState.reverberationValue = value;
                                 break;
                             case "pitchWheelSensitivityLongControl":
-                                guiState.pitchWheelSensitivityValue = value;
+                                channelGUIState.pitchWheelSensitivityValue = value;
                                 break;
                             default:
                                 console.assert(false, "Unknown long control");
