@@ -97,9 +97,9 @@
                     </td>
                     <td id="presetSelectCell">
                         <!--
-                        <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
-                        sendAgainButton
-                    -->
+                            <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
+                            sendAgainButton
+                        -->
                     </td>
                 </tr>
             </table>
@@ -124,12 +124,12 @@
                     </td>
                     <td id="tuningSelectCell">
                         <!--
-                        <select id="tuningSelect" class="tuningSelect" onchange="WebMIDI.host.onTuningSelectChanged()" />
-                        sendAgainButton
-                    -->
+                            <select id="tuningSelect" class="tuningSelect" onchange="WebMIDI.host.onTuningSelectChanged()" />
+                            sendAgainButton
+                        -->
                     </td>
                     <td id="A4FrequencySelectCell">
-                        <select id="A4FrequencySelect" class="A4FrequencySelect" onchange="WebMIDI.host.onA4FrequencySelectChanged()"/>
+                        <select id="A4FrequencySelect" class="A4FrequencySelect" onchange="WebMIDI.host.onA4FrequencySelectChanged()" />
                     </td>
                 </tr>
             </table>
@@ -183,7 +183,7 @@
                         <input id="notesDivVelocityInput1" type="number" name="value" class="number" min="0" max="127" value="100" />
                         <input type="checkbox" id="sendNote1Checkbox" style="vertical-align:middle" onclick="WebMIDI.host.noteCheckboxClicked()" />
                     </td>
-                    
+
                 </tr>
                 <tr>
                     <td>
@@ -205,7 +205,6 @@
 
     <script src="WebMIDI/namespace.js" type="text/javascript"></script>
     <script src="WebMIDI/constants.js" type="text/javascript"></script>	<!-- contains PitchWheelDeviation constants -->
-
     <!-- The following scripts define all the presets used by the ResidentSynth in this application -->
     <script src="synthConfig/webAudioFontFiles/0000_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
     <script src="synthConfig/webAudioFontFiles/0000_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
@@ -269,7 +268,6 @@
     <script src="synthConfig/webAudioFontDefs.js" type="text/javascript"></script>
     <script src="synthConfig/tuningDefs.js" type="text/javascript"></script>
     <script src="synthConfig/mixtureDefs.js" type="text/javascript"></script>
-    <script src="synthConfig/triggerActionDefs.js" type="text/javascript"></script>
 
     <script src="residentSynth/reverberator.js" type="text/javascript"></script>
     <script src="residentSynth/webAudioFont.js" type="text/javascript"></script>
@@ -278,6 +276,7 @@
     <script src="residentSynth/residentSynth.js" type="text/javascript"></script>
     <script src="residentSynth/residentSynthNote.js" type="text/javascript"></script>
 
+    <script src="triggerActionDefs.js" type="text/javascript"></script>
     <script src="host.js" type="text/javascript"></script>
 </body>
 </html>
