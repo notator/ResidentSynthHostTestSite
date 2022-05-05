@@ -22,7 +22,6 @@ Differences include:
 - Support for
   - mixtures (chords that are played when a single NoteOn message is received)
   - tunings (including microtones)
-  - triggers (actions that are performed when a particular MIDI key is pressed)
 
 #### Configuration
 The _ResidentSynth_ can be configured by editing the files in the _synthConfig_ folder. This currently contains:<br />
@@ -30,7 +29,6 @@ The _ResidentSynth_ can be configured by editing the files in the _synthConfig_ 
 - webAudioFontDefs.js : a file that allocates the available presets to bank and preset addresses in the synth
 - mixtureDefs.js : mixture definitions (see below)
 - tuningDefs.js : tuning definitions (see below)
-- triggerStackDefs.js : trigger stack definitions (see below)<br />
 
 Precise instructions as to how to edit the definitions is given in the respective files, but here's an overview:
 ##### Presets
@@ -49,19 +47,11 @@ The following types of tuning can be created by the synth using the (configurabl
 - warped octaves : Tunings containing internally warped octaves
 - free keyboard : warped tunings in which the only restriction is that pitches ascend from left to right of the keyboard
 
-Internally, tunings are activated using MIDI RegisteredParameter and DataEntry controls (see host.js), but this detail is hidden from end-users by the GUI.
-This host application provides a tuning selector, parallel to the preset selector.  
+### Trigger Actions
+A trigger is a MIDI key that sends predefined MIDI messsages to the synthesizer when pressed under certain circumstances.<br />
+Such triggers are defined (in triggerDefs.js) for a particular _host_.
+The triggers defined for this host can change the preset and/or the tuning. Triggers could also be defined to send sequences of MIDI messages.
 
-##### Trigger Stacks
-A trigger is a MIDI key that changes the synth's configuration when pressed under certain circumstances.<br />
-Currently, such triggers are defined (in triggerDefs.js) using their MIDI key number and a `fireOnHitNumber` attribute. The trigger is released when the key has been hit `fireOnHitNumber` times. Such trigger definitions can be put in a sequence (a stack) designed to be used with a particular score. And it doesn't matter if the score is being played live or automatically on a website...<br />
-
-Currently, a trigger can change one or more of the following:
-- preset (with or without mixture)
-- tuning (the whole keyboard)
-- tuning overlay (a section of the keyboard)
-
-This synthesizer is still being developed. Please raise any issues, or make pull requests etc., here in this repository.<br />
 The _ResidentSynth_ is also used by my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
 
 James Ingram<br />
