@@ -1,19 +1,28 @@
 ## ResidentSynthHost
-This is a Web Audio application, written in HTML5 and Javascript, that hosts a GUI-less _ResidentSynth_ synthesizer.<br />
-The _ResidentSynth_ is a MIDI Output device, written entirely in Javascript, that can be installed and used on any website. It does _not_ require Web MIDI support from the browser, since it implements the Web MIDI [_MIDIOutput_ interface](https://www.w3.org/TR/webmidi/#midioutput-interface) itself. Such software synths can be included in websites as a substitute for end-user hardware, so they should be especially useful on mobile devices.<br />
-The _ResidentSynth_ uses configurable [WebAudioFont](https://github.com/surikov/webaudiofont) presets (see below). For illustration purposes, this host installs a deliberately large number of these. Other installations would typically use less.<br />
-This _**ResidentSynthHost**_ uses the Web MIDI [_MIDIInput_ interface](https://www.w3.org/TR/webmidi/#midiinput-interface) so that an attached hardware MIDI input device can be used to control the _ResidentSynth_ in real time. This _does_ require the browser to support the Web MIDI API, and is recommended, but not absolutely necessary.<br />
-The _ResidentSynth_ is used not only by this [_ResidentSynthHost_ application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html), but also by my [_AssistantPerformer_](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html).
+This is a [Web Audio application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html), written in HTML5 and Javascript, that hosts a GUI-less _ResidentSynth_ synthesizer.<br />
+The application uses the Web MIDI [_MIDIInput_ interface](https://www.w3.org/TR/webmidi/#midiinput-interface) so that an attached hardware MIDI input device can be used to control the _ResidentSynth_ in real time. It is therefore best used in a browser that supports the Web MIDI API.<br />
+
+The _ResidentSynth_ is a MIDI Output device, written entirely in Javascript, that can be installed and used on any website. It uses Web Audio, but does _not_ require Web MIDI support from the browser since it implements the Web MIDI [_MIDIOutput_ interface](https://www.w3.org/TR/webmidi/#midioutput-interface) itself. Such software synths can be included in websites as a substitute for end-user hardware, so they should be especially useful on mobile devices.<br />
+The _ResidentSynth_ is being developed in _this_ repository. All issues relating to it should be raised here.
 
 ### ResidentSynth
+This software synthesizer uses clones of freeware wavetables (=presets, instruments) found on [Sergey Surikov's WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organised into custom sound fonts.<br />
+For illustration purposes, the _ResidentSynthHost_ installs a deliberately large number of presets, organising them into several different fonts. Other installations would typically use less.<br />
+
 The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ and _Resident**Sf2**Synth_.<br />
 These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ ([repository](https://github.com/notator/WebMIDISynthHost) and [application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)).<br />
-The inherited code owes a lot to Sergey Surikov's [WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his `WebAudioFontReverberator`.<br />
+The inherited code owes a lot to [Sergey Surikov's WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his `WebAudioFontReverberator`.<br />
 Differences include:
 - Implementation of the Web MIDI _MIDIOutput_ interface
+- Presets may be modified after loading:
+  - envelopes are tweeked
+  - where possible and meaningful, zones are extended to cover the full range of MIDI keys
+  - any errors in the wavetables are silently corrected
 - Groups of presets are collected into custom, selectable sound fonts 
-- Envelope settings are customised for each zone in the loaded presets
-- Support for both mixtures, microtones and triggers (see below)
+- Support for
+  - mixtures (chords that are played when a single NoteOn message is received)
+  - tunings (including microtones)
+  - triggers (actions that are performed when a particular MIDI key is pressed)
 
 #### Configuration
 The _ResidentSynth_ can be configured by editing the files in the _synthConfig_ folder. This currently contains:<br />
@@ -53,6 +62,7 @@ Currently, a trigger can change one or more of the following:
 - tuning overlay (a section of the keyboard)
 
 This synthesizer is still being developed. Please raise any issues, or make pull requests etc., here in this repository.<br />
+The _ResidentSynth_ is also used by my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
 
 James Ingram<br />
 May 2022<br />
