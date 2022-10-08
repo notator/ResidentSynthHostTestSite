@@ -1248,7 +1248,7 @@ WebMIDI.residentSynth = (function(window)
 		}
 
 		console.log("residentSynth WebAudioFont set.");
-	}
+	};
 
 	// WebMIDIAPI §4.6 -- MIDIPort interface
 	// See https://github.com/notator/WebMIDISynthHost/issues/24
