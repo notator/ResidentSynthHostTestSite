@@ -204,19 +204,6 @@ WebMIDI.host = (function(document)
         },
 
         // exported
-        gitHubButtonClick = function()
-        {
-            var url = "https://github.com/notator/ResidentSynthHost";
-            openInNewTab(url);
-        },
-
-        // exported
-        synthWebsiteButtonClick = function()
-        {
-            gitHubButtonClick();
-        },
-
-        // exported
         webAudioFontWebsiteButtonClick = function()
         {
             let webAudioFontSelect = getElem("webAudioFontSelect"),
@@ -1606,13 +1593,10 @@ WebMIDI.host = (function(document)
 
 		publicAPI =
 		{
-            gitHubButtonClick: gitHubButtonClick,
-
             onInputDeviceSelectChanged: onInputDeviceSelectChanged,
 
 			onContinueAtStartClicked: onContinueAtStartClicked,
 
-			synthWebsiteButtonClick: synthWebsiteButtonClick,
 			webAudioFontWebsiteButtonClick: webAudioFontWebsiteButtonClick,
 
             onChannelSelectChanged: onChannelSelectChanged,

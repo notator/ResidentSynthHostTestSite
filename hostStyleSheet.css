@@ -27,7 +27,12 @@ hr
 .boldTitle
 {
 	font-weight: bold;
-	font-size:14px;
+	font-size: 14px;
+}
+
+.subtitle
+{
+	font-size: 12px;
 }
 
 .boldSubtitle
@@ -57,7 +62,7 @@ hr
 .inputDeviceSelect
 {
 	font-size: 11px;
-	width: 180px;
+	width: 178px;
 	height: 18px;
 	margin-left: 0;
 }
