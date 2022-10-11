@@ -81,10 +81,18 @@ WebMIDI.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    let triggerActionSelect = getElem("triggerActionSelect"),
+                    // returns the channel's current TriggerAction, and increments the channel's current actionPointer,
+                    // cycling through the available actions.
+                    function getTriggerAction(channel)
+                    {
+
+                    }
+
+                    let channel = getElem("channelSelect").selectedIndex,
                         presetSelect = getElem("presetSelect"),
                         tuningSelect = getElem("tuningSelect"),
-                        actionOption = triggerActionSelect[triggerActionSelect.selectedIndex];
+                        actionOption = getTriggerAction(channel);
+                        //actionOption = triggerActionSelect[triggerActionSelect.selectedIndex];
 
                     if(actionOption.presetSelectIndex === -1 && actionOption.tuningSelectIndex === -1)
                     {
@@ -255,14 +263,15 @@ WebMIDI.host = (function(document)
             function setTriggerSelectsFromState(channelGUIState)
             {
                 let triggerKeySelectIndex = channelGUIState.triggerKeySelectIndex,
-                    triggerActionSelectIndex = channelGUIState.triggerActionSelectIndex,
+                    //triggerActionSelectIndex = channelGUIState.triggerActionSelectIndex,
+                    triggerActionDescription = channelGUIState.nextActionDescription,
                     triggerKeySelect = getElem("triggerKeySelect"),
-                    triggerActionSelect = getElem("triggerActionSelect");
+                    triggerActionCell = getElem("triggerActionCell");
 
                 triggerKeySelect.selectedIndex = triggerKeySelectIndex;
                 triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
 
-                triggerActionSelect.selectedIndex = triggerActionSelectIndex;
+                triggerActionCell.innerHTML = triggerActionDescription;
             }
 
             function setAndSendLongControlsFromState(channelGUIState)
@@ -569,15 +578,15 @@ WebMIDI.host = (function(document)
         },
 
         // exported (c.f. onTuningSelectChanged() )
-        onTriggerActionSelectChanged = function()
-        {
-            let triggerActionSelect = getElem("triggerActionSelect"),
-                channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState;
+        //onTriggerActionSelectChanged = function()
+        //{
+        //    let triggerActionSelect = getElem("triggerActionSelect"),
+        //        channelSelect = getElem("channelSelect"),
+        //        channel = channelSelect.selectedIndex,
+        //        channelGUIState = channelSelect.options[channel].guiState;
 
-            channelGUIState.triggerActionSelectIndex = triggerActionSelect.selectedIndex;
-        },
+        //    channelGUIState.triggerActionSelectIndex = triggerActionSelect.selectedIndex;
+        //},
 
         // exported
         onContinueAtStartClicked = function()
@@ -1318,6 +1327,14 @@ WebMIDI.host = (function(document)
 
                 function getDefaultChannelGUIStates()
                 {
+                    // Returns the nextActionDescription for this channel.
+                    // Does NOT increment the channel's nextAction pointer.
+                    function getNextActionDescription(channel)
+                    {
+                        //dummy code
+                        return "channel " + channel.toString() + ": dummy action";
+                    }
+
                     let channelOptions = getElem("channelSelect").options,
                         fontSelectIndex = getElem("webAudioFontSelect").selectedIndex,
                         presetSelectIndex = getElem("presetSelect").selectedIndex,
@@ -1325,7 +1342,6 @@ WebMIDI.host = (function(document)
                         tuningSelectIndex = getElem("tuningSelect").selectedIndex,
                         A4FrequencySelectIndex = getElem("A4FrequencySelect").selectedIndex,
                         triggerKeySelectIndex = getElem("triggerKeySelect").selectedIndex,
-                        triggerActionSelectIndex = getElem("triggerActionSelect").selectedIndex,
                         aftertouchValue = getElem("aftertouchLongControl").getValue(),
                         pitchWheelValue = getElem("pitchWheelLongControl").getValue(),
                         modWheelValue = getElem("modWheelLongControl").getValue(),
@@ -1346,7 +1362,7 @@ WebMIDI.host = (function(document)
                         guiState.tuningSelectIndex = tuningSelectIndex;
                         guiState.A4FrequencySelectIndex = A4FrequencySelectIndex;
                         guiState.triggerKeySelectIndex = triggerKeySelectIndex;
-                        guiState.triggerActionSelectIndex = triggerActionSelectIndex;
+                        guiState.nextActionDescription = getNextActionDescription(i);
                         guiState.aftertouchValue = aftertouchValue;
                         guiState.pitchWheelValue = pitchWheelValue;
                         guiState.modWheelValue = modWheelValue;

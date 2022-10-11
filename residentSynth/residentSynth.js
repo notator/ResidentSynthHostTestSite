@@ -212,7 +212,7 @@ WebMIDI.residentSynth = (function(window)
 							keyZone.midi = presetDef.presetIndex;
 							zones.push(keyZone);
 						}
-						percussionPresets.push({ name: presetDef.name, zones: zones });
+						percussionPresets.push({name: presetDef.name, zones: zones});
 					}
 					return percussionPresets;
 				}
@@ -291,7 +291,7 @@ WebMIDI.residentSynth = (function(window)
 						let presetIndex = zones[0].midi,
 							presetOptionName = getPresetOptionName(presetName, bankIndex, presetIndex, isPercussion);
 
-						bankPresets.push({ name: presetOptionName, presetIndex: presetIndex, zones: zones });
+						bankPresets.push({name: presetOptionName, presetIndex: presetIndex, zones: zones});
 					}
 
 					allPresetsPerBank.push(bankPresets);
@@ -343,14 +343,14 @@ WebMIDI.residentSynth = (function(window)
 					// 0: short envelope (e.g. drum, xylophone, percussion)
 					// 1: long envelope (e.g. piano)
 					// 2: unending envelope (e.g. wind instrument, organ)
-					const PRESET_ENVTYPE = { SHORT: 0, LONG: 1, UNENDING: 2 },
+					const PRESET_ENVTYPE = {SHORT: 0, LONG: 1, UNENDING: 2},
 						MAX_DURATION = 300000, // five minutes should be long enough...
 						DEFAULT_NOTEOFF_RELEASE_DURATION = 0.2;
 
 					function presetEnvType(isPercussion, presetIndex)
 					{
 						const shortEnvs =
-							[	13,
+							[13,
 								45, 47,
 								55,
 								112, 113, 114, 115, 116, 117, 118, 119,
@@ -421,7 +421,7 @@ WebMIDI.residentSynth = (function(window)
 						// Sets attack, hold, decay and release durations for each zone.
 						for(var i = 0; i < zones.length; i++)
 						{
-							let vEnvData = { attack: 0, hold: 0.5, decay: 4.5, release: DEFAULT_NOTEOFF_RELEASE_DURATION }; // Surikov envelope
+							let vEnvData = {attack: 0, hold: 0.5, decay: 4.5, release: DEFAULT_NOTEOFF_RELEASE_DURATION}; // Surikov envelope
 							vEnvData.envelopeDuration = 5; // zoneVEnvData.attack + zoneVEnvData.hold + zoneVEnvData.decay;
 							vEnvData.noteOffReleaseDuration = DEFAULT_NOTEOFF_RELEASE_DURATION; // zoneVEnvData.release;
 							zones[i].vEnvData = vEnvData;
@@ -451,7 +451,7 @@ WebMIDI.residentSynth = (function(window)
 									d = dLow * Math.pow(dFactor, keyLow),
 									r = rLow * Math.pow(rFactor, keyLow);
 
-								let vEnvData = { attack: a, hold: h, decay: d, release: r };
+								let vEnvData = {attack: a, hold: h, decay: d, release: r};
 								vEnvData.envelopeDuration = a + h + d; // zoneVEnvData.attack + zoneVEnvData.hold + zoneVEnvData.decay;
 								vEnvData.noteOffReleaseDuration = r; // zoneVEnvData.release;
 								checkDurations(vEnvData);
@@ -525,7 +525,7 @@ WebMIDI.residentSynth = (function(window)
 						// Sets attack, hold, decay and release durations for each zone.
 						for(var i = 0; i < zones.length; i++)
 						{
-							let vEnvData = { attack: 0, hold: MAX_DURATION, decay: 0, release: DEFAULT_NOTEOFF_RELEASE_DURATION }; // Surikov envelope
+							let vEnvData = {attack: 0, hold: MAX_DURATION, decay: 0, release: DEFAULT_NOTEOFF_RELEASE_DURATION}; // Surikov envelope
 							vEnvData.envelopeDuration = MAX_DURATION; // zoneVEnvData.attack + zoneVEnvData.hold + zoneVEnvData.decay;
 							vEnvData.noteOffReleaseDuration = DEFAULT_NOTEOFF_RELEASE_DURATION; // zoneVEnvData.release;
 							zones[i].vEnvData = vEnvData;
@@ -830,6 +830,11 @@ WebMIDI.residentSynth = (function(window)
 
 			return tuningGroups;
 		},
+
+		getActionDefs = function()
+		{
+			return WebMIDI.actionDefs;
+        },
 
 		/*****************************************/
 		/* Control Functions */
@@ -1202,7 +1207,8 @@ WebMIDI.residentSynth = (function(window)
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
 			Object.defineProperty(this, "presetMixtures", { value: getPresetMixtures(this.webAudioFonts), writable: false });
 			Object.defineProperty(this, "tuningsFactory", { value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false });
-			Object.defineProperty(this, "tuningGroups", { value: getTuningGroups(this.tuningsFactory), writable: false });
+			Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(this.tuningsFactory), writable: false});
+			Object.defineProperty(this, "actionDefs", {value: getActionDefs(), writable: false});
 		},
 
 		API =
