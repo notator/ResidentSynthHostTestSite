@@ -81,44 +81,76 @@ WebMIDI.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    // returns the channel's current TriggerAction, and increments the channel's current actionPointer,
-                    // cycling through the available actions.
-                    function getTriggerAction(channel)
+                    // Returns the channel's next action definition.
+                    // Throws an exception if the channel has no actions or no nextActionIndex or no action at the required index.
+                    function getNextActionDef(channel)
                     {
+                        let channelState = synth.channelControls[channel],
+                            actions = channelState.actions,
+                            nextActionIndex = channelState.nextActionIndex;
 
+                        if(actions === undefined || nextActionIndex === undefined || nextActionIndex < 0 || nextActionIndex >= actions.length)
+                        {
+                            throw "undefined action";
+                        }
+                        return actions[nextActionIndex];
+                    }
+
+                    // Throws an exception if index is out of range.
+                    function checkSelectRange(index, select)
+                    {
+                        if(index < 0 || index >= select.options.length)
+                        {
+                            throw "index out of range";
+                        }
+                    }
+
+                    function doAction(actionDef)
+                    {
+                        if(actionDef.presetIndex !== undefined)
+                        {
+                            checkSelectRange(actionDef.presetIndex, presetSelect);
+                            presetSelect.selectedIndex = actionDef.presetIndex;
+                            onPresetSelectChanged();
+                        }
+                        if(actionDef.tuningIndex !== undefined)
+                        {
+                            checkSelectRange(actionDef.tuningIndex, tuningSelect);
+                            tuningSelect.selectedIndex = actionDef.tuningIndex;
+                            onTuningSelectChanged();
+                        }
+                    }
+
+                    function incrementActionPointer(channel)
+                    {
+                        let channelState = synth.channelControls[channel],
+                            nActions = channelState.actions.length,
+                            nextActionIndex = channelState.nextActionIndex;
+
+                        if(nextActionIndex === nActions - 1)
+                        {
+                            channelState.nextActionIndex = 0;
+                        }
+                        else
+                        {
+                            channelState.nextActionIndex++;
+                        }
                     }
 
                     let channel = getElem("channelSelect").selectedIndex,
                         presetSelect = getElem("presetSelect"),
                         tuningSelect = getElem("tuningSelect"),
-                        actionOption = getTriggerAction(channel);
-                        //actionOption = triggerActionSelect[triggerActionSelect.selectedIndex];
+                        actionDef = getNextActionDef(channel);
 
-                    if(actionOption.presetSelectIndex === -1 && actionOption.tuningSelectIndex === -1)
-                    {
-                        return; // no action
-                    }
-                    else if(actionOption.presetSelectIndex < 0
-                        || actionOption.tuningSelectIndex < 0
-                        || actionOption.presetSelectIndex >= presetSelect.options.length
-                        || actionOption.tuningSelectIndex >= tuningSelect.options.length)
-                    {
-                        throw "illegal action.";
-                    }
-                    else
-                    {
-                        presetSelect.selectedIndex = actionOption.presetSelectIndex;
-                        onPresetSelectChanged();
-                        tuningSelect.selectedIndex = actionOption.tuningSelectIndex;
-                        onTuningSelectChanged();
-                    }
+                    doAction(actionDef);
+                    incrementActionPointer(channel);
                 }
 
                 let data = e.data,
                     CMD = WebMIDI.constants.COMMAND,
                     cmdIndex = data[0] & 0xF0;
 
-                if(cmdIndex === CMD.NOTE_ON && data[1] === triggerKey)
+                if(triggerKey !== undefined && cmdIndex === CMD.NOTE_ON && data[1] === triggerKey)
                 {
                     if(data[2] !== 0)
                     {
@@ -220,6 +252,27 @@ WebMIDI.host = (function(document)
             openInNewTab(selectedOption.url);
         },
 
+        setTriggersDiv = function(channelIndex, actionIndex)
+        {
+            let triggerKeySelect = getElem("triggerKeySelect"),
+                actionNameCell = getElem("actionNameCell"),
+                channelActionDefs = synth.actionDefs[channelIndex];
+
+            if(channelActionDefs === undefined || channelActionDefs.actions[actionIndex] === undefined)
+            {
+                triggerKeySelect.selectedIndex = 0;
+                triggerKeySelect.disabled = true;
+                actionNameCell.innerHTML = "This channel has no defined actions";
+            }
+            else
+            {
+                let actionName = channelActionDefs.actions[actionIndex].name;
+                triggerKeySelect.selectedIndex = 1;
+                triggerKeySelect.disabled = false;
+                actionNameCell.innerHTML = "action: " + actionName;
+            }
+        },
+
         // exported
         onChannelSelectChanged = function()
         {
@@ -260,7 +313,7 @@ WebMIDI.host = (function(document)
                 onTuningSelectChanged(); // sets the tuning in the synth (reads the channelSelect)
             }
 
-            function setTriggerSelectsFromState(channelGUIState)
+            function setTriggerDivFromState(channelGUIState)
             {
                 let triggerKeySelectIndex = channelGUIState.triggerKeySelectIndex,
                     //triggerActionSelectIndex = channelGUIState.triggerActionSelectIndex,
@@ -301,7 +354,7 @@ WebMIDI.host = (function(document)
 
             setAndSendPresetFromState(channelGUIState);
             setAndSendTuningFromState(channelGUIState);
-            setTriggerSelectsFromState(channelGUIState);
+            setTriggerDivFromState(channelGUIState);
 
             setAndSendLongControlsFromState(channelGUIState);
         },
@@ -333,7 +386,7 @@ WebMIDI.host = (function(document)
                     dataEntry = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.DATA_ENTRY, mixtureIndex]);
                 }
 
-                return { regParam, dataEntry };
+                return {regParam, dataEntry};
             }
 
             let CMD = WebMIDI.constants.COMMAND,
@@ -366,7 +419,7 @@ WebMIDI.host = (function(document)
                 let returnIndex = -1, // frequency out of range
                     maxSelectMidiCents = options[0].midiCents + 0.5,
                     minSelectMidiCents = options[options.length - 1].midiCents - 0.5,
-                    minDiff = Number.MAX_VALUE;                    
+                    minDiff = Number.MAX_VALUE;
 
                 console.assert(tuningA4MidiCents < maxSelectMidiCents && tuningA4MidiCents > minSelectMidiCents);
 
@@ -418,7 +471,7 @@ WebMIDI.host = (function(document)
                         data2 = (cents - (data1 << 7)) & 0x7f;
 
                     console.assert(cents === ((data2 & 0x7f) | ((data1 & 0x7f) << 7)));
-                            
+
                     sysExMsg[i++] = j;
                     sysExMsg[i++] = basePitch;
                     sysExMsg[i++] = data1;
@@ -576,17 +629,6 @@ WebMIDI.host = (function(document)
             triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
             channelGUIState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
         },
-
-        // exported (c.f. onTuningSelectChanged() )
-        //onTriggerActionSelectChanged = function()
-        //{
-        //    let triggerActionSelect = getElem("triggerActionSelect"),
-        //        channelSelect = getElem("channelSelect"),
-        //        channel = channelSelect.selectedIndex,
-        //        channelGUIState = channelSelect.options[channel].guiState;
-
-        //    channelGUIState.triggerActionSelectIndex = triggerActionSelect.selectedIndex;
-        //},
 
         // exported
         onContinueAtStartClicked = function()
@@ -751,6 +793,12 @@ WebMIDI.host = (function(document)
                     let triggerKeySelect = getElem("triggerKeySelect"),
                         options = [];
 
+                    let option = new Option("triggerKeyOption");
+
+                    option.innerHTML = "none";
+                    option.key = undefined;
+                    options.push(option);
+
                     triggerKey = 36;
 
                     // My 4 octave EMU keyboard has keys 36-84.
@@ -763,46 +811,6 @@ WebMIDI.host = (function(document)
                         options.push(option);
                     }
                     setOptions(triggerKeySelect, options);
-                }
-
-                function setTriggerActionSelect()
-                {
-                    function appendTriggerActionSelect(triggerActionCell, triggerActionOptions)
-                    {
-                        var triggerActionSelect;
-
-                        triggerActionSelect = document.createElement("select");
-                        triggerActionSelect.id = "triggerActionSelect";
-                        triggerActionSelect.className = "triggerActionSelect";
-                        triggerActionSelect.onchange = onTriggerActionSelectChanged;
-                        setOptions(triggerActionSelect, triggerActionOptions);
-                        triggerActionCell.appendChild(triggerActionSelect);
-                    }
-
-                    let triggerActionCell = getElem("triggerActionCell"),
-                        triggerActionDefs = WebMIDI.triggerActionDefs,
-                        options = [];
-
-                    let option = new Option("triggerActionOption");
-
-                    option.innerHTML = "no action";
-                    option.presetSelectIndex = -1;
-                    option.tuningSelectIndex = -1;
-                    options.push(option);
-
-                    for(var i = 0; i < triggerActionDefs.length; i++)
-                    {
-                        let triggerActionDef = triggerActionDefs[i];
-
-                        option = new Option("triggerActionOption");
-
-                        option.innerHTML = triggerActionDef.name;
-                        option.presetSelectIndex = triggerActionDef.presetSelectIndex;
-                        option.tuningSelectIndex = triggerActionDef.tuningSelectIndex;
-                        options.push(option);
-                    }
-
-                    appendTriggerActionSelect(triggerActionCell, options);
                 }
 
                 function setChannelGUIStateFromLongControl(longControl, value)
@@ -1399,7 +1407,7 @@ WebMIDI.host = (function(document)
                 tuningDiv.style.display = "block";
 
                 setTriggerKeySelect();
-                setTriggerActionSelect();
+                setTriggersDiv(0, 0);
                 triggersDiv.style.display = "block";
 
                 setCommandsAndControlsDivs();
@@ -1622,7 +1630,7 @@ WebMIDI.host = (function(document)
             onTuningSelectChanged: onTuningSelectChanged,
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
             onTriggerKeySelectChanged: onTriggerKeySelectChanged,
-            onTriggerActionSelectChanged: onTriggerActionSelectChanged,
+           // onTriggerActionSelectChanged: onTriggerActionSelectChanged,
 
 			noteCheckboxClicked: noteCheckboxClicked,
 			holdCheckboxClicked: holdCheckboxClicked,
