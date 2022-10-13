@@ -31,6 +31,43 @@ WebMIDI.host = (function(document)
             return document.getElementById(elemID);
         },
 
+        // Disables the triggerKeySelect if the channel has no defined actions.
+        // Otherwise sets actionNameCell.InnerHTML to "" if actionIndex is undefined.
+        // Otherwise throws an exception either if there is no action at actionIndex,
+        // or if the action has no name attribute.
+        setTriggersDiv = function(channelIndex, actionIndex)
+        {
+            let channelSelect = getElem("channelSelect"),
+                triggerKeySelect = getElem("triggerKeySelect"),
+                actionNameCell = getElem("actionNameCell"),
+                channelOptions = channelSelect.options[channelIndex],
+                channelActions = channelOptions.hostState.actions;
+
+            if(channelActions === undefined)
+            {
+                triggerKeySelect.disabled = true;
+                actionNameCell.innerHTML = "This channel has no defined actions";
+            }
+            else if(actionIndex === undefined) // triggerKeySelect is set to "none" (but can still be changed)
+            {
+                triggerKeySelect.disabled = false;
+                actionNameCell.innerHTML = "next action: none";
+            }
+            else if(actionIndex >= channelActions.length)
+            {
+                throw "Application error: actionIndex out of range.";
+            }
+            else if(channelActions[actionIndex].name === undefined)
+            {
+                throw "Configuration error: action has no name.";
+            }
+            else
+            {
+                triggerKeySelect.disabled = false;
+                actionNameCell.innerHTML = "next action: " + channelActions[actionIndex].name;
+            }
+        },
+
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
             function handleInputMessage(e)
@@ -81,21 +118,6 @@ WebMIDI.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    // Returns the channel's next action definition.
-                    // Throws an exception if the channel has no actions or no nextActionIndex or no action at the required index.
-                    function getNextActionDef(channel)
-                    {
-                        let channelState = synth.channelControls[channel],
-                            actions = channelState.actions,
-                            nextActionIndex = channelState.nextActionIndex;
-
-                        if(actions === undefined || nextActionIndex === undefined || nextActionIndex < 0 || nextActionIndex >= actions.length)
-                        {
-                            throw "undefined action";
-                        }
-                        return actions[nextActionIndex];
-                    }
-
                     // Throws an exception if index is out of range.
                     function checkSelectRange(index, select)
                     {
@@ -107,6 +129,9 @@ WebMIDI.host = (function(document)
 
                     function doAction(actionDef)
                     {
+                        let presetSelect = getElem("presetSelect"),
+                            tuningSelect = getElem("tuningSelect");
+
                         if(actionDef.presetIndex !== undefined)
                         {
                             checkSelectRange(actionDef.presetIndex, presetSelect);
@@ -121,29 +146,27 @@ WebMIDI.host = (function(document)
                         }
                     }
 
-                    function incrementActionPointer(channel)
+                    function incrementNextActionPointer(hostChannelState, nActions)
                     {
-                        let channelState = synth.channelControls[channel],
-                            nActions = channelState.actions.length,
-                            nextActionIndex = channelState.nextActionIndex;
-
-                        if(nextActionIndex === nActions - 1)
+                        if(hostChannelState.nextActionIndex === nActions - 1)
                         {
-                            channelState.nextActionIndex = 0;
+                            hostChannelState.nextActionIndex = 0;
                         }
                         else
                         {
-                            channelState.nextActionIndex++;
+                            hostChannelState.nextActionIndex++;
                         }
                     }
 
-                    let channel = getElem("channelSelect").selectedIndex,
-                        presetSelect = getElem("presetSelect"),
-                        tuningSelect = getElem("tuningSelect"),
-                        actionDef = getNextActionDef(channel);
+                    let channelSelect = getElem("channelSelect"),
+                        channel = channelSelect.selectedIndex,
+                        hostChannelState = channelSelect.options[channel].hostState,
+                        actions = hostChannelState.actions,
+                        actionDef = actions[hostChannelState.nextActionIndex];
 
                     doAction(actionDef);
-                    incrementActionPointer(channel);
+                    incrementNextActionPointer(hostChannelState, actions.length);
+                    setTriggersDiv(channel, hostChannelState.nextActionIndex);
                 }
 
                 let data = e.data,
@@ -252,41 +275,6 @@ WebMIDI.host = (function(document)
             openInNewTab(selectedOption.url);
         },
 
-        // Disables the triggerKeySelect if the channel has no defined actions.
-        // Sets actionNameCell.InnerHTML to "" if actionIndex is undefined.
-        // Otherwise throws an exception either if there is no action at actionIndex,
-        // or if the action has no name attribute.
-        setTriggersDiv = function(channelIndex, actionIndex)
-        {
-            let triggerKeySelect = getElem("triggerKeySelect"),
-                actionNameCell = getElem("actionNameCell"),
-                channelActionDefs = synth.actionDefs[channelIndex];
-
-            if(channelActionDefs === undefined || channelActionDefs.actions === undefined)
-            {
-                triggerKeySelect.disabled = true;
-                actionNameCell.innerHTML = "This channel has no defined actions";
-            }
-            else if(actionIndex === undefined)
-            {
-                triggerKeySelect.disabled = false;
-                actionNameCell.innerHTML = "";
-            }
-            else if(channelActionDefs.actions[actionIndex] === undefined)
-            {
-                throw "Application error: action index out of range.";
-            }
-            else if(channelActionDefs.actions[actionIndex].name === undefined)
-            {
-                throw "Configuration error: action has no name.";
-            }
-            else
-            {
-                triggerKeySelect.disabled = false;
-                actionNameCell.innerHTML = "action: " + channelActionDefs.actions[actionIndex].name;
-            }
-        },
-
         // exported
         onChannelSelectChanged = function()
         {
@@ -347,6 +335,7 @@ WebMIDI.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
+                triggerKeySelect = getElem("triggerKeySelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState;
 
@@ -354,6 +343,9 @@ WebMIDI.host = (function(document)
 
             setAndSendPresetFromState(hostChannelState);
             setAndSendTuningFromState(hostChannelState);
+
+            triggerKeySelect.selectedIndex = hostChannelState.triggerKeySelectIndex;
+
             setTriggersDiv(channel, hostChannelState.nextActionIndex);
 
             setAndSendLongControlsFromState(hostChannelState);
@@ -627,7 +619,12 @@ WebMIDI.host = (function(document)
                 hostChannelState = channelSelect.options[channel].hostState,
                 channelNextActionIndex = hostChannelState.nextActionIndex;
 
-            triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
+            triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key; // set global triggerKey
+            if(triggerKey === undefined) // select is set to "none"
+            {
+                channelNextActionIndex = undefined; // for setTriggersDiv
+            }
+
             hostChannelState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
 
             setTriggersDiv(channel, channelNextActionIndex);
@@ -1364,6 +1361,7 @@ WebMIDI.host = (function(document)
                         hostState.tuningSelectIndex = tuningSelectIndex;
                         hostState.A4FrequencySelectIndex = A4FrequencySelectIndex;
                         hostState.triggerKeySelectIndex = triggerKeySelectIndex;
+                        // hostState.actions is set below (intermediate channels may have undefined actions).
                         hostState.nextActionIndex = 0;
                         hostState.aftertouchValue = aftertouchValue;
                         hostState.pitchWheelValue = pitchWheelValue;
@@ -1374,6 +1372,15 @@ WebMIDI.host = (function(document)
                         hostState.pitchWheelSensitivityValue = pitchWheelSensitivityValue;
 
                         channelOption.hostState = hostState;
+                    }
+
+                    for(let i = 0; i < synth.actionDefs.length; i++)
+                    {
+                        let actionDef = synth.actionDefs[i],
+                            channel = actionDef.channel,
+                            actions = actionDef.actions;
+
+                        channelOptions[channel].hostState.actions = actions;
                     }
                 }
 
@@ -1401,7 +1408,6 @@ WebMIDI.host = (function(document)
                 tuningDiv.style.display = "block";
 
                 setTriggerKeySelect();
-                setTriggersDiv(0, 0);
                 triggersDiv.style.display = "block";
 
                 setCommandsAndControlsDivs();
