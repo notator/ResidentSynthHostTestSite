@@ -252,24 +252,38 @@ WebMIDI.host = (function(document)
             openInNewTab(selectedOption.url);
         },
 
+        // Disables the triggerKeySelect if the channel has no defined actions.
+        // Sets actionNameCell.InnerHTML to "" if actionIndex is undefined.
+        // Otherwise throws an exception either if there is no action at actionIndex,
+        // or if the action has no name attribute.
         setTriggersDiv = function(channelIndex, actionIndex)
         {
             let triggerKeySelect = getElem("triggerKeySelect"),
                 actionNameCell = getElem("actionNameCell"),
                 channelActionDefs = synth.actionDefs[channelIndex];
 
-            if(channelActionDefs === undefined || channelActionDefs.actions[actionIndex] === undefined)
+            if(channelActionDefs === undefined || channelActionDefs.actions === undefined)
             {
-                triggerKeySelect.selectedIndex = 0;
                 triggerKeySelect.disabled = true;
                 actionNameCell.innerHTML = "This channel has no defined actions";
             }
+            else if(actionIndex === undefined)
+            {
+                triggerKeySelect.disabled = false;
+                actionNameCell.innerHTML = "";
+            }
+            else if(channelActionDefs.actions[actionIndex] === undefined)
+            {
+                throw "Application error: action index out of range.";
+            }
+            else if(channelActionDefs.actions[actionIndex].name === undefined)
+            {
+                throw "Configuration error: action has no name.";
+            }
             else
             {
-                let actionName = channelActionDefs.actions[actionIndex].name;
-                triggerKeySelect.selectedIndex = 1;
                 triggerKeySelect.disabled = false;
-                actionNameCell.innerHTML = "action: " + actionName;
+                actionNameCell.innerHTML = "action: " + channelActionDefs.actions[actionIndex].name;
             }
         },
 
@@ -624,10 +638,13 @@ WebMIDI.host = (function(document)
             let triggerKeySelect = getElem("triggerKeySelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState;
+                channelGUIState = channelSelect.options[channel].guiState,
+                channelNextActionIndex = channelGUIState.nextActionIndex;
 
             triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
             channelGUIState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
+
+            setTriggersDiv(channel, channelNextActionIndex);
         },
 
         // exported
@@ -793,23 +810,22 @@ WebMIDI.host = (function(document)
                     let triggerKeySelect = getElem("triggerKeySelect"),
                         options = [];
 
-                    let option = new Option("triggerKeyOption");
-
-                    option.innerHTML = "none";
-                    option.key = undefined;
-                    options.push(option);
-
                     triggerKey = 36;
 
                     // My 4 octave EMU keyboard has keys 36-84.
                     for(var key = triggerKey; key < 85; key++)
                     {
                         let option = new Option("triggerKeyOption");
-
                         option.innerHTML = key.toString();
                         option.key = key;
                         options.push(option);
                     }
+
+                    let option = new Option("triggerKeyOption");
+                    option.innerHTML = "none";
+                    option.key = undefined;
+                    options.push(option);
+
                     setOptions(triggerKeySelect, options);
                 }
 
@@ -1335,14 +1351,6 @@ WebMIDI.host = (function(document)
 
                 function getDefaultChannelGUIStates()
                 {
-                    // Returns the nextActionDescription for this channel.
-                    // Does NOT increment the channel's nextAction pointer.
-                    function getNextActionDescription(channel)
-                    {
-                        //dummy code
-                        return "channel " + channel.toString() + ": dummy action";
-                    }
-
                     let channelOptions = getElem("channelSelect").options,
                         fontSelectIndex = getElem("webAudioFontSelect").selectedIndex,
                         presetSelectIndex = getElem("presetSelect").selectedIndex,
@@ -1370,7 +1378,7 @@ WebMIDI.host = (function(document)
                         guiState.tuningSelectIndex = tuningSelectIndex;
                         guiState.A4FrequencySelectIndex = A4FrequencySelectIndex;
                         guiState.triggerKeySelectIndex = triggerKeySelectIndex;
-                        guiState.nextActionDescription = getNextActionDescription(i);
+                        guiState.nextActionIndex = 0;
                         guiState.aftertouchValue = aftertouchValue;
                         guiState.pitchWheelValue = pitchWheelValue;
                         guiState.modWheelValue = modWheelValue;
