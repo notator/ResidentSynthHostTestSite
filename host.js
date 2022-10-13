@@ -362,7 +362,7 @@ WebMIDI.host = (function(document)
 
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState;
+                channelGUIState = channelSelect.options[channel].hostState;
 
             currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
@@ -408,7 +408,7 @@ WebMIDI.host = (function(document)
                 channelSelect = getElem("channelSelect"),
                 presetSelect = getElem("presetSelect"),
                 channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState,
+                channelGUIState = channelSelect.options[channel].hostState,
                 preset = presetSelect.options[presetSelect.selectedIndex].preset,
                 bankIndex = preset.bankIndex,
                 presetIndex = preset.presetIndex,
@@ -504,7 +504,7 @@ WebMIDI.host = (function(document)
                 tuningSelect = getElem("tuningSelect"),
                 tuningSelectIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState,
+                channelGUIState = channelSelect.options[channel].hostState,
                 tuning = synth.tuningGroups[tuningGroupSelectIndex][tuningSelectIndex];
 
             if(A4FrequencySelect.disabled === false)
@@ -592,7 +592,7 @@ WebMIDI.host = (function(document)
             let webAudioFontSelect = getElem("webAudioFontSelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState,
+                channelGUIState = channelSelect.options[channel].hostState,
                 presetSelect = getElem("presetSelect"),
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
@@ -613,7 +613,7 @@ WebMIDI.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState,
+                channelGUIState = channelSelect.options[channel].hostState,
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 A4FrequencySelect = getElem("A4FrequencySelect"),
                 tuningSelect = getElem("tuningSelect"),
@@ -638,7 +638,7 @@ WebMIDI.host = (function(document)
             let triggerKeySelect = getElem("triggerKeySelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                channelGUIState = channelSelect.options[channel].guiState,
+                channelGUIState = channelSelect.options[channel].hostState,
                 channelNextActionIndex = channelGUIState.nextActionIndex;
 
             triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key;
@@ -832,7 +832,7 @@ WebMIDI.host = (function(document)
                 function setChannelGUIStateFromLongControl(longControl, value)
                 {
                     let channelSelect = getElem("channelSelect"),
-                        channelGUIState = channelSelect.options[channelSelect.selectedIndex].guiState;
+                        channelGUIState = channelSelect.options[channelSelect.selectedIndex].hostState;
 
                     if(channelGUIState !== undefined)
                     {
@@ -1370,24 +1370,24 @@ WebMIDI.host = (function(document)
                     for(let i = 0; i < channelOptions.length; i++)
                     {
                         let channelOption = channelOptions[i],
-                            guiState = {};
+                            hostState = {};
 
-                        guiState.fontSelectIndex = fontSelectIndex;
-                        guiState.presetSelectIndex = presetSelectIndex;
-                        guiState.tuningGroupSelectIndex = tuningGroupSelectIndex;
-                        guiState.tuningSelectIndex = tuningSelectIndex;
-                        guiState.A4FrequencySelectIndex = A4FrequencySelectIndex;
-                        guiState.triggerKeySelectIndex = triggerKeySelectIndex;
-                        guiState.nextActionIndex = 0;
-                        guiState.aftertouchValue = aftertouchValue;
-                        guiState.pitchWheelValue = pitchWheelValue;
-                        guiState.modWheelValue = modWheelValue;
-                        guiState.volumeValue = volumeValue;
-                        guiState.panValue = panValue;
-                        guiState.reverberationValue = reverberationValue;
-                        guiState.pitchWheelSensitivityValue = pitchWheelSensitivityValue;
+                        hostState.fontSelectIndex = fontSelectIndex;
+                        hostState.presetSelectIndex = presetSelectIndex;
+                        hostState.tuningGroupSelectIndex = tuningGroupSelectIndex;
+                        hostState.tuningSelectIndex = tuningSelectIndex;
+                        hostState.A4FrequencySelectIndex = A4FrequencySelectIndex;
+                        hostState.triggerKeySelectIndex = triggerKeySelectIndex;
+                        hostState.nextActionIndex = 0;
+                        hostState.aftertouchValue = aftertouchValue;
+                        hostState.pitchWheelValue = pitchWheelValue;
+                        hostState.modWheelValue = modWheelValue;
+                        hostState.volumeValue = volumeValue;
+                        hostState.panValue = panValue;
+                        hostState.reverberationValue = reverberationValue;
+                        hostState.pitchWheelSensitivityValue = pitchWheelSensitivityValue;
 
-                        channelOption.guiState = guiState;
+                        channelOption.hostState = hostState;
                     }
                 }
 
