@@ -35,36 +35,37 @@ WebMIDI.host = (function(document)
         // Otherwise sets actionNameCell.InnerHTML to "" if actionIndex is undefined.
         // Otherwise throws an exception either if there is no action at actionIndex,
         // or if the action has no name attribute.
-        setTriggersDiv = function(channelIndex, actionIndex)
+        setTriggersDiv = function(hostChannelState, channelIndex)
         {
-            let channelSelect = getElem("channelSelect"),
-                triggerKeySelect = getElem("triggerKeySelect"),
+            let triggerKeySelect = getElem("triggerKeySelect"),
                 actionNameCell = getElem("actionNameCell"),
-                channelOptions = channelSelect.options[channelIndex],
-                channelActions = channelOptions.hostState.actions;
+                channelActions = hostChannelState.actions,
+                nextActionIndex = hostChannelState.nextActionIndex;
+
+            triggerKeySelect.selectedIndex = hostChannelState.triggerKeySelectIndex;
 
             if(channelActions === undefined)
             {
                 triggerKeySelect.disabled = true;
-                actionNameCell.innerHTML = "This channel has no defined actions";
+                actionNameCell.innerHTML = "Channel " + channelIndex.toString() + " has no defined actions.";
             }
-            else if(actionIndex === undefined) // triggerKeySelect is set to "none" (but can still be changed)
+            else if(nextActionIndex === undefined) // triggerKeySelect is set to "none" (but can still be changed)
             {
                 triggerKeySelect.disabled = false;
                 actionNameCell.innerHTML = "next action: none";
             }
-            else if(actionIndex >= channelActions.length)
+            else if(nextActionIndex >= channelActions.length)
             {
                 throw "Application error: actionIndex out of range.";
             }
-            else if(channelActions[actionIndex].name === undefined)
+            else if(channelActions[nextActionIndex].name === undefined)
             {
                 throw "Configuration error: action has no name.";
             }
             else
             {
                 triggerKeySelect.disabled = false;
-                actionNameCell.innerHTML = "next action: " + channelActions[actionIndex].name;
+                actionNameCell.innerHTML = "next action: " + channelActions[nextActionIndex].name;
             }
         },
 
@@ -166,7 +167,7 @@ WebMIDI.host = (function(document)
 
                     doAction(actionDef);
                     incrementNextActionPointer(hostChannelState, actions.length);
-                    setTriggersDiv(channel, hostChannelState.nextActionIndex);
+                    setTriggersDiv(hostChannelState, channel);
                 }
 
                 let data = e.data,
@@ -335,18 +336,16 @@ WebMIDI.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
-                triggerKeySelect = getElem("triggerKeySelect"),
                 channel = channelSelect.selectedIndex,
-                hostChannelState = channelSelect.options[channel].hostState;
+                channelOptions = channelSelect.options[channel],
+                hostChannelState = channelOptions.hostState;
 
             currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
             setAndSendPresetFromState(hostChannelState);
             setAndSendTuningFromState(hostChannelState);
 
-            triggerKeySelect.selectedIndex = hostChannelState.triggerKeySelectIndex;
-
-            setTriggersDiv(channel, hostChannelState.nextActionIndex);
+            setTriggersDiv(hostChannelState, channel);
 
             setAndSendLongControlsFromState(hostChannelState);
         },
@@ -616,18 +615,19 @@ WebMIDI.host = (function(document)
             let triggerKeySelect = getElem("triggerKeySelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostChannelState = channelSelect.options[channel].hostState,
-                channelNextActionIndex = hostChannelState.nextActionIndex;
+                channelOptions = channelSelect.options[channel],
+                hostChannelState = channelOptions.hostState;
 
             triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key; // set global triggerKey
+
             if(triggerKey === undefined) // select is set to "none"
             {
-                channelNextActionIndex = undefined; // for setTriggersDiv
+                hostChannelState.nextActionIndex = undefined; // for setTriggersDiv
             }
 
             hostChannelState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
 
-            setTriggersDiv(channel, channelNextActionIndex);
+            setTriggersDiv(hostChannelState, channel);
         },
 
         // exported
