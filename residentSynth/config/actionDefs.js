@@ -42,7 +42,11 @@ WebMIDI.actionDefs =
 						name: "set preset index 2, tuning index 2",
 						presetIndex: 2,
 						tuningIndex: 2
-					}
+					},
+					{
+						name: "all controllers off",
+						allControllersOff: true
+                    }
 					// etc. more Trigger Action definitions can be added here.
 				]
 		},

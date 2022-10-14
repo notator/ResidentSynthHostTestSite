@@ -26,16 +26,49 @@ WebMIDI.host = (function(document)
 
         triggerKey,
 
+        sendLongControl = function(controlIndex, value)
+        {
+            sendCommand(WebMIDI.constants.COMMAND.CONTROL_CHANGE, controlIndex, value);
+        },
+
+        sendShortControl = function(controlIndex)
+        {
+            function resetHostGUI(controlIndex)
+            {
+                let sendButton = getElem("sendButton");
+                if(sendButton.disabled === true)
+                {
+                    sendButton.disabled = false;
+                }
+
+                if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
+                {
+                    for(let i = 0; i < allLongInputControls.length; ++i)
+                    {
+                        let longInputControl = allLongInputControls[i];
+                        longInputControl.setValue(longInputControl.numberInputElem.defaultValue);
+                    }
+                }
+            }
+
+            if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === WebMIDI.constants.CONTROL.ALL_SOUND_OFF)
+            {
+                resetHostGUI(controlIndex);
+            }
+
+            sendCommand(WebMIDI.constants.COMMAND.CONTROL_CHANGE, controlIndex);
+        },
+
         getElem = function(elemID)
         {
             return document.getElementById(elemID);
         },
 
         // Disables the triggerKeySelect if the channel has no defined actions.
-        // Otherwise sets actionNameCell.InnerHTML to "" if actionIndex is undefined.
+        // Otherwise sets actionNameCell.InnerHTML to "next action: none" if actionIndex is undefined.
         // Otherwise throws an exception either if there is no action at actionIndex,
         // or if the action has no name attribute.
-        setTriggersDiv = function(hostChannelState, channelIndex)
+        setTriggersDiv = function(hostChannelState)
         {
             let triggerKeySelect = getElem("triggerKeySelect"),
                 actionNameCell = getElem("actionNameCell"),
@@ -47,7 +80,7 @@ WebMIDI.host = (function(document)
             if(channelActions === undefined)
             {
                 triggerKeySelect.disabled = true;
-                actionNameCell.innerHTML = "Channel " + channelIndex.toString() + " has no defined actions.";
+                actionNameCell.innerHTML = "Channel " + currentChannel.toString() + " has no defined actions.";
             }
             else if(nextActionIndex === undefined) // triggerKeySelect is set to "none" (but can still be changed)
             {
@@ -148,8 +181,14 @@ WebMIDI.host = (function(document)
                         let presetSelect = getElem("presetSelect"),
                             tuningSelect = getElem("tuningSelect");
 
+                        if(action.allControllersOff !== undefined && action.allControllersOff === true)
+                        {
+                            sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF); // resets hostState (=GUI) and sends message to synth
+                        }
+
                         if(action.presetIndex !== undefined)
                         {
+                            // Ranges should be checked at load time, not here!
                             checkSelectRange(action.presetIndex, presetSelect);
                             presetSelect.selectedIndex = action.presetIndex;
                             onPresetSelectChanged();
@@ -175,14 +214,13 @@ WebMIDI.host = (function(document)
                     }
 
                     let channelSelect = getElem("channelSelect"),
-                        channel = channelSelect.selectedIndex,
-                        hostChannelState = channelSelect.options[channel].hostState,
+                        hostChannelState = channelSelect.options[currentChannel].hostState,
                         actions = hostChannelState.actions,
                         action = actions[hostChannelState.nextActionIndex];
 
-                    doAction(action);
+                    doAction(action); // uses currentChannel
                     incrementNextActionPointer(hostChannelState, actions.length);
-                    setTriggersDiv(hostChannelState, channel);
+                    setTriggersDiv(hostChannelState); // uses currentChannel
                 }
 
                 let data = e.data,
@@ -360,7 +398,7 @@ WebMIDI.host = (function(document)
             setAndSendPresetFromState(hostChannelState);
             setAndSendTuningFromState(hostChannelState);
 
-            setTriggersDiv(hostChannelState, channel);
+            setTriggersDiv(hostChannelState); // uses currentChannel
 
             setAndSendLongControlsFromState(hostChannelState);
         },
@@ -642,7 +680,7 @@ WebMIDI.host = (function(document)
 
             hostChannelState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
 
-            setTriggersDiv(hostChannelState, channel);
+            setTriggersDiv(hostChannelState); // uses global currentChannel
         },
 
         // exported
@@ -869,39 +907,6 @@ WebMIDI.host = (function(document)
                 function setCommandsAndControlsDivs()
                 {
                     var CMD = WebMIDI.constants.COMMAND;
-
-                    function sendLongControl(controlIndex, value)
-                    {
-                        sendCommand(CMD.CONTROL_CHANGE, controlIndex, value);
-                    }
-
-                    function sendShortControl(controlIndex)
-                    {
-                        function resetHostGUI(controlIndex)
-                        {
-                            let sendButton = getElem("sendButton");
-                            if(sendButton.disabled === true)
-                            {
-                                sendButton.disabled = false;
-                            }
-
-                            if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
-                            {
-                                for(let i = 0; i < allLongInputControls.length; ++i)
-                                {
-                                    let longInputControl = allLongInputControls[i];
-                                    longInputControl.setValue(longInputControl.numberInputElem.defaultValue);
-                                }
-                            }
-                        }
-
-                        if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === WebMIDI.constants.CONTROL.ALL_SOUND_OFF)
-                        {
-                            resetHostGUI(controlIndex);
-                        }
-
-                        sendCommand(CMD.CONTROL_CHANGE, controlIndex);
-                    }
 
                     // called by both commands and CCs
                     function getBasicLongInputControl(tr, name, defaultValue, infoString)
