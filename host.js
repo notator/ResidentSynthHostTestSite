@@ -128,21 +128,36 @@ WebMIDI.host = (function(document)
                         }
                     }
 
-                    function doAction(actionDef)
+                    // The full set of optional action attributes is (in the order they will be executed):
+                    //		.allControllersOff (boolean, works if defined as true) // executed first, before any other messages
+                    //		.allSoundOff (boolean, works if defined as true) // executed second, before any other messages
+                    //		.fontIndex // executed before bankIndex and/or presetIndex
+                    //		.bankIndex // executed before presetIndex
+                    //		.presetIndex
+                    //		.tuningGroupIndex // executed before tuningIndex
+                    //		.tuningIndex
+                    //		.aftertouch (value in range 0..127)
+                    //		.pitchWheel14Bit (value in range 0..127)
+                    //		.modWheel (value in range 0..127)
+                    //		.volume (value in range 0..127)
+                    //		.pan(value in range 0..127)
+                    //		.reverberation (value in range 0..127)
+                    //		.pitchWheelSensitivity (value in range 0..127)
+                    function doAction(action)
                     {
                         let presetSelect = getElem("presetSelect"),
                             tuningSelect = getElem("tuningSelect");
 
-                        if(actionDef.presetIndex !== undefined)
+                        if(action.presetIndex !== undefined)
                         {
-                            checkSelectRange(actionDef.presetIndex, presetSelect);
-                            presetSelect.selectedIndex = actionDef.presetIndex;
+                            checkSelectRange(action.presetIndex, presetSelect);
+                            presetSelect.selectedIndex = action.presetIndex;
                             onPresetSelectChanged();
                         }
-                        if(actionDef.tuningIndex !== undefined)
+                        if(action.tuningIndex !== undefined)
                         {
-                            checkSelectRange(actionDef.tuningIndex, tuningSelect);
-                            tuningSelect.selectedIndex = actionDef.tuningIndex;
+                            checkSelectRange(action.tuningIndex, tuningSelect);
+                            tuningSelect.selectedIndex = action.tuningIndex;
                             onTuningSelectChanged();
                         }
                     }
@@ -163,9 +178,9 @@ WebMIDI.host = (function(document)
                         channel = channelSelect.selectedIndex,
                         hostChannelState = channelSelect.options[channel].hostState,
                         actions = hostChannelState.actions,
-                        actionDef = actions[hostChannelState.nextActionIndex];
+                        action = actions[hostChannelState.nextActionIndex];
 
-                    doAction(actionDef);
+                    doAction(action);
                     incrementNextActionPointer(hostChannelState, actions.length);
                     setTriggersDiv(hostChannelState, channel);
                 }

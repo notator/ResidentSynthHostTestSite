@@ -11,10 +11,10 @@ WebMIDI.namespace('actionDefs');
 //
 // Each action must have a .name attribute. The other attributes are all optional.
 // The full set of optional action attributes is (in the order they occur in the ResidentSynth Host GUI):
-//		.fontIndex
-//		.bankIndex
+//		.fontIndex // executed before bankIndex and/or presetIndex
+//		.bankIndex // executed before presetIndex
 //		.presetIndex
-//		.tuningGroupIndex
+//		.tuningGroupIndex // executed before tuningIndex
 //		.tuningIndex
 //		.aftertouch (value in range 0..127)
 //		.pitchWheel14Bit (value in range 0..127)
@@ -23,13 +23,10 @@ WebMIDI.namespace('actionDefs');
 //		.pan(value in range 0..127)
 //		.reverberation (value in range 0..127)
 //		.pitchWheelSensitivity (value in range 0..127)
-//		.allControllersOff (boolean, works if defined as true)
-//		.allSoundOff (boolean, works if defined as true)
+//		.allControllersOff (boolean, works if defined as true) // executed first, before any other messages
+//		.allSoundOff (boolean, works if defined as true) // executed second, before any other messages
 //
 // If an action attribute is undefined here, the action leaves the corresponding parameter as it is.
-// An exception will be thrown when an action is triggered if:
-//		either the channel has no defined actions.
-//		or the channel has no defined action at the required index.
 WebMIDI.actionDefs =
 	[
 		{
