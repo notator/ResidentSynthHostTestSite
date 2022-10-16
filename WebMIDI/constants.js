@@ -277,7 +277,8 @@ WebMIDI.constants = (function()
 	Object.defineProperty(CONTROL, "DATA_ENTRY", { value: 6, writable: false });
 	Object.defineProperty(CONTROL, "VOLUME", { value: 7, writable: false });
 	Object.defineProperty(CONTROL, "PAN", { value: 10, writable: false });
-	Object.defineProperty(CONTROL, "EXPRESSION", { value: 11, writable: false });
+	Object.defineProperty(CONTROL, "EXPRESSION", {value: 11, writable: false});
+	Object.defineProperty(CONTROL, "SOUND_CONTROL_6", {value: 75, writable: false});
 	Object.defineProperty(CONTROL, "REVERBERATION", { value: 91, writable: false });
     Object.defineProperty(CONTROL, "REGISTERED_PARAMETER", { value: 101, writable: false });
     Object.defineProperty(CONTROL, "ALL_SOUND_OFF", { value: 120, writable: false });
