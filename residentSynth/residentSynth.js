@@ -29,6 +29,7 @@ WebMIDI.residentSynth = (function(window)
 		REGPARAM_SET_PITCHWHEEL_SENSITIVITY = 0,
 		REGPARAM_SET_MIXTURE_INDEX = 1;
 	let
+		that,
 		audioContext,
 		banks, // set in synth.setSoundFont
 		channelAudioNodes = [], // initialized in synth.open
@@ -831,9 +832,9 @@ WebMIDI.residentSynth = (function(window)
 			return tuningGroups;
 		},
 
-		getActionDefs = function()
+		getStateDefs = function()
 		{
-			return WebMIDI.actionDefs;
+			return WebMIDI.stateDefs;
         },
 
 		/*****************************************/
@@ -932,6 +933,12 @@ WebMIDI.residentSynth = (function(window)
 		{
 			let panValue = ((pan / 127) * 2) - 1; // panValue is in range [-1..1]
 			channelAudioNodes[channel].panNode.pan.setValueAtTime(panValue, audioContext.currentTime);
+		},
+		// The stateIndex argument is in range [0..127], and is assumed to be in range of the configured stateDefs.
+		updateChannelState = function(channel, stateIndex)
+		{
+			let state = that.stateDefs[stateIndex];
+			// TODO
 		},
 		// The reverberation argument is in range [0..127], meaning completely dry to completely wet.
 		updateReverberation = function(channel, reverberation)
@@ -1208,7 +1215,9 @@ WebMIDI.residentSynth = (function(window)
 			Object.defineProperty(this, "presetMixtures", { value: getPresetMixtures(this.webAudioFonts), writable: false });
 			Object.defineProperty(this, "tuningsFactory", { value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false });
 			Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(this.tuningsFactory), writable: false});
-			Object.defineProperty(this, "actionDefs", {value: getActionDefs(), writable: false});
+			Object.defineProperty(this, "stateDefs", {value: getStateDefs(), writable: false});
+
+			that = this;
 		},
 
 		API =
@@ -1442,6 +1451,12 @@ WebMIDI.residentSynth = (function(window)
 				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
 				updatePan(channel, value);
 			}
+			function setChannelState(channel, stateIndex)
+			{
+				checkControlExport(CTL.SOUND_CONTROL_6);
+				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
+				updateChannelState(channel, stateIndex);
+			}
 
 			function setReverberation(channel, value)
 			{
@@ -1495,6 +1510,9 @@ WebMIDI.residentSynth = (function(window)
 					break;
 				case CTL.PAN:
 					setPan(channel, data2);
+					break;
+				case CTL.SOUND_CONTROL_6:
+					setChannelState(channel, data2);
 					break;
 				case CTL.REVERBERATION:
 					setReverberation(channel, data2);

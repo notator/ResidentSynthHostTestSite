@@ -64,41 +64,33 @@ WebMIDI.host = (function(document)
             return document.getElementById(elemID);
         },
 
-        // Disables the triggerKeySelect if the channel has no defined actions.
-        // Otherwise sets actionNameCell.InnerHTML to "next action: none" if actionIndex is undefined.
-        // Otherwise throws an exception either if there is no action at actionIndex,
-        // or if the action has no name attribute.
+        // Throws an exception either if hostChannelState.nextStateIndex is out of range,
+        // or if the stateDef has no name attribute.
+        // If triggerKeySelect is set to "none", sets channelStateNameCell.InnerHTML to "".
         setTriggersDiv = function(hostChannelState)
         {
             let triggerKeySelect = getElem("triggerKeySelect"),
-                actionNameCell = getElem("actionNameCell"),
-                channelActions = hostChannelState.actions,
-                nextActionIndex = hostChannelState.nextActionIndex;
+                channelStateNameCell = getElem("channelStateNameCell"),
+                nextStateIndex = hostChannelState.nextStateIndex,
+                stateDefs = synth.stateDefs;
 
             triggerKeySelect.selectedIndex = hostChannelState.triggerKeySelectIndex;
 
-            if(channelActions === undefined)
+            if(nextStateIndex >= stateDefs.length)
             {
-                triggerKeySelect.disabled = true;
-                actionNameCell.innerHTML = "Channel " + currentChannel.toString() + " has no defined actions.";
+                throw "Error: stateIndex out of range.";
             }
-            else if(nextActionIndex === undefined) // triggerKeySelect is set to "none" (but can still be changed)
+            else if(stateDefs[nextStateIndex].name === undefined)
             {
-                triggerKeySelect.disabled = false;
-                actionNameCell.innerHTML = "next action: none";
+                throw "Error in configuration file: stateDef must have a name.";
             }
-            else if(nextActionIndex >= channelActions.length)
+            else if(triggerKey === undefined) // is true when triggerKeySelect is set to "none"
             {
-                throw "Application error: actionIndex out of range.";
-            }
-            else if(channelActions[nextActionIndex].name === undefined)
-            {
-                throw "Configuration error: action has no name.";
+                channelStateNameCell.innerHTML = "";
             }
             else
             {
-                triggerKeySelect.disabled = false;
-                actionNameCell.innerHTML = "next action: " + channelActions[nextActionIndex].name;
+                channelStateNameCell.innerHTML = "next state: " + stateDefs[nextStateIndex].name;
             }
         },
 
@@ -176,50 +168,61 @@ WebMIDI.host = (function(document)
                     //		.pan(value in range 0..127)
                     //		.reverberation (value in range 0..127)
                     //		.pitchWheelSensitivity (value in range 0..127)
-                    function doAction(action)
+                    function setSynthChannelState(stateIndex)
                     {
-                        let presetSelect = getElem("presetSelect"),
+                        let CMD = WebMIDI.constants.COMMAND,
+                            SET_STATE_CONTROL = WebMIDI.constants.CONTROL.SOUND_CONTROL_6,
+                            msg = new Uint8Array([((CMD.CONTROL_CHANGE + currentChannel) & 0xFF), SET_STATE_CONTROL, stateIndex]);
+
+                        synth.send(msg, performance.now());
+                    }
+
+                    function setHostChannelState(stateIndex)
+                    {
+                        let stateDef = (nextStateIndex < stateDefs.length) ? stateDefs[stateIndex] : undefined,
+                            presetSelect = getElem("presetSelect"),
                             tuningSelect = getElem("tuningSelect");
 
-                        if(action.allControllersOff !== undefined && action.allControllersOff === true)
+                        if(stateDef.allControllersOff !== undefined && stateDef.allControllersOff === true)
                         {
                             sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF); // resets hostState (=GUI) and sends message to synth
                         }
 
-                        if(action.presetIndex !== undefined)
+                        if(stateDef.presetIndex !== undefined)
                         {
                             // Ranges should be checked at load time, not here!
-                            checkSelectRange(action.presetIndex, presetSelect);
-                            presetSelect.selectedIndex = action.presetIndex;
+                            checkSelectRange(stateDef.presetIndex, presetSelect);
+                            presetSelect.selectedIndex = stateDef.presetIndex;
                             onPresetSelectChanged();
                         }
-                        if(action.tuningIndex !== undefined)
+                        if(stateDef.tuningIndex !== undefined)
                         {
-                            checkSelectRange(action.tuningIndex, tuningSelect);
-                            tuningSelect.selectedIndex = action.tuningIndex;
+                            checkSelectRange(stateDef.tuningIndex, tuningSelect);
+                            tuningSelect.selectedIndex = stateDef.tuningIndex;
                             onTuningSelectChanged();
                         }
                     }
 
-                    function incrementNextActionPointer(hostChannelState, nActions)
+                    function incrementNextStatePointer(hostChannelState, nActions)
                     {
-                        if(hostChannelState.nextActionIndex === nActions - 1)
+                        if(hostChannelState.nextStateIndex === nActions - 1)
                         {
-                            hostChannelState.nextActionIndex = 0;
+                            hostChannelState.nextStateIndex = 0;
                         }
                         else
                         {
-                            hostChannelState.nextActionIndex++;
+                            hostChannelState.nextStateIndex++;
                         }
                     }
 
                     let channelSelect = getElem("channelSelect"),
                         hostChannelState = channelSelect.options[currentChannel].hostState,
-                        actions = hostChannelState.actions,
-                        action = actions[hostChannelState.nextActionIndex];
+                        nextStateIndex = hostChannelState.nextStateIndex,
+                        stateDefs = synth.stateDefs;
 
-                    doAction(action); // uses currentChannel
-                    incrementNextActionPointer(hostChannelState, actions.length);
+                    setSynthChannelState(nextStateIndex); // uses currentChannel
+                    setHostChannelState(nextStateIndex); // uses currentChannel
+                    incrementNextStatePointer(hostChannelState, stateDefs.length);
                     setTriggersDiv(hostChannelState); // uses currentChannel
                 }
 
@@ -672,11 +675,6 @@ WebMIDI.host = (function(document)
                 hostChannelState = channelOptions.hostState;
 
             triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key; // set global triggerKey
-
-            if(triggerKey === undefined) // select is set to "none"
-            {
-                hostChannelState.nextActionIndex = undefined; // for setTriggersDiv
-            }
 
             hostChannelState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
 
@@ -1381,8 +1379,7 @@ WebMIDI.host = (function(document)
                         hostState.tuningSelectIndex = tuningSelectIndex;
                         hostState.A4FrequencySelectIndex = A4FrequencySelectIndex;
                         hostState.triggerKeySelectIndex = triggerKeySelectIndex;
-                        // hostState.actions is set below (intermediate channels may have undefined actions).
-                        hostState.nextActionIndex = 0;
+                        hostState.nextStateIndex = 0;
                         hostState.aftertouchValue = aftertouchValue;
                         hostState.pitchWheelValue = pitchWheelValue;
                         hostState.modWheelValue = modWheelValue;
@@ -1392,15 +1389,6 @@ WebMIDI.host = (function(document)
                         hostState.pitchWheelSensitivityValue = pitchWheelSensitivityValue;
 
                         channelOption.hostState = hostState;
-                    }
-
-                    for(let i = 0; i < synth.actionDefs.length; i++)
-                    {
-                        let actionDef = synth.actionDefs[i],
-                            channel = actionDef.channel,
-                            actions = actionDef.actions;
-
-                        channelOptions[channel].hostState.actions = actions;
                     }
                 }
 
@@ -1650,7 +1638,6 @@ WebMIDI.host = (function(document)
             onTuningSelectChanged: onTuningSelectChanged,
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
             onTriggerKeySelectChanged: onTriggerKeySelectChanged,
-           // onTriggerActionSelectChanged: onTriggerActionSelectChanged,
 
 			noteCheckboxClicked: noteCheckboxClicked,
 			holdCheckboxClicked: holdCheckboxClicked,
