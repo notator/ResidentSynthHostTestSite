@@ -29,12 +29,12 @@ WebMIDI.residentSynth = (function(window)
 		REGPARAM_SET_PITCHWHEEL_SENSITIVITY = 0,
 		REGPARAM_SET_MIXTURE_INDEX = 1;
 	let
-		that,
 		audioContext,
 		banks, // set in synth.setSoundFont
 		channelAudioNodes = [], // initialized in synth.open
 		channelControls = [], // initialized in synth.open
 		mixtures = [], // initialized in getPresetMixtures()
+		tuningGroups = [],
 
 		// returns a three character string representing the index
 		getIndexString = function(index)
@@ -832,13 +832,39 @@ WebMIDI.residentSynth = (function(window)
 			return tuningGroups;
 		},
 
-		getStateDefs = function()
-		{
-			return WebMIDI.stateDefs;
-        },
-
 		/*****************************************/
 		/* Control Functions */
+
+		// sets both channelControl.bankIndex and channelControl.presetIndex to 0.
+		updateFontIndex = function(channel, fontIndex)
+		{
+			channelControls[channel].fontIndex = fontIndex;
+			channelControls[channel].bankIndex = 0;
+			channelControls[channel].presetIndex = 0;
+		},
+		// sets channelControl.presetIndex to 0.
+		updateBankIndex = function(channel, bankIndex)
+		{
+			channelControls[channel].bankIndex = bankIndex;
+			channelControls[channel].presetIndex = 0;
+		},
+		updatePresetIndex = function(channel, presetIndex)
+		{
+			channelControls[channel].presetIndex = presetIndex;
+		},
+		// sets channelControl.tuning to the first tuning in the group.
+		updateTuningGroupIndex = function(channel, tuningGroupIndex)
+		{
+			channelControls[channel].tuningGroupIndex = tuningGroupIndex;
+			channelControls[channel].tuning = tuningGroups[tuningGroupIndex][0];
+		},
+		updateTuning = function(channel, tuningIndex)
+		{
+			let tuningGroupIndex = channelControls[channel].tuningGroupIndex;
+
+			channelControls[channel].tuning = tuningGroups[tuningGroupIndex][tuningIndex];
+		},
+
 		updateAftertouch = function(channel, key, value)
 		{
 			let currentNoteOns = channelControls[channel].currentNoteOns,
@@ -934,17 +960,12 @@ WebMIDI.residentSynth = (function(window)
 			let panValue = ((pan / 127) * 2) - 1; // panValue is in range [-1..1]
 			channelAudioNodes[channel].panNode.pan.setValueAtTime(panValue, audioContext.currentTime);
 		},
-		// The stateIndex argument is in range [0..127], and is assumed to be in range of the configured stateDefs.
-		updateChannelState = function(channel, stateIndex)
-		{
-			let state = that.stateDefs[stateIndex];
-			// TODO
-		},
 		// The reverberation argument is in range [0..127], meaning completely dry to completely wet.
 		updateReverberation = function(channel, reverberation)
 		{
 			channelAudioNodes[channel].reverberator.setValueAtTime(reverberation, audioContext.currentTime);
 		},
+
 		// This function must always be called immediately before calling ResidentSynth.prototype.dataEntry(...)
 		registeredParameter = function(channel, value)
 		{
@@ -1098,14 +1119,16 @@ WebMIDI.residentSynth = (function(window)
 		/*****************************************/
 
 		// This command sets the pitchWheel, pitchWheelSensitivity, modWheel, volume, pan and reverberation controllers
-		// to their default values, but does *not* reset the current preset (bank, preset and mixture), tuning,
-		// aftertouch or channelPressure. Aftertouch and channelPressure start at 0, when each note is created.
-		// (channelPressure is not yet implemented.)
+		// to their default values, but does *not* reset the current aftertouch or channelPressure.
+		// Aftertouch and channelPressure start at 0, when each note is created. (channelPressure is not yet implemented.)
         setControllerDefaults = function(that, channel)
         {
 			let constants = WebMIDI.constants,
 				controlDefaultValue = constants.controlDefaultValue,
 				pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
+
+			updateFontIndex(channel, 0); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
+			updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
 
 			updatePitchWheel(channel, pitchWheelDefaultValue, pitchWheelDefaultValue);
 			updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
@@ -1114,7 +1137,66 @@ WebMIDI.residentSynth = (function(window)
 			updateVolume(channel, controlDefaultValue(CTL.VOLUME));
 			updatePan(channel, controlDefaultValue(CTL.PAN));
 			updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
-        },
+
+			channelControls[channel].currentNoteOns = [];
+		},
+
+		// The stateIndex argument is in range [0..127], and is assumed to be in range of the configured stateDefs.
+		updateChannelState = function(channel, stateIndex)
+		{
+			updateFontIndex(channel, 0); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
+			updateTuningGroupIndex(channel, 0); // sets channelControl.tuning to the first tuning in the group.
+			setControllerDefaults(this, channel);
+
+			let state = WebMIDI.stateDefs[stateIndex];
+			// set preset and tuning
+			if(state.fontIndex !== undefined)
+			{
+				updateFontIndex(channel, state.fontIndex); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
+			}
+			if(state.bankIndex !== undefined)
+			{
+				updateBankIndex(channel, state.bankIndex); // sets channelControl.presetIndex to 0.
+			}
+			if(state.presetIndex !== undefined)
+			{
+				updatePresetIndex(channel, state.presetIndex);
+			}
+			if(state.tuningGroupIndex !== undefined)
+			{
+				updateTuningGroupIndex(channel, state.tuningGroupIndex); // sets channelControl.tuning to the first tuning in the group.
+			}
+			if(state.tuningIndex !== undefined)
+			{
+				updateTuning(channel, state.tuningIndex);
+			}
+
+			// set controls set by setControllerDefaults() above
+			if(state.pitchWheel !== undefined)
+			{
+				updatePitchWheel(channel, state.pitchWheel, state.pitchWheel); // 14bit?
+			}
+			if(state.pitchWheelSensitivity !== undefined)
+			{
+				updatePitchWheelSensitivity(channel, state.pitchWheelSensitivity);
+			}
+			if(state.modWheel !== undefined)
+			{
+				updateModWheel(channel, state.modWheel);
+			}
+			if(state.volume !== undefined)
+			{
+				updateVolume(channel, state.volume);
+			}
+			if(state.pan !== undefined)
+			{
+				updatePan(channel, state.pan);
+			}
+			if(state.reverberation !== undefined)
+			{
+				updateReverberation(channel, state.reverberation);
+			}
+		},
 
 		CMD = WebMIDI.constants.COMMAND,
 		CTL = WebMIDI.constants.CONTROL,
@@ -1213,11 +1295,10 @@ WebMIDI.residentSynth = (function(window)
 
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
 			Object.defineProperty(this, "presetMixtures", { value: getPresetMixtures(this.webAudioFonts), writable: false });
-			Object.defineProperty(this, "tuningsFactory", { value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false });
+			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});
 			Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(this.tuningsFactory), writable: false});
-			Object.defineProperty(this, "stateDefs", {value: getStateDefs(), writable: false});
 
-			that = this;
+			tuningGroups = this.tuningGroups;
 		},
 
 		API =
@@ -1271,17 +1352,6 @@ WebMIDI.residentSynth = (function(window)
 	// This function sets internal default values for all the synth's commands, and controls in all channels.
 	ResidentSynth.prototype.open = function()
 	{
-		function getDefaultTuning()
-		{
-			let defaultTuning = []; // standard MIDI (i.e. equal temperament) tuning
-			for(var key = 0; key < 128; key++)
-			{
-				defaultTuning.push(key);
-			}
-
-			return defaultTuning;
-		}
-
 		// Create and connect the channel AudioNodes:
         function audioNodesConfig(audioContext, finalGainNode)
 		{
@@ -1306,19 +1376,6 @@ WebMIDI.residentSynth = (function(window)
             return channelInfo;
 		}
 
-        function initializeChannelControlState(that, channel, defaultTuning)
-		{
-			let controlState = channelControls[channel];
-
-			setControllerDefaults(that, channel);
-
-			// a clone of the default tuning array (12-tone equal temperament)
-			controlState.tuning = [...defaultTuning];
-			controlState.currentNoteOns = [];
-		}
-
-		let defaultTuning = getDefaultTuning();
-
 		audioContext.resume().then(() => { console.log('AudioContext resumed successfully'); });
 
         channelAudioNodes.finalGainNode = audioContext.createGain();
@@ -1330,7 +1387,7 @@ WebMIDI.residentSynth = (function(window)
 
 			let controlState = {};
 			channelControls.push(controlState);
-			initializeChannelControlState(this, i, defaultTuning);
+			setControllerDefaults(this, i);
 		}
 
 		this.setSoundFont(this.webAudioFonts[0]);

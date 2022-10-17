@@ -22,15 +22,12 @@ WebMIDI.namespace('actionDefs');
 //		.presetIndex
 //		.tuningGroupIndex // executed before tuningIndex
 //		.tuningIndex
-//		.aftertouch (value in range 0..127)
-//		.pitchWheel14Bit (value in range 0..127)
+//		.pitchWheel (value in range 0..127)
 //		.modWheel (value in range 0..127)
 //		.volume (value in range 0..127)
 //		.pan(value in range 0..127)
 //		.reverberation (value in range 0..127)
 //		.pitchWheelSensitivity (value in range 0..127)
-//		.allControllersOff (boolean, works if defined as true) // executed first, before any other messages
-//		.allSoundOff (boolean, works if defined as true) // executed second, before any other messages
 //
 // Before setting the above values, the setChannelStateMessage automatically
 //     1. sets ALL_CONTROLLERS_OFF(the synth automatically sets ALL_SOUND_OFF)

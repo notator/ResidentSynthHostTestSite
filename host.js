@@ -72,7 +72,7 @@ WebMIDI.host = (function(document)
             let triggerKeySelect = getElem("triggerKeySelect"),
                 channelStateNameCell = getElem("channelStateNameCell"),
                 nextStateIndex = hostChannelState.nextStateIndex,
-                stateDefs = synth.stateDefs;
+                stateDefs = WebMIDI.stateDefs;
 
             triggerKeySelect.selectedIndex = hostChannelState.triggerKeySelectIndex;
 
@@ -154,14 +154,11 @@ WebMIDI.host = (function(document)
                     }
 
                     // The full set of optional action attributes is (in the order they will be executed):
-                    //		.allControllersOff (boolean, works if defined as true) // executed first, before any other messages
-                    //		.allSoundOff (boolean, works if defined as true) // executed second, before any other messages
                     //		.fontIndex // executed before bankIndex and/or presetIndex
                     //		.bankIndex // executed before presetIndex
                     //		.presetIndex
                     //		.tuningGroupIndex // executed before tuningIndex
                     //		.tuningIndex
-                    //		.aftertouch (value in range 0..127)
                     //		.pitchWheel14Bit (value in range 0..127)
                     //		.modWheel (value in range 0..127)
                     //		.volume (value in range 0..127)
@@ -218,7 +215,7 @@ WebMIDI.host = (function(document)
                     let channelSelect = getElem("channelSelect"),
                         hostChannelState = channelSelect.options[currentChannel].hostState,
                         nextStateIndex = hostChannelState.nextStateIndex,
-                        stateDefs = synth.stateDefs;
+                        stateDefs = WebMIDI.stateDefs;
 
                     setSynthChannelState(nextStateIndex); // uses currentChannel
                     setHostChannelState(nextStateIndex); // uses currentChannel
@@ -461,6 +458,15 @@ WebMIDI.host = (function(document)
         // exported
         onTuningSelectChanged = function()
         {
+            function checkIndexRanges(tuningGroups, tuningGroupSelectIndex, tuningSelectIndex)
+            {
+                if(tuningGroupSelectIndex < tuningGroups.length && tuningSelectIndex < tuningGroups[tuningGroupSelectIndex].length)
+                {
+                    return true;
+                }
+                else return false;
+            }
+
             function findNearestA4FrequencySelectIndex(options, tuningA4MidiCents)
             {
                 let returnIndex = -1, // frequency out of range
@@ -537,8 +543,14 @@ WebMIDI.host = (function(document)
                 tuningSelect = getElem("tuningSelect"),
                 tuningSelectIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
-                hostChannelState = channelSelect.options[channel].hostState,
-                tuning = synth.tuningGroups[tuningGroupSelectIndex][tuningSelectIndex];
+                hostChannelState = channelSelect.options[channel].hostState;                
+
+            if(checkIndexRanges(synth.tuningGroups, tuningGroupSelectIndex, tuningSelectIndex) === false)
+            {
+                throw "index out of range.";
+            }
+
+            let tuning = synth.tuningGroups[tuningGroupSelectIndex][tuningSelectIndex];
 
             if(A4FrequencySelect.disabled === false)
             {
