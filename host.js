@@ -144,15 +144,6 @@ WebMIDI.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    // Throws an exception if index is out of range.
-                    function checkSelectRange(index, select)
-                    {
-                        if(index < 0 || index >= select.options.length)
-                        {
-                            throw "index out of range";
-                        }
-                    }
-
                     // The full set of optional action attributes is (in the order they will be executed):
                     //		.fontIndex // executed before bankIndex and/or presetIndex
                     //		.bankIndex // executed before presetIndex
@@ -187,14 +178,19 @@ WebMIDI.host = (function(document)
 
                         if(stateDef.presetIndex !== undefined)
                         {
-                            // Ranges should be checked at load time, not here!
-                            checkSelectRange(stateDef.presetIndex, presetSelect);
+                            if(stateDef.presetIndex >= presetSelect.options.length)
+                            {
+                                stateDef.presetIndex = 0;
+                            }
                             presetSelect.selectedIndex = stateDef.presetIndex;
                             onPresetSelectChanged();
                         }
                         if(stateDef.tuningIndex !== undefined)
                         {
-                            checkSelectRange(stateDef.tuningIndex, tuningSelect);
+                            if(stateDef.tuningIndex >= tuningSelect.options.length)
+                            {
+                                stateDef.tuningIndex = 0;
+                            }
                             tuningSelect.selectedIndex = stateDef.tuningIndex;
                             onTuningSelectChanged();
                         }

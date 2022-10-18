@@ -1007,7 +1007,7 @@ WebMIDI.residentSynth = (function(window)
 			while(currentNoteOns.length > 0)
 			{
 				now = audioContext.currentTime;
-				stopTime = noteOff(channel, currentNoteOns[0].keyPitch, 0);
+				stopTime = noteOff(channel, currentNoteOns[0].offKey, 0);
 			}
 			setTimeout(reconnectChannelInput(), stopTime - now);
 		},
@@ -1121,8 +1121,8 @@ WebMIDI.residentSynth = (function(window)
 		// This command sets the pitchWheel, pitchWheelSensitivity, modWheel, volume, pan and reverberation controllers
 		// to their default values, but does *not* reset the current aftertouch or channelPressure.
 		// Aftertouch and channelPressure start at 0, when each note is created. (channelPressure is not yet implemented.)
-        setControllerDefaults = function(that, channel)
-        {
+		setControllerDefaults = function(that, channel)
+		{
 			let constants = WebMIDI.constants,
 				controlDefaultValue = constants.controlDefaultValue,
 				pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
@@ -1137,13 +1137,13 @@ WebMIDI.residentSynth = (function(window)
 			updateVolume(channel, controlDefaultValue(CTL.VOLUME));
 			updatePan(channel, controlDefaultValue(CTL.PAN));
 			updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
-
-			channelControls[channel].currentNoteOns = [];
 		},
 
 		// The stateIndex argument is in range [0..127], and is assumed to be in range of the configured stateDefs.
 		updateChannelState = function(channel, stateIndex)
 		{
+			allSoundOff(channel);
+
 			updateFontIndex(channel, 0); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
 			updateTuningGroupIndex(channel, 0); // sets channelControl.tuning to the first tuning in the group.
 			setControllerDefaults(this, channel);
@@ -1388,6 +1388,8 @@ WebMIDI.residentSynth = (function(window)
 			let controlState = {};
 			channelControls.push(controlState);
 			setControllerDefaults(this, i);
+
+			channelControls[i].currentNoteOns = [];
 		}
 
 		this.setSoundFont(this.webAudioFonts[0]);
