@@ -159,8 +159,8 @@ WebMIDI.host = (function(document)
                     function setSynthChannelState(stateIndex)
                     {
                         let CMD = WebMIDI.constants.COMMAND,
-                            SET_STATE_CONTROL = WebMIDI.constants.CONTROL.SOUND_CONTROL_6,
-                            msg = new Uint8Array([((CMD.CONTROL_CHANGE + currentChannel) & 0xFF), SET_STATE_CONTROL, stateIndex]);
+                            SET_CHANNEL_STATE = WebMIDI.constants.CONTROL.SET_CHANNEL_STATE,
+                            msg = new Uint8Array([((CMD.CONTROL_CHANGE + currentChannel) & 0xFF), SET_CHANNEL_STATE, stateIndex]);
 
                         synth.send(msg, performance.now());
                     }
@@ -912,8 +912,6 @@ WebMIDI.host = (function(document)
 
                 function setCommandsAndControlsDivs()
                 {
-                    var CMD = WebMIDI.constants.COMMAND;
-
                     // called by both commands and CCs
                     function getBasicLongInputControl(tr, name, defaultValue, infoString)
                     {

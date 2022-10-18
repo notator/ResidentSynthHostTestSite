@@ -1007,7 +1007,7 @@ WebMIDI.residentSynth = (function(window)
 			while(currentNoteOns.length > 0)
 			{
 				now = audioContext.currentTime;
-				stopTime = noteOff(channel, currentNoteOns[0].offKey, 0);
+				stopTime = noteOff(channel, currentNoteOns[0].offKey);
 			}
 			setTimeout(reconnectChannelInput(), stopTime - now);
 		},
@@ -1099,7 +1099,7 @@ WebMIDI.residentSynth = (function(window)
 				}
 			}
 		},
-		noteOff = function(channel, key, unusedVelocity)
+		noteOff = function(channel, key) // velocity is unused
 		{
 			let currentNoteOns = channelControls[channel].currentNoteOns,
 				stopTime = 0;
@@ -1440,11 +1440,11 @@ WebMIDI.residentSynth = (function(window)
 				}
 			}
 		}
-		function handleNoteOff(channel, data1, data2)
+		function handleNoteOff(channel, data1)
 		{
 			checkCommandExport(CMD.NOTE_OFF);
 			// console.log("residentSynth NoteOff: channel:" + channel + " note:" + data1 + " velocity:" + data2);
-			noteOff(channel, data1, data2);
+			noteOff(channel, data1);
 		}
 		function handleNoteOn(channel, data1, data2)
 		{
@@ -1452,7 +1452,7 @@ WebMIDI.residentSynth = (function(window)
 			// console.log("residentSynth NoteOn: channel:" + channel + " note:" + data1 + " velocity:" + data2);
             if(data2 === 0)
             {
-                noteOff(channel, data1, 100);
+                noteOff(channel, data1);
             }
             else
             {
@@ -1512,7 +1512,7 @@ WebMIDI.residentSynth = (function(window)
 			}
 			function setChannelState(channel, stateIndex)
 			{
-				checkControlExport(CTL.SOUND_CONTROL_6);
+				checkControlExport(CTL.SET_CHANNEL_STATE);
 				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
 				updateChannelState(channel, stateIndex);
 			}
@@ -1570,7 +1570,7 @@ WebMIDI.residentSynth = (function(window)
 				case CTL.PAN:
 					setPan(channel, data2);
 					break;
-				case CTL.SOUND_CONTROL_6:
+				case CTL.SET_CHANNEL_STATE:
 					setChannelState(channel, data2);
 					break;
 				case CTL.REVERBERATION:
@@ -1605,7 +1605,8 @@ WebMIDI.residentSynth = (function(window)
 		}
 		// The CHANNEL_PRESSURE command can be sent from my EMU keyboard, but is never sent from the ResidentSynthHost GUI.
 		// It could be implemented later, to do something different from the other controls.
-		function handleChannelPressure(channel, data1)
+		// When implemented, this function should, of course, have channel and data1 arguments.
+		function handleChannelPressure()
 		{
 			//let warnMessage = "Channel pressure: channel:" + channel + " pressure:" + data1 +
 			//	" (The ResidentSynth does not implement the channelPressure (0x" + CMD.CHANNEL_PRESSURE.toString(16) + ") command.)";
@@ -1679,7 +1680,7 @@ WebMIDI.residentSynth = (function(window)
 		switch(command)
 		{
 			case CMD.NOTE_OFF:
-				handleNoteOff(channel, data1, data2);
+				handleNoteOff(channel, data1);
 				break;
 			case CMD.NOTE_ON:
 				handleNoteOn(channel, data1, data2);
@@ -1694,7 +1695,8 @@ WebMIDI.residentSynth = (function(window)
 				handlePreset(channel, data1);
 				break;
 			case CMD.CHANNEL_PRESSURE:
-				handleChannelPressure(channel, data1);
+				handleChannelPressure();
+				// handleChannelPressure(channel, data1);
 				break;
 			case CMD.PITCHWHEEL:
 				handlePitchWheel(channel, data1, data2);
