@@ -2,8 +2,7 @@ console.log('load mixtureDefs.js');
 
 WebMIDI.namespace('mixtureDefs');
 
-// This file can be omitted by applications that define neither mixtures nor presetMixtures. 
-
+// This file can be omitted by applications that dont want to define mixtures.
 // The mixtureDefs array is an array of mixture definitions.
 // Each mixture definition is an array of [keyInterval, relativeVelocity] arrays.
 // Each mixture definition can have any length greater than 0.
@@ -34,41 +33,41 @@ WebMIDI.mixtureDefs =
     ];
 
 
-// Each basePresetIndex is the General MIDI preset index, that has
-// been saved in each preset's presetIndex attribute in the synth's webAudioFonts.
-WebMIDI.presetMixtureDefs =
-    [
-        {
-            webAudioFontIndex: 0,
-            basePresetBankIndex: 0,
-            basePresetIndex: 16, // organ
-            mixtureIndex: 0
-        },
-        {
-            webAudioFontIndex: 0,
-            basePresetBankIndex: 0,
-            basePresetIndex: 58, // tuba
-            mixtureIndex: 1
-        },
-        {
-            webAudioFontIndex: 0,
-            basePresetBankIndex: 0,
-            basePresetIndex: 58, // tuba
-            mixtureIndex: 2
-        },
-        {
-            webAudioFontIndex: 0,
-            basePresetBankIndex: 0,
-            basePresetIndex: 8, // celesta
-            mixtureIndex: 3
-        },
-        {
-            webAudioFontIndex: 0,
-            basePresetBankIndex: 0,
-            basePresetIndex: 46, // harp
-            mixtureIndex: 4
-        }
-    ];
+//// Each basePresetIndex is the General MIDI preset index, that has
+//// been saved in each preset's presetIndex attribute in the synth's webAudioFonts.
+//WebMIDI.presetMixtureDefs =
+//    [
+//        {
+//            webAudioFontIndex: 0,
+//            basePresetBankIndex: 0,
+//            basePresetIndex: 16, // organ
+//            mixtureIndex: 0
+//        },
+//        {
+//            webAudioFontIndex: 0,
+//            basePresetBankIndex: 0,
+//            basePresetIndex: 58, // tuba
+//            mixtureIndex: 1
+//        },
+//        {
+//            webAudioFontIndex: 0,
+//            basePresetBankIndex: 0,
+//            basePresetIndex: 58, // tuba
+//            mixtureIndex: 2
+//        },
+//        {
+//            webAudioFontIndex: 0,
+//            basePresetBankIndex: 0,
+//            basePresetIndex: 8, // celesta
+//            mixtureIndex: 3
+//        },
+//        {
+//            webAudioFontIndex: 0,
+//            basePresetBankIndex: 0,
+//            basePresetIndex: 46, // harp
+//            mixtureIndex: 4
+//        }
+//    ];
 
 
 
