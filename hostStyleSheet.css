@@ -70,25 +70,25 @@ hr
 .webAudioFontSelect
 {
 	font-size: 11px;
-	width: 200px;
+	width: 220px;
 	height: 18px;
-	margin-left: 0;
+	margin: 0;
 }
 
 .presetSelect
 {
 	font-size: 11px;
-	width: 200px;
+	width: 290px;
 	height: 18px;
-	margin: 0 4px auto auto;
+	margin: 0 0 auto auto;
 }
 
 .mixtureSelect
 {
 	font-size: 11px;
-	width: 200px;
+	width: 135px;
 	height: 18px;
-	margin: 0 4px auto auto;
+	margin: 0;
 }
 
 .tuningGroupSelect
