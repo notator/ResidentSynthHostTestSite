@@ -33,7 +33,7 @@ WebMIDI.host = (function(document)
 
         sendShortControl = function(controlIndex)
         {
-            function resetHostGUI(controlIndex)
+            function resetLongControllersAndSendButton()
             {
                 let sendButton = getElem("sendButton");
                 if(sendButton.disabled === true)
@@ -41,40 +41,19 @@ WebMIDI.host = (function(document)
                     sendButton.disabled = false;
                 }
 
-                if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
+                for(let i = 0; i < allLongInputControls.length; ++i)
                 {
-                    let channelSelect = getElem("channelSelect");
-
-                    channelSelect.selectedIndex = 0;
-                    onChannelSelectChanged();
-
-                    //getElem("webAudioFontSelect").selectedIndex = 0;
-                    //onWebAudioFontSelectChanged();
-                    //getElem("presetSelect").selectedIndex = 0;
-                    //onPresetSelectChanged();
-                    //getElem("mixtureSelect").selectedIndex = 0;
-                    //onMixtureSelectChanged();
-
-                    //getElem("tuningGroupSelect").selectedIndex = 0;
-                    //onTuningGroupSelectChanged();
-                    //getElem("tuningSelect").selectedIndex = 0;
-                    //onTuningSelectChanged();
-                    //getElem("A4FrequencySelect").selectedIndex = 0;
-                    //onA4FrequencySelectChanged();
-
-                    for(let i = 0; i < allLongInputControls.length; ++i)
-                    {
-                        let longInputControl = allLongInputControls[i];
-                        longInputControl.setValue(longInputControl.numberInputElem.defaultValue);
-                    }
+                    let longInputControl = allLongInputControls[i];
+                    longInputControl.setValue(longInputControl.numberInputElem.defaultValue);
                 }
             }
 
-            if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === WebMIDI.constants.CONTROL.ALL_SOUND_OFF)
+            if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
             {
-                resetHostGUI(controlIndex);
+                resetLongControllersAndSendButton();
             }
 
+            // controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === WebMIDI.constants.CONTROL.ALL_SOUND_OFF
             sendCommand(WebMIDI.constants.COMMAND.CONTROL_CHANGE, controlIndex);
         },
 
@@ -876,32 +855,39 @@ WebMIDI.host = (function(document)
                     mixtureSelect.selectedIndex = 0;
                 }
 
-                function getTuningGroupOptions(tuningGroups)
+                function setTuningGroupSelect(tuningGroupSelect)
                 {
-                    let options = [];
-
-                    for(let i = 0; i < tuningGroups.length; i++)
+                    function getTuningGroupOptions(tuningGroups)
                     {
-                        let tuningGroupOption = new Option("tuningGroupOption"),
-                            tuningGroup = tuningGroups[i],
-                            tuningOptionsArray = [];
+                        let options = [];
 
-                        for(var j = 0; j < tuningGroup.length; j++)
+                        for(let i = 0; i < tuningGroups.length; i++)
                         {
-                            let tuningOption = new Option("tuningOption");
+                            let tuningGroupOption = new Option("tuningGroupOption"),
+                                tuningGroup = tuningGroups[i],
+                                tuningOptionsArray = [];
 
-                            tuningOption.innerHTML = tuningGroup[j].name;
-                            tuningOptionsArray.push(tuningOption);
+                            for(var j = 0; j < tuningGroup.length; j++)
+                            {
+                                let tuningOption = new Option("tuningOption");
+
+                                tuningOption.innerHTML = tuningGroup[j].name;
+                                tuningOptionsArray.push(tuningOption);
+                            }
+
+                            tuningGroupOption.innerHTML = tuningGroup.name;
+                            tuningGroupOption.tuningGroup = tuningGroup;
+                            tuningGroupOption.tuningOptionsArray = tuningOptionsArray; // used to set the tuningSelect
+
+                            options.push(tuningGroupOption);
                         }
 
-                        tuningGroupOption.innerHTML = tuningGroup.name;
-                        tuningGroupOption.tuningGroup = tuningGroup;
-                        tuningGroupOption.tuningOptionsArray = tuningOptionsArray; // used to set the tuningSelect
-
-                        options.push(tuningGroupOption);
+                        return options;
                     }
 
-                    return options;
+                    let tuningGroupOptions = getTuningGroupOptions(synth.tuningGroups);
+                    setOptions(tuningGroupSelect, tuningGroupOptions);
+                    tuningGroupSelect.selectedIndex = 0;
                 }
 
                 function setA4FrequencySelect()
@@ -1460,40 +1446,6 @@ WebMIDI.host = (function(document)
                     sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF);
                 }
 
-                function setDefaultHostChannelStates()
-                {
-                    let channelOptions = getElem("channelSelect").options,
-                        CMD = WebMIDI.constants.COMMAND,
-                        CTL = WebMIDI.constants.CONTROL,
-                        cmdDefaultValue = WebMIDI.constants.commandDefaultValue,
-                        ctlDefaultValue = WebMIDI.constants.controlDefaultValue;
-
-
-                    for(let i = 0; i < channelOptions.length; i++)
-                    {
-                        let channelOption = channelOptions[i],
-                            hostState = {};
-
-                        hostState.fontSelectIndex = 0;
-                        hostState.presetSelectIndex = 0;
-                        hostState.mixtureSelectIndex = 0;
-                        hostState.tuningGroupSelectIndex = 0;
-                        hostState.tuningSelectIndex = 0;
-                        hostState.A4FrequencySelectIndex = 0;
-                        hostState.triggerKeySelectIndex = 0;
-                        hostState.nextStateIndex = 0;
-                        hostState.aftertouchValue = cmdDefaultValue(CMD.AFTERTOUCH);
-                        hostState.pitchWheelValue = cmdDefaultValue(CMD.PITCHWHEEL);
-                        hostState.modWheelValue = ctlDefaultValue(CTL.MODWHEEL);
-                        hostState.volumeValue = ctlDefaultValue(CTL.VOLUME);
-                        hostState.panValue = ctlDefaultValue(CTL.PAN);
-                        hostState.reverberationValue = ctlDefaultValue(CTL.REVERBERATION);
-                        hostState.pitchWheelSensitivityValue = WebMIDI.constants.MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY;
-
-                        channelOption.hostState = hostState;
-                    }
-                }
-
                 function getDefaultHostChannelStates()
                 {
                     let channelOptions = getElem("channelSelect").options,
@@ -1549,17 +1501,13 @@ WebMIDI.host = (function(document)
 
                 console.assert(synth.name === "ResidentSynth", "Error: this app only uses the ResidentSynth");
 
-                setDefaultHostChannelStates();
-
                 setWebAudioFontSelect(webAudioFontSelect);
                 setPresetSelect(presetSelect, webAudioFontSelect);
                 setMixtureSelect(mixtureSelect);
 
                 webAudioFontDiv.style.display = "block";
 
-                let tuningGroupOptions = getTuningGroupOptions(synth.tuningGroups);
-                setOptions(tuningGroupSelect, tuningGroupOptions);
-                tuningGroupSelect.selectedIndex = 0;
+                setTuningGroupSelect(tuningGroupSelect);
                 setTuningSelect();
                 setA4FrequencySelect();
                 tuningDiv.style.display = "block";
@@ -1569,7 +1517,7 @@ WebMIDI.host = (function(document)
 
                 setCommandsAndControlsDivs();
 
-                //getDefaultHostChannelStates();
+                getDefaultHostChannelStates();
 
                 // must be called after all the GUI controls have been set.
                 // It calls all the synth's public control functions.
