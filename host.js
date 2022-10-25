@@ -33,7 +33,7 @@ WebMIDI.host = (function(document)
 
         sendShortControl = function(controlIndex)
         {
-            function resetLongControllersAndSendButton()
+            function resetGUILongControllersAndSendButton()
             {
                 let sendButton = getElem("sendButton");
                 if(sendButton.disabled === true)
@@ -50,7 +50,7 @@ WebMIDI.host = (function(document)
 
             if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
             {
-                resetLongControllersAndSendButton();
+                resetGUILongControllersAndSendButton();
             }
 
             // controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === WebMIDI.constants.CONTROL.ALL_SOUND_OFF
@@ -164,8 +164,20 @@ WebMIDI.host = (function(document)
                             return rval;
                         }
 
+                        function resetFontsAndTuningsSelects(fontSelect, mixtureSelect, tuningGroupSelect)
+                        {
+                            fontSelect.selectedIndex = 0;
+                            onWebAudioFontSelectChanged(); // automatically resets presetSelect
+
+                            mixtureSelect.selectedIndex = 0;
+                            onMixtureSelectChanged();
+
+                            tuningGroupSelect.selectedIndex = 0;
+                            onTuningGroupSelectChanged(); // automatically resets tuningSelect and A4FrequencySelect
+                            // A4FrequencySelect cannot be set using a stateDef.
+                        }
+
                         let state = (nextStateIndex < stateDefs.length) ? stateDefs[stateIndex] : undefined,
-                            channelSelect = getElem("channelSelect"),
                             fontSelect = getElem("webAudioFontSelect"),
                             presetSelect = getElem("presetSelect"),
                             mixtureSelect = getElem("mixtureSelect"),
@@ -176,10 +188,11 @@ WebMIDI.host = (function(document)
                             volumeLongControl = getElem("volumeLongControl"),
                             panLongControl = getElem("panLongControl"),
                             reverberationLongControl = getElem("reverberationLongControl"),
-                            pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl"),
-                            currentHostState = channelSelect.options[channelSelect.selectedIndex].hostState;                        
+                            pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");                        
 
-                        sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF); // resets hostState (=GUI) (and sends message to synth)
+                        resetFontsAndTuningsSelects(fontSelect, mixtureSelect, tuningGroupSelect); // resets host GUI selects (and sends messages to synth)
+                        sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF); // resets host GUI sliders (and sends messages to synth)
+
                         // set preset and tuning
                         if(state.fontIndex !== undefined)
                         {
@@ -216,6 +229,7 @@ WebMIDI.host = (function(document)
                             tuningSelect.selectedIndex = state.tuningIndex;
                             onTuningSelectChanged();
                         }
+                        // The A4FrequencySelect is reset above, but it cannot be set using a stateDef.
 
                         // set controls set by setControllerDefaults() above
                         if(state.pitchWheel !== undefined)
@@ -535,32 +549,32 @@ WebMIDI.host = (function(document)
                 else return false;
             }
 
+            // returns 0 if tuningMidiCents is out of range
             function findNearestA4FrequencySelectIndex(options, tuningA4MidiCents)
             {
-                let returnIndex = -1, // frequency out of range
+                let returnIndex = 0, // frequency out of range
                     maxSelectMidiCents = options[0].midiCents + 0.5,
                     minSelectMidiCents = options[options.length - 1].midiCents - 0.5,
                     minDiff = Number.MAX_VALUE;
 
-                console.assert(tuningA4MidiCents < maxSelectMidiCents && tuningA4MidiCents > minSelectMidiCents);
-
-                for(var i = 0; i < options.length; i++)
+                if(tuningA4MidiCents > minSelectMidiCents && tuningA4MidiCents < maxSelectMidiCents)
                 {
-                    let option = options[i],
-                        diff = Math.abs(option.midiCents - tuningA4MidiCents);
-
-                    if(diff < minDiff)
+                    for(var i = 0; i < options.length; i++)
                     {
-                        minDiff = diff;
-                        returnIndex = i;
-                        if(minDiff === 0)
+                        let option = options[i],
+                            diff = Math.abs(option.midiCents - tuningA4MidiCents);
+
+                        if(diff < minDiff)
                         {
-                            break;
+                            minDiff = diff;
+                            returnIndex = i;
+                            if(minDiff === 0)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
-
-                console.assert(returnIndex >= 0);
 
                 return returnIndex;
             }
