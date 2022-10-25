@@ -55,7 +55,8 @@
             <hr />
             <table>
                 <colgroup>
-                    <col style="width:75px" />
+                    <col style="width:330px" />
+                    <col style="width:330px" />
                     <col />
                 </colgroup>
                 <tr>
@@ -66,16 +67,19 @@
                     <td>
                         <span class="boldSubtitle">preset: </span>
                     </td>
+                    <td>
+                        <span class="boldSubtitle">mixture: </span>
+                    </td>
                 </tr>
                 <tr>
                     <td>
                         <select id="webAudioFontSelect" class="webAudioFontSelect" onchange="WebMIDI.host.onWebAudioFontSelectChanged()" />
                     </td>
                     <td id="presetSelectCell">
-                        <!--
-                            <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
-                            sendAgainButton
-                        -->
+                        <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
+                    </td>
+                    <td id="mixtureSelectCell">
+                        <select id="mixtureSelect" class="mixtureSelect" onchange="WebMIDI.host.onMixtureSelectChanged()" />
                     </td>
                 </tr>
             </table>
@@ -247,7 +251,6 @@
     <script src="residentSynth/reverberator.js" type="text/javascript"></script>
     <script src="residentSynth/webAudioFont.js" type="text/javascript"></script>
     <script src="residentSynth/tuningsFactory.js" type="text/javascript"></script>
-
 
     <script src="residentSynth/residentSynth.js" type="text/javascript"></script>
     <script src="residentSynth/residentSynthNote.js" type="text/javascript"></script>

@@ -27,12 +27,14 @@ WebMIDI.webAudioFont = (function()
 	let
 		// Returns a banks array.
 		// Each bank is an array of presets.
+		// N.B.: The presets are in the order in which they are defined in "config/webAudioFontDefs.js".
+		//       This means that the .presetIndex used by the residentSynth is not the preset's original midi preset index.
 		// Each preset has a 'zones' attribute that is an array of 'zone'.
 		// A 'zone' is an object that has attributes used to when processing a single sample.
 		getBanks = function(allPresetsPerBank, presetNamesPerBank)
 		{
 			// This function just corrrects errors in the WebAudioFont preset files.
-			function correctWebAudioPresetErrors(presetIndex, zones)
+			function correctWebAudioPresetErrors(originalPresetIndex, zones)
 			{
 				function removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones)
 				{
@@ -97,7 +99,7 @@ WebMIDI.webAudioFont = (function()
 					}
 				}
 
-				switch(presetIndex)
+				switch(originalPresetIndex)
 				{
 					case 0:
 						removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones);
@@ -117,13 +119,13 @@ WebMIDI.webAudioFont = (function()
 				}
 			}
 
-			function checkZoneContiguity(presetName, presetIndex, zones)
+			function checkZoneContiguity(presetName, originalPresetIndex, zones)
 			{
 				for(var zoneIndex = 1; zoneIndex < zones.length; zoneIndex++)
 				{
 					if(zones[zoneIndex].keyRangeLow !== (zones[zoneIndex - 1].keyRangeHigh + 1))
 					{
-						throw presetName + " (presetIndex:" + presetIndex + "): zoneIndex " + zoneIndex + " is not contiguous!";
+						throw presetName + " (originalPresetIndex:" + originalPresetIndex + "): zoneIndex " + zoneIndex + " is not contiguous!";
 					}
 				}
 			}
@@ -136,36 +138,40 @@ WebMIDI.webAudioFont = (function()
 					presetNames = presetNamesPerBank[bankIndex],
 					presetsPerBank = allPresetsPerBank[bankIndex];
 
-				for(let i = 0; i < presetNames.length; ++i)
+				for(let presetIndex = 0; presetIndex < presetNames.length; ++presetIndex)
 				{
-					let presetName = presetNames[i],
-						presetIndex,
+					let presetName = presetNames[presetIndex],
+						originalPresetIndex,
 						presetVariable = window[presetName];
 					
 					if(presetVariable !== undefined)
 					{
-						presetIndex = presetVariable.zones[0].midi; // Surikov's midi attribute
+						originalPresetIndex = presetVariable.zones[0].midi; // Surikov's midi attribute
 					}
 					else // percussion preset
 					{
-						presetIndex = presetsPerBank[i].presetIndex;
+						originalPresetIndex = presetsPerBank[presetIndex].originalPresetIndex;
 					}
 
-					let preset = presetsPerBank.find(obj => obj.presetIndex === presetIndex);
+					let preset = presetsPerBank[presetIndex];
 
 					if(preset === undefined)
 					{
 						throw "can't find preset";
 					}
 
-					correctWebAudioPresetErrors(presetIndex, preset.zones);
+					correctWebAudioPresetErrors(originalPresetIndex, preset.zones);
 
 					if(!presetName.includes("percussion"))
 					{
-						checkZoneContiguity(presetName, presetIndex, preset.zones);
+						checkZoneContiguity(presetName, originalPresetIndex, preset.zones);
 					}
 
+					preset.originalPresetIndex = originalPresetIndex;
+
 					preset.bankIndex = bankIndex;
+					preset.presetIndex = presetIndex; // used by residentSynth API
+
 
 					bank.push(preset);
 				}

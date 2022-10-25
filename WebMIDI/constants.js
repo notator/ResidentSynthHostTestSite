@@ -204,6 +204,8 @@ WebMIDI.constants = (function()
 				return (100);
 			case CONTROL.PAN:
 				return (64);
+			case CONTROL.MIXTURE_INDEX:
+				return (127); // 127 is "no mixture"
 		    case CONTROL.REGISTERED_PARAMETER:
 		        return (0); // 0 is pitchWheelDeviation (=semitones)
 		    case CONTROL.DATA_ENTRY:
@@ -278,8 +280,9 @@ WebMIDI.constants = (function()
 	Object.defineProperty(CONTROL, "VOLUME", { value: 7, writable: false });
 	Object.defineProperty(CONTROL, "PAN", { value: 10, writable: false });
 	Object.defineProperty(CONTROL, "EXPRESSION", {value: 11, writable: false});
-	Object.defineProperty(CONTROL, "SET_CHANNEL_STATE", {value: 75, writable: false}); // Custom control: MIDI SOUND_CONTROL_6
-	Object.defineProperty(CONTROL, "REVERBERATION", { value: 91, writable: false });
+	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 75, writable: false}); // Custom control: MIDI SOUND_CONTROL_6
+	Object.defineProperty(CONTROL, "SET_CHANNEL_STATE", {value: 76, writable: false}); // Custom control: MIDI SOUND_CONTROL_7
+	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false});
     Object.defineProperty(CONTROL, "REGISTERED_PARAMETER", { value: 101, writable: false });
     Object.defineProperty(CONTROL, "ALL_SOUND_OFF", { value: 120, writable: false });
     Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", { value: 121, writable: false });

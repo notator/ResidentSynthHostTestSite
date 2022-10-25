@@ -70,7 +70,7 @@ hr
 .webAudioFontSelect
 {
 	font-size: 11px;
-	width: 275px;
+	width: 200px;
 	height: 18px;
 	margin-left: 0;
 }
@@ -78,7 +78,15 @@ hr
 .presetSelect
 {
 	font-size: 11px;
-	width: 300px;
+	width: 200px;
+	height: 18px;
+	margin: 0 4px auto auto;
+}
+
+.mixtureSelect
+{
+	font-size: 11px;
+	width: 200px;
 	height: 18px;
 	margin: 0 4px auto auto;
 }

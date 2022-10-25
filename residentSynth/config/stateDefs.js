@@ -18,7 +18,7 @@ WebMIDI.namespace('actionDefs');
 // Each stateDef must have a .name attribute. The other attributes are all optional.
 // The full set of optional action attributes is (in the order they occur in the ResidentSynth Host GUI):
 //		.fontIndex // executed before bankIndex and/or presetIndex, sets bankIndex=0, presetIndex=0
-//		N.B. bankIndex is not used. The ResidentSynth only uses bank 0 of each WebAudioFont.
+//		.bankIndex
 //		.presetIndex
 //      .mixtureIndex 
 //		.tuningGroupIndex // executed before tuningIndex, sets tuningIndex=0

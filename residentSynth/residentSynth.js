@@ -33,7 +33,7 @@ WebMIDI.residentSynth = (function(window)
 		banks, // set in synth.setSoundFont
 		channelAudioNodes = [], // initialized in synth.open
 		channelControls = [], // initialized in synth.open
-		mixtures = [], // initialized in getPresetMixtures()
+		mixtures = [], // initialized by getMixtures()
 		tuningGroups = [],
 
 		// returns a three character string representing the index
@@ -48,7 +48,7 @@ WebMIDI.residentSynth = (function(window)
 		},
 
 		// Called by the constructor, which sets this.webAudioFonts to the return value of this function.
-		// Creates all the WebAudioFonts defined in "synthConfig/webAudioFontDefs.js",
+		// Creates all the WebAudioFonts defined in "config/webAudioFontDefs.js",
 		// adjusting (=decoding) all the required WebAudioFontPresets.
 		getWebAudioFonts = function(audioContext)
 		{
@@ -223,7 +223,7 @@ WebMIDI.residentSynth = (function(window)
 			{
 				// returns a string of the form "000:000 - " + standardGMPresetName + " (" + soundFontSourceName + ")"
 				// where the "000" groups are the bank and preset indices.
-				function getPresetOptionName(presetName, bankIndex, presetIndex, isPercussion)
+				function getPresetOptionName(presetName, bankIndex, originalPresetIndex, isPercussion)
 				{
 					function getIndex(str, substr, ind)
 					{
@@ -238,7 +238,7 @@ WebMIDI.residentSynth = (function(window)
 
 					let presetOptionName = "error: illegal presetVariable",
 						bankString = getIndexString(bankIndex),
-						presetString = getIndexString(presetIndex);
+						presetString = getIndexString(originalPresetIndex);
 
 					if(isPercussion === true)
 					{
@@ -252,7 +252,7 @@ WebMIDI.residentSynth = (function(window)
 						if(truncStart > 0 && truncEnd > 0 && truncEnd > truncStart)
 						{
 							let soundFontSourceName = presetName.slice(truncStart, truncEnd),
-								gmName = WebMIDI.constants.generalMIDIPresetName(presetIndex);
+								gmName = WebMIDI.constants.generalMIDIPresetName(originalPresetIndex);
 
 							presetOptionName = bankString + ":" + presetString + " - " + gmName + " (" + soundFontSourceName + ")";
 						}
@@ -270,10 +270,10 @@ WebMIDI.residentSynth = (function(window)
 					let bankPresets = [],
 						presetNames = presetNamesPerBank[bankIndex];
 
-					for(var nameIndex = 0; nameIndex < presetNames.length; nameIndex++)
+					for(var presetIndex = 0; presetIndex < presetNames.length; presetIndex++)
 					{
 						let isPercussion = false,
-							presetName = presetNames[nameIndex],
+							presetName = presetNames[presetIndex],
 							zones;
 
 						if(window[presetName] === undefined)
@@ -289,10 +289,10 @@ WebMIDI.residentSynth = (function(window)
 						{
 							zones = window[presetName].zones;
 						}
-						let presetIndex = zones[0].midi,
-							presetOptionName = getPresetOptionName(presetName, bankIndex, presetIndex, isPercussion);
+						let originalPresetIndex = zones[0].midi,
+							presetOptionName = getPresetOptionName(presetName, bankIndex, originalPresetIndex, isPercussion);
 
-						bankPresets.push({name: presetOptionName, presetIndex: presetIndex, zones: zones});
+						bankPresets.push({name: presetOptionName, originalPresetIndex: originalPresetIndex, zones: zones});
 					}
 
 					allPresetsPerBank.push(bankPresets);
@@ -303,7 +303,7 @@ WebMIDI.residentSynth = (function(window)
 
 			function adjustForResidentSynth(webAudioFont)
 			{
-				function setZonesToMaximumRange(presetName, presetGMIndex, zones)
+				function setZonesToMaximumRange(presetName, originalPresetIndex, zones)
 				{
 					let bottomZone = zones[0],
 						topZone = zones[zones.length - 1],
@@ -322,7 +322,7 @@ WebMIDI.residentSynth = (function(window)
 
 					if(expanded)
 					{
-						let gmName = WebMIDI.constants.generalMIDIPresetName(presetGMIndex);
+						let gmName = WebMIDI.constants.generalMIDIPresetName(originalPresetIndex);
 						console.warn("WAFSynth: extended the pitch range of preset " + presetName + " (" + gmName + ").");
 					}
 				}
@@ -338,7 +338,7 @@ WebMIDI.residentSynth = (function(window)
 					}
 				}
 
-				function setZoneVEnvData(presetName, presetIndex, zones)
+				function setZoneVEnvData(presetName, originalPresetIndex, zones)
 				{
 					// envTypes:
 					// 0: short envelope (e.g. drum, xylophone, percussion)
@@ -348,7 +348,7 @@ WebMIDI.residentSynth = (function(window)
 						MAX_DURATION = 300000, // five minutes should be long enough...
 						DEFAULT_NOTEOFF_RELEASE_DURATION = 0.2;
 
-					function presetEnvType(isPercussion, presetIndex)
+					function presetEnvType(isPercussion, originalPresetIndex)
 					{
 						const shortEnvs =
 							[13,
@@ -382,15 +382,15 @@ WebMIDI.residentSynth = (function(window)
 						{
 							return PRESET_ENVTYPE.SHORT;
 						}
-						else if(shortEnvs.indexOf(presetIndex) >= 0)
+						else if(shortEnvs.indexOf(originalPresetIndex) >= 0)
 						{
 							return PRESET_ENVTYPE.SHORT;
 						}
-						else if(longEnvs.indexOf(presetIndex) >= 0)
+						else if(longEnvs.indexOf(originalPresetIndex) >= 0)
 						{
 							return PRESET_ENVTYPE.LONG;
 						}
-						else if(unendingEnvs.indexOf(presetIndex) >= 0)
+						else if(unendingEnvs.indexOf(originalPresetIndex) >= 0)
 						{
 							return PRESET_ENVTYPE.UNENDING;
 						}
@@ -430,7 +430,7 @@ WebMIDI.residentSynth = (function(window)
 						checkDurations(zones[0].vEnvData);
 					}
 
-					function setLONG_vEnvData(presetName, presetIndex, zones)
+					function setLONG_vEnvData(presetName, originalPresetIndex, zones)
 					{
 						// Sets attack, hold, decay and release durations for each zone.
 						// The duration values are set to increase logarithmically per pitchIndex
@@ -470,7 +470,7 @@ WebMIDI.residentSynth = (function(window)
 						//
 						// 02.2020: Except for Harpsichord, the following presetIndices
 						// are all those used by the AssistantPerformer(GrandPiano + Study2)
-						switch(presetIndex)
+						switch(originalPresetIndex)
 						{
 							case 0: // Grand Piano						
 								setCustomLONGEnvData(zones, 0, 0, 0, 0, 25, 5, 1, 0.5);
@@ -517,7 +517,7 @@ WebMIDI.residentSynth = (function(window)
 								setCustomLONGEnvData(zones, 0, 0, 0.5, 0.5, 10, 0.4, 0.4, 0.04);
 								break;
 							default:
-								console.warn("Volume envelope data has not been defined for preset " + presetIndex.toString() + " (" + presetName + ").");
+								console.warn("Volume envelope data has not been defined for preset " + originalPresetIndex.toString() + " (" + presetName + ").");
 						}
 					}
 
@@ -547,7 +547,7 @@ WebMIDI.residentSynth = (function(window)
 							setSHORT_vEnvData(zones);
 							break;
 						case PRESET_ENVTYPE.LONG:
-							setLONG_vEnvData(presetName, presetIndex, zones);
+							setLONG_vEnvData(presetName, originalPresetIndex, zones);
 							break;
 						case PRESET_ENVTYPE.UNENDING:
 							setUNENDING_vEnvData(zones);
@@ -557,22 +557,26 @@ WebMIDI.residentSynth = (function(window)
 
 				let banks = webAudioFont.banks;
 
-				for(var i = 0; i < banks.length; i++)
+				for(var bankIndex = 0; bankIndex < banks.length; bankIndex++)
 				{
-					let presets = banks[i];
-					for(var j = 0; j < presets.length; j++)
+					let presets = banks[bankIndex];
+					for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
 					{
-						let preset = presets[j],
+						let preset = presets[presetIndex],
 							presetName = preset.name,
-							presetGMIndex = preset.presetIndex,
+							originalPresetIndex = preset.originalPresetIndex,
 							zones = preset.zones;
 
-						setZonesToMaximumRange(presetName, presetGMIndex, zones);
+						setZonesToMaximumRange(presetName, originalPresetIndex, zones);
 						// The residentSynth is going to use the zone.vEnvData attributes
 						//(which are set below) instead of the original zone.ahdsr attributes.
 						// The zone.ahdsr attributes are deleted here to avoid confusion.
 						deleteZoneAHDSRs(zones);
-						setZoneVEnvData(presetName, presetGMIndex, zones);
+						setZoneVEnvData(presetName, originalPresetIndex, zones);
+
+						// the originalPresetIndex attribute is not part of the ResidentSynth's API,
+						// so should be deleted before it is exposed.
+						delete preset.originalPresetIndex;
 					}
 				}
 
@@ -633,98 +637,42 @@ WebMIDI.residentSynth = (function(window)
 			return webAudioFonts;
 		},
 
-		getPresetMixtures = function(webAudioFonts)
+		getMixtures = function()
 		{
-			function getMixtures()
+			// There can be at most 256 [keyIncrement, velocityFactor] extraNotes components.
+			// KeyIncrement components must be integers in range [-127..127].
+			// VelocityFactor components are usually floats > 0 and < 1, but can be <= 100.0.
+			function checkMixtures(mixtures)
 			{
-				// There can be at most 256 [keyIncrement, velocityFactor] components.
-				// KeyIncrement components must be integers in range [-127..127].
-				// VelocityFactor components are usually floats > 0 and < 1, but can be <= 100.0.
-				function checkMixtures(mixtures)
+				let nIncrVels = 0;
+				for(var i = 0; i < mixtures.length; i++)
 				{
-					let nIncrVels = 0;
-					for(var i = 0; i < mixtures.length; i++)
+					console.assert(mixtures[i].name !== undefined);
+					let extraNotes = mixtures[i].extraNotes;
+					for(var k = 0; k < extraNotes.length; k++)
 					{
-						let mixture = mixtures[i];
-						for(var k = 0; k < mixture.length; k++)
-						{
-							let keyVel = mixture[k],
-								keyIncr = keyVel[0],
-								velFac = keyVel[1];
+						let keyVel = extraNotes[k],
+							keyIncr = keyVel[0],
+							velFac = keyVel[1];
 
-							console.assert(keyVel.length === 2);
-							console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
-							console.assert(velFac > 0 && velFac <= 100.0);
+						console.assert(keyVel.length === 2);
+						console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
+						console.assert(velFac > 0 && velFac <= 100.0);
 
-							nIncrVels++;
-						}
+						nIncrVels++;
 					}
-
-					console.assert(nIncrVels <= 256);
 				}
 
-				let mixtures = [];
-
-				if(WebMIDI.mixtureDefs !== undefined)
-				{
-					mixtures = WebMIDI.mixtureDefs;
-					checkMixtures(mixtures);
-				}
-
-				return mixtures; // can be empty
+				console.assert(nIncrVels <= 256);
 			}
 
-			function checkPresetMixtureDefs(webAudioFonts, mixtures, presetMixtureDefs)
+			if(WebMIDI.mixtureDefs !== undefined)
 			{
-				for(var i = 0; i < presetMixtureDefs.length; i++)
-				{
-					let pmd = presetMixtureDefs[i];
-
-					console.assert(pmd.webAudioFontIndex !== undefined && pmd.webAudioFontIndex < webAudioFonts.length);
-					let banks = webAudioFonts[pmd.webAudioFontIndex].banks;
-					console.assert(pmd.basePresetBankIndex !== undefined && pmd.basePresetBankIndex < banks.length);
-					console.assert(pmd.basePresetIndex !== undefined);
-					let preset = banks[pmd.basePresetBankIndex].find(x => x.presetIndex === pmd.basePresetIndex);
-					console.assert(preset !== undefined);
-					console.assert(pmd.mixtureIndex !== undefined && pmd.mixtureIndex < mixtures.length);
-				}
+				mixtures = WebMIDI.mixtureDefs;
+				checkMixtures(mixtures);
 			}
 
-			function getMixtureName(oldName, mixtureIndex)
-			{
-				let mixString = ":" + getIndexString(mixtureIndex),
-					newName = oldName.slice(0, 7) + mixString + oldName.slice(7) + " mixture " + mixtureIndex.toString();
-
-				return newName;
-			}
-
-			let presetMixtureDefs = WebMIDI.presetMixtureDefs,
-				presetMixtures = [];
-
-			mixtures = getMixtures();
-
-			if(mixtures !== undefined && mixtures.length > 0 && presetMixtureDefs !== undefined && presetMixtureDefs.length > 0)
-			{
-				checkPresetMixtureDefs(webAudioFonts, mixtures, presetMixtureDefs);
-
-				for(var i = 0; i < presetMixtureDefs.length; i++)
-				{
-					let pmd = presetMixtureDefs[i],
-						banks = webAudioFonts[pmd.webAudioFontIndex].banks,
-						bank = banks[pmd.basePresetBankIndex],
-						basePreset = bank.find(x => x.presetIndex === pmd.basePresetIndex),
-						presetMixture = {};
-
-					presetMixture.name = getMixtureName(basePreset.name, pmd.mixtureIndex);
-					presetMixture.bankIndex = basePreset.bankIndex;
-					presetMixture.presetIndex = basePreset.presetIndex;
-					presetMixture.mixtureIndex = pmd.mixtureIndex;
-
-					presetMixtures.push(presetMixture);
-				}
-			}
-
-			return presetMixtures; // can be empty
+			return mixtures; // can be empty
 		},
 
 		getTuningGroups = function(tuningsFactory)
@@ -852,6 +800,10 @@ WebMIDI.residentSynth = (function(window)
 		{
 			channelControls[channel].presetIndex = presetIndex;
 		},
+		updateMixtureIndex = function(channel, mixtureIndex)
+		{
+			channelControls[channel].mixtureIndex = mixtureIndex; // for new noteOns (127 is "no mixture")
+		},
 		// sets channelControl.tuning to the first tuning in the group.
 		updateTuningGroupIndex = function(channel, tuningGroupIndex)
 		{
@@ -960,6 +912,7 @@ WebMIDI.residentSynth = (function(window)
 			let panValue = ((pan / 127) * 2) - 1; // panValue is in range [-1..1]
 			channelAudioNodes[channel].panNode.pan.setValueAtTime(panValue, audioContext.currentTime);
 		},
+
 		// The reverberation argument is in range [0..127], meaning completely dry to completely wet.
 		updateReverberation = function(channel, reverberation)
 		{
@@ -1076,12 +1029,12 @@ WebMIDI.residentSynth = (function(window)
 
 			doNoteOn(midi);
 
-			if(chanControls.mixtureIndex !== undefined)
+			if(chanControls.mixtureIndex < 127) // 127 is "no mixture"
 			{
-				let mixture = mixtures[chanControls.mixtureIndex];
-				for(var i = 0; i < mixture.length; i++)
+				let extraNotes = mixtures[chanControls.mixtureIndex].extraNotes;
+				for(var i = 0; i < extraNotes.length; i++)
 				{
-					let keyVel = mixture[i],
+					let keyVel = extraNotes[i],
 						newKey = key + keyVel[0],
 						newVelocity = Math.floor(velocity * keyVel[1]);
 
@@ -1133,6 +1086,7 @@ WebMIDI.residentSynth = (function(window)
 			updatePitchWheel(channel, pitchWheelDefaultValue, pitchWheelDefaultValue);
 			updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
 
+			updateMixtureIndex(channel, controlDefaultValue(CTL.MIXTURE_INDEX));
 			updateModWheel(channel, controlDefaultValue(CTL.MODWHEEL));
 			updateVolume(channel, controlDefaultValue(CTL.VOLUME));
 			updatePan(channel, controlDefaultValue(CTL.PAN));
@@ -1161,6 +1115,10 @@ WebMIDI.residentSynth = (function(window)
 			if(state.presetIndex !== undefined)
 			{
 				updatePresetIndex(channel, state.presetIndex);
+			}
+			if(state.mixtureIndex !== undefined)
+			{
+				updateMixtureIndex(channel, state.mixtureIndex);
 			}
 			if(state.tuningGroupIndex !== undefined)
 			{
@@ -1230,6 +1188,7 @@ WebMIDI.residentSynth = (function(window)
 				CTL.MODWHEEL,
 				CTL.VOLUME,
 				CTL.PAN,
+				CTL.MIXTURE_INDEX, // custom control
 				CTL.REVERBERATION,
 				CTL.REGISTERED_PARAMETER,
 				CTL.DATA_ENTRY,
@@ -1274,7 +1233,7 @@ WebMIDI.residentSynth = (function(window)
 			// If supportsGeneralMIDI is defined, and is true, then
 			// 1. both COMMAND.PRESET and CONTROL.BANK MUST be defined.
 			// 2. the presets can be usefully named using GM preset names.
-			//    (GM preset names are returned by WebMIDI.constants.generalMIDIPresetName(presetIndex). )
+			//    (GM preset names are returned by WebMIDI.constants.generalMIDIPresetName(originalPresetIndex). )
 			// 3. in a percussion font, notes can be usefully named using the GM percussion names.
 			//    (GM percussion names are returned by WebMIDI.constants.generalMIDIPercussionName(noteIndex). )
 			// 4. the synth MAY define the function:
@@ -1294,7 +1253,7 @@ WebMIDI.residentSynth = (function(window)
 			Object.defineProperty(this, "REGPARAM_SET_MIXTURE_INDEX", { value: REGPARAM_SET_MIXTURE_INDEX, writable: false });
 
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
-			Object.defineProperty(this, "presetMixtures", { value: getPresetMixtures(this.webAudioFonts), writable: false });
+			Object.defineProperty(this, "mixtures", { value: getMixtures(), writable: false });
 			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});
 			Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(this.tuningsFactory), writable: false});
 
@@ -1310,13 +1269,6 @@ WebMIDI.residentSynth = (function(window)
 
 	ResidentSynth.prototype.setSoundFont = function(webAudioFont)
 	{
-		function setPresetDefaultIndices(channelInfo, defaultPreset)
-		{
-			channelInfo.bankIndex = defaultPreset.bankIndex;
-			channelInfo.presetIndex = defaultPreset.presetIndex;   // the presetIndex argument is the General MIDI presetIndex
-			channelInfo.mixtureIndex = defaultPreset.mixtureIndex; // can be undefined
-		}
-
 		if(!webAudioFont.isReady())
 		{
 			throw "This function should not be called before the webAudioFont is ready!";
@@ -1331,16 +1283,19 @@ WebMIDI.residentSynth = (function(window)
 			for(var j = 0; j < wafBank.length; j++)	
 			{
 				let preset = wafBank[j];
-				bank[preset.presetIndex] = preset;
+				bank[j] = preset;
 			}
 			banks.push(bank);
 		}
 
-		let defaultPreset = webAudioFont.banks[0][0];
-		for(let i = 0; i < 16; ++i)
+		for(let channel = 0; channel < 16; ++channel)
 		{
 			// set default bankIndex, presetIndex and mixtureIndex.
-			setPresetDefaultIndices(channelControls[i], defaultPreset);
+			let channelInfo = channelControls[channel];
+
+			channelInfo.bankIndex = 0;
+			channelInfo.presetIndex = 0;   // the presetIndex argument is the index in banks[0]
+			channelInfo.mixtureIndex = undefined; // can be undefined
 		}
 
 		console.log("residentSynth WebAudioFont set.");
@@ -1510,6 +1465,12 @@ WebMIDI.residentSynth = (function(window)
 				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
 				updatePan(channel, value);
 			}
+			function setMixtureIndex(channel, mixtureIndex)
+			{
+				checkControlExport(CTL.SET_CHANNEL_STATE);
+				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
+				updateMixtureIndex(channel, mixtureIndex);
+			}
 			function setChannelState(channel, stateIndex)
 			{
 				checkControlExport(CTL.SET_CHANNEL_STATE);
@@ -1570,6 +1531,9 @@ WebMIDI.residentSynth = (function(window)
 				case CTL.PAN:
 					setPan(channel, data2);
 					break;
+				case CTL.MIXTURE_INDEX:
+					setMixtureIndex(channel, data2);
+					break;
 				case CTL.SET_CHANNEL_STATE:
 					setChannelState(channel, data2);
 					break;
@@ -1601,7 +1565,6 @@ WebMIDI.residentSynth = (function(window)
 			checkCommandExport(CMD.PRESET);
 
 			channelControls[channel].presetIndex = data1;
-			// console.log("residentSynth Preset: channel:" + channel, " value:" + data1);
 		}
 		// The CHANNEL_PRESSURE command can be sent from my EMU keyboard, but is never sent from the ResidentSynthHost GUI.
 		// It could be implemented later, to do something different from the other controls.
