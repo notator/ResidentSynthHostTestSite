@@ -1047,7 +1047,7 @@ WebMIDI.residentSynth = (function(window)
 
 					// midi.preset is unchanged
 					midi.offKey = key; // the key that turns this note off (unchanged in mix)
-					midi.keyPitch = chanControls.tuning[newKey];
+					midi.keyPitch = chanControls.tuning[newKey] - chanControls.centsOffset;
 					midi.velocity = newVelocity;
 
 					doNoteOn(midi);
