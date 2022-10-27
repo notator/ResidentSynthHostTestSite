@@ -678,7 +678,6 @@ WebMIDI.residentSynth = (function(window)
 		getTuningGroups = function(tuningsFactory)
 		{
 			let tuningGroupDefs = WebMIDI.tuningDefs,
-				tuningGroups = [],
 				wmtg = WebMIDI.tuningConstructors;
 
 			if(tuningGroupDefs === undefined || tuningGroupDefs.length === 0)
@@ -776,8 +775,6 @@ WebMIDI.residentSynth = (function(window)
 					tuningGroups.push(tuningGroup);
 				}
 			}
-
-			return tuningGroups;
 		},
 
 		/*****************************************/
@@ -816,6 +813,11 @@ WebMIDI.residentSynth = (function(window)
 
 			channelControls[channel].tuning = tuningGroups[tuningGroupIndex][tuningIndex];
 		},
+		updateCentsOffset = function(channel, centsOffset)
+		{
+			channelControls[channel].centsOffset = centsOffset;
+
+        },
 
 		updateAftertouch = function(channel, key, value)
 		{
@@ -1024,7 +1026,7 @@ WebMIDI.residentSynth = (function(window)
 
 			midi.preset = preset;
 			midi.offKey = key; // the note stops when the offKey's noteOff arrives
-			midi.keyPitch = chanControls.tuning[key];
+			midi.keyPitch = chanControls.tuning[key] - chanControls.centsOffset;
 			midi.velocity = velocity;
 
 			doNoteOn(midi);
@@ -1082,6 +1084,7 @@ WebMIDI.residentSynth = (function(window)
 
 			updateFontIndex(channel, 0); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
 			updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
+			updateCentsOffset(channel, 0); // centsOffset will be subtracted from the key's midiCents value in NoteOn. 
 
 			updatePitchWheel(channel, pitchWheelDefaultValue, pitchWheelDefaultValue);
 			updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
@@ -1128,6 +1131,10 @@ WebMIDI.residentSynth = (function(window)
 			{
 				updateTuning(channel, state.tuningIndex);
 			}
+			if(state.centsOffset !== undefined)
+			{
+				updateCentsOffset(channel, state.centsOffset);
+            }
 
 			// set controls set by setControllerDefaults() above
 			if(state.pitchWheel !== undefined)
@@ -1253,11 +1260,11 @@ WebMIDI.residentSynth = (function(window)
 			Object.defineProperty(this, "REGPARAM_SET_MIXTURE_INDEX", { value: REGPARAM_SET_MIXTURE_INDEX, writable: false });
 
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
-			Object.defineProperty(this, "mixtures", { value: getMixtures(), writable: false });
+			Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
 			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});
-			Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(this.tuningsFactory), writable: false});
 
-			tuningGroups = this.tuningGroups;
+			getTuningGroups(this.tuningsFactory);
+			Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
 		},
 
 		API =
@@ -1290,12 +1297,12 @@ WebMIDI.residentSynth = (function(window)
 
 		for(let channel = 0; channel < 16; ++channel)
 		{
-			// set default bankIndex, presetIndex and mixtureIndex.
+			// Set default bankIndex and presetIndex.
+			// The mixture index is changed neither by this function, nor by setting the preset.
 			let channelInfo = channelControls[channel];
 
 			channelInfo.bankIndex = 0;
 			channelInfo.presetIndex = 0;   // the presetIndex argument is the index in banks[0]
-			channelInfo.mixtureIndex = undefined; // can be undefined
 		}
 
 		console.log("residentSynth WebAudioFont set.");
@@ -1581,64 +1588,6 @@ WebMIDI.residentSynth = (function(window)
 			//console.log("residentSynth PitchWheel: channel:" + channel + " data1:" + data1 + " data2:" + data2);
 			updatePitchWheel(channel, data1, data2);
 		}
-		function handleSysEx(message)
-		{
-			checkCommandExport(CMD.SYSEX);
-
-			let SYSEX = WebMIDI.constants.SYSEX;
-
-			function setTuning(tuning, message)
-			{
-				// Returns an array of keyPitch objects, each of which has a .key and .pitch attribute.
-				function getKeyPitches(message, nKeyPitches, keyPitchesStartIndex)
-				{
-					let keyPitches = [],
-						index = keyPitchesStartIndex;
-
-					for(let keyIndex = 0; keyIndex < nKeyPitches; keyIndex++)
-					{
-						let keyPitch = {},
-							key = message[index++],
-							basePitch = message[index++],
-							data1 = message[index++],
-							data2 = message[index++],
-							// data1 and data2 encode cents * 16384
-							cents = ((data2 & 0x7f) | ((data1 & 0x7f) << 7)) / 16384;
-
-						console.assert(cents >= 0 && cents < 1, "Error");
-
-						keyPitch.key = key;
-						keyPitch.pitch = basePitch + cents;
-
-						keyPitches.push(keyPitch);
-					}
-
-					return keyPitches;
-				}
-
-				let keyPitches = getKeyPitches(message, message[6], 7);
-
-				for(var i = 0; i < keyPitches.length; i++)
-				{
-					tuning[keyPitches[i].key] = keyPitches[i].pitch;
-				}
-			}
-
-			if(message[0] === CMD.SYSEX
-				&& message[1] === SYSEX.NON_REAL_TIME
-				&& message[2] === SYSEX.RESEARCH_DEVICE_ID
-				&& message[3] === SYSEX.MIDI_TUNING
-				&& message[4] === SYSEX.MIDI_TUNING_NOTE_CHANGES_NON_REAL_TIME_BANK
-				&& message[message.length - 1] === SYSEX.END_OF_MESSAGE)
-			{
-				let channel = message[5];
-				setTuning(channelControls[channel].tuning, message);
-			}
-			else
-			{
-				console.log("Unknown SysEx message.");
-			}
-		}
 
 		switch(command)
 		{
@@ -1665,13 +1614,32 @@ WebMIDI.residentSynth = (function(window)
 				handlePitchWheel(channel, data1, data2);
 				break;
 			case CMD.SYSEX:
-				handleSysEx(messageData);
+				//handleSysEx(messageData);
 				break;
 			default:
 				console.assert(false, "Illegal command.");
 				break;
 		}
 	};
+
+	// sets the channel's tuning to the tuning at tuningGroups[tuningGroupIndex][tuningIndex]
+	ResidentSynth.prototype.setTuning = function(channel, tuningGroupIndex, tuningIndex)
+	{
+		if(tuningGroupIndex >= tuningGroups.length || tuningIndex >= tuningGroups[tuningGroupIndex].length)
+		{
+			throw "index out of range.";
+		}
+
+		channelControls[channel].tuning = tuningGroups[tuningGroupIndex][tuningIndex];
+	};
+
+	// sets the channel's centsOffset. centsOffset/100 will be subtracted from the tuning[key] value when executing noteOn.
+	ResidentSynth.prototype.setCentsOffset = function(channel, centsOffset)
+	{
+		channelControls[channel].centsOffset = centsOffset / 100;
+	};
+
+
 
 	// see close() above...
 	ResidentSynth.prototype.disconnect = function()
