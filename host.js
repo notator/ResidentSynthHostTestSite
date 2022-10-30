@@ -614,7 +614,7 @@ WebMIDI.host = (function(document)
                 A4FrequencySelect = getElem("A4FrequencySelect"),
                 centsOffset = A4FrequencySelect[A4FrequencySelect.selectedIndex].centsOffset;
 
-            synth.setCentsOffset(channel, centsOffset); // replace by midi message
+            synth.setCentsOffset(channel, centsOffset); // replace this function by midi registered parameter messages (master tuning)
 
             hostChannelState.A4FrequencySelectIndex = A4FrequencySelect.selectedIndex;
         },
@@ -796,6 +796,21 @@ WebMIDI.host = (function(document)
 
                 function setA4FrequencySelect()
                 {
+                    function getDataCoarseAndFine(centsBelow440Hz)
+                    {
+                        let coarseBelow440Hz = Math.ceil(centsBelow440Hz / 100),
+                            fine = Math.round(100 - centsBelow440Hz);
+
+                        while(fine >= 100)
+                        {
+                            fine -= 100;
+                        }
+
+                        let coarse = 64 - coarseBelow440Hz; // 440HZ is coarse = 64
+
+                        return {coarse, fine};
+                    }
+
                     let A4FrequencySelectCell = getElem("A4FrequencySelectCell"),
                         A4FrequencySelect = getElem("A4FrequencySelect"),
                         input = document.createElement("input"),
@@ -804,11 +819,19 @@ WebMIDI.host = (function(document)
                     for(var frequency = 440; frequency > 408; frequency -= 2)
                     {
                         let option = document.createElement("option"),
-                            centsOffset = synth.tuningsFactory.getCents(frequency / 440) * -1;
+                            centsOffset = synth.tuningsFactory.getCents(440 / frequency);
 
-                        centsOffset = (centsOffset === -0) ? 0 : centsOffset; // clean up javascript's -0...
+                        // Replace centsOffset by the data coarse and fine values for RPN master tuning
+                        // onA4FrequencySelectChanged first sends RPN _master_tuning_ COARSE and FINE,
+                        // then sends these data coarse and fine values in DATA_ENTRY_COARSE and _FINE messages.
+                        // -- begin new
+                        let data = getDataCoarseAndFine(centsOffset);
+                        option.dataCoarse = data.coarse;
+                        option.dataFine = data.fine;
+                        // -- end new
+
                         option.innerHTML = frequency.toString();
-                        option.centsOffset = Math.round(centsOffset);
+                        option.centsOffset = Math.round(centsOffset); // delete
                         optionsArray.push(option);
                     }
 

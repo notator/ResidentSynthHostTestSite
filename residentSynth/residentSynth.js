@@ -1639,8 +1639,6 @@ WebMIDI.residentSynth = (function(window)
 		channelControls[channel].centsOffset = centsOffset / 100;
 	};
 
-
-
 	// see close() above...
 	ResidentSynth.prototype.disconnect = function()
 	{
