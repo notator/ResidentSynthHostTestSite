@@ -858,23 +858,6 @@ WebMIDI.residentSynth = (function(window)
 
 			channelControls[channel].pitchWheel14Bit = pitchWheel14Bit; // for new noteOns
 		},
-		updatePitchWheelSensitivity = function(channel, semitones)
-		{
-			let currentNoteOns = controls.currentNoteOns;
-			if(currentNoteOns !== undefined && currentNoteOns.length > 0) // required for sounding notes
-			{
-				let pitchWheel14Bit = channelControls[channel].pitchWheel14Bit,
-					nNoteOns = currentNoteOns.length;
-
-				for(let i = 0; i < nNoteOns; ++i)
-				{
-					currentNoteOns[i].pitchWheelSensitivity = semitones; // 0..127 semitones
-					currentNoteOns[i].updatePitchWheel(pitchWheel14Bit);
-				}
-			}
-
-			channelControls[channel].pitchWheelSensitivity = semitones; // for new noteOns
-		},
 		// The value argument is in range [0..127], meaning not modulated to as modulated as possible.
 		// The frequency of the modMode depends on the frequency of the note...
 		updateModWheel = function(channel, value)
@@ -917,42 +900,24 @@ WebMIDI.residentSynth = (function(window)
 			channelAudioNodes[channel].reverberator.setValueAtTime(reverberation, audioContext.currentTime);
 		},
 
-		// This function must always be called immediately before calling ResidentSynth.prototype.dataEntry(...)
-		registeredParameterCoarse = function(channel, value)
+		updatePitchWheelSensitivity = function(channel, semitones)
 		{
-			channelControls[channel].registeredParameterCoarse = value;
-		},
-		registeredParameterFine = function(channel, value)
-		{
-			channelControls[channel].registeredParameterFine = value;
-		},
-		// ResidentSynth.prototype.registeredParameterCoarse must always be called immediately before calling this function.
-		dataEntryCoarse = function(channel, value)
-		{
-			switch(channelControls[channel].registeredParameterCoarse)
+			let currentNoteOns = controls.currentNoteOns;
+			if(currentNoteOns !== undefined && currentNoteOns.length > 0) // required for sounding notes
 			{
-				case CTL.DATA_ENTRY_COARSE_PITCHWHEEL_SENSITIVITY:
-					let semitones = value;
-					updatePitchWheelSensitivity(channel, semitones);
-					break;
-				default:
-					console.assert(false, "Unknown registered parameter.");
-					break;
+				let pitchWheel14Bit = channelControls[channel].pitchWheel14Bit,
+					nNoteOns = currentNoteOns.length;
+
+				for(let i = 0; i < nNoteOns; ++i)
+				{
+					currentNoteOns[i].pitchWheelSensitivity = semitones; // 0..127 semitones
+					currentNoteOns[i].updatePitchWheel(pitchWheel14Bit);
+				}
 			}
+
+			channelControls[channel].pitchWheelSensitivity = semitones; // for new noteOns
 		},
-		dataEntryFine = function(channel, value)
-		{
-			//switch(channelControls[channel].registeredParameterFine)
-			//{
-			//	case REGPARAM_SET_PITCHWHEEL_SENSITIVITY:
-			//		let semitones = value;
-			//		updatePitchWheelSensitivity(channel, semitones);
-			//		break;
-			//	default:
-			//		console.assert(false, "Unknown registered parameter.");
-			//		break;
-			//}
-		},
+
 		allSoundOff = function(channel)
 		{
 			function reconnectChannelInput()
@@ -1086,7 +1051,7 @@ WebMIDI.residentSynth = (function(window)
 		// This command sets the pitchWheel, pitchWheelSensitivity, modWheel, volume, pan and reverberation controllers
 		// to their default values, but does *not* reset the current aftertouch or channelPressure.
 		// Aftertouch and channelPressure start at 0, when each note is created. (channelPressure is not yet implemented.)
-		setControllerDefaults = function(that, channel)
+		setControllerDefaults = function(channel)
 		{
 			let constants = WebMIDI.constants,
 				controlDefaultValue = constants.controlDefaultValue,
@@ -1113,7 +1078,7 @@ WebMIDI.residentSynth = (function(window)
 
 			updateFontIndex(channel, 0); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
 			updateTuningGroupIndex(channel, 0); // sets channelControl.tuning to the first tuning in the group.
-			setControllerDefaults(this, channel);
+			setControllerDefaults(channel);
 
 			let state = WebMIDI.stateDefs[stateIndex];
 			// set preset and tuning
@@ -1207,10 +1172,6 @@ WebMIDI.residentSynth = (function(window)
 				CTL.PAN,
 				CTL.MIXTURE_INDEX, // custom control
 				CTL.REVERBERATION,
-				CTL.REGISTERED_PARAMETER_COARSE,
-				CTL.DATA_ENTRY_COARSE,
-				CTL.REGISTERED_PARAMETER_FINE,
-				CTL.DATA_ENTRY_FINE,
 
 				// standard 2-byte controllers.
 				CTL.ALL_CONTROLLERS_OFF,
@@ -1270,7 +1231,7 @@ WebMIDI.residentSynth = (function(window)
 
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
 			Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
-			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});
+			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});		
 
 			getTuningGroups(this.tuningsFactory);
 			Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
@@ -1352,15 +1313,15 @@ WebMIDI.residentSynth = (function(window)
         channelAudioNodes.finalGainNode = audioContext.createGain();
         channelAudioNodes.finalGainNode.connect(audioContext.destination);
 
-		for(var i = 0; i < 16; i++)
+		for(var channel = 0; channel < 16; channel++)
 		{
 			channelAudioNodes.push(audioNodesConfig(audioContext, channelAudioNodes.finalGainNode));
 
 			let controlState = {};
 			channelControls.push(controlState);
-			setControllerDefaults(this, i);
+			setControllerDefaults(channel);
 
-			channelControls[i].currentNoteOns = [];
+			channelControls[channel].currentNoteOns = [];
 		}
 
 		this.setSoundFont(this.webAudioFonts[0]);
@@ -1507,40 +1468,13 @@ WebMIDI.residentSynth = (function(window)
 				// console.log("residentSynth AllControllersOff: channel:" + channel);
 
 				allSoundOff(channel);
-				setControllerDefaults(this, channel);
+				setControllerDefaults(channel);
 			}
 			function setAllSoundOff(channel)
 			{
 				checkControlExport(CTL.ALL_SOUND_OFF);
 				// console.log("residentSynth AllSoundOff: channel:" + channel);
 				allSoundOff(channel);
-			}
-
-			// This function must always be called immediately before calling setDataEntry(...).
-			function setRegisteredParameterCoarse(channel, value)
-			{
-				checkControlExport(CTL.REGISTERED_PARAMETER_COARSE);
-				// console.log("residentSynth RegisteredParameter: channel:" + channel + " value:" + value);
-				registeredParameterCoarse(channel, value);
-			}
-			function setRegisteredParameterFine(channel, value)
-			{
-				checkControlExport(CTL.REGISTERED_PARAMETER_FINE);
-				// console.log("residentSynth RegisteredParameter: channel:" + channel + " value:" + value);
-				registeredParameterFine(channel, value);
-			}
-			// setRegisteredParameter(...) must always be called immediately before calling this function.
-			function setDataEntryCoarse(channel, value)
-			{
-				checkControlExport(CTL.DATA_ENTRY_COARSE);
-				// console.log("residentSynth DataEntry: channel:" + channel + " value:" + semitones);
-				dataEntryCoarse(channel, value);
-			}
-			function setDataEntryFine(channel, value)
-			{
-				checkControlExport(CTL.DATA_ENTRY_FINE);
-				// console.log("residentSynth DataEntry: channel:" + channel + " value:" + semitones);
-				dataEntryFine(channel, value);
 			}
 
 			checkCommandExport(CMD.CONTROL_CHANGE);
@@ -1573,20 +1507,6 @@ WebMIDI.residentSynth = (function(window)
 					break;
 				case CTL.ALL_SOUND_OFF:
 					setAllSoundOff(channel);
-					break;
-				// CTL.REGISTERED_PARAMETER_COARSE is always set immediately before setting CTL.DATA_ENTRY_COARSE.
-				case CTL.REGISTERED_PARAMETER_COARSE:
-					setRegisteredParameterCoarse(channel, data2);
-					break;
-				case CTL.REGISTERED_PARAMETER_FINE:
-					setRegisteredParameterFine(channel, data2);
-					break;
-				// CTL.REGISTERED_PARAMETER_FINE is always set immediately before setting CTL.DATA_ENTRY_FINE.
-				case CTL.DATA_ENTRY_COARSE:
-					setDataEntryCoarse(channel, data2);
-					break;
-				case CTL.DATA_ENTRY_FINE:
-					setDataEntryFine(channel, data2);
 					break;
 
 				default:
@@ -1647,6 +1567,11 @@ WebMIDI.residentSynth = (function(window)
 				console.assert(false, "Illegal command.");
 				break;
 		}
+	};
+
+	ResidentSynth.prototype.updatePitchWheelSensitivity = function(channel, semitones)
+	{
+		updatePitchWheelSensitivity(channel, semitones);		
 	};
 
 	// sets the channel's tuning to the tuning at tuningGroups[tuningGroupIndex][tuningIndex]

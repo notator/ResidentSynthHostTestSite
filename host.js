@@ -44,7 +44,7 @@ WebMIDI.host = (function(document)
                 case CMD.AFTERTOUCH:
                 case CMD.CONTROL_CHANGE:
                 case CMD.PITCHWHEEL:
-                    message = new Uint8Array([status, data1, data2]); // data1 can be RegisteredParameter or DataEntry controls
+                    message = new Uint8Array([status, data1, data2]);
                     break;
                 case CMD.PRESET:
                 case CMD.CHANNEL_PRESSURE:
@@ -131,15 +131,11 @@ WebMIDI.host = (function(document)
                 {
                     let longInputControls = allLongInputControls.filter(elem => elem.numberInputElem.ccIndex === ccIndex);
 
-                    // longInputControls.length will be > 1 if there is more than one regParam control.
+                    // longInputControls.length will be > 1 if there is more than one control has no ccIndex.
                     // This function simply updates all the regParam controls even though only one of them has changed.
                     for(var i = 0; i < longInputControls.length; i++)
                     {
                         let longInputControl = longInputControls[i];
-                        if(ccIndex === WebMIDI.constants.CONTROL.DATA_ENTRY)
-                        {
-                            console.assert(longInputControl.numberInputElem.regParam !== undefined);
-                        }
 
                         longInputControl.setValue(ccValue);
                     }
@@ -796,21 +792,6 @@ WebMIDI.host = (function(document)
 
                 function setA4FrequencySelect()
                 {
-                    function getDataCoarseAndFine(centsBelow440Hz)
-                    {
-                        let coarseBelow440Hz = Math.ceil(centsBelow440Hz / 100),
-                            fine = Math.round(100 - centsBelow440Hz);
-
-                        while(fine >= 100)
-                        {
-                            fine -= 100;
-                        }
-
-                        let coarse = 64 - coarseBelow440Hz; // 440HZ is coarse = 64
-
-                        return {coarse, fine};
-                    }
-
                     let A4FrequencySelectCell = getElem("A4FrequencySelectCell"),
                         A4FrequencySelect = getElem("A4FrequencySelect"),
                         input = document.createElement("input"),
@@ -821,17 +802,8 @@ WebMIDI.host = (function(document)
                         let option = document.createElement("option"),
                             centsOffset = synth.tuningsFactory.getCents(440 / frequency);
 
-                        // Replace centsOffset by the data coarse and fine values for RPN master tuning
-                        // onA4FrequencySelectChanged first sends RPN _master_tuning_ COARSE and FINE,
-                        // then sends these data coarse and fine values in DATA_ENTRY_COARSE and _FINE messages.
-                        // -- begin new
-                        let data = getDataCoarseAndFine(centsOffset);
-                        option.dataCoarse = data.coarse;
-                        option.dataFine = data.fine;
-                        // -- end new
-
                         option.innerHTML = frequency.toString();
-                        option.centsOffset = Math.round(centsOffset); // delete
+                        option.centsOffset = Math.round(centsOffset);
                         optionsArray.push(option);
                     }
 
@@ -1175,19 +1147,16 @@ WebMIDI.host = (function(document)
                                     sendLongControl(ccIndex, value);
                                 }
 
-                                // only uses DATA_ENTRY_COARSE
-                                function onRegParamControlInputChanged(event)
+                                function onPitchWheelSensitivityControlChanged(event)
                                 {
                                     var target = (event === undefined) ? this : event.currentTarget,
-                                        value = target.valueAsNumber,
-                                        regParamIndex = target.regParam;
+                                        value = target.valueAsNumber;
 
                                     target.twinInputElem.value = value;
 
                                     setHostChannelStateFromLongControl(target.parentElement, value);
 
-                                    sendLongControl(WebMIDI.constants.CONTROL.REGISTERED_PARAMETER_COARSE, regParamIndex);
-                                    sendLongControl(WebMIDI.constants.CONTROL.DATA_ENTRY_COARSE, value);
+                                    synth.updatePitchWheelSensitivity(currentChannel, value);
                                 }
 
                                 function onSendControlAgainButtonClick(event)
@@ -1199,15 +1168,12 @@ WebMIDI.host = (function(document)
                                     sendLongControl(ccIndex, value);
                                 }
 
-                                // only uses DATA_ENTRY_COARSE
-                                function onSendRegParamControlAgainButtonClick(event)
+                                function onPitchWheelSensitivityControlChangedAgain(event)
                                 {
                                     var numberInputElem = event.currentTarget.numberInputElem,                               
-                                        regParamIndex = numberInputElem.regParam,
                                         value = numberInputElem.valueAsNumber;
 
-                                    sendLongControl(WebMIDI.constants.CONTROL.REGISTERED_PARAMETER_COARSE, regParamIndex);
-                                    sendLongControl(WebMIDI.constants.CONTROL.DATA_ENTRY_COARSE, value);
+                                    synth.updatePitchWheelSensitivity(currentChannel, value);
                                 }
 
                                 let longInputControlTD = getBasicLongInputControl(tr, name, defaultValue, ccString);
@@ -1222,19 +1188,11 @@ WebMIDI.host = (function(document)
                                     longInputControlTD.numberInputElem.onchange = onControlInputChanged;
                                     longInputControlTD.buttonInputElem.onclick = onSendControlAgainButtonClick;
                                 }
-                                else if(regParam !== undefined)
-                                {
-                                    longInputControlTD.regParam = regParam;
-                                    longInputControlTD.rangeInputElem.regParam = regParam;
-                                    longInputControlTD.numberInputElem.regParam = regParam;
-
-                                    longInputControlTD.rangeInputElem.onchange = onRegParamControlInputChanged;
-                                    longInputControlTD.numberInputElem.onchange = onRegParamControlInputChanged;
-                                    longInputControlTD.buttonInputElem.onclick = onSendRegParamControlAgainButtonClick;
-                                }
                                 else
                                 {
-                                    console.error("Either ccIndex or regParam must be defined, but not both.");
+                                    longInputControlTD.rangeInputElem.onchange = onPitchWheelSensitivityControlChanged;
+                                    longInputControlTD.numberInputElem.onchange = onPitchWheelSensitivityControlChanged;
+                                    longInputControlTD.buttonInputElem.onclick = onPitchWheelSensitivityControlChangedAgain;
                                 }
 
                                 allLongInputControls.push(longInputControlTD);
@@ -1284,21 +1242,6 @@ WebMIDI.host = (function(document)
                                     return info;
                                 }
 
-                                function getRegParamControlInfo(name, defaultValue, regParam)
-                                {
-                                    let info = {};
-
-                                    info.name = name;
-                                    info.defaultValue = defaultValue;
-                                    info.regParam = regParam;
-
-                                    info.ccIndex = WebMIDI.constants.CONTROL.DATA_ENTRY; // this will be the same for all RegParam controls
-                                    info.ccString = ""; // this will be the same for all RegParam controls
-
-                                    return info;
-
-                                }
-
                                 let constants = WebMIDI.constants,
                                     ctl = constants.CONTROL,
                                     modWheelData = getStandardControlInfo(constants, ctl.MODWHEEL),
@@ -1307,10 +1250,7 @@ WebMIDI.host = (function(document)
                                     reverberationData = getStandardControlInfo(constants, ctl.REVERBERATION),
                                     allControllersOff = getStandardControlInfo(constants, ctl.ALL_CONTROLLERS_OFF),
                                     allSoundOff = getStandardControlInfo(constants, ctl.ALL_SOUND_OFF),
-                                    pitchWheelSensitivityData =
-                                        getRegParamControlInfo("pitchWheelSensitivity",
-                                            constants.MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY,
-                                            constants.CONTROL.DATA_ENTRY_COARSE_PITCHWHEEL_SENSITIVITY),
+                                    pitchWheelSensitivityData = {name: "pitchWheelSensitivity", defaultValue: 2},
                                     controlInfos = [];
 
                                 controlInfos.push(modWheelData);
