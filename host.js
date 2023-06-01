@@ -1175,19 +1175,19 @@ WebMIDI.host = (function(document)
                                     sendLongControl(ccIndex, value);
                                 }
 
+                                // only uses DATA_ENTRY_COARSE
                                 function onRegParamControlInputChanged(event)
                                 {
                                     var target = (event === undefined) ? this : event.currentTarget,
                                         value = target.valueAsNumber,
-                                        ccIndex = target.ccIndex,
                                         regParamIndex = target.regParam;
 
                                     target.twinInputElem.value = value;
 
                                     setHostChannelStateFromLongControl(target.parentElement, value);
 
-                                    sendLongControl(WebMIDI.constants.CONTROL.REGISTERED_PARAMETER, regParamIndex);
-                                    sendLongControl(ccIndex, value);
+                                    sendLongControl(WebMIDI.constants.CONTROL.REGISTERED_PARAMETER_COARSE, regParamIndex);
+                                    sendLongControl(WebMIDI.constants.CONTROL.DATA_ENTRY_COARSE, value);
                                 }
 
                                 function onSendControlAgainButtonClick(event)
@@ -1199,36 +1199,42 @@ WebMIDI.host = (function(document)
                                     sendLongControl(ccIndex, value);
                                 }
 
+                                // only uses DATA_ENTRY_COARSE
                                 function onSendRegParamControlAgainButtonClick(event)
                                 {
-                                    var numberInputElem = event.currentTarget.numberInputElem,
-                                        ccIndex = numberInputElem.ccIndex,
+                                    var numberInputElem = event.currentTarget.numberInputElem,                               
                                         regParamIndex = numberInputElem.regParam,
                                         value = numberInputElem.valueAsNumber;
 
-                                    sendLongControl(WebMIDI.constants.CONTROL.REGISTERED_PARAMETER, regParamIndex);
-                                    sendLongControl(ccIndex, value);
+                                    sendLongControl(WebMIDI.constants.CONTROL.REGISTERED_PARAMETER_COARSE, regParamIndex);
+                                    sendLongControl(WebMIDI.constants.CONTROL.DATA_ENTRY_COARSE, value);
                                 }
 
                                 let longInputControlTD = getBasicLongInputControl(tr, name, defaultValue, ccString);
 
-                                longInputControlTD.ccIndex = ccIndex;
-                                longInputControlTD.rangeInputElem.ccIndex = ccIndex;
-                                longInputControlTD.numberInputElem.ccIndex = ccIndex;
-
-                                if(regParam === undefined)
+                                if(ccIndex !== undefined)
                                 {
+                                    longInputControlTD.ccIndex = ccIndex;
+                                    longInputControlTD.rangeInputElem.ccIndex = ccIndex;
+                                    longInputControlTD.numberInputElem.ccIndex = ccIndex;
+
                                     longInputControlTD.rangeInputElem.onchange = onControlInputChanged;
                                     longInputControlTD.numberInputElem.onchange = onControlInputChanged;
                                     longInputControlTD.buttonInputElem.onclick = onSendControlAgainButtonClick;
                                 }
-                                else
+                                else if(regParam !== undefined)
                                 {
+                                    longInputControlTD.regParam = regParam;
                                     longInputControlTD.rangeInputElem.regParam = regParam;
                                     longInputControlTD.numberInputElem.regParam = regParam;
+
                                     longInputControlTD.rangeInputElem.onchange = onRegParamControlInputChanged;
                                     longInputControlTD.numberInputElem.onchange = onRegParamControlInputChanged;
                                     longInputControlTD.buttonInputElem.onclick = onSendRegParamControlAgainButtonClick;
+                                }
+                                else
+                                {
+                                    console.error("Either ccIndex or regParam must be defined, but not both.");
                                 }
 
                                 allLongInputControls.push(longInputControlTD);

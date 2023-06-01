@@ -922,14 +922,18 @@ WebMIDI.residentSynth = (function(window)
 		},
 
 		// This function must always be called immediately before calling ResidentSynth.prototype.dataEntry(...)
-		registeredParameter = function(channel, value)
+		registeredParameterCoarse = function(channel, value)
 		{
-			channelControls[channel].registeredParameter = value;
+			channelControls[channel].registeredParameterCoarse = value;
 		},
-		// ResidentSynth.prototype.registeredParameter must always be called immediately before calling this function.
-		dataEntry = function(channel, value)
+		registeredParameterFine = function(channel, value)
 		{
-			switch(channelControls[channel].registeredParameter)
+			channelControls[channel].registeredParameterFine = value;
+		},
+		// ResidentSynth.prototype.registeredParameterCoarse must always be called immediately before calling this function.
+		dataEntryCoarse = function(channel, value)
+		{
+			switch(channelControls[channel].registeredParameterCoarse)
 			{
 				case REGPARAM_SET_PITCHWHEEL_SENSITIVITY:
 					let semitones = value;
@@ -942,6 +946,22 @@ WebMIDI.residentSynth = (function(window)
 					console.assert(false, "Unknown registered parameter.");
 					break;
 			}
+		},
+		dataEntryFine = function(channel, value)
+		{
+			//switch(channelControls[channel].registeredParameterFine)
+			//{
+			//	case REGPARAM_SET_PITCHWHEEL_SENSITIVITY:
+			//		let semitones = value;
+			//		updatePitchWheelSensitivity(channel, semitones);
+			//		break;
+			//	case REGPARAM_SET_MIXTURE_INDEX:
+			//		channelControls[channel].mixtureIndex = value;
+			//		break;
+			//	default:
+			//		console.assert(false, "Unknown registered parameter.");
+			//		break;
+			//}
 		},
 		allSoundOff = function(channel)
 		{
@@ -1508,18 +1528,30 @@ WebMIDI.residentSynth = (function(window)
 			}
 
 			// This function must always be called immediately before calling setDataEntry(...).
-			function setRegisteredParameter(channel, value)
+			function setRegisteredParameterCoarse(channel, value)
 			{
-				checkControlExport(CTL.REGISTERED_PARAMETER);
+				checkControlExport(CTL.REGISTERED_PARAMETER_COARSE);
 				// console.log("residentSynth RegisteredParameter: channel:" + channel + " value:" + value);
-				registeredParameter(channel, value);
+				registeredParameterCoarse(channel, value);
+			}
+			function setRegisteredParameterFine(channel, value)
+			{
+				checkControlExport(CTL.REGISTERED_PARAMETER_FINE);
+				// console.log("residentSynth RegisteredParameter: channel:" + channel + " value:" + value);
+				registeredParameterFine(channel, value);
 			}
 			// setRegisteredParameter(...) must always be called immediately before calling this function.
-			function setDataEntry(channel, value)
+			function setDataEntryCoarse(channel, value)
 			{
-				checkControlExport(CTL.DATA_ENTRY);
+				checkControlExport(CTL.DATA_ENTRY_COARSE);
 				// console.log("residentSynth DataEntry: channel:" + channel + " value:" + semitones);
-				dataEntry(channel, value);
+				dataEntryCoarse(channel, value);
+			}
+			function setDataEntryFine(channel, value)
+			{
+				checkControlExport(CTL.DATA_ENTRY_FINE);
+				// console.log("residentSynth DataEntry: channel:" + channel + " value:" + semitones);
+				dataEntryFine(channel, value);
 			}
 
 			checkCommandExport(CMD.CONTROL_CHANGE);
@@ -1553,13 +1585,19 @@ WebMIDI.residentSynth = (function(window)
 				case CTL.ALL_SOUND_OFF:
 					setAllSoundOff(channel);
 					break;
-				// CTL.REGISTERED_PARAMETER is always set immediately before setting CTL.DATA_ENTRY.
-				case CTL.REGISTERED_PARAMETER:
-					setRegisteredParameter(channel, data2);
+				// CTL.REGISTERED_PARAMETER_COARSE is always set immediately before setting CTL.DATA_ENTRY_COARSE.
+				case CTL.REGISTERED_PARAMETER_COARSE:
+					setRegisteredParameterCoarse(channel, data2);
 					break;
-				// CTL.REGISTERED_PARAMETER is always set immediately before setting CTL.DATA_ENTRY.
-				case CTL.DATA_ENTRY:
-					setDataEntry(channel, data2);
+				case CTL.REGISTERED_PARAMETER_FINE:
+					setRegisteredParameterFine(channel, data2);
+					break;
+				// CTL.REGISTERED_PARAMETER_FINE is always set immediately before setting CTL.DATA_ENTRY_FINE.
+				case CTL.DATA_ENTRY_COARSE:
+					setDataEntryCoarse(channel, data2);
+					break;
+				case CTL.DATA_ENTRY_FINE:
+					setDataEntryFine(channel, data2);
 					break;
 
 				default:
