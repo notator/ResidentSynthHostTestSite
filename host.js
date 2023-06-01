@@ -31,6 +31,28 @@ WebMIDI.host = (function(document)
             return document.getElementById(elemID);
         },
 
+        setAudioOutputDeviceSelect = async function()
+        {
+            const permission = await navigator.permissions.query({name: "microphone"});
+            if(permission.state == "prompt")
+            {
+                alert("More audio outputs are available when user grants access to the mic");
+                // More audio outputs are available when user grants access to the mic.
+                const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+                stream.getTracks().forEach((track) => track.stop());
+            }
+
+            const devices = await navigator.mediaDevices.enumerateDevices(); 
+            const AudioOutputDevices = devices.filter(device => device.kind == "audiooutput");
+
+            let audioDevices = []
+            for(let i = 0; i < AudioOutputDevices.length; i++)  
+            {
+                let audioDev = AudioOutputDevices[i];
+                audioDevices.push({name: audioDev.label, id: audioDev.deviceId});
+            }
+        },
+
         sendCommand = function(commandIndex, data1, data2)
         {
             var CMD = WebMIDI.constants.COMMAND,
@@ -1590,6 +1612,7 @@ WebMIDI.host = (function(document)
             }
             
             setupInputDevice();
+            setAudioOutputDeviceSelect();
             synth = new WebMIDI.residentSynth.ResidentSynth(); // loads definitions from synthConfig.
 			setInitialDivsDisplay();
 		},
