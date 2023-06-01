@@ -33,6 +33,12 @@ WebMIDI.residentSynth = (function(window)
 		mixtures = [], // initialized by getMixtures()
 		tuningGroups = [],
 
+		// see: https://developer.chrome.com/blog/audiocontext-setsinkid/
+		setAudioOutputDevice = async function(deviceId)
+		{
+			await audioContext.setSinkId(deviceId);
+		},	
+
 		// returns a three character string representing the index
 		getIndexString = function(index)
 		{
@@ -1589,6 +1595,11 @@ WebMIDI.residentSynth = (function(window)
 	ResidentSynth.prototype.setCentsOffset = function(channel, centsOffset)
 	{
 		channelControls[channel].centsOffset = centsOffset / 100;
+	};
+
+	ResidentSynth.prototype.setAudioOutputDevice = function(deviceId)
+	{
+		setAudioOutputDevice(deviceId);
 	};
 
 	// see close() above...

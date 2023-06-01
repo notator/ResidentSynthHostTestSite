@@ -31,28 +31,6 @@ WebMIDI.host = (function(document)
             return document.getElementById(elemID);
         },
 
-        setAudioOutputDeviceSelect = async function()
-        {
-            const permission = await navigator.permissions.query({name: "microphone"});
-            if(permission.state == "prompt")
-            {
-                alert("More audio outputs are available when user grants access to the mic");
-                // More audio outputs are available when user grants access to the mic.
-                const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-                stream.getTracks().forEach((track) => track.stop());
-            }
-
-            const devices = await navigator.mediaDevices.enumerateDevices(); 
-            const AudioOutputDevices = devices.filter(device => device.kind == "audiooutput");
-
-            let audioDevices = []
-            for(let i = 0; i < AudioOutputDevices.length; i++)  
-            {
-                let audioDev = AudioOutputDevices[i];
-                audioDevices.push({name: audioDev.label, id: audioDev.deviceId});
-            }
-        },
-
         sendCommand = function(commandIndex, data1, data2)
         {
             var CMD = WebMIDI.constants.COMMAND,
@@ -218,7 +196,7 @@ WebMIDI.host = (function(document)
                             volumeLongControl = getElem("volumeLongControl"),
                             panLongControl = getElem("panLongControl"),
                             reverberationLongControl = getElem("reverberationLongControl"),
-                            pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");                        
+                            pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");
 
                         resetFontsAndTuningsSelects(fontSelect, mixtureSelect, tuningGroupSelect); // resets host GUI selects (and sends messages to synth)
                         sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF); // resets host GUI sliders (and sends messages to synth)
@@ -241,7 +219,7 @@ WebMIDI.host = (function(document)
                                 state.presetIndex = currentPreset.presetIndex;
                             }
                             // N.B.: presetIndex is re the _bank_, not the original MIDI preset index.
-                            presetSelect.selectedIndex = findIndex(presetSelect.options, state.bankIndex, state.presetIndex);                           
+                            presetSelect.selectedIndex = findIndex(presetSelect.options, state.bankIndex, state.presetIndex);
                             onPresetSelectChanged();
                         }
                         if(state.mixtureSelectIndex !== undefined)
@@ -403,16 +381,27 @@ WebMIDI.host = (function(document)
         // exported
         onInputDeviceSelectChanged = function()
         {
-            let ids = getElem("inputDeviceSelect");
+            let inputDeviceSelect = getElem("inputDeviceSelect");
 
-            if(ids.selectedIndex > 0)
+            if(inputDeviceSelect.selectedIndex > 0)
             {
-                setInputDeviceEventListener(ids);
+                setInputDeviceEventListener(inputDeviceSelect);
             }
             else
             {
                 inputDevice = null;
             }
+        },
+
+        // exported
+        // See: https://developer.chrome.com/blog/audiocontext-setsinkid/
+        onAudioOutputSelectChanged = function()
+        {
+            let audioOutputSelect = getElem("audioOutputSelect"),
+                option = audioOutputSelect.options[audioOutputSelect.selectedIndex],
+                deviceId = (option.deviceId === "default") ? "" : option.deviceId;
+
+            synth.setAudioOutputDevice(deviceId);
         },
 
         // Called by 'gitHub' and 'website' buttons
@@ -1598,6 +1587,32 @@ WebMIDI.host = (function(document)
 
                 navigator.requestMIDIAccess().then(onSuccessCallback, onErrorCallback);
             }
+
+            async function setAudioOutputDeviceSelect()
+            {
+                const permission = await navigator.permissions.query({name: "microphone"});
+                if(permission.state == "prompt")
+                {
+                    alert("More audio outputs are available when user grants access to the mic");
+                    // More audio outputs are available when user grants access to the mic.
+                    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+                    stream.getTracks().forEach((track) => track.stop());
+                }
+
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const AudioOutputDevices = devices.filter(device => device.kind == "audiooutput");
+
+                let audioOutputSelect = getElem("audioOutputSelect");
+                for(let i = 0; i < AudioOutputDevices.length; i++)  
+                {
+                    let audioDev = AudioOutputDevices[i]
+                    let option = document.createElement("option");
+                    option.text = audioDev.label;
+                    option.deviceId = audioDev.deviceId;
+                    audioOutputSelect.add(option, null);                    
+                }
+            }
+
             function setInitialDivsDisplay()
             {
                 getElem("loadingMsgDiv").style.display = "none";
@@ -1620,6 +1635,7 @@ WebMIDI.host = (function(document)
 		publicAPI =
 		{
             onInputDeviceSelectChanged: onInputDeviceSelectChanged,
+            onAudioOutputSelectChanged: onAudioOutputSelectChanged,
 
 			onContinueAtStartClicked: onContinueAtStartClicked,
 

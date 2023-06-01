@@ -19,7 +19,7 @@
                 <span class="boldSubtitle">Input Device:</span>
                 <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="WebMIDI.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
                 <span>
-                    <span class="boldSubtitle">Output Device: ResidentSynth</span>, channel:
+                    <span class="boldSubtitle">ResidentSynth</span> channel:
                     <select id="channelSelect" class="valueSelector" onchange="WebMIDI.host.onChannelSelectChanged()">
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -37,7 +37,11 @@
                         <option value="13">13</option>
                         <option value="14">14</option>
                         <option value="15">15</option>
-                    </select>
+                    </select>&nbsp;&nbsp;
+                </span>
+                <span>
+                    <span class="boldSubtitle">Audio Output:</span>
+                    <select id="audioOutputSelect" class="outputDeviceSelect" onchange="WebMIDI.host.onAudioOutputSelectChanged()"></select>
                 </span>
             </p>
         </div>

@@ -62,7 +62,15 @@ hr
 .inputDeviceSelect
 {
 	font-size: 11px;
-	width: 178px;
+	width: 120px;
+	height: 18px;
+	margin-left: 0;
+}
+
+.outputDeviceSelect
+{
+	font-size: 11px;
+	width: 190px;
 	height: 18px;
 	margin-left: 0;
 }
