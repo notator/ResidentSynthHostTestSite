@@ -190,7 +190,7 @@ WebMIDI.constants = (function()
 				return ("registeredParameterFine");
 			case CONTROL.NON_REGISTERED_PARAMETER_COARSE:
 				return ("nonRegisteredParameterCoarse");
-			case CONTROL.NON_REGISTERED_PARAMETER_FINE:
+			case CONTROL.NON_REGISTERED_PARAMETER:
 				return ("nonRegisteredParameterFine");
 			case CONTROL.DATA_ENTRY_COARSE:
 				return ("dataEntryCoarse");
@@ -220,7 +220,7 @@ WebMIDI.constants = (function()
 				return (0); // 0 is pitchWheelDeviation (=cents)
 			case CONTROL.NON_REGISTERED_PARAMETER_COARSE:
 				return (0); // 0 is note-wise tuning (=semitones)
-			case CONTROL.NON_REGISTERED_PARAMETER_FINE:
+			case CONTROL.NON_REGISTERED_PARAMETER:
 				return (0); // 0 is note-wise tuning (=cents)
 			case CONTROL.DATA_ENTRY_COARSE:
 				return (2); // default pitchWheelDeviation is 2 semitones
@@ -288,8 +288,6 @@ WebMIDI.constants = (function()
 	Object.defineProperty(COMMAND, "SYSEX", { value: 0xF0, writable: false });
 
     // CONTROL
-	// Only the "coarse" versions of these controls are supported.
-	// (Moritz does not write the "fine" versions either.)
     Object.defineProperty(CONTROL, "BANK", { value: 0, writable: false });
 	Object.defineProperty(CONTROL, "MODWHEEL", { value: 1, writable: false });
 	Object.defineProperty(CONTROL, "DATA_ENTRY_COARSE", {value: 6, writable: false});
@@ -300,13 +298,22 @@ WebMIDI.constants = (function()
 	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 75, writable: false}); // Custom control: MIDI SOUND_CONTROL_6
 	Object.defineProperty(CONTROL, "SET_CHANNEL_STATE", {value: 76, writable: false}); // Custom control: MIDI SOUND_CONTROL_7
 	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false});
-	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_COARSE", {value: 101, writable: false});
+	Object.defineProperty(CONTROL, "ALL_SOUND_OFF", {value: 120, writable: false});
+	Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", {value: 121, writable: false});
+	Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});
+
+	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_COARSE", {value: 101, writable: false}); // never used (message value would always be 0)
 	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_FINE", {value: 100, writable: false});
-	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_COARSE", {value: 99, writable: false});
-	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_FINE", {value: 98, writable: false});
-    Object.defineProperty(CONTROL, "ALL_SOUND_OFF", { value: 120, writable: false });
-    Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", { value: 121, writable: false });
-	Object.defineProperty(CONTROL, "ALL_NOTES_OFF", { value: 123, writable: false });
+
+	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_COARSE", {value: 99, writable: false}); // never used (message value would always be 0)
+	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER", {value: 98, writable: false});
+
+	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_PITCHWHEEL_SENSITIVITY", {value: 0, writable: false});
+	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_MASTER_TUNING_COARSE", {value: 1, writable: false}); // never used (message value would always be 0)
+	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_MASTER_TUNING", {value: 2, writable: false});
+	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_MIXTURE_INDEX", {value: 3, writable: false});
+	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_NOTE_TUNING_COARSE", {value: 4, writable: false}); // never used (message value would always be 0)
+	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_NOTE_TUNING", {value: 5, writable: false});	
 
 	// SYSEX
 	// byte 0 is COMMAND.SYSEX (= 0xF0)
