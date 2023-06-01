@@ -302,18 +302,13 @@ WebMIDI.constants = (function()
 	Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", {value: 121, writable: false});
 	Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});
 
-	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_COARSE", {value: 101, writable: false}); // never used (message value would always be 0)
-	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_FINE", {value: 100, writable: false});
+	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_COARSE", {value: 101, writable: false}); // currently used
+	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_FINE", {value: 100, writable: false}); // currently never used (message value would always be 0)
 
 	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_COARSE", {value: 99, writable: false}); // never used (message value would always be 0)
 	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER", {value: 98, writable: false});
 
-	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_PITCHWHEEL_SENSITIVITY", {value: 0, writable: false});
-	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_MASTER_TUNING_COARSE", {value: 1, writable: false}); // never used (message value would always be 0)
-	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER_MASTER_TUNING", {value: 2, writable: false});
-	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_MIXTURE_INDEX", {value: 3, writable: false});
-	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_NOTE_TUNING_COARSE", {value: 4, writable: false}); // never used (message value would always be 0)
-	Object.defineProperty(CONTROL, "NON_REGISTERED_PARAMETER_NOTE_TUNING", {value: 5, writable: false});	
+	Object.defineProperty(CONTROL, "DATA_ENTRY_COARSE_PITCHWHEEL_SENSITIVITY", {value: 0, writable: false});	
 
 	// SYSEX
 	// byte 0 is COMMAND.SYSEX (= 0xF0)

@@ -25,9 +25,6 @@ WebMIDI.namespace('residentSynth');
 WebMIDI.residentSynth = (function(window)
 {
 	"use strict";
-	const
-		REGPARAM_SET_PITCHWHEEL_SENSITIVITY = 0,
-		REGPARAM_SET_MIXTURE_INDEX = 1;
 	let
 		audioContext,
 		banks, // set in synth.setSoundFont
@@ -816,7 +813,6 @@ WebMIDI.residentSynth = (function(window)
 		updateCentsOffset = function(channel, centsOffset)
 		{
 			channelControls[channel].centsOffset = centsOffset;
-
         },
 
 		updateAftertouch = function(channel, key, value)
@@ -887,7 +883,7 @@ WebMIDI.residentSynth = (function(window)
 
 			if(value === 0)
 			{
-				console.log("Temporary reminder: check that value===0 is innoccuous.");
+				console.log("Temporary reminder: check that value===0 is innocuous.");
 			}
 
 			let currentNoteOns = channelControls[channel].currentNoteOns;
@@ -935,12 +931,9 @@ WebMIDI.residentSynth = (function(window)
 		{
 			switch(channelControls[channel].registeredParameterCoarse)
 			{
-				case REGPARAM_SET_PITCHWHEEL_SENSITIVITY:
+				case CTL.DATA_ENTRY_COARSE_PITCHWHEEL_SENSITIVITY:
 					let semitones = value;
 					updatePitchWheelSensitivity(channel, semitones);
-					break;
-				case REGPARAM_SET_MIXTURE_INDEX:
-					channelControls[channel].mixtureIndex = value;
 					break;
 				default:
 					console.assert(false, "Unknown registered parameter.");
@@ -954,9 +947,6 @@ WebMIDI.residentSynth = (function(window)
 			//	case REGPARAM_SET_PITCHWHEEL_SENSITIVITY:
 			//		let semitones = value;
 			//		updatePitchWheelSensitivity(channel, semitones);
-			//		break;
-			//	case REGPARAM_SET_MIXTURE_INDEX:
-			//		channelControls[channel].mixtureIndex = value;
 			//		break;
 			//	default:
 			//		console.assert(false, "Unknown registered parameter.");
@@ -1217,8 +1207,10 @@ WebMIDI.residentSynth = (function(window)
 				CTL.PAN,
 				CTL.MIXTURE_INDEX, // custom control
 				CTL.REVERBERATION,
-				CTL.REGISTERED_PARAMETER,
-				CTL.DATA_ENTRY,
+				CTL.REGISTERED_PARAMETER_COARSE,
+				CTL.DATA_ENTRY_COARSE,
+				CTL.REGISTERED_PARAMETER_FINE,
+				CTL.DATA_ENTRY_FINE,
 
 				// standard 2-byte controllers.
 				CTL.ALL_CONTROLLERS_OFF,
@@ -1229,7 +1221,7 @@ WebMIDI.residentSynth = (function(window)
 		{
 			if(!(this instanceof ResidentSynth))
 			{
-				return new ResidentSynth();
+				return new ResidentSynth(midiConstants);
 			}
 
 			// WebMIDIAPI §4.6 -- MIDIPort interface
@@ -1275,9 +1267,6 @@ WebMIDI.residentSynth = (function(window)
 			let AudioContextFunc = (window.AudioContext || window.webkitAudioContext);
 
 			audioContext = new AudioContextFunc();
-
-			Object.defineProperty(this, "REGPARAM_SET_PITCHWHEEL_SENSITIVITY", { value: REGPARAM_SET_PITCHWHEEL_SENSITIVITY, writable: false });
-			Object.defineProperty(this, "REGPARAM_SET_MIXTURE_INDEX", { value: REGPARAM_SET_MIXTURE_INDEX, writable: false });
 
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
 			Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});

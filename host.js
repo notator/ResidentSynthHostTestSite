@@ -614,7 +614,7 @@ WebMIDI.host = (function(document)
                 A4FrequencySelect = getElem("A4FrequencySelect"),
                 centsOffset = A4FrequencySelect[A4FrequencySelect.selectedIndex].centsOffset;
 
-            synth.setCentsOffset(channel, centsOffset); // replace this function by midi registered parameter messages (master tuning)
+            synth.setCentsOffset(channel, centsOffset);
 
             hostChannelState.A4FrequencySelectIndex = A4FrequencySelect.selectedIndex;
         },
@@ -1310,7 +1310,7 @@ WebMIDI.host = (function(document)
                                     pitchWheelSensitivityData =
                                         getRegParamControlInfo("pitchWheelSensitivity",
                                             constants.MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY,
-                                            synth.REGPARAM_SET_PITCHWHEEL_SENSITIVITY),
+                                            constants.CONTROL.DATA_ENTRY_COARSE_PITCHWHEEL_SENSITIVITY),
                                     controlInfos = [];
 
                                 controlInfos.push(modWheelData);
