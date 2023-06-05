@@ -103,38 +103,12 @@
                     </td>
                     <td id="tuningSelectCell">
                         <!--
-                            <select id="tuningSelect" class="tuningSelect" onchange="WebMIDI.host.onTuningSelectChanged()" />
-                            sendAgainButton
-                        -->
+                        <select id="tuningSelect" class="tuningSelect" onchange="WebMIDI.host.onTuningSelectChanged()" />
+                        sendAgainButton
+                    -->
                     </td>
                     <td id="a4FrequencySelectCell">
                         <select id="a4FrequencySelect" class="a4FrequencySelect" onchange="WebMIDI.host.onA4FrequencySelectChanged()" />
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div id="triggersDiv" style="display:none">
-            <hr />
-            <table>
-                <colgroup>
-                    <col style="width:74px" />
-                    <col style="width:586px" />
-                </colgroup>
-                <tr>
-                    <td>
-                        <span class="boldSubtitle">Trigger key: </span>
-                    </td>
-                    <td align="right">
-                        <input type="button" class="exportButton" value="export state as preset" onclick="WebMIDI.host.onExportCurrentStateButtonClicked()" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <select id="triggerKeySelect" class="triggerKeySelect" onchange="WebMIDI.host.onTriggerKeySelectChanged()" />
-                        <span class="boldSubtitle"> action: </span>
-                    </td>
-                    <td id="channelStateNameCell">
-                        <!-- channel state name -->
                     </td>
                 </tr>
             </table>
@@ -144,6 +118,35 @@
             <span class="boldSubtitle">Commands and Controls:</span>
             <table id="commandsTable" class="midiMessagesTable commandsTable"></table>
             <table id="controlsTable" class="midiMessagesTable"></table>
+        </div>
+        <div id="triggersDiv" style="display:none">
+            <hr />
+            <table>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">Preset: </span>
+                    </td>
+                    <td>
+                        <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
+                    </td>
+                    <td align="right">
+                        <input type="button" class="exportButton" value="export state as preset" onclick="WebMIDI.host.onExportCurrentStateButtonClicked()" />
+                    </td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">Trigger key: </span>
+                    </td>
+                    <td>
+                        <select id="triggerKeySelect" class="triggerKeySelect" onchange="WebMIDI.host.onTriggerKeySelectChanged()" />
+                    </td>
+                    <td id="channelStateNameCell">
+                        <!-- channel state name -->
+                    </td>
+                </tr>
+            </table>
         </div>
         <div id="notesDiv" style="display:none;">
             <hr />

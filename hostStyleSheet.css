@@ -123,10 +123,18 @@ hr
 	margin: 0 4px auto auto;
 }
 
+.presetSelect
+{
+	font-size: 11px;
+	width: 488px;
+	height: 18px;
+	margin-left: 0;
+}
+
 .triggerKeySelect
 {
 	font-size: 11px;
-	width: 67px;
+	width: 40px;
 	height: 18px;
 	margin-left: 0;
 }

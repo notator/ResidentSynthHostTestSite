@@ -27,14 +27,14 @@ WebMIDI.namespace('actionDefs');
 WebMIDI.presets =
     [
         {
-            "name": "preset 0: channel=5, font=Study 2, tuning=420",
-            "channel": "5",
-            "font": "Study 2",
-            "instrument": "000:008 - Celesta (FluidR3)",
+            "name": "preset 0: (=defaults)",
+            "channel": "0",
+            "font": "Test Font",
+            "instrument": "000:016 - Drawbar Organ (FluidR3)",
             "mixture": "none",
             "tuningGroup": "constant factor tunings",
             "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
-            "a4Frequency": "420",
+            "a4Frequency": "440",
             "triggerKey": "36",
             "pitchWheel": 64,
             "modWheel": 0,
@@ -44,14 +44,14 @@ WebMIDI.presets =
             "pitchWheelSensitivity": 2
         },
         {
-            "name": "preset 1: (=defaults)",
-            "channel": "0",
-            "font": "Test Font",
-            "instrument": "000:016 - Drawbar Organ (FluidR3)",
+            "name": "preset 1: channel=5, font=Study 2, tuning=420",
+            "channel": "5",
+            "font": "Study 2",
+            "instrument": "000:008 - Celesta (FluidR3)",
             "mixture": "none",
             "tuningGroup": "constant factor tunings",
             "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
-            "a4Frequency": "440",
+            "a4Frequency": "420",
             "triggerKey": "36",
             "pitchWheel": 64,
             "modWheel": 0,
@@ -76,23 +76,23 @@ WebMIDI.presets =
             "pan": 64,
             "reverberation": 0,
             "pitchWheelSensitivity": 2
-    },
-    {
-        "name": "preset 3: Vibraphone, a4Frequency=420, pan=20",
-        "channel": "5",
-        "font": "Study 2",
-        "instrument": "000:011 - Vibraphone (FluidR3)",
-        "mixture": "none",
-        "tuningGroup": "constant factor tunings",
-        "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
-        "a4Frequency": "420",
-        "triggerKey": "36",
-        "pitchWheel": 64,
-        "modWheel": 0,
-        "volume": 100,
-        "pan": 20,
-        "reverberation": 0,
-        "pitchWheelSensitivity": 2
-    }
+        },
+        {
+            "name": "preset 3: Vibraphone, a4Frequency=420, pan=20",
+            "channel": "5",
+            "font": "Study 2",
+            "instrument": "000:011 - Vibraphone (FluidR3)",
+            "mixture": "none",
+            "tuningGroup": "constant factor tunings",
+            "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
+            "a4Frequency": "420",
+            "triggerKey": "36",
+            "pitchWheel": 64,
+            "modWheel": 0,
+            "volume": 100,
+            "pan": 20,
+            "reverberation": 0,
+            "pitchWheelSensitivity": 2
+        }
         // etc. more preset definitions can be added here.
     ];

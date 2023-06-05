@@ -21,7 +21,7 @@ WebMIDI.host = (function(document)
         synth = null,
         inputDevice = null,
         currentChannel = 0,
-        nextPresetIndex = 0,
+        nextPresetIndex = 1,
         notesAreSounding = false,
         allLongInputControls = [], // used by AllControllersOff control
 
@@ -162,7 +162,7 @@ WebMIDI.host = (function(document)
                             {
                                 throw "Unknown option."
                             }
-                            return index; 
+                            return index;
                         }
 
                         let presets = WebMIDI.presets,
@@ -226,7 +226,7 @@ WebMIDI.host = (function(document)
                         {
                             triggerKeySelect.selectedIndex = findIndexfromOptionName(triggerKeySelect, preset.triggerKey);
                             onTriggerKeySelectChanged();
-                        }                        
+                        }
                         // slider controls
                         if(preset.pitchWheel !== undefined)
                         {
@@ -254,7 +254,7 @@ WebMIDI.host = (function(document)
                         }
                     }
 
-                    setPreset(nextPresetIndex ); // sets the channel and its state in both the host and the synth
+                    setPreset(nextPresetIndex); // sets the channel and its state in both the host and the synth
 
                     nextPresetIndex = (nextPresetIndex < (WebMIDI.presets.length - 1)) ? nextPresetIndex + 1 : 0;
 
@@ -611,6 +611,11 @@ WebMIDI.host = (function(document)
             {
                 channelStateNameCell.innerHTML = "next state: " + presets[nextPresetIndex].name;
             }
+        },
+
+        onPresetSelectChanged = function()
+        {
+
         },
 
         //exported
@@ -1621,9 +1626,9 @@ WebMIDI.host = (function(document)
                 getElem("continueAtStartButtonDiv").style.display = "block";
 
                 getElem("webAudioFontDiv").style.display = "none";
-                getElem("tuningDiv").style.display = "none";
-                getElem("triggersDiv").style.display = "none";
+                getElem("tuningDiv").style.display = "none";                
                 getElem("commandsAndControlsDiv").style.display = "none";
+                getElem("triggersDiv").style.display = "none";
 
                 getElem("notesDiv").style.display = "none";
             }
@@ -1650,6 +1655,7 @@ WebMIDI.host = (function(document)
             onTuningGroupSelectChanged: onTuningGroupSelectChanged,
             onTuningSelectChanged: onTuningSelectChanged,
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
+            onPresetSelectChanged: onPresetSelectChanged,
             onExportCurrentStateButtonClicked: onExportCurrentStateButtonClicked,
             onTriggerKeySelectChanged: onTriggerKeySelectChanged,
 
