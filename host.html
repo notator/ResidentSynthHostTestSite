@@ -64,7 +64,7 @@
                         <!--<input class="smallButton" type="button" value="website" onclick="WebMIDI.host.webAudioFontWebsiteButtonClick()" />-->
                     </td>
                     <td>
-                        <span class="boldSubtitle">preset: </span>
+                        <span class="boldSubtitle">instrument: </span>
                     </td>
                     <td>
                         <span class="boldSubtitle">mixture: </span>
@@ -74,8 +74,8 @@
                     <td>
                         <select id="webAudioFontSelect" class="webAudioFontSelect" onchange="WebMIDI.host.onWebAudioFontSelectChanged()" />
                     </td>
-                    <td id="presetSelectCell">
-                        <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
+                    <td id="instrumentSelectCell">
+                        <select id="instrumentSelect" class="instrumentSelect" onchange="WebMIDI.host.onInstrumentSelectChanged()" />
                     </td>
                     <td id="mixtureSelectCell">
                         <select id="mixtureSelect" class="mixtureSelect" onchange="WebMIDI.host.onMixtureSelectChanged()" />
@@ -107,8 +107,8 @@
                             sendAgainButton
                         -->
                     </td>
-                    <td id="A4FrequencySelectCell">
-                        <select id="A4FrequencySelect" class="A4FrequencySelect" onchange="WebMIDI.host.onA4FrequencySelectChanged()" />
+                    <td id="a4FrequencySelectCell">
+                        <select id="a4FrequencySelect" class="a4FrequencySelect" onchange="WebMIDI.host.onA4FrequencySelectChanged()" />
                     </td>
                 </tr>
             </table>
@@ -118,11 +118,14 @@
             <table>
                 <colgroup>
                     <col style="width:74px" />
-                    <col />
+                    <col style="width:586px" />
                 </colgroup>
                 <tr>
                     <td>
                         <span class="boldSubtitle">Trigger key: </span>
+                    </td>
+                    <td align="right">
+                        <input type="button" class="exportButton" value="export current state" onclick="WebMIDI.host.onExportCurrentStateButtonClicked()" />
                     </td>
                 </tr>
                 <tr>
@@ -182,7 +185,7 @@
 
     <script src="WebMIDI/namespace.js" type="text/javascript"></script>
     <script src="WebMIDI/constants.js" type="text/javascript"></script>	<!-- contains PitchWheelDeviation constants -->
-    <!-- The following scripts define all the presets used by the ResidentSynth in this application -->
+    <!-- The following scripts define all the instruments used by the ResidentSynth in this application -->
     <script src="residentSynth/config/webAudioFontFiles/0000_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
     <script src="residentSynth/config/webAudioFontFiles/0000_GeneralUserGS_sf2_file.js" type="text/javascript"></script>
     <script src="residentSynth/config/webAudioFontFiles/0060_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
@@ -208,7 +211,7 @@
     <script src="residentSynth/config/webAudioFontFiles/0250_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
     <script src="residentSynth/config/webAudioFontFiles/0260_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
     <script src="residentSynth/config/webAudioFontFiles/0270_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
-    <!-- new, interesting Fluid presets -->
+    <!-- new, interesting Fluid instruments -->
     <script src="residentSynth/config/webAudioFontFiles/0460_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
     <script src="residentSynth/config/webAudioFontFiles/0530_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
     <script src="residentSynth/config/webAudioFontFiles/0580_FluidR3_GM_sf2_file.js" type="text/javascript"></script>
@@ -245,7 +248,6 @@
     <script src="residentSynth/config/webAudioFontDefs.js" type="text/javascript"></script>
     <script src="residentSynth/config/tuningDefs.js" type="text/javascript"></script>
     <script src="residentSynth/config/mixtureDefs.js" type="text/javascript"></script>
-    <script src="residentSynth/config/stateDefs.js" type="text/javascript"></script>
 
     <script src="residentSynth/reverberator.js" type="text/javascript"></script>
     <script src="residentSynth/webAudioFont.js" type="text/javascript"></script>
@@ -254,7 +256,7 @@
     <script src="residentSynth/residentSynth.js" type="text/javascript"></script>
     <script src="residentSynth/residentSynthNote.js" type="text/javascript"></script>
 
-
+    <script src="presets.js" type="text/javascript"></script>
     <script src="host.js" type="text/javascript"></script>
 </body>
 </html>

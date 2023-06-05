@@ -1077,73 +1077,6 @@ WebMIDI.residentSynth = (function(window)
 			updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
 		},
 
-		// The stateIndex argument is in range [0..127], and is assumed to be in range of the configured stateDefs.
-		updateChannelState = function(channel, stateIndex)
-		{
-			allSoundOff(channel);
-
-			updateFontIndex(channel, 0); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
-			updateTuningGroupIndex(channel, 0); // sets channelControl.tuning to the first tuning in the group.
-			setControllerDefaults(channel);
-
-			let state = WebMIDI.stateDefs[stateIndex];
-			// set preset and tuning
-			if(state.fontIndex !== undefined)
-			{
-				updateFontIndex(channel, state.fontIndex); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
-			}
-			if(state.bankIndex !== undefined)
-			{
-				updateBankIndex(channel, state.bankIndex); // sets channelControl.presetIndex to 0.
-			}
-			if(state.presetIndex !== undefined)
-			{
-				updatePresetIndex(channel, state.presetIndex);
-			}
-			if(state.mixtureIndex !== undefined)
-			{
-				updateMixtureIndex(channel, state.mixtureIndex);
-			}
-			if(state.tuningGroupIndex !== undefined)
-			{
-				updateTuningGroupIndex(channel, state.tuningGroupIndex); // sets channelControl.tuning to the first tuning in the group.
-			}
-			if(state.tuningIndex !== undefined)
-			{
-				updateTuning(channel, state.tuningIndex);
-			}
-			if(state.centsOffset !== undefined)
-			{
-				updateCentsOffset(channel, state.centsOffset);
-            }
-
-			// set controls set by setControllerDefaults() above
-			if(state.pitchWheel !== undefined)
-			{
-				updatePitchWheel(channel, state.pitchWheel, state.pitchWheel); // 14bit?
-			}
-			if(state.pitchWheelSensitivity !== undefined)
-			{
-				updatePitchWheelSensitivity(channel, state.pitchWheelSensitivity);
-			}
-			if(state.modWheel !== undefined)
-			{
-				updateModWheel(channel, state.modWheel);
-			}
-			if(state.volume !== undefined)
-			{
-				updateVolume(channel, state.volume);
-			}
-			if(state.pan !== undefined)
-			{
-				updatePan(channel, state.pan);
-			}
-			if(state.reverberation !== undefined)
-			{
-				updateReverberation(channel, state.reverberation);
-			}
-		},
-
 		CMD = WebMIDI.constants.COMMAND,
 		CTL = WebMIDI.constants.CONTROL,
 		MISC = WebMIDI.constants.MISC,
@@ -1450,15 +1383,9 @@ WebMIDI.residentSynth = (function(window)
 			}
 			function setMixtureIndex(channel, mixtureIndex)
 			{
-				checkControlExport(CTL.SET_CHANNEL_STATE);
+				checkControlExport(CTL.MIXTURE_INDEX);
 				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
 				updateMixtureIndex(channel, mixtureIndex);
-			}
-			function setChannelState(channel, stateIndex)
-			{
-				checkControlExport(CTL.SET_CHANNEL_STATE);
-				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
-				updateChannelState(channel, stateIndex);
 			}
 
 			function setReverberation(channel, value)
@@ -1501,9 +1428,6 @@ WebMIDI.residentSynth = (function(window)
 					break;
 				case CTL.MIXTURE_INDEX:
 					setMixtureIndex(channel, data2);
-					break;
-				case CTL.SET_CHANNEL_STATE:
-					setChannelState(channel, data2);
 					break;
 				case CTL.REVERBERATION:
 					setReverberation(channel, data2);

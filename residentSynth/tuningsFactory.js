@@ -66,12 +66,12 @@ WebMIDI.tuningsFactory = (function()
             return frequency;
         },
 
-        // Transpose the tuning so that A4 (midi key 69) has a midiCent value equivalent to A4Frequency
+        // Transpose the tuning so that A4 (midi key 69) has a midiCent value equivalent to a4Frequency
         // The A4 midiCents value is rounded to a maximum of 4 decimal places.
-        transposeTuningForA4Frequency = function(tuning, A4Frequency)
+        transposeTuningForA4Frequency = function(tuning, a4Frequency)
         {
             let currentA4Frequency = getFrequency(tuning[69]),
-                semitonesDiff = getCents(A4Frequency / currentA4Frequency) / 100;
+                semitonesDiff = getCents(a4Frequency / currentA4Frequency) / 100;
 
             for(var i = 0; i < 128; i++)
             {

@@ -21,6 +21,7 @@ WebMIDI.host = (function(document)
         synth = null,
         inputDevice = null,
         currentChannel = 0,
+        nextPresetIndex = 0,
         notesAreSounding = false,
         allLongInputControls = [], // used by AllControllersOff control
 
@@ -150,157 +151,114 @@ WebMIDI.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    // sets the channel state in both the host and the synth
-                    function setChannelState(stateIndex)
+                    // sets the new channel state in both the host and the synth
+                    function setPreset(presetIndex)
                     {
-                        function findIndex(presetOptions, bankIndex, presetIndex)
+                        function findIndexfromOptionName(select, optionName)
                         {
-                            let rval = -1;
-                            for(var i = 0; i < presetOptions.length; i++)
+                            let options = Array.from(select.options),
+                                index = options.findIndex((opt) => opt.label === optionName);
+                            if(index === -1)
                             {
-                                let preset = presetOptions[i].preset;
-                                if(preset.bankIndex === bankIndex && preset.presetIndex === presetIndex)
-                                {
-                                    rval = i;
-                                    break;
-                                }
+                                throw "Unknown option."
                             }
-                            if(rval === -1)
-                            {
-                                throw "Preset option not found.";
-                            }
-                            return rval;
+                            return index; 
                         }
 
-                        function resetFontsAndTuningsSelects(fontSelect, mixtureSelect, tuningGroupSelect)
-                        {
-                            fontSelect.selectedIndex = 0;
-                            onWebAudioFontSelectChanged(); // automatically resets presetSelect
-
-                            mixtureSelect.selectedIndex = 0;
-                            onMixtureSelectChanged();
-
-                            tuningGroupSelect.selectedIndex = 0;
-                            onTuningGroupSelectChanged(); // automatically resets tuningSelect and A4FrequencySelect
-                            // A4FrequencySelect cannot be set using a stateDef.
-                        }
-
-                        let state = (nextStateIndex < stateDefs.length) ? stateDefs[stateIndex] : undefined,
+                        let presets = WebMIDI.presets,
+                            preset = (nextPresetIndex < presets.length) ? presets[presetIndex] : undefined,
+                            channelSelect = getElem("channelSelect"),
                             fontSelect = getElem("webAudioFontSelect"),
-                            presetSelect = getElem("presetSelect"),
+                            instrumentSelect = getElem("instrumentSelect"),
                             mixtureSelect = getElem("mixtureSelect"),
                             tuningGroupSelect = getElem("tuningGroupSelect"),
                             tuningSelect = getElem("tuningSelect"),
+                            a4FrequencySelect = getElem("a4FrequencySelect"),
+                            triggerKeySelect = getElem("triggerKeySelect"),
                             pitchWheelLongControl = getElem("pitchWheelLongControl"),
                             modWheelLongControl = getElem("modWheelLongControl"),
                             volumeLongControl = getElem("volumeLongControl"),
                             panLongControl = getElem("panLongControl"),
                             reverberationLongControl = getElem("reverberationLongControl"),
-                            pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");
+                            pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl"),
+                            index;
 
-                        resetFontsAndTuningsSelects(fontSelect, mixtureSelect, tuningGroupSelect); // resets host GUI selects (and sends messages to synth)
-                        sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF); // resets host GUI sliders (and sends messages to synth)
+                        // decided _not_ to silence the synth while resetting all the controls.
+                        // sendShortControl(WebMIDI.constants.CONTROL.ALL_SOUND_OFF);
 
-                        // set preset and tuning
-                        if(state.fontIndex !== undefined)
+                        // select controls
+                        if(preset.channel !== undefined)
                         {
-                            fontSelect.selectedIndex = state.fontIndex; // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
+                            channelSelect.selectedIndex = findIndexfromOptionName(channelSelect, preset.channel);
+                            onChannelSelectChanged();
+                        }
+                        if(preset.font !== undefined)
+                        {
+                            fontSelect.selectedIndex = findIndexfromOptionName(fontSelect, preset.font);
                             onWebAudioFontSelectChanged();
                         }
-                        if(state.bankIndex !== undefined || state.presetIndex !== undefined)
+                        if(preset.instrument)
                         {
-                            let currentPreset = presetSelect.options[presetSelect.selectedIndex].preset;
-                            if(state.bankIndex === undefined)
-                            {
-                                state.bankIndex = currentPreset.bankIndex;
-                            }
-                            if(state.presetIndex === undefined)
-                            {
-                                state.presetIndex = currentPreset.presetIndex;
-                            }
-                            // N.B.: presetIndex is re the _bank_, not the original MIDI preset index.
-                            presetSelect.selectedIndex = findIndex(presetSelect.options, state.bankIndex, state.presetIndex);
-                            onPresetSelectChanged();
+                            instrumentSelect.selectedIndex = findIndexfromOptionName(instrumentSelect, preset.instrument);
+                            onInstrumentSelectChanged();
                         }
-                        if(state.mixtureSelectIndex !== undefined)
+                        if(preset.mixture !== undefined)
                         {
-                            mixtureSelect.selectedIndex = state.mixtureSelectIndex;
+                            mixtureSelect.selectedIndex = findIndexfromOptionName(mixtureSelect, preset.mixture);
                             onMixtureSelectChanged();
                         }
-                        if(state.tuningGroupIndex !== undefined)
+                        if(preset.tuningGroup !== undefined)
                         {
-                            tuningGroupSelect.selectedIndex = state.tuningGroupIndex;
+                            tuningGroupSelect.selectedIndex = findIndexfromOptionName(tuningGroupSelect, preset.tuningGroup);
                             onTuningGroupSelectChanged();
                         }
-                        if(state.tuningIndex !== undefined)
+                        if(preset.tuning !== undefined)
                         {
-                            tuningSelect.selectedIndex = state.tuningIndex;
+                            tuningSelect.selectedIndex = findIndexfromOptionName(tuningSelect, preset.tuning);
                             onTuningSelectChanged();
                         }
-                        // The A4FrequencySelect is reset above, but it cannot be set using a stateDef.
-
-                        // set controls set by setControllerDefaults() above
-                        if(state.pitchWheel !== undefined)
+                        if(preset.a4Frequency !== undefined) // The a4FrequencySelect is reset above, but does this really work? If not, why not?
                         {
-                            pitchWheelLongControl.setValue(state.pitchWheel);
+                            a4FrequencySelect.selectedIndex = findIndexfromOptionName(a4FrequencySelect, preset.a4Frequency);
+                            onA4FrequencySelectChanged();
                         }
-                        if(state.pitchWheelSensitivity !== undefined)
+                        if(preset.triggerKey !== undefined)
                         {
-                            pitchWheelSensitivityLongControl.setValue(state.pitchWheelSensitivity);
+                            triggerKeySelect.selectedIndex = findIndexfromOptionName(triggerKeySelect, preset.triggerKey);
+                            onTriggerKeySelectChanged();
+                        }                        
+                        // slider controls
+                        if(preset.pitchWheel !== undefined)
+                        {
+                            pitchWheelLongControl.setValue(preset.pitchWheel);
                         }
-                        if(state.modWheel !== undefined)
+                        if(preset.modWheel !== undefined)
                         {
-                            modWheelLongControl.setValue(state.modWheel);
+                            modWheelLongControl.setValue(preset.modWheel);
                         }
-                        if(state.volume !== undefined)
+                        if(preset.volume !== undefined)
                         {
-                            volumeLongControl.setValue(state.volume);
+                            volumeLongControl.setValue(preset.volume);
                         }
-                        if(state.pan !== undefined)
+                        if(preset.pan !== undefined)
                         {
-                            panLongControl.setValue(state.pan);
+                            panLongControl.setValue(preset.pan);
                         }
-                        if(state.reverberation !== undefined)
+                        if(preset.reverberation !== undefined)
                         {
-                            reverberationLongControl.setValue(state.reverberation);
+                            reverberationLongControl.setValue(preset.reverberation);
                         }
-                    }
-
-                    // See comment in residentSynth/config/stateDefs.js
-                    // This function is redundant here because setChannelState(stateIndex) above sets both host and synth states.
-                    // The synth's SET_CHANNEL_STATE message must exist (and has been tested here) for use when ResidentSynth has no GUI.
-                    // (The AssistantPerformer will send this type of message.)
-                    function setSynthChannelState(stateIndex)
-                    {
-                        let CMD = WebMIDI.constants.COMMAND,
-                            SET_CHANNEL_STATE = WebMIDI.constants.CONTROL.SET_CHANNEL_STATE,
-                            msg = new Uint8Array([((CMD.CONTROL_CHANGE + currentChannel) & 0xFF), SET_CHANNEL_STATE, stateIndex]);
-
-                        synth.send(msg, performance.now());
-                    }
-
-                    function incrementNextStatePointer(hostChannelState, nActions)
-                    {
-                        if(hostChannelState.nextStateIndex === nActions - 1)
+                        if(preset.pitchWheelSensitivity !== undefined)
                         {
-                            hostChannelState.nextStateIndex = 0;
-                        }
-                        else
-                        {
-                            hostChannelState.nextStateIndex++;
+                            pitchWheelSensitivityLongControl.setValue(preset.pitchWheelSensitivity);
                         }
                     }
 
-                    let channelSelect = getElem("channelSelect"),
-                        hostChannelState = channelSelect.options[currentChannel].hostState,
-                        nextStateIndex = hostChannelState.nextStateIndex,
-                        stateDefs = WebMIDI.stateDefs;
+                    setPreset(nextPresetIndex ); // sets the channel and its state in both the host and the synth
 
-                    setChannelState(nextStateIndex); // sets the channel state in both the host and the synth
-                    //setSynthChannelState(nextStateIndex); // redundent call -- see comment on the function above
+                    nextPresetIndex = (nextPresetIndex < (WebMIDI.presets.length - 1)) ? nextPresetIndex + 1 : 0;
 
-                    incrementNextStatePointer(hostChannelState, stateDefs.length);
-                    setTriggersDiv(hostChannelState); // uses currentChannel
+                    setTriggersDiv(channelSelect.options[currentChannel].hostState);
                 }
 
                 let data = e.data,
@@ -426,17 +384,17 @@ WebMIDI.host = (function(document)
             function setAndSendFontDivControlsFromState(hostChannelState)
             {
                 let fontSelectIndex = hostChannelState.fontSelectIndex, // index in webAudioFontSelect
-                    presetSelectIndex = hostChannelState.presetSelectIndex, // index in presetSelect
+                    instrumentSelectIndex = hostChannelState.instrumentSelectIndex, // index in instrumentSelect
                     mixtureSelectIndex = hostChannelState.mixtureSelectIndex, // index in mixtureSelect
                     fontSelect = getElem("webAudioFontSelect"),
-                    presetSelect = getElem("presetSelect"),
+                    instrumentSelect = getElem("instrumentSelect"),
                     mixtureSelect = getElem("mixtureSelect");
 
                 fontSelect.selectedIndex = fontSelectIndex;
                 onWebAudioFontSelectChanged(); // sets the presets in the presetsSelect and the soundFont in the synth
 
-                presetSelect.selectedIndex = presetSelectIndex; // sets the presetSelect
-                onPresetSelectChanged();  // sets the preset in the synth
+                instrumentSelect.selectedIndex = instrumentSelectIndex; // sets the instrumentSelect
+                onInstrumentSelectChanged();  // sets the preset in the synth
 
                 mixtureSelect.selectedIndex = mixtureSelectIndex; // sets the mixtureSelect
                 onMixtureSelectChanged();  // sets the preset in the synth
@@ -446,10 +404,10 @@ WebMIDI.host = (function(document)
             {
                 let tuningGroupSelect = getElem("tuningGroupSelect"),
                     tuningSelect = getElem("tuningSelect"),
-                    A4FrequencySelect = getElem("A4FrequencySelect"),
+                    a4FrequencySelect = getElem("a4FrequencySelect"),
                     newTuningGroupSelectIndex = hostChannelState.tuningGroupSelectIndex,
                     newTuningSelectIndex = hostChannelState.tuningSelectIndex,
-                    newA4FrequencySelectIndex = hostChannelState.A4FrequencySelectIndex;
+                    newA4FrequencySelectIndex = hostChannelState.a4FrequencySelectIndex;
 
                 tuningGroupSelect.selectedIndex = newTuningGroupSelectIndex;
                 onTuningGroupSelectChanged();
@@ -457,7 +415,7 @@ WebMIDI.host = (function(document)
                 tuningSelect.selectedIndex = newTuningSelectIndex;
                 onTuningSelectChanged();
 
-                A4FrequencySelect.selectedIndex = newA4FrequencySelectIndex;
+                a4FrequencySelect.selectedIndex = newA4FrequencySelectIndex;
                 onA4FrequencySelectChanged();
             }
 
@@ -502,23 +460,23 @@ WebMIDI.host = (function(document)
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
-                presetSelect = getElem("presetSelect"),
+                instrumentSelect = getElem("instrumentSelect"),
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
                 presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
 
             synth.setSoundFont(soundFont);
 
-            setOptions(presetSelect, presetOptionsArray);
+            setOptions(instrumentSelect, presetOptionsArray);
 
-            presetSelect.selectedIndex = 0;
-            onPresetSelectChanged();
+            instrumentSelect.selectedIndex = 0;
+            onInstrumentSelectChanged();
 
             hostChannelState.fontSelectIndex = webAudioFontSelect.selectedIndex;
         },
 
         // exported
-        onPresetSelectChanged = function()
+        onInstrumentSelectChanged = function()
         {
             function getBankMsg(channel, bankIndex)
             {
@@ -533,12 +491,12 @@ WebMIDI.host = (function(document)
             let CMD = WebMIDI.constants.COMMAND,
                 CTL = WebMIDI.constants.CONTROL,
                 channelSelect = getElem("channelSelect"),
-                presetSelect = getElem("presetSelect"),
+                instrumentSelect = getElem("instrumentSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
-                preset = presetSelect.options[presetSelect.selectedIndex].preset,
-                bankIndex = preset.bankIndex, 
+                preset = instrumentSelect.options[instrumentSelect.selectedIndex].preset,
+                bankIndex = preset.bankIndex,
                 presetIndex = preset.presetIndex, // N.B.: this is the presetIndex re the _bank_, not the original MIDI preset index.
                 bankMsg = getBankMsg(channel, bankIndex),
                 presetMsg = getPresetMsg(channel, presetIndex);
@@ -549,7 +507,7 @@ WebMIDI.host = (function(document)
             mixtureSelect.selectedIndex = hostChannelState.mixtureSelectIndex;
             onMixtureSelectChanged();
 
-            hostChannelState.presetSelectIndex = presetSelect.selectedIndex;
+            hostChannelState.instrumentSelectIndex = instrumentSelect.selectedIndex;
         },
 
         // exported
@@ -598,15 +556,15 @@ WebMIDI.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 tuningGroupSelectIndex = getElem("tuningGroupSelect").selectedIndex,
-                A4FrequencySelect = getElem("A4FrequencySelect"),
+                a4FrequencySelect = getElem("a4FrequencySelect"),
                 tuningSelect = getElem("tuningSelect"),
                 tuningSelectIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
-                hostChannelState = channelSelect.options[channel].hostState;                
+                hostChannelState = channelSelect.options[channel].hostState;
 
             synth.setTuning(channel, tuningGroupSelectIndex, tuningSelectIndex);
 
-            A4FrequencySelect.selectedIndex = hostChannelState.A4FrequencySelectIndex;
+            a4FrequencySelect.selectedIndex = hostChannelState.a4FrequencySelectIndex;
             onA4FrequencySelectChanged();
 
             hostChannelState.tuningSelectIndex = tuningSelectIndex;
@@ -618,31 +576,30 @@ WebMIDI.host = (function(document)
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
-                A4FrequencySelect = getElem("A4FrequencySelect"),
-                centsOffset = A4FrequencySelect[A4FrequencySelect.selectedIndex].centsOffset;
+                a4FrequencySelect = getElem("a4FrequencySelect"),
+                centsOffset = a4FrequencySelect[a4FrequencySelect.selectedIndex].centsOffset;
 
             synth.setCentsOffset(channel, centsOffset);
 
-            hostChannelState.A4FrequencySelectIndex = A4FrequencySelect.selectedIndex;
+            hostChannelState.a4FrequencySelectIndex = a4FrequencySelect.selectedIndex;
         },
 
-        // Throws an exception either if hostChannelState.nextStateIndex is out of range,
+        // Throws an exception either if nextPresetIndex is out of range,
         // or if the stateDef has no name attribute.
         // If triggerKeySelect is set to "none", sets channelStateNameCell.InnerHTML to "".
         setTriggersDiv = function(hostChannelState)
         {
             let triggerKeySelect = getElem("triggerKeySelect"),
                 channelStateNameCell = getElem("channelStateNameCell"),
-                nextStateIndex = hostChannelState.nextStateIndex,
-                stateDefs = WebMIDI.stateDefs;
+                presets = WebMIDI.presets;
 
             triggerKeySelect.selectedIndex = hostChannelState.triggerKeySelectIndex;
 
-            if(nextStateIndex >= stateDefs.length)
+            if(nextPresetIndex >= presets.length)
             {
                 throw "Error: stateIndex out of range.";
             }
-            else if(stateDefs[nextStateIndex].name === undefined)
+            else if(presets[nextPresetIndex].name === undefined)
             {
                 throw "Error in configuration file: stateDef must have a name.";
             }
@@ -652,8 +609,54 @@ WebMIDI.host = (function(document)
             }
             else
             {
-                channelStateNameCell.innerHTML = "next state: " + stateDefs[nextStateIndex].name;
+                channelStateNameCell.innerHTML = "next state: " + presets[nextPresetIndex].name;
             }
+        },
+
+        //exported
+        onExportCurrentStateButtonClicked = function()
+        {
+            let channelSelect = getElem("channelSelect"),
+                fontSelect = getElem("webAudioFontSelect"),
+                instrumentSelect = getElem("instrumentSelect"),
+                mixtureSelect = getElem("mixtureSelect"),
+                tuningGroupSelect = getElem("tuningGroupSelect"),
+                tuningSelect = getElem("tuningSelect"),
+                a4FrequencySelect = getElem("a4FrequencySelect"),
+                triggerKeySelect = getElem("triggerKeySelect"),
+                pitchWheelLongControl = getElem("pitchWheelLongControl"),
+                modWheelLongControl = getElem("modWheelLongControl"),
+                volumeLongControl = getElem("volumeLongControl"),
+                panLongControl = getElem("panLongControl"),
+                reverberationLongControl = getElem("reverberationLongControl"),
+                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");
+
+            const preset = {
+                name: "new preset", // give this preset a unique name when adding to the online presets.js
+                channel: channelSelect.value,
+                font: fontSelect.value, // executed before bankIndex and/or presetIndex, sets bankIndex=0, presetIndex=0
+                instrument: instrumentSelect.value,
+                mixture: mixtureSelect.value,
+                tuningGroup: tuningGroupSelect.value, // executed before tuningIndex, sets tuningIndex=0
+                tuning: tuningSelect.value,
+                a4Frequency: a4FrequencySelect.value,
+                triggerKey: triggerKeySelect.value,
+                pitchWheel: pitchWheelLongControl.getValue(), // done (value in range 0..127)
+                modWheel: modWheelLongControl.getValue(), // done (value in range 0..127)
+                volume: volumeLongControl.getValue(),// done (value in range 0..127)
+                pan: panLongControl.getValue(), // done (value in range 0..127)
+                reverberation: reverberationLongControl.getValue(), // done (value in range 0..127)
+                pitchWheelSensitivity: pitchWheelSensitivityLongControl.getValue() // done (value in range 0..127)
+            };
+
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(preset, null, "\t")], {
+                type: "text/plain"
+            }));
+            a.setAttribute("download", "currentHostState.json");
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         },
 
         // exported (c.f. onTuningSelectChanged() )
@@ -708,7 +711,7 @@ WebMIDI.host = (function(document)
 
                             option.innerHTML = webAudioFont.name;
                             option.soundFont = webAudioFont;
-                            option.presetOptionsArray = presetOptionsArray; // used to set the presetSelect
+                            option.presetOptionsArray = presetOptionsArray; // used to set the instrumentSelect
                             option.url = "https://github.com/surikov/webaudiofont";
 
                             options.push(option);
@@ -724,11 +727,11 @@ WebMIDI.host = (function(document)
                     webAudioFontSelect.selectedIndex = 0;
                 }
 
-                function setPresetSelect(presetSelect, webAudioFontSelect)
+                function setPresetSelect(instrumentSelect, webAudioFontSelect)
                 {
-                    setOptions(presetSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].presetOptionsArray);
+                    setOptions(instrumentSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].presetOptionsArray);
 
-                    presetSelect.selectedIndex = 0;
+                    instrumentSelect.selectedIndex = 0;
                 }
 
                 function setMixtureSelect(mixtureSelect)
@@ -741,7 +744,7 @@ WebMIDI.host = (function(document)
                         let option = new Option("mixtureOption");
 
                         option.innerHTML = "none";
-                        option.mixtureIndex = 127; // sending the synth a SET_MIXTURE_INDEX of 127 resets it to a "no mixture" state.
+                        option.mixtureIndex = 127; // sending the synth a MIXTURE_INDEX of 127 resets it to a "no mixture" state.
                         options.push(option);
 
                         console.assert(mixtures.length < 127);
@@ -803,8 +806,8 @@ WebMIDI.host = (function(document)
 
                 function setA4FrequencySelect()
                 {
-                    let A4FrequencySelectCell = getElem("A4FrequencySelectCell"),
-                        A4FrequencySelect = getElem("A4FrequencySelect"),
+                    let a4FrequencySelectCell = getElem("a4FrequencySelectCell"),
+                        a4FrequencySelect = getElem("a4FrequencySelect"),
                         input = document.createElement("input"),
                         optionsArray = [];
 
@@ -818,13 +821,13 @@ WebMIDI.host = (function(document)
                         optionsArray.push(option);
                     }
 
-                    setOptions(A4FrequencySelect, optionsArray);
+                    setOptions(a4FrequencySelect, optionsArray);
 
                     input.type = "button";
                     input.className = "sendAgainButton";
                     input.value = "send again";
                     input.onclick = onTuningSelectChanged;
-                    A4FrequencySelectCell.appendChild(input);
+                    a4FrequencySelectCell.appendChild(input);
                 }
 
                 function setTuningSelect()
@@ -1002,7 +1005,7 @@ WebMIDI.host = (function(document)
 
                     function setCommandsTable()
                     {
-                        // sets the presetSelect and 
+                        // sets the instrumentSelect and 
                         // returns an array of tr elements
                         function getCommandRows()
                         {
@@ -1335,11 +1338,11 @@ WebMIDI.host = (function(document)
                 {
                     let channelOptions = getElem("channelSelect").options,
                         fontSelectIndex = getElem("webAudioFontSelect").selectedIndex,
-                        presetSelectIndex = getElem("presetSelect").selectedIndex,
+                        instrumentSelectIndex = getElem("instrumentSelect").selectedIndex,
                         mixtureSelectIndex = getElem("mixtureSelect").selectedIndex,
                         tuningGroupSelectIndex = getElem("tuningGroupSelect").selectedIndex,
                         tuningSelectIndex = getElem("tuningSelect").selectedIndex,
-                        A4FrequencySelectIndex = getElem("A4FrequencySelect").selectedIndex,
+                        a4FrequencySelectIndex = getElem("a4FrequencySelect").selectedIndex,
                         triggerKeySelectIndex = getElem("triggerKeySelect").selectedIndex,
                         aftertouchValue = getElem("aftertouchLongControl").getValue(),
                         pitchWheelValue = getElem("pitchWheelLongControl").getValue(),
@@ -1356,13 +1359,12 @@ WebMIDI.host = (function(document)
                             hostState = {};
 
                         hostState.fontSelectIndex = fontSelectIndex;
-                        hostState.presetSelectIndex = presetSelectIndex;
+                        hostState.instrumentSelectIndex = instrumentSelectIndex;
                         hostState.mixtureSelectIndex = mixtureSelectIndex;
                         hostState.tuningGroupSelectIndex = tuningGroupSelectIndex;
                         hostState.tuningSelectIndex = tuningSelectIndex;
-                        hostState.A4FrequencySelectIndex = A4FrequencySelectIndex;
+                        hostState.a4FrequencySelectIndex = a4FrequencySelectIndex;
                         hostState.triggerKeySelectIndex = triggerKeySelectIndex;
-                        hostState.nextStateIndex = 0;
                         hostState.aftertouchValue = aftertouchValue;
                         hostState.pitchWheelValue = pitchWheelValue;
                         hostState.modWheelValue = modWheelValue;
@@ -1380,14 +1382,14 @@ WebMIDI.host = (function(document)
                     tuningDiv = getElem("tuningDiv"),
                     triggersDiv = getElem("triggersDiv"),
                     webAudioFontSelect = getElem("webAudioFontSelect"),
-                    presetSelect = getElem("presetSelect"),
+                    instrumentSelect = getElem("instrumentSelect"),
                     mixtureSelect = getElem("mixtureSelect"),
                     tuningGroupSelect = getElem("tuningGroupSelect");
 
                 console.assert(synth.name === "ResidentSynth", "Error: this app only uses the ResidentSynth");
 
                 setWebAudioFontSelect(webAudioFontSelect);
-                setPresetSelect(presetSelect, webAudioFontSelect);
+                setPresetSelect(instrumentSelect, webAudioFontSelect);
                 setMixtureSelect(mixtureSelect);
 
                 webAudioFontDiv.style.display = "block";
@@ -1643,11 +1645,12 @@ WebMIDI.host = (function(document)
 
             onChannelSelectChanged: onChannelSelectChanged,
             onWebAudioFontSelectChanged: onWebAudioFontSelectChanged,
-            onPresetSelectChanged: onPresetSelectChanged,
+            onInstrumentSelectChanged: onInstrumentSelectChanged,
             onMixtureSelectChanged: onMixtureSelectChanged,
             onTuningGroupSelectChanged: onTuningGroupSelectChanged,
             onTuningSelectChanged: onTuningSelectChanged,
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
+            onExportCurrentStateButtonClicked: onExportCurrentStateButtonClicked,
             onTriggerKeySelectChanged: onTriggerKeySelectChanged,
 
 			noteCheckboxClicked: noteCheckboxClicked,

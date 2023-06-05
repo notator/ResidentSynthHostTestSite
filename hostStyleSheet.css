@@ -83,7 +83,7 @@ hr
 	margin: 0;
 }
 
-.presetSelect
+.instrumentSelect
 {
 	font-size: 11px;
 	width: 290px;
@@ -115,7 +115,7 @@ hr
 	margin: 0 0 auto auto;
 }
 
-.A4FrequencySelect
+.a4FrequencySelect
 {
 	font-size: 11px;
 	width: 46px;
@@ -163,10 +163,17 @@ hr
 
 .sendButton
 {
-    font-size: 11px;
-	height:18px;
-	width:45px;
-    margin-right:5px;
+	font-size: 11px;
+	height: 18px;
+	width: 45px;
+	margin-right: 5px;
+}
+
+.exportButton
+{
+	font-size: 11px;
+	height: 18px;
+	
 }
 
 .smallButton
