@@ -732,7 +732,7 @@ WebMIDI.host = (function(document)
                     webAudioFontSelect.selectedIndex = 0;
                 }
 
-                function setPresetSelect(instrumentSelect, webAudioFontSelect)
+                function setInstrumentSelect(instrumentSelect, webAudioFontSelect)
                 {
                     setOptions(instrumentSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].presetOptionsArray);
 
@@ -1339,6 +1339,24 @@ WebMIDI.host = (function(document)
                     sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF);
                 }
 
+                function setPresetSelect()
+                {
+                    let presetSelect = getElem("presetSelect"),
+                        presets = WebMIDI.presets;
+
+                    console.assert(presets.length < 127);
+
+                    for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
+                    {
+                        let option = new Option();
+
+                        option.innerHTML = presets[presetIndex].name;
+                        presetSelect.options.add(option);
+                    }
+                    
+                    presetSelect.selectedIndex = 0;
+                }
+
                 function getDefaultHostChannelStates()
                 {
                     let channelOptions = getElem("channelSelect").options,
@@ -1394,7 +1412,7 @@ WebMIDI.host = (function(document)
                 console.assert(synth.name === "ResidentSynth", "Error: this app only uses the ResidentSynth");
 
                 setWebAudioFontSelect(webAudioFontSelect);
-                setPresetSelect(instrumentSelect, webAudioFontSelect);
+                setInstrumentSelect(instrumentSelect, webAudioFontSelect);
                 setMixtureSelect(mixtureSelect);
 
                 webAudioFontDiv.style.display = "block";
@@ -1408,6 +1426,8 @@ WebMIDI.host = (function(document)
                 triggersDiv.style.display = "block";
 
                 setCommandsAndControlsDivs();
+
+                setPresetSelect();
 
                 getDefaultHostChannelStates();
 
