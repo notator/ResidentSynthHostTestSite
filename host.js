@@ -32,6 +32,16 @@ WebMIDI.host = (function(document)
             return document.getElementById(elemID);
         },
 
+        enablePresetSelect = function(bool)
+        {
+            let presetSelect = getElem("presetSelect"),
+                exportStateAsPresetButton = getElem("exportStateAsPresetButton"),
+                notBool = (bool === true) ? false : true;
+
+            presetSelect.disabled = notBool;
+            exportStateAsPresetButton.disabled = bool;
+        },
+
         sendCommand = function(commandIndex, data1, data2)
         {
             var CMD = WebMIDI.constants.COMMAND,
@@ -134,13 +144,10 @@ WebMIDI.host = (function(document)
                 volumeLongControl = getElem("volumeLongControl"),
                 panLongControl = getElem("panLongControl"),
                 reverberationLongControl = getElem("reverberationLongControl"),
-                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl"),
-                exportStateAsPresetButton = getElem("exportStateAsPresetButton");
+                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");
 
             // decided _not_ to silence the synth while resetting all the controls.
-            // sendShortControl(WebMIDI.constants.CONTROL.ALL_SOUND_OFF);           
-
-            exportStateAsPresetButton.style.disabled = true;
+            // sendShortControl(WebMIDI.constants.CONTROL.ALL_SOUND_OFF);
 
             // select controls
             if(preset.channel !== undefined)
@@ -255,11 +262,11 @@ WebMIDI.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    let presetSelect = getElem("presetSelect");
-
                     presetSelect.selectedIndex = nextPresetIndex;
 
                     setPreset(nextPresetIndex); // sets the channel and its state in both the host and the synth
+
+                    enablePresetSelect(true); // disables the button
 
                     nextPresetIndex = (nextPresetIndex < (WebMIDI.presets.length - 1)) ? nextPresetIndex + 1 : 0;
 
@@ -456,6 +463,8 @@ WebMIDI.host = (function(document)
             setTriggersDiv(hostChannelState); // uses currentChannel
 
             setAndSendLongControlsFromState(hostChannelState);
+
+            enablePresetSelect(false);
         },
 
         // exported
@@ -535,6 +544,8 @@ WebMIDI.host = (function(document)
             synth.send(mixtureMessage);
 
             hostChannelState.mixtureSelectIndex = mixtureSelect.selectedIndex;
+
+            enablePresetSelect(false);
         },
 
         // exported (c.f. onWebAudioFontSelectChanged() )
@@ -587,6 +598,8 @@ WebMIDI.host = (function(document)
             synth.setCentsOffset(channel, centsOffset);
 
             hostChannelState.a4FrequencySelectIndex = a4FrequencySelect.selectedIndex;
+
+            enablePresetSelect(false);
         },
 
         // Throws an exception either if nextPresetIndex is out of range,
@@ -616,6 +629,8 @@ WebMIDI.host = (function(document)
         onPresetSelectChanged = function()
         {
             setPreset(getElem("presetSelect").selectedIndex);
+
+            enablePresetSelect(true); // disables the button
         },
 
         //exported
@@ -675,6 +690,8 @@ WebMIDI.host = (function(document)
 
             triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
             hostChannelState.triggerKey = triggerKey;
+
+            enablePresetSelect(false);
         },
 
         // exported
@@ -857,6 +874,8 @@ WebMIDI.host = (function(document)
                 {
                     let channelSelect = getElem("channelSelect"),
                         hostChannelState = channelSelect.options[channelSelect.selectedIndex].hostState;
+
+                    enablePresetSelect(false);
 
                     if(hostChannelState !== undefined)
                     {
@@ -1406,6 +1425,8 @@ WebMIDI.host = (function(document)
                 // must be called after all the GUI controls have been set.
                 // It calls all the synth's public control functions.
                 onChannelSelectChanged();
+
+                enablePresetSelect(true);
 
                 getElem("notesDiv").style.display = "block";
             }
