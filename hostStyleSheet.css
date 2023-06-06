@@ -173,7 +173,35 @@ hr
 {
 	font-size: 11px;
 	height: 18px;
-	
+}
+
+.recordingSelect
+{
+	font-size: 11px;
+	width: 350px;
+	height: 18px;
+	margin-left: 3px;
+}
+
+.playRecordingButton
+{
+	font-size: 11px;
+	height: 18px;
+	margin-left: 4px;
+}
+
+.startRecordingButton
+{
+	font-size: 11px;
+	height: 18px;
+}
+
+.stopRecordingButton
+{
+	font-size: 11px;
+	height: 18px;
+	background-color: lightpink;
+	display: none;
 }
 
 .smallButton

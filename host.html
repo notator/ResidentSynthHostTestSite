@@ -130,7 +130,7 @@
                         <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
                     </td>
                     <td align="right">
-                        <input id="exportStateAsPresetButton"type="button" class="exportButton" value="export state as preset" onclick="WebMIDI.host.onExportStateAsPresetButtonClicked()" disabled />
+                        <input id="exportStateAsPresetButton" type="button" class="exportButton" value="export state as preset" onclick="WebMIDI.host.onExportStateAsPresetButtonClicked()" disabled />
                     </td>
                 </tr>
             </table>
@@ -144,6 +144,26 @@
                     </td>
                     <td id="channelStateNameCell">
                         <!-- channel state name -->
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="recordingDiv" style="display: none">
+            <hr />
+            <table width="660px">
+                <colgroup>
+                    <col width="560" />
+                    <col width="100" />
+                </colgroup>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">Recordings: </span>
+                        <select id="recordingSelect" class="recordingSelect" onchange="WebMIDI.host.onRecordingSelectChanged()" />
+                        <input id="playRecordingButton" type="button" class="playRecordingButton" value="play recording" onclick="WebMIDI.host.onPlayRecordingButtonClicked()" />
+                    </td>
+                    <td align="right">
+                        <input id="startRecordingButton" type="button" class="startRecordingButton" value="start recording notes" onclick="WebMIDI.host.onStartRecordingButtonClicked()" />
+                        <input id="stopRecordingButton" type="button" class="stopRecordingButton" value="stop recording notes" onclick="WebMIDI.host.onStopRecordingButtonClicked()" />
                     </td>
                 </tr>
             </table>

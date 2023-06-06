@@ -24,8 +24,8 @@ WebMIDI.host = (function(document)
         nextPresetIndex = 1,
         notesAreSounding = false,
         allLongInputControls = [], // used by AllControllersOff control
-
         triggerKey,
+        notesRecording, // recording happens when notesRecording is an array
 
         getElem = function(elemID)
         {
@@ -275,7 +275,8 @@ WebMIDI.host = (function(document)
 
                 let data = e.data,
                     CMD = WebMIDI.constants.COMMAND,
-                    cmdIndex = data[0] & 0xF0;
+                    cmdIndex = data[0] & 0xF0,
+                    now = performance.now();
 
                 if(triggerKey !== undefined && cmdIndex === CMD.NOTE_ON && data[1] === triggerKey)
                 {
@@ -298,6 +299,11 @@ WebMIDI.host = (function(document)
                                 msg[2] = getRectifiedEMUVelocity(msg[2]);
                             }
                             //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
+                            if(notesRecording !== undefined)
+                            {
+                                msg.now = now;
+                                notesRecording.push(msg);
+                            }
                             break;
                         case CMD.AFTERTOUCH:
                             // The EMU keyboard never sends aftertouch, so this should never happen.
@@ -325,7 +331,7 @@ WebMIDI.host = (function(document)
                             console.warn("Unknown command sent from midi input device.");
                             break;
                     }
-                    synth.send(msg, performance.now());
+                    synth.send(msg, now);
                 }
             }
 
@@ -649,10 +655,11 @@ WebMIDI.host = (function(document)
                 volumeLongControl = getElem("volumeLongControl"),
                 panLongControl = getElem("panLongControl"),
                 reverberationLongControl = getElem("reverberationLongControl"),
-                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");
+                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl"),
+                presetName = "ch" + currentChannel.toString() + "_preset";
 
             const preset = {
-                name: "new preset", // give this preset a unique name when adding to the online presets.js
+                name: presetName, // give this preset a unique name when adding to the online presets.js
                 channel: channelSelect.value,
                 font: fontSelect.value, // executed before bankIndex and/or presetIndex, sets bankIndex=0, presetIndex=0
                 instrument: instrumentSelect.value,
@@ -673,7 +680,7 @@ WebMIDI.host = (function(document)
             a.href = URL.createObjectURL(new Blob([JSON.stringify(preset, null, "\t")], {
                 type: "text/plain"
             }));
-            a.setAttribute("download", "currentHostState.json");
+            a.setAttribute("download", presetName + ".json");
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -692,6 +699,61 @@ WebMIDI.host = (function(document)
             hostChannelState.triggerKey = triggerKey;
 
             enablePresetSelect(false);
+        },
+
+        onRecordingSelectChanged = function()
+        {
+
+        },
+        onPlayRecordingButtonClicked = function()
+        {
+
+        },
+        onStartRecordingButtonClicked = function()
+        {
+            let startRecordingButton = getElem("startRecordingButton"),
+                stopRecordingButton = getElem("stopRecordingButton");
+
+            startRecordingButton.style.display = "none";
+            stopRecordingButton.style.display = "block";
+
+            notesRecording = [];
+        },
+        onStopRecordingButtonClicked = function()
+        {
+            let presetSelect = getElem("presetSelect"),
+                startRecordingButton = getElem("startRecordingButton"),
+                stopRecordingButton = getElem("stopRecordingButton"),
+                name = "ch" + currentChannel.toString() + "_recording",
+                presetName,
+                recording = {};
+
+            if(presetSelect.disabled === false)
+            {
+                presetName = presetSelect.options[presetSelect.selectedIndex].value;
+                name = presetName + "_recording";
+            }
+
+            recording.name = name;
+            if(presetName !== undefined)
+            {
+                recording.preset = presetName;
+            }
+            recording.notes = notesRecording;
+
+            startRecordingButton.style.display = "block";
+            stopRecordingButton.style.display = "none";
+
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(recording, null, "\t")], {
+                type: "text/plain"
+            }));
+            a.setAttribute("download", name + ".json");
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            notesRecording = undefined; // stop recording
         },
 
         // exported
@@ -1396,6 +1458,7 @@ WebMIDI.host = (function(document)
                     webAudioFontDiv = getElem("webAudioFontDiv"),
                     tuningDiv = getElem("tuningDiv"),
                     triggersDiv = getElem("triggersDiv"),
+                    recordingDiv = getElem("recordingDiv"),
                     webAudioFontSelect = getElem("webAudioFontSelect"),
                     instrumentSelect = getElem("instrumentSelect"),
                     mixtureSelect = getElem("mixtureSelect"),
@@ -1415,6 +1478,7 @@ WebMIDI.host = (function(document)
                 tuningDiv.style.display = "block";
 
                 triggersDiv.style.display = "block";
+                recordingDiv.style.display = "block";
 
                 setCommandsAndControlsDivs();
 
@@ -1668,9 +1732,15 @@ WebMIDI.host = (function(document)
             onTuningGroupSelectChanged: onTuningGroupSelectChanged,
             onTuningSelectChanged: onTuningSelectChanged,
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
+
             onPresetSelectChanged: onPresetSelectChanged,
             onExportStateAsPresetButtonClicked: onExportStateAsPresetButtonClicked,
             onTriggerKeyInputChanged: onTriggerKeyInputChanged,
+
+            onRecordingSelectChanged: onRecordingSelectChanged,
+            onPlayRecordingButtonClicked: onPlayRecordingButtonClicked,
+            onStartRecordingButtonClicked: onStartRecordingButtonClicked,
+            onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
             noteCheckboxClicked: noteCheckboxClicked,
             holdCheckboxClicked: holdCheckboxClicked,
