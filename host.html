@@ -140,7 +140,7 @@
                         <span class="boldSubtitle">Trigger key: </span>
                     </td>
                     <td>
-                        <select id="triggerKeySelect" class="triggerKeySelect" onchange="WebMIDI.host.onTriggerKeySelectChanged()" />
+                        <input id="triggerKeyInput" type="number" class="number" value="36" min="0" max="127" onchange="WebMIDI.host.onTriggerKeyInputChanged()" />
                     </td>
                     <td id="channelStateNameCell">
                         <!-- channel state name -->

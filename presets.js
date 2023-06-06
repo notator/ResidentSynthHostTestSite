@@ -52,7 +52,7 @@ WebMIDI.presets =
             "tuningGroup": "constant factor tunings",
             "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
             "a4Frequency": "420",
-            "triggerKey": "36",
+            "triggerKey": "40",
             "pitchWheel": 64,
             "modWheel": 0,
             "volume": 100,

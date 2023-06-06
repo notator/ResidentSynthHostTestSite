@@ -174,7 +174,7 @@ WebMIDI.host = (function(document)
                             tuningGroupSelect = getElem("tuningGroupSelect"),
                             tuningSelect = getElem("tuningSelect"),
                             a4FrequencySelect = getElem("a4FrequencySelect"),
-                            triggerKeySelect = getElem("triggerKeySelect"),
+                            triggerKeyInput = getElem("triggerKeyInput"),
                             pitchWheelLongControl = getElem("pitchWheelLongControl"),
                             modWheelLongControl = getElem("modWheelLongControl"),
                             volumeLongControl = getElem("volumeLongControl"),
@@ -224,8 +224,8 @@ WebMIDI.host = (function(document)
                         }
                         if(preset.triggerKey !== undefined)
                         {
-                            triggerKeySelect.selectedIndex = findIndexfromOptionName(triggerKeySelect, preset.triggerKey);
-                            onTriggerKeySelectChanged();
+                            triggerKeyInput.value = preset.triggerKey;
+                            onTriggerKeyInputChanged();
                         }
                         // slider controls
                         if(preset.pitchWheel !== undefined)
@@ -585,27 +585,22 @@ WebMIDI.host = (function(document)
         },
 
         // Throws an exception either if nextPresetIndex is out of range,
-        // or if the stateDef has no name attribute.
-        // If triggerKeySelect is set to "none", sets channelStateNameCell.InnerHTML to "".
+        // or if the preset has no name attribute.
         setTriggersDiv = function(hostChannelState)
         {
-            let triggerKeySelect = getElem("triggerKeySelect"),
+            let triggerKeyInput = getElem("triggerKeyInput"),
                 channelStateNameCell = getElem("channelStateNameCell"),
                 presets = WebMIDI.presets;
 
-            triggerKeySelect.selectedIndex = hostChannelState.triggerKeySelectIndex;
+            triggerKeyInput.value = hostChannelState.triggerKey;
 
             if(nextPresetIndex >= presets.length)
             {
-                throw "Error: stateIndex out of range.";
+                throw "Error: preset out of range.";
             }
             else if(presets[nextPresetIndex].name === undefined)
             {
-                throw "Error in configuration file: stateDef must have a name.";
-            }
-            else if(triggerKey === undefined) // is true when triggerKeySelect is set to "none"
-            {
-                channelStateNameCell.innerHTML = "";
+                throw "Error in preset file: preset must have a name.";
             }
             else
             {
@@ -628,7 +623,7 @@ WebMIDI.host = (function(document)
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 tuningSelect = getElem("tuningSelect"),
                 a4FrequencySelect = getElem("a4FrequencySelect"),
-                triggerKeySelect = getElem("triggerKeySelect"),
+                triggerKeyInput = getElem("triggerKeyInput"),
                 pitchWheelLongControl = getElem("pitchWheelLongControl"),
                 modWheelLongControl = getElem("modWheelLongControl"),
                 volumeLongControl = getElem("volumeLongControl"),
@@ -645,7 +640,7 @@ WebMIDI.host = (function(document)
                 tuningGroup: tuningGroupSelect.value, // executed before tuningIndex, sets tuningIndex=0
                 tuning: tuningSelect.value,
                 a4Frequency: a4FrequencySelect.value,
-                triggerKey: triggerKeySelect.value,
+                triggerKey: parseInt(triggerKeyInput.value),
                 pitchWheel: pitchWheelLongControl.getValue(), // done (value in range 0..127)
                 modWheel: modWheelLongControl.getValue(), // done (value in range 0..127)
                 volume: volumeLongControl.getValue(),// done (value in range 0..127)
@@ -665,19 +660,16 @@ WebMIDI.host = (function(document)
         },
 
         // exported (c.f. onTuningSelectChanged() )
-        onTriggerKeySelectChanged = function()
+        onTriggerKeyInputChanged = function()
         {
-            let triggerKeySelect = getElem("triggerKeySelect"),
+            let triggerKeyInput = getElem("triggerKeyInput"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 channelOptions = channelSelect.options[channel],
                 hostChannelState = channelOptions.hostState;
 
-            triggerKey = triggerKeySelect[triggerKeySelect.selectedIndex].key; // set global triggerKey
-
-            hostChannelState.triggerKeySelectIndex = triggerKeySelect.selectedIndex;
-
-            setTriggersDiv(hostChannelState); // uses global currentChannel
+            triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
+            hostChannelState.triggerKey = triggerKey;
         },
 
         // exported
@@ -854,30 +846,6 @@ WebMIDI.host = (function(document)
                         tuningOptionsArray = tuningGroupSelect[tuningGroupSelect.selectedIndex].tuningOptionsArray;
 
                     appendTuningSelect(tuningSelectCell, tuningOptionsArray);
-                }
-
-                function setTriggerKeySelect()
-                {
-                    let triggerKeySelect = getElem("triggerKeySelect"),
-                        options = [];
-
-                    triggerKey = 36;
-
-                    // My 4 octave EMU keyboard has keys 36-84.
-                    for(var key = triggerKey; key < 85; key++)
-                    {
-                        let option = new Option("triggerKeyOption");
-                        option.innerHTML = key.toString();
-                        option.key = key;
-                        options.push(option);
-                    }
-
-                    let option = new Option("triggerKeyOption");
-                    option.innerHTML = "none";
-                    option.key = undefined;
-                    options.push(option);
-
-                    setOptions(triggerKeySelect, options);
                 }
 
                 function setHostChannelStateFromLongControl(longControl, value)
@@ -1366,7 +1334,6 @@ WebMIDI.host = (function(document)
                         tuningGroupSelectIndex = getElem("tuningGroupSelect").selectedIndex,
                         tuningSelectIndex = getElem("tuningSelect").selectedIndex,
                         a4FrequencySelectIndex = getElem("a4FrequencySelect").selectedIndex,
-                        triggerKeySelectIndex = getElem("triggerKeySelect").selectedIndex,
                         aftertouchValue = getElem("aftertouchLongControl").getValue(),
                         pitchWheelValue = getElem("pitchWheelLongControl").getValue(),
                         modWheelValue = getElem("modWheelLongControl").getValue(),
@@ -1375,6 +1342,7 @@ WebMIDI.host = (function(document)
                         reverberationValue = getElem("reverberationLongControl").getValue(),
                         pitchWheelSensitivityValue = getElem("pitchWheelSensitivityLongControl").getValue();
 
+                    triggerKey = parseInt(getElem("triggerKeyInput").value); // global, used by handleInputEvent()
 
                     for(let i = 0; i < channelOptions.length; i++)
                     {
@@ -1387,7 +1355,7 @@ WebMIDI.host = (function(document)
                         hostState.tuningGroupSelectIndex = tuningGroupSelectIndex;
                         hostState.tuningSelectIndex = tuningSelectIndex;
                         hostState.a4FrequencySelectIndex = a4FrequencySelectIndex;
-                        hostState.triggerKeySelectIndex = triggerKeySelectIndex;
+                        hostState.triggerKey = triggerKey;
                         hostState.aftertouchValue = aftertouchValue;
                         hostState.pitchWheelValue = pitchWheelValue;
                         hostState.modWheelValue = modWheelValue;
@@ -1422,7 +1390,6 @@ WebMIDI.host = (function(document)
                 setA4FrequencySelect();
                 tuningDiv.style.display = "block";
 
-                setTriggerKeySelect();
                 triggersDiv.style.display = "block";
 
                 setCommandsAndControlsDivs();
@@ -1677,7 +1644,7 @@ WebMIDI.host = (function(document)
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
             onPresetSelectChanged: onPresetSelectChanged,
             onExportCurrentStateButtonClicked: onExportCurrentStateButtonClicked,
-            onTriggerKeySelectChanged: onTriggerKeySelectChanged,
+            onTriggerKeyInputChanged: onTriggerKeyInputChanged,
 
 			noteCheckboxClicked: noteCheckboxClicked,
 			holdCheckboxClicked: holdCheckboxClicked,
