@@ -130,7 +130,7 @@
                         <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
                     </td>
                     <td align="right">
-                        <input type="button" class="exportButton" value="export state as preset" onclick="WebMIDI.host.onExportCurrentStateButtonClicked()" />
+                        <input id="exportStateAsPresetButton"type="button" class="exportButton" value="export state as preset" onclick="WebMIDI.host.onExportStateAsPresetButtonClicked()" disabled />
                     </td>
                 </tr>
             </table>

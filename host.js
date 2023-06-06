@@ -105,6 +105,110 @@ WebMIDI.host = (function(document)
             sendCommand(WebMIDI.constants.COMMAND.CONTROL_CHANGE, controlIndex);
         },
 
+        // sets the new channel state in both the host and the synth
+        setPreset = function(presetIndex)
+        {
+            function findIndexfromOptionName(select, optionName)
+            {
+                let options = Array.from(select.options),
+                    index = options.findIndex((opt) => opt.label === optionName);
+                if(index === -1)
+                {
+                    throw "Unknown option."
+                }
+                return index;
+            }
+
+            let presets = WebMIDI.presets,
+                preset = (nextPresetIndex < presets.length) ? presets[presetIndex] : undefined,
+                channelSelect = getElem("channelSelect"),
+                fontSelect = getElem("webAudioFontSelect"),
+                instrumentSelect = getElem("instrumentSelect"),
+                mixtureSelect = getElem("mixtureSelect"),
+                tuningGroupSelect = getElem("tuningGroupSelect"),
+                tuningSelect = getElem("tuningSelect"),
+                a4FrequencySelect = getElem("a4FrequencySelect"),
+                triggerKeyInput = getElem("triggerKeyInput"),
+                pitchWheelLongControl = getElem("pitchWheelLongControl"),
+                modWheelLongControl = getElem("modWheelLongControl"),
+                volumeLongControl = getElem("volumeLongControl"),
+                panLongControl = getElem("panLongControl"),
+                reverberationLongControl = getElem("reverberationLongControl"),
+                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl"),
+                exportStateAsPresetButton = getElem("exportStateAsPresetButton");
+
+            // decided _not_ to silence the synth while resetting all the controls.
+            // sendShortControl(WebMIDI.constants.CONTROL.ALL_SOUND_OFF);           
+
+            exportStateAsPresetButton.style.disabled = true;
+
+            // select controls
+            if(preset.channel !== undefined)
+            {
+                channelSelect.selectedIndex = findIndexfromOptionName(channelSelect, preset.channel);
+                onChannelSelectChanged();
+            }
+            if(preset.font !== undefined)
+            {
+                fontSelect.selectedIndex = findIndexfromOptionName(fontSelect, preset.font);
+                onWebAudioFontSelectChanged();
+            }
+            if(preset.instrument)
+            {
+                instrumentSelect.selectedIndex = findIndexfromOptionName(instrumentSelect, preset.instrument);
+                onInstrumentSelectChanged();
+            }
+            if(preset.mixture !== undefined)
+            {
+                mixtureSelect.selectedIndex = findIndexfromOptionName(mixtureSelect, preset.mixture);
+                onMixtureSelectChanged();
+            }
+            if(preset.tuningGroup !== undefined)
+            {
+                tuningGroupSelect.selectedIndex = findIndexfromOptionName(tuningGroupSelect, preset.tuningGroup);
+                onTuningGroupSelectChanged();
+            }
+            if(preset.tuning !== undefined)
+            {
+                tuningSelect.selectedIndex = findIndexfromOptionName(tuningSelect, preset.tuning);
+                onTuningSelectChanged();
+            }
+            if(preset.a4Frequency !== undefined) // The a4FrequencySelect is reset above, but does this really work? If not, why not?
+            {
+                a4FrequencySelect.selectedIndex = findIndexfromOptionName(a4FrequencySelect, preset.a4Frequency);
+                onA4FrequencySelectChanged();
+            }
+            if(preset.triggerKey !== undefined)
+            {
+                triggerKeyInput.value = preset.triggerKey;
+                onTriggerKeyInputChanged();
+            }
+            // slider controls
+            if(preset.pitchWheel !== undefined)
+            {
+                pitchWheelLongControl.setValue(preset.pitchWheel);
+            }
+            if(preset.modWheel !== undefined)
+            {
+                modWheelLongControl.setValue(preset.modWheel);
+            }
+            if(preset.volume !== undefined)
+            {
+                volumeLongControl.setValue(preset.volume);
+            }
+            if(preset.pan !== undefined)
+            {
+                panLongControl.setValue(preset.pan);
+            }
+            if(preset.reverberation !== undefined)
+            {
+                reverberationLongControl.setValue(preset.reverberation);
+            }
+            if(preset.pitchWheelSensitivity !== undefined)
+            {
+                pitchWheelSensitivityLongControl.setValue(preset.pitchWheelSensitivity);
+            }
+        },
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
             function handleInputMessage(e)
@@ -151,108 +255,9 @@ WebMIDI.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    // sets the new channel state in both the host and the synth
-                    function setPreset(presetIndex)
-                    {
-                        function findIndexfromOptionName(select, optionName)
-                        {
-                            let options = Array.from(select.options),
-                                index = options.findIndex((opt) => opt.label === optionName);
-                            if(index === -1)
-                            {
-                                throw "Unknown option."
-                            }
-                            return index;
-                        }
+                    let presetSelect = getElem("presetSelect");
 
-                        let presets = WebMIDI.presets,
-                            preset = (nextPresetIndex < presets.length) ? presets[presetIndex] : undefined,
-                            channelSelect = getElem("channelSelect"),
-                            fontSelect = getElem("webAudioFontSelect"),
-                            instrumentSelect = getElem("instrumentSelect"),
-                            mixtureSelect = getElem("mixtureSelect"),
-                            tuningGroupSelect = getElem("tuningGroupSelect"),
-                            tuningSelect = getElem("tuningSelect"),
-                            a4FrequencySelect = getElem("a4FrequencySelect"),
-                            triggerKeyInput = getElem("triggerKeyInput"),
-                            pitchWheelLongControl = getElem("pitchWheelLongControl"),
-                            modWheelLongControl = getElem("modWheelLongControl"),
-                            volumeLongControl = getElem("volumeLongControl"),
-                            panLongControl = getElem("panLongControl"),
-                            reverberationLongControl = getElem("reverberationLongControl"),
-                            pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl"),
-                            index;
-
-                        // decided _not_ to silence the synth while resetting all the controls.
-                        // sendShortControl(WebMIDI.constants.CONTROL.ALL_SOUND_OFF);
-
-                        // select controls
-                        if(preset.channel !== undefined)
-                        {
-                            channelSelect.selectedIndex = findIndexfromOptionName(channelSelect, preset.channel);
-                            onChannelSelectChanged();
-                        }
-                        if(preset.font !== undefined)
-                        {
-                            fontSelect.selectedIndex = findIndexfromOptionName(fontSelect, preset.font);
-                            onWebAudioFontSelectChanged();
-                        }
-                        if(preset.instrument)
-                        {
-                            instrumentSelect.selectedIndex = findIndexfromOptionName(instrumentSelect, preset.instrument);
-                            onInstrumentSelectChanged();
-                        }
-                        if(preset.mixture !== undefined)
-                        {
-                            mixtureSelect.selectedIndex = findIndexfromOptionName(mixtureSelect, preset.mixture);
-                            onMixtureSelectChanged();
-                        }
-                        if(preset.tuningGroup !== undefined)
-                        {
-                            tuningGroupSelect.selectedIndex = findIndexfromOptionName(tuningGroupSelect, preset.tuningGroup);
-                            onTuningGroupSelectChanged();
-                        }
-                        if(preset.tuning !== undefined)
-                        {
-                            tuningSelect.selectedIndex = findIndexfromOptionName(tuningSelect, preset.tuning);
-                            onTuningSelectChanged();
-                        }
-                        if(preset.a4Frequency !== undefined) // The a4FrequencySelect is reset above, but does this really work? If not, why not?
-                        {
-                            a4FrequencySelect.selectedIndex = findIndexfromOptionName(a4FrequencySelect, preset.a4Frequency);
-                            onA4FrequencySelectChanged();
-                        }
-                        if(preset.triggerKey !== undefined)
-                        {
-                            triggerKeyInput.value = preset.triggerKey;
-                            onTriggerKeyInputChanged();
-                        }
-                        // slider controls
-                        if(preset.pitchWheel !== undefined)
-                        {
-                            pitchWheelLongControl.setValue(preset.pitchWheel);
-                        }
-                        if(preset.modWheel !== undefined)
-                        {
-                            modWheelLongControl.setValue(preset.modWheel);
-                        }
-                        if(preset.volume !== undefined)
-                        {
-                            volumeLongControl.setValue(preset.volume);
-                        }
-                        if(preset.pan !== undefined)
-                        {
-                            panLongControl.setValue(preset.pan);
-                        }
-                        if(preset.reverberation !== undefined)
-                        {
-                            reverberationLongControl.setValue(preset.reverberation);
-                        }
-                        if(preset.pitchWheelSensitivity !== undefined)
-                        {
-                            pitchWheelSensitivityLongControl.setValue(preset.pitchWheelSensitivity);
-                        }
-                    }
+                    presetSelect.selectedIndex = nextPresetIndex;
 
                     setPreset(nextPresetIndex); // sets the channel and its state in both the host and the synth
 
@@ -604,17 +609,17 @@ WebMIDI.host = (function(document)
             }
             else
             {
-                channelStateNameCell.innerHTML = "next state: " + presets[nextPresetIndex].name;
+                channelStateNameCell.innerHTML = "next preset: " + presets[nextPresetIndex].name;
             }
         },
 
         onPresetSelectChanged = function()
         {
-
+            setPreset(getElem("presetSelect").selectedIndex);
         },
 
         //exported
-        onExportCurrentStateButtonClicked = function()
+        onExportStateAsPresetButtonClicked = function()
         {
             let channelSelect = getElem("channelSelect"),
                 fontSelect = getElem("webAudioFontSelect"),
@@ -931,7 +936,7 @@ WebMIDI.host = (function(document)
                         //rangeInputElem.onchange = "WebMIDI.host.onLongControlComponentChanged()"; -- is set later
                         numberInputElem.getValue = getInputElemValue;
                         //numberInputElem.onchange = "WebMIDI.host.onLongControlComponentChanged()"; -- is set later
-                        
+
                         longControlTD.appendChild(rangeInputElem);
                         longControlTD.appendChild(numberInputElem);
                         longControlTD.appendChild(buttonInputElem);
@@ -1072,7 +1077,7 @@ WebMIDI.host = (function(document)
                                     baseSendCommand(cmdIndex, value);
                                 }
 
-                                let longInputControlTD = getBasicLongInputControl(tr, name, defaultValue, cmdString);                                                                    
+                                let longInputControlTD = getBasicLongInputControl(tr, name, defaultValue, cmdString);
 
                                 longInputControlTD.cmdIndex = cmdIndex;
                                 longInputControlTD.rangeInputElem.cmdIndex = cmdIndex;
@@ -1095,9 +1100,9 @@ WebMIDI.host = (function(document)
                                     cmdIndex = commandInfo.cmdIndex,
                                     cmdString = commandInfo.cmdString;
 
-                                    let tr = document.createElement("tr");
-                                    rval.push(tr);
-                                    setCommandRow(tr, name, defaultValue, cmdIndex, cmdString);
+                                let tr = document.createElement("tr");
+                                rval.push(tr);
+                                setCommandRow(tr, name, defaultValue, cmdIndex, cmdString);
                             }
 
                             return rval;
@@ -1123,7 +1128,7 @@ WebMIDI.host = (function(document)
                             {
                                 function onControlInputChanged(event)
                                 {
-                                    var target = (event === undefined) ? this: event.currentTarget,
+                                    var target = (event === undefined) ? this : event.currentTarget,
                                         value = target.valueAsNumber,
                                         ccIndex = target.ccIndex;
 
@@ -1157,7 +1162,7 @@ WebMIDI.host = (function(document)
 
                                 function onPitchWheelSensitivityControlChangedAgain(event)
                                 {
-                                    var numberInputElem = event.currentTarget.numberInputElem,                               
+                                    var numberInputElem = event.currentTarget.numberInputElem,
                                         value = numberInputElem.valueAsNumber;
 
                                     synth.updatePitchWheelSensitivity(currentChannel, value);
@@ -1321,7 +1326,7 @@ WebMIDI.host = (function(document)
                         option.innerHTML = presets[presetIndex].name;
                         presetSelect.options.add(option);
                     }
-                    
+
                     presetSelect.selectedIndex = 0;
                 }
 
@@ -1414,24 +1419,24 @@ WebMIDI.host = (function(document)
 
             // This function should initialize the synth with the (default) values of all the host's controls
             // by calling the corresponding functions in the synth's public interface.
-			setPage2Display(synth);
-		},
+            setPage2Display(synth);
+        },
 
         // exported
-		noteCheckboxClicked = function()
-		{
-			var
-				note1Checkbox = getElem("sendNote1Checkbox"),
-				note2Checkbox = getElem("sendNote2Checkbox");
+        noteCheckboxClicked = function()
+        {
+            var
+                note1Checkbox = getElem("sendNote1Checkbox"),
+                note2Checkbox = getElem("sendNote2Checkbox");
 
-			if((!note1Checkbox.checked) && (!note2Checkbox.checked))
-			{
-				note2Checkbox.checked = true;
-			}
-		},
+            if((!note1Checkbox.checked) && (!note2Checkbox.checked))
+            {
+                note2Checkbox.checked = true;
+            }
+        },
 
         // exported
-		doNotesOn = function()
+        doNotesOn = function()
         {
             function sendNoteOn(noteIndex, noteVelocity)
             {
@@ -1440,26 +1445,26 @@ WebMIDI.host = (function(document)
 
             var
                 aftertouchValue = getElem('aftertouchLongControl').getValue(),
-				note1Checkbox = getElem("sendNote1Checkbox"),
-				note1Index = getElem("notesDivIndexInput1").valueAsNumber,
-				note1Velocity = getElem("notesDivVelocityInput1").valueAsNumber,
-				note2Checkbox = getElem("sendNote2Checkbox"),
-				note2Index = getElem("notesDivIndexInput2").valueAsNumber,
-				note2Velocity = getElem("notesDivVelocityInput2").valueAsNumber,
-				holdCheckbox = getElem("holdCheckbox"),
+                note1Checkbox = getElem("sendNote1Checkbox"),
+                note1Index = getElem("notesDivIndexInput1").valueAsNumber,
+                note1Velocity = getElem("notesDivVelocityInput1").valueAsNumber,
+                note2Checkbox = getElem("sendNote2Checkbox"),
+                note2Index = getElem("notesDivIndexInput2").valueAsNumber,
+                note2Velocity = getElem("notesDivVelocityInput2").valueAsNumber,
+                holdCheckbox = getElem("holdCheckbox"),
                 sendButton = getElem("sendButton");
 
-			if(holdCheckbox.checked === true)
-			{
-				sendButton.disabled = true;
-			}
+            if(holdCheckbox.checked === true)
+            {
+                sendButton.disabled = true;
+            }
 
-			if(note1Checkbox.checked)
-			{
-				sendNoteOn(note1Index, note1Velocity);
-			}
-			if(note2Checkbox.checked)
-			{
+            if(note1Checkbox.checked)
+            {
+                sendNoteOn(note1Index, note1Velocity);
+            }
+            if(note2Checkbox.checked)
+            {
                 sendNoteOn(note2Index, note2Velocity);
                 // note that in this GUI, aftertouch is only applied to note2
                 if(aftertouchValue > 0)
@@ -1468,10 +1473,10 @@ WebMIDI.host = (function(document)
                 }
             }
             notesAreSounding = true;
-		},
+        },
 
         // exported
-		doNotesOff = function()
+        doNotesOff = function()
         {
             function sendNoteOff(noteIndex, noteVelocity)
             {
@@ -1489,24 +1494,24 @@ WebMIDI.host = (function(document)
                 }
             }
 
-			var
-				note1Checkbox = getElem("sendNote1Checkbox"),
-				note1Index = getElem("notesDivIndexInput1").valueAsNumber,
-				note1Velocity = getElem("notesDivVelocityInput1").valueAsNumber,
-				note2Checkbox = getElem("sendNote2Checkbox"),
-				note2Index = getElem("notesDivIndexInput2").valueAsNumber,
-				note2Velocity = getElem("notesDivVelocityInput2").valueAsNumber;
+            var
+                note1Checkbox = getElem("sendNote1Checkbox"),
+                note1Index = getElem("notesDivIndexInput1").valueAsNumber,
+                note1Velocity = getElem("notesDivVelocityInput1").valueAsNumber,
+                note2Checkbox = getElem("sendNote2Checkbox"),
+                note2Index = getElem("notesDivIndexInput2").valueAsNumber,
+                note2Velocity = getElem("notesDivVelocityInput2").valueAsNumber;
 
-			if(note1Checkbox.checked)
-			{
-				sendNoteOff(note1Index, note1Velocity);
-			}
-			if(note2Checkbox.checked)
-			{
-				sendNoteOff(note2Index, note2Velocity);
+            if(note1Checkbox.checked)
+            {
+                sendNoteOff(note1Index, note1Velocity);
+            }
+            if(note2Checkbox.checked)
+            {
+                sendNoteOff(note2Index, note2Velocity);
             }
             notesAreSounding = false;
-		},
+        },
 
         // exported
         holdCheckboxClicked = function()
@@ -1521,7 +1526,7 @@ WebMIDI.host = (function(document)
             }
         },
 
-		init = function()
+        init = function()
         {
             function setupInputDevice()
             {
@@ -1603,7 +1608,7 @@ WebMIDI.host = (function(document)
                     let option = document.createElement("option");
                     option.text = audioDev.label;
                     option.deviceId = audioDev.deviceId;
-                    audioOutputSelect.add(option, null);                    
+                    audioOutputSelect.add(option, null);
                 }
             }
 
@@ -1613,27 +1618,27 @@ WebMIDI.host = (function(document)
                 getElem("continueAtStartButtonDiv").style.display = "block";
 
                 getElem("webAudioFontDiv").style.display = "none";
-                getElem("tuningDiv").style.display = "none";                
+                getElem("tuningDiv").style.display = "none";
                 getElem("commandsAndControlsDiv").style.display = "none";
                 getElem("triggersDiv").style.display = "none";
 
                 getElem("notesDiv").style.display = "none";
             }
-            
+
             setupInputDevice();
             setAudioOutputDeviceSelect();
             synth = new WebMIDI.residentSynth.ResidentSynth(); // loads definitions from synthConfig.
-			setInitialDivsDisplay();
-		},
+            setInitialDivsDisplay();
+        },
 
-		publicAPI =
-		{
+        publicAPI =
+        {
             onInputDeviceSelectChanged: onInputDeviceSelectChanged,
             onAudioOutputSelectChanged: onAudioOutputSelectChanged,
 
-			onContinueAtStartClicked: onContinueAtStartClicked,
+            onContinueAtStartClicked: onContinueAtStartClicked,
 
-			webAudioFontWebsiteButtonClick: webAudioFontWebsiteButtonClick,
+            webAudioFontWebsiteButtonClick: webAudioFontWebsiteButtonClick,
 
             onChannelSelectChanged: onChannelSelectChanged,
             onWebAudioFontSelectChanged: onWebAudioFontSelectChanged,
@@ -1643,19 +1648,19 @@ WebMIDI.host = (function(document)
             onTuningSelectChanged: onTuningSelectChanged,
             onA4FrequencySelectChanged: onA4FrequencySelectChanged,
             onPresetSelectChanged: onPresetSelectChanged,
-            onExportCurrentStateButtonClicked: onExportCurrentStateButtonClicked,
+            onExportStateAsPresetButtonClicked: onExportStateAsPresetButtonClicked,
             onTriggerKeyInputChanged: onTriggerKeyInputChanged,
 
-			noteCheckboxClicked: noteCheckboxClicked,
-			holdCheckboxClicked: holdCheckboxClicked,
+            noteCheckboxClicked: noteCheckboxClicked,
+            holdCheckboxClicked: holdCheckboxClicked,
 
-			doNotesOn: doNotesOn,
-			doNotesOff: doNotesOff
-		};
-	// end var
+            doNotesOn: doNotesOn,
+            doNotesOff: doNotesOff
+        };
+    // end var
 
-	init();
+    init();
 
-	return publicAPI;
+    return publicAPI;
 
 }(document));
