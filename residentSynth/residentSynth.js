@@ -121,11 +121,12 @@ WebMIDI.residentSynth = (function(window)
 									audioContext.decodeAudioData(arraybuffer).then(function(audioBuffer)
 									{
 										zone.buffer = audioBuffer;
-										// 13.01.2020, ji: Added console.log code 
-										if(isLastZone === true)
-										{
-											console.log("adjusted " + presetName);
-										}
+										// 13.01.2020, ji: Added console.log code
+										// 07.06.2023, ji: commented out
+										//if(isLastZone === true)
+										//{
+										//	console.log("adjusted " + presetName);
+										//}
 									});
 								}
 							}
@@ -599,9 +600,9 @@ WebMIDI.residentSynth = (function(window)
 				{
 					while(!webAudioFont.isReady())
 					{
-						console.log('Sleeping');
+						//console.log('Sleeping');
 						await sleep(100);
-						console.log('Done sleeping');
+						//console.log('Done sleeping');
 					}
 				}
 
@@ -890,7 +891,7 @@ WebMIDI.residentSynth = (function(window)
 
 			// channelControls[channel].aftertouch is not required because new noteOns always start with aftertouch=0.
 
-			console.log("updateAftertouch() key: " + key + " value:" + value + " aftertouch14Bit=" + aftertouch14Bit);
+			//console.log("updateAftertouch() key: " + key + " value:" + value + " aftertouch14Bit=" + aftertouch14Bit);
 		},
 		updatePitchWheel = function(channel, data1, data2)
 		{
@@ -898,7 +899,7 @@ WebMIDI.residentSynth = (function(window)
 				currentNoteOns = channelControls[channel].currentNoteOns;
 
 			// data2 is the MSB, data1 is LSB.
-			console.log("updatePitchWheel() data1: " + data1 + " data2:" + data2 + " pitchWheel14Bit=" + pitchWheel14Bit + " (should be in range -8192..+8191)");
+			//console.log("updatePitchWheel() data1: " + data1 + " data2:" + data2 + " pitchWheel14Bit=" + pitchWheel14Bit + " (should be in range -8192..+8191)");
 
 			if(currentNoteOns !== undefined && currentNoteOns.length > 0)
 			{
@@ -915,7 +916,7 @@ WebMIDI.residentSynth = (function(window)
 		// The frequency of the modMode depends on the frequency of the note...
 		updateModWheel = function(channel, value)
 		{
-			console.log("ResidentSynth: ModWheel channel:" + channel + " value:" + value);
+			//console.log("ResidentSynth: ModWheel channel:" + channel + " value:" + value);
 
 			let currentNoteOns = channelControls[channel].currentNoteOns;
 			if(currentNoteOns !== undefined && currentNoteOns.length > 0)
