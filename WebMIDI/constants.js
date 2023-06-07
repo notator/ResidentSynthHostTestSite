@@ -269,38 +269,18 @@ WebMIDI.constants = (function()
 	Object.defineProperty(CONTROL, "VOLUME", { value: 7, writable: false });
 	Object.defineProperty(CONTROL, "PAN", { value: 10, writable: false });
 	Object.defineProperty(CONTROL, "EXPRESSION", {value: 11, writable: false});
-	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 75, writable: false}); // Custom control: MIDI SOUND_CONTROL_6
-	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false});
 	Object.defineProperty(CONTROL, "ALL_SOUND_OFF", {value: 120, writable: false});
 	Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", {value: 121, writable: false});
-	Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});	
-
-	// SYSEX
-	// byte 0 is COMMAND.SYSEX (= 0xF0)
-	// byte 1
-	Object.defineProperty(SYSEX, "REAL_TIME", { value: 0x7F, writable: false });
-	Object.defineProperty(SYSEX, "NON_REAL_TIME", { value: 0x7E, writable: false });
-	// DeviceID (1 or 3 bytes)
-	Object.defineProperty(SYSEX, "THREE_BYTE_DEVICE_ID_BYTE0", { value: 0x00, writable: false });
-	Object.defineProperty(SYSEX, "RESEARCH_DEVICE_ID", { value: 0x7D, writable: false });
-	// MIDI Tuning#1 (byte following DeviceID)
-	Object.defineProperty(SYSEX, "MIDI_TUNING", { value: 0x08, writable: false });
-	// MIDI Tuning#2 (byte following Tuning#1 "MIDI_TUNING")
-	Object.defineProperty(SYSEX, "MIDI_TUNING_NOTE_CHANGES_NON_REAL_TIME_BANK", { value: 0x07, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_BULK_DUMP_REQUEST", { value: 0x00, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_BULK_DUMP_REQUEST_BANK", { value: 0x03, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_BULK_DUMP_REPLY_REAL_TIME", { value: 0x09, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_BULK_DUMP_REPLY_NON_REAL_TIME", { value: 0x01, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_SCALE_OCTAVE_TUNING_DUMP_1BYTE_REAL_TIME", { value: 0x08, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_SCALE_OCTAVE_TUNING_DUMP_1BYTE_NON_REAL_TIME", { value: 0x05, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_SCALE_OCTAVE_TUNING_DUMP_2BYTE_REAL_TIME", { value: 0x09, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_SCALE_OCTAVE_TUNING_DUMP_2BYTE_NON_REAL_TIME", { value: 0x06, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_KEY-BASED_TUNING_DUMP", { value: 0x04, writable: false });
-	Object.defineProperty(SYSEX, "MIDI_TUNING_NOTE_CHANGE", { value: 0x02, writable: false });	
-
-	Object.defineProperty(SYSEX, "END_OF_MESSAGE", { value: 0xF7, writable: false });
+	Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});
+	// Custom
+	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false}); // MIDI Effects_level
+	Object.defineProperty(CONTROL, "RECORDING_ONOFF_SWITCH", {value: 80, writable: false}); // MIDI General_purpose_button_1. Uses "ON" and "OFF" values below
+	Object.defineProperty(CONTROL, "RECORDING_PLAY", {value: 16, writable: false}); //  // MIDI General_purpose_slider_1 (value is the index of the recording)
+	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 17, writable: false}); // MIDI General_purpose_slider_2 (value is the index of the mixture)
 
 	// MISC
+	Object.defineProperty(MISC, "ON", {value: 127, writable: false}); // for use as value for RECORDING_ONOFF_SWITCH
+	Object.defineProperty(MISC, "OFF", {value: 0, writable: false}); // for use as value for RECORDING_ONOFF_SWITCH
 	Object.defineProperty(MISC, "MIDI_0_FREQUENCY", { value: 8.1758, writable: false }); // Hertz
 	Object.defineProperty(MISC, "MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY", { value: 2, writable: false }); // semitones
 

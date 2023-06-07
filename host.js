@@ -25,7 +25,6 @@ WebMIDI.host = (function(document)
         notesAreSounding = false,
         allLongInputControls = [], // used by AllControllersOff control
         triggerKey,
-        notesRecording, // recording happens when notesRecording is an array
 
         getElem = function(elemID)
         {
@@ -299,11 +298,6 @@ WebMIDI.host = (function(document)
                                 msg[2] = getRectifiedEMUVelocity(msg[2]);
                             }
                             //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
-                            if(notesRecording !== undefined)
-                            {
-                                msg.now = now;
-                                notesRecording.push(msg);
-                            }
                             break;
                         case CMD.AFTERTOUCH:
                             // The EMU keyboard never sends aftertouch, so this should never happen.
@@ -709,51 +703,32 @@ WebMIDI.host = (function(document)
         {
 
         },
+        // exported
         onStartRecordingButtonClicked = function()
         {
             let startRecordingButton = getElem("startRecordingButton"),
-                stopRecordingButton = getElem("stopRecordingButton");
+                stopRecordingButton = getElem("stopRecordingButton"),
+                CONST = WebMIDI.constants,
+                startRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_ONOFF_SWITCH, CONST.MISC.ON]);
+
+            synth.send(startRecordingMsg);
 
             startRecordingButton.style.display = "none";
             stopRecordingButton.style.display = "block";
-
-            notesRecording = [];
         },
+        // exported
         onStopRecordingButtonClicked = function()
         {
-            let presetSelect = getElem("presetSelect"),
-                startRecordingButton = getElem("startRecordingButton"),
+            let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
-                name = "ch" + currentChannel.toString() + "_recording",
-                presetName,
-                recording = {};
+                CONST = WebMIDI.constants,
+                stopRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_ONOFF_SWITCH, CONST.MISC.OFF]);
 
-            if(presetSelect.disabled === false)
-            {
-                presetName = presetSelect.options[presetSelect.selectedIndex].value;
-                name = presetName + "_recording";
-            }
+            synth.send(stopRecordingMsg);
 
-            recording.name = name;
-            if(presetName !== undefined)
-            {
-                recording.preset = presetName;
-            }
-            recording.notes = notesRecording;
-
-            startRecordingButton.style.display = "block";
             stopRecordingButton.style.display = "none";
+            startRecordingButton.style.display = "block";
 
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(new Blob([JSON.stringify(recording, null, "\t")], {
-                type: "text/plain"
-            }));
-            a.setAttribute("download", name + ".json");
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            notesRecording = undefined; // stop recording
         },
 
         // exported

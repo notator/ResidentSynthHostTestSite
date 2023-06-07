@@ -870,11 +870,6 @@ WebMIDI.residentSynth = (function(window)
 		{
 			console.log("ResidentSynth: ModWheel channel:" + channel + " value:" + value);
 
-			if(value === 0)
-			{
-				console.log("Temporary reminder: check that value===0 is innocuous.");
-			}
-
 			let currentNoteOns = channelControls[channel].currentNoteOns;
 			if(currentNoteOns !== undefined && currentNoteOns.length > 0)
 			{
@@ -1099,7 +1094,6 @@ WebMIDI.residentSynth = (function(window)
 		controls =
 			[
 				// standard 3-byte controllers.
-
 				// The WebMIDISynthHost GUI manages banks using the preset selector, so it does not provide a separate banks
 				// control in the controls section of its GUI.
 				// ResidentSynth.prototype.send(message, ignoredTimestamp) _does_, however, use the
@@ -1109,12 +1103,15 @@ WebMIDI.residentSynth = (function(window)
 				CTL.MODWHEEL,
 				CTL.VOLUME,
 				CTL.PAN,
-				CTL.MIXTURE_INDEX, // custom control
-				CTL.REVERBERATION,
-
 				// standard 2-byte controllers.
 				CTL.ALL_CONTROLLERS_OFF,
-				CTL.ALL_SOUND_OFF
+				CTL.ALL_SOUND_OFF,
+
+				// custom controls (see constants.js)
+				CTL.REVERBERATION,
+				CTL.RECORDING_ONOFF_SWITCH,
+				CTL.RECORDING_PLAY,
+				CTL.MIXTURE_INDEX 
 			],
 
 		ResidentSynth = function()
@@ -1387,12 +1384,61 @@ WebMIDI.residentSynth = (function(window)
 				// console.log("residentSynth Pan: channel:" + channel + " value:" + value);
 				updateMixtureIndex(channel, mixtureIndex);
 			}
-
 			function setReverberation(channel, value)
 			{
 				checkControlExport(CTL.REVERBERATION);
 				// console.log("residentSynth Reverberation: channel:" + channel + " value:" + value);
 				updateReverberation(channel, value);
+			}
+
+			function setRecordingOnOff(channel, value)
+			{
+				// omits the final (stop recording) message (CHANNEL_PRESSURE has been omitted earlier)
+				function getStringArray(recording)
+				{
+					let rval = [],
+						prevTime = recording[0].now,
+						nMessages = recording.length - 1; // omits the final (stop recording) message
+
+					for(let i = 0; i < nMessages; i++)
+					{
+						let msg = recording[i],
+							delay = Math.round(msg.now - prevTime),
+							str = msg[0].toString() + "," + msg[1].toString() + "," + msg[2].toString() + "," + delay.toString();
+
+						rval.push(str);
+						prevTime = msg.now;
+					}
+					return rval;
+				}
+
+				if(value === MISC.ON)
+				{
+					channelControls[channel].recording = [];
+				}
+				else // value === MISC.OFF
+				{
+					let save = {};
+
+					save.name = "ch" + channel.toString() + "_recording";
+					save.recording = getStringArray(channelControls[channel].recording);
+
+					const a = document.createElement("a");
+					a.href = URL.createObjectURL(new Blob([JSON.stringify(save, null, "\t")], {
+						type: "text/plain"
+					}));
+					a.setAttribute("download", save.name + ".json");
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+
+					channelControls[channel].recording = undefined;
+				}
+			}
+
+			function setRecordingPlay(channel, value)
+			{
+
 			}
 
 			function allControllersOff(channel)
@@ -1432,6 +1478,12 @@ WebMIDI.residentSynth = (function(window)
 				case CTL.REVERBERATION:
 					setReverberation(channel, data2);
 					break;
+				case CTL.RECORDING_ONOFF_SWITCH:
+					setRecordingOnOff(channel, data2);
+					break;
+				case CTL.RECORDING_PLAY:
+					setRecordingPlay(channel, data2);
+					break;
 				case CTL.ALL_CONTROLLERS_OFF:
 					allControllersOff(channel);
 					break;
@@ -1464,6 +1516,12 @@ WebMIDI.residentSynth = (function(window)
 			checkCommandExport(CMD.PITCHWHEEL);
 			//console.log("residentSynth PitchWheel: channel:" + channel + " data1:" + data1 + " data2:" + data2);
 			updatePitchWheel(channel, data1, data2);
+		}
+
+		if(channelControls[channel].recording !== undefined && command !== WebMIDI.constants.COMMAND.CHANNEL_PRESSURE)
+		{
+			messageData.now = performance.now();
+			channelControls[channel].recording.push(messageData);
 		}
 
 		switch(command)
