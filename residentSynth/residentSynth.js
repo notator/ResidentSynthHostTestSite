@@ -37,7 +37,7 @@ WebMIDI.residentSynth = (function(window)
 		setAudioOutputDevice = async function(deviceId)
 		{
 			await audioContext.setSinkId(deviceId);
-		},	
+		},
 
 		// returns a three character string representing the index
 		getIndexString = function(index)
@@ -678,6 +678,52 @@ WebMIDI.residentSynth = (function(window)
 			return mixtures; // can be empty
 		},
 
+		// returns an array of recordings, each of which has a name and a messages attribute.
+		// The messages attribute is an array of objects, each of which has a UintArray of the form [status, data1, data2]
+		// and a delay attribute.
+		getRecordings = function()	
+		{
+			function getMessageData(msgStringsArray)
+			{
+				let msgData = [];
+				for(var i = 0; i < msgStringsArray.length; i++)
+				{
+					let msgStr = msgStringsArray[i],
+						strData = msgStr.split(","),
+						status = parseInt(strData[0]),
+						data1 = parseInt(strData[1]),
+						data2 = parseInt(strData[2]),
+						delay = parseInt(strData[3]),
+						msg = new Uint8Array([status, data1, data2]),
+						msgObj = {};
+
+					msgObj.msg = msg;
+					msgObj.delay = delay;
+
+					msgData.push(msgObj);
+				}
+				return msgData;
+			}
+
+			let recordings = WebMIDI.recordings,
+				returnRecordings = [];
+
+			if(recordings !== undefined)
+			{
+				for(var i = 0; i < recordings.length; i++)
+				{
+					let recording = recordings[i],
+						rRecording = {};
+
+					rRecording.name = recording.name;
+					rRecording.msgData = getMessageData(recording.messages);
+					
+					returnRecordings.push(rRecording);
+                }
+			}
+			return returnRecordings;
+		},
+
 		getTuningGroups = function(tuningsFactory)
 		{
 			let tuningGroupDefs = WebMIDI.tuningDefs,
@@ -1167,7 +1213,8 @@ WebMIDI.residentSynth = (function(window)
 
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
 			Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
-			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});		
+			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});
+			Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
 
 			getTuningGroups(this.tuningsFactory);
 			Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
@@ -1421,7 +1468,7 @@ WebMIDI.residentSynth = (function(window)
 					let save = {};
 
 					save.name = "ch" + channel.toString() + "_recording";
-					save.recording = getStringArray(channelControls[channel].recording);
+					save.messages = getStringArray(channelControls[channel].recording);
 
 					const a = document.createElement("a");
 					a.href = URL.createObjectURL(new Blob([JSON.stringify(save, null, "\t")], {

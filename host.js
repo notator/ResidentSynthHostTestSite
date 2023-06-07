@@ -703,11 +703,6 @@ WebMIDI.host = (function(document)
 
             enablePresetSelect(false);
         },
-
-        onRecordingSelectChanged = function()
-        {
-
-        },
         onPlayRecordingButtonClicked = function()
         {
 
@@ -1395,6 +1390,30 @@ WebMIDI.host = (function(document)
                     presetSelect.selectedIndex = 0;
                 }
 
+                function setRecordingSelect()
+                {
+                    let recordingSelect = getElem("recordingSelect"),
+                        recordings = synth.recordings;
+
+                    for(var i = 0; i < recordings.length; i++)
+                    {
+                        let recording = recordings[i],
+                            name = recording.name,
+                            // The messages attribute is an array of objects,
+                            // each of which has a msg attribute (a UintArray of the form[status, data1, data2])
+                            // and a delay attribute (an integer).
+                            msgData = recording.msgData,
+                            option = new Option();
+
+                        option.innerHTML = name;
+                        option.msgData = msgData;
+
+                        recordingSelect.options.add(option);
+                    }
+
+                    recordingSelect.selectedIndex = 0;
+                }
+
                 function getDefaultHostChannelStates()
                 {
                     let channelOptions = getElem("channelSelect").options,
@@ -1467,6 +1486,7 @@ WebMIDI.host = (function(document)
                 setCommandsAndControlsDivs();
 
                 setPresetSelect();
+                setRecordingSelect();
 
                 getDefaultHostChannelStates();
 
@@ -1721,7 +1741,6 @@ WebMIDI.host = (function(document)
             onExportStateAsPresetButtonClicked: onExportStateAsPresetButtonClicked,
             onTriggerKeyInputChanged: onTriggerKeyInputChanged,
 
-            onRecordingSelectChanged: onRecordingSelectChanged,
             onPlayRecordingButtonClicked: onPlayRecordingButtonClicked,
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
