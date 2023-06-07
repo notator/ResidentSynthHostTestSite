@@ -451,20 +451,29 @@ WebMIDI.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
+                stopRecordingButton = getElem("stopRecordingButton"),
                 channel = channelSelect.selectedIndex,
                 channelOptions = channelSelect.options[channel],
                 hostChannelState = channelOptions.hostState;
 
-            currentChannel = channel; // the global currentChannel is used by synth.send(...)
+            if(stopRecordingButton.style.display === "block")
+            {
+                channelSelect.selectedIndex = currentChannel;
+                alert("Cant change channel while recording.");
+            }
+            else
+            {
+                currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
-            setAndSendFontDivControlsFromState(hostChannelState);
-            setAndSendTuningDivFromState(hostChannelState);
+                setAndSendFontDivControlsFromState(hostChannelState);
+                setAndSendTuningDivFromState(hostChannelState);
 
-            setTriggersDiv(hostChannelState); // uses currentChannel
+                setTriggersDiv(hostChannelState); // uses currentChannel
 
-            setAndSendLongControlsFromState(hostChannelState);
+                setAndSendLongControlsFromState(hostChannelState);
 
-            enablePresetSelect(false);
+                enablePresetSelect(false);
+            }
         },
 
         // exported
