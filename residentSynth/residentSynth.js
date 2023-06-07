@@ -31,6 +31,7 @@ WebMIDI.residentSynth = (function(window)
 		channelAudioNodes = [], // initialized in synth.open
 		channelControls = [], // initialized in synth.open
 		mixtures = [], // initialized by getMixtures()
+		recordedMsgData = [], // initialized by getRecordings()
 		tuningGroups = [],
 
 		// see: https://developer.chrome.com/blog/audiocontext-setsinkid/
@@ -678,9 +679,10 @@ WebMIDI.residentSynth = (function(window)
 			return mixtures; // can be empty
 		},
 
-		// returns an array of recordings, each of which has a name and a messages attribute.
-		// The messages attribute is an array of objects, each of which has a UintArray of the form [status, data1, data2]
-		// and a delay attribute.
+		// returns an array of recordingNames, and sets the private .recordings array to the corresponding msgData.
+		// Each msgData object has two attributes:
+		//   msg -- a UintArray of the form[status, data1, data2] and
+		//   delay -- an integer, the number of milliseconds to delay before sending the msg.
 		getRecordings = function()	
 		{
 			function getMessageData(msgStringsArray)
@@ -705,23 +707,21 @@ WebMIDI.residentSynth = (function(window)
 				return msgData;
 			}
 
-			let recordings = WebMIDI.recordings,
-				returnRecordings = [];
+			let wRecordings = WebMIDI.recordings,
+				returnRecordingNames = [];
 
-			if(recordings !== undefined)
+			if(wRecordings !== undefined)
 			{
-				for(var i = 0; i < recordings.length; i++)
+				for(var i = 0; i < wRecordings.length; i++)
 				{
-					let recording = recordings[i],
-						rRecording = {};
-
-					rRecording.name = recording.name;
-					rRecording.msgData = getMessageData(recording.messages);
+					let record = wRecordings[i],
+						msgData = getMessageData(record.messages);
 					
-					returnRecordings.push(rRecording);
+					returnRecordingNames.push(record.name);
+					recordedMsgData.push(msgData);
                 }
 			}
-			return returnRecordings;
+			return returnRecordingNames;
 		},
 
 		getTuningGroups = function(tuningsFactory)
@@ -850,6 +850,7 @@ WebMIDI.residentSynth = (function(window)
 		{
 			channelControls[channel].mixtureIndex = mixtureIndex; // for new noteOns (127 is "no mixture")
 		},
+
 		// sets channelControl.tuning to the first tuning in the group.
 		updateTuningGroupIndex = function(channel, tuningGroupIndex)
 		{
@@ -1214,7 +1215,7 @@ WebMIDI.residentSynth = (function(window)
 			Object.defineProperty(this, "webAudioFonts", { value: getWebAudioFonts(audioContext), writable: false });
 			Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
 			Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});
-			Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
+			Object.defineProperty(this, "recordingNames", {value: getRecordings(), writable: false});
 
 			getTuningGroups(this.tuningsFactory);
 			Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
@@ -1383,7 +1384,7 @@ WebMIDI.residentSynth = (function(window)
 			//console.log("residentSynth Aftertouch: channel:" + channel + " key:" + key + " value:" + value);
 			updateAftertouch(channel, key, value);
         }
-		function handleControl(channel, data1, data2)
+		function handleControl(channel, data1, data2, that)
 		{
 			function checkControlExport(control)
 			{
@@ -1470,22 +1471,41 @@ WebMIDI.residentSynth = (function(window)
 					save.name = "ch" + channel.toString() + "_recording";
 					save.messages = getStringArray(channelControls[channel].recording);
 
-					const a = document.createElement("a");
-					a.href = URL.createObjectURL(new Blob([JSON.stringify(save, null, "\t")], {
-						type: "text/plain"
-					}));
-					a.setAttribute("download", save.name + ".json");
-					document.body.appendChild(a);
-					a.click();
-					document.body.removeChild(a);
+					if(save.messages.length > 0)
+					{
+						const a = document.createElement("a");
+						a.href = URL.createObjectURL(new Blob([JSON.stringify(save, null, "\t")], {
+							type: "text/plain"
+						}));
+						a.setAttribute("download", save.name + ".json");
+						document.body.appendChild(a);
+						a.click();
+						document.body.removeChild(a);
+					}
 
 					channelControls[channel].recording = undefined;
 				}
 			}
 
-			function setRecordingPlay(channel, value)
+			async function playRecording(channel, value, that)
 			{
+				function wait(delay)
+				{
+					return new Promise(resolve => setTimeout(resolve, delay));
+				}				
 
+				checkControlExport(CTL.RECORDING_PLAY);
+
+				let msgData = recordedMsgData[value];
+				for(var i = 0; i < msgData.length; i++) 
+				{
+					let msgD = msgData[i],
+						msg = msgD.msg,
+						delay = msgD.delay;
+
+					await wait(delay);
+					that.send(msg);
+				}
 			}
 
 			function allControllersOff(channel)
@@ -1529,7 +1549,7 @@ WebMIDI.residentSynth = (function(window)
 					setRecordingOnOff(channel, data2);
 					break;
 				case CTL.RECORDING_PLAY:
-					setRecordingPlay(channel, data2);
+					playRecording(channel, data2, that);
 					break;
 				case CTL.ALL_CONTROLLERS_OFF:
 					allControllersOff(channel);
@@ -1583,7 +1603,7 @@ WebMIDI.residentSynth = (function(window)
 				handleAftertouch(channel, data1, data2);
 				break;
 			case CMD.CONTROL_CHANGE:
-				handleControl(channel, data1, data2);
+				handleControl(channel, data1, data2, this);
 				break;
 			case CMD.PRESET:
 				handlePreset(channel, data1);

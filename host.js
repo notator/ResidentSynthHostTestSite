@@ -705,7 +705,12 @@ WebMIDI.host = (function(document)
         },
         onPlayRecordingButtonClicked = function()
         {
+            let recordingSelect = getElem("recordingSelect"),
+                index = recordingSelect.selectedIndex,
+                CONST = WebMIDI.constants,
+                playRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_PLAY, index]);
 
+            synth.send(playRecordingMsg);
         },
         // exported
         onStartRecordingButtonClicked = function()
@@ -1390,23 +1395,17 @@ WebMIDI.host = (function(document)
                     presetSelect.selectedIndex = 0;
                 }
 
+                // The synth has a private array, parallel to the names, containing the MIDI recordings
                 function setRecordingSelect()
                 {
                     let recordingSelect = getElem("recordingSelect"),
-                        recordings = synth.recordings;
+                        recordingNames = synth.recordingNames;
 
-                    for(var i = 0; i < recordings.length; i++)
+                    for(var i = 0; i < recordingNames.length; i++)
                     {
-                        let recording = recordings[i],
-                            name = recording.name,
-                            // The messages attribute is an array of objects,
-                            // each of which has a msg attribute (a UintArray of the form[status, data1, data2])
-                            // and a delay attribute (an integer).
-                            msgData = recording.msgData,
-                            option = new Option();
+                        let option = new Option();
 
-                        option.innerHTML = name;
-                        option.msgData = msgData;
+                        option.innerHTML = recordingNames[i];
 
                         recordingSelect.options.add(option);
                     }
