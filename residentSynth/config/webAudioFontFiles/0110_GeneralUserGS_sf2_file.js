@@ -1,4 +1,4 @@
-console.log('load _tone_0110_GeneralUserGS_sf2_file');
+// console.log('load _tone_0110_GeneralUserGS_sf2_file');
 var _tone_0110_GeneralUserGS_sf2_file={
 	zones:[
 		{

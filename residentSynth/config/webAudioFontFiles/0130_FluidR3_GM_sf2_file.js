@@ -1,4 +1,4 @@
-console.log('load _tone_0130_FluidR3_GM_sf2_file');
+// console.log('load _tone_0130_FluidR3_GM_sf2_file');
 var _tone_0130_FluidR3_GM_sf2_file={
 	zones:[
 		{
