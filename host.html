@@ -124,13 +124,13 @@
             <table>
                 <tr>
                     <td>
-                        <span class="boldSubtitle">Preset: </span>
+                        <span class="boldSubtitle">Settings: </span>
                     </td>
                     <td>
-                        <select id="presetSelect" class="presetSelect" onchange="WebMIDI.host.onPresetSelectChanged()" />
+                        <select id="settingsSelect" class="settingsSelect" onchange="WebMIDI.host.onSettingsSelectChanged()" />
                     </td>
                     <td align="right">
-                        <input id="exportStateAsPresetButton" type="button" class="exportButton" value="export state as preset" onclick="WebMIDI.host.onExportStateAsPresetButtonClicked()" disabled />
+                        <input id="exportSettingsButton" type="button" class="exportSettingsButton" value="export settings" onclick="WebMIDI.host.onExportSettingsButtonClicked()" disabled />
                     </td>
                 </tr>
             </table>
@@ -142,8 +142,8 @@
                     <td>
                         <input id="triggerKeyInput" type="number" class="number" value="36" min="0" max="127" onchange="WebMIDI.host.onTriggerKeyInputChanged()" />
                     </td>
-                    <td id="channelStateNameCell">
-                        <!-- channel state name -->
+                    <td id="settingsNameCell">
+                        <!-- settings name -->
                     </td>
                 </tr>
             </table>
@@ -280,7 +280,7 @@
     <script src="residentSynth/residentSynth.js" type="text/javascript"></script>
     <script src="residentSynth/residentSynthNote.js" type="text/javascript"></script>
 
-    <script src="presets.js" type="text/javascript"></script>
+    <script src="settings.js" type="text/javascript"></script>
     <script src="host.js" type="text/javascript"></script>
 </body>
 </html>

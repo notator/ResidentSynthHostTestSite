@@ -1,4 +1,4 @@
-console.log('load presets.js');
+console.log('load settings.js');
 
 // Each preset definition has a name, and defines a set of values for all the controls in the host.
 // The full set of preset attributes is as follows:
@@ -22,10 +22,10 @@ console.log('load presets.js');
 //
 // Before setting the above values, the setChannelStateMessage automatically
 //     1. sets ALL_CONTROLLERS_OFF(the synth automatically sets ALL_SOUND_OFF)
-WebMIDI.presets =
+WebMIDI.settings =
     [
         {
-            "name": "preset 0: (=defaults)",
+            "name": "settings 0: (=defaults)",
             "channel": "0",
             "font": "Test Font",
             "instrument": "000:016 - Drawbar Organ (FluidR3)",
@@ -42,7 +42,7 @@ WebMIDI.presets =
             "pitchWheelSensitivity": 2
         },
         {
-            "name": "preset 1: channel=5, font=Study 2, tuning=420",
+            "name": "settings 1: channel=5, font=Study 2, tuning=420",
             "channel": "5",
             "font": "Study 2",
             "instrument": "000:008 - Celesta (FluidR3)",
@@ -59,7 +59,7 @@ WebMIDI.presets =
             "pitchWheelSensitivity": 2
         },
         {
-            "name": "preset 2: Harp (Fluid)",
+            "name": "settings 2: Harp (Fluid)",
             "channel": "0",
             "font": "interesting Fluid presets",
             "instrument": "000:046 - Orchestral Harp (FluidR3)",
@@ -76,7 +76,7 @@ WebMIDI.presets =
             "pitchWheelSensitivity": 2
         },
         {
-            "name": "preset 3: Vibraphone, a4Frequency=420, pan=20",
+            "name": "settings 3: Vibraphone, a4Frequency=420, pan=20",
             "channel": "5",
             "font": "Study 2",
             "instrument": "000:011 - Vibraphone (FluidR3)",

@@ -123,10 +123,10 @@ hr
 	margin: 0 4px auto auto;
 }
 
-.presetSelect
+.settingsSelect
 {
 	font-size: 11px;
-	width: 488px;
+	width: 513px;
 	height: 18px;
 	margin-left: 0;
 }
@@ -169,7 +169,7 @@ hr
 	margin-right: 5px;
 }
 
-.exportButton
+.exportSettingsButton
 {
 	font-size: 11px;
 	height: 18px;
