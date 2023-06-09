@@ -1,8 +1,5 @@
 console.log('load webAudioFontDefs.js');
 
-WebMIDI.namespace('webAudioFontDefs');
-WebMIDI.namespace('percussionPresets'); // omit if there are no percussion presets
-
 // The following instruments are installed in the webAudioFontDefs below.
 // This object should be adjusted accordingly when different instuments are installed.
 WebMIDI.installedPresetIndex =

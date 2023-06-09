@@ -1,7 +1,5 @@
 console.log('load mixtureDefs.js');
 
-WebMIDI.namespace('mixtureDefs');
-
 // This file can be omitted by applications that don't use mixtures.
 // The mixtureDefs array is an array of mixture definitions.
 // The maximum number of mixture definitions is 126, since one definition is reserved for resetting to no mixture.

@@ -3,7 +3,7 @@ console.log('load tuningDefs.js');
 // This file can be omitted by applications that do not define special tunings.
 // (12-tone Equal Temperament tuning is always defined by default.)
 
-WebMIDI.namespace('tuningDefs');
+// WebMIDI.namespace('tuningDefs');
 
 WebMIDI.tuningConstructors =
 {

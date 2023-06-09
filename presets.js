@@ -1,6 +1,4 @@
-console.log('load actionDefs.js');
-
-WebMIDI.namespace('actionDefs');
+console.log('load presets.js');
 
 // Each preset definition has a name, and defines a set of values for all the controls in the host.
 // The full set of preset attributes is as follows:

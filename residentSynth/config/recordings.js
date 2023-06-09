@@ -1,7 +1,5 @@
 console.log('load recordings.js');
 
-WebMIDI.namespace('recordings');
-
 WebMIDI.recordings =
     [
         {
