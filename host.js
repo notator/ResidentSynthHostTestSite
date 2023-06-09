@@ -593,8 +593,6 @@ WebMIDI.host = (function(document)
             synth.send(setTuningGroupIndexMsg);
             synth.send(setTuningIndexMsg);
 
-            // setTuning(channel, tuningGroupIndex, tuningIndex);
-
             a4FrequencySelect.selectedIndex = hostChannelState.a4FrequencySelectIndex;
             onA4FrequencySelectChanged();
 
