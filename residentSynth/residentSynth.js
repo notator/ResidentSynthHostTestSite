@@ -328,7 +328,7 @@ WebMIDI.residentSynth = (function(window)
 					if(expanded)
 					{
 						let gmName = WebMIDI.constants.generalMIDIPresetName(originalPresetIndex);
-						console.warn("WAFSynth: extended the pitch range of preset " + presetName + " (" + gmName + ").");
+						// console.warn("WAFSynth: extended the pitch range of preset " + presetName + " (" + gmName + ").");
 					}
 				}
 

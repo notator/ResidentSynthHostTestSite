@@ -54,7 +54,7 @@ WebMIDI.webAudioFont = (function()
 					}
 					if(corrected)
 					{
-                        console.warn("WebAudioFont: corrected GeneralUserGS GrandPiano zones.");
+                        // console.warn("WebAudioFont: corrected GeneralUserGS GrandPiano zones.");
 					}
 				}
 				function removeRedundantWebAudioFontGeneralUserGSMusicBoxZones(zones)
@@ -75,7 +75,7 @@ WebMIDI.webAudioFont = (function()
 					}
 					if(corrected)
 					{
-                        console.warn("WebAudioFont: corrected GeneralUserGS MusicBox zones.");
+                        // console.warn("WebAudioFont: corrected GeneralUserGS MusicBox zones.");
 					}
 				}
 				function resetHighFluidPadZone(zones, padNumber)
@@ -84,7 +84,7 @@ WebMIDI.webAudioFont = (function()
 					{
 						zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
 						zones[1].keyRangeHigh = 127;
-						console.warn("WebAudioFont: corrected Fluid Pad " + padNumber + " (top zone).");
+						// console.warn("WebAudioFont: corrected Fluid Pad " + padNumber + " (top zone).");
 					}
 				}
 				function correctFluidPad5Zones(zones)
@@ -95,7 +95,7 @@ WebMIDI.webAudioFont = (function()
 						zones.splice(1, 1);
 						zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
 						zones[1].keyRangeHigh = 127;
-                        console.warn("WebAudioFont: corrected Fluid Pad 5 zones.");
+                        // console.warn("WebAudioFont: corrected Fluid Pad 5 zones.");
 					}
 				}
 
