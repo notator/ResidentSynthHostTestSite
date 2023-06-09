@@ -717,10 +717,10 @@ WebMIDI.residentSynth = (function(window)
 				{
 					let record = wRecordings[i],
 						msgData = getMessageData(record.messages);
-					
+
 					returnRecordingNames.push(record.name);
 					recordedMsgData.push(msgData);
-                }
+				}
 			}
 			return returnRecordingNames;
 		},
@@ -867,7 +867,7 @@ WebMIDI.residentSynth = (function(window)
 		updateCentsOffset = function(channel, centsOffset)
 		{
 			channelControls[channel].centsOffset = centsOffset;
-        },
+		},
 
 		updateAftertouch = function(channel, key, value)
 		{
@@ -1158,8 +1158,12 @@ WebMIDI.residentSynth = (function(window)
 				// custom controls (see constants.js)
 				CTL.REVERBERATION,
 				CTL.RECORDING_ONOFF_SWITCH,
+				CTL.PITCH_WHEEL_SENSITIVITY,
+				CTL.CENTS_OFFSET,
 				CTL.RECORDING_PLAY,
-				CTL.MIXTURE_INDEX 
+				CTL.MIXTURE_INDEX,
+				CTL.TUNING_GROUP_INDEX,
+				CTL.TUNING_INDEX
 			],
 
 		ResidentSynth = function()
@@ -1488,6 +1492,16 @@ WebMIDI.residentSynth = (function(window)
 				}
 			}
 
+			function setPitchWheelSensitivity(channel, semitones)
+			{
+				updatePitchWheelSensitivity(channel, semitones);
+			}
+
+			function setCentsOffset(channel, centsDown)
+			{
+				channelControls[channel].centsOffset = centsDown / 100;
+			}
+
 			async function playRecording(channel, value, that)
 			{
 				function wait(delay)
@@ -1508,6 +1522,17 @@ WebMIDI.residentSynth = (function(window)
 					that.send(msg);
 				}
 			}
+
+			// sets channelControl.tuning to the first tuning in the group.
+			function setTuningGroupIndex(channel, tuningGroupIndex)
+			{
+				updateTuningGroupIndex(channel, tuningGroupIndex);
+			};
+
+			function setTuning(channel, tuningIndex)
+			{
+				updateTuning(channel, tuningIndex);
+			};
 
 			function allControllersOff(channel)
 			{
@@ -1549,8 +1574,20 @@ WebMIDI.residentSynth = (function(window)
 				case CTL.RECORDING_ONOFF_SWITCH:
 					setRecordingOnOff(channel, data2);
 					break;
+				case CTL.PITCH_WHEEL_SENSITIVITY:
+					setPitchWheelSensitivity(channel, data2);
+					break;
+				case CTL.CENTS_OFFSET:
+					setCentsOffset(channel, data2);
+					break;
 				case CTL.RECORDING_PLAY:
 					playRecording(channel, data2, that);
+					break;
+				case CTL.TUNING_GROUP_INDEX:
+					setTuningGroupIndex(channel, data2); // sets tuning to the first tuning in the group
+					break;
+				case CTL.TUNING_INDEX:
+					setTuning(channel, data2); // sets tuning to the tuning at value (=index) in the group
 					break;
 				case CTL.ALL_CONTROLLERS_OFF:
 					allControllersOff(channel);
@@ -1623,28 +1660,6 @@ WebMIDI.residentSynth = (function(window)
 				console.assert(false, "Illegal command.");
 				break;
 		}
-	};
-
-	ResidentSynth.prototype.updatePitchWheelSensitivity = function(channel, semitones)
-	{
-		updatePitchWheelSensitivity(channel, semitones);		
-	};
-
-	// sets the channel's tuning to the tuning at tuningGroups[tuningGroupIndex][tuningIndex]
-	ResidentSynth.prototype.setTuning = function(channel, tuningGroupIndex, tuningIndex)
-	{
-		if(tuningGroupIndex >= tuningGroups.length || tuningIndex >= tuningGroups[tuningGroupIndex].length)
-		{
-			throw "index out of range.";
-		}
-
-		channelControls[channel].tuning = tuningGroups[tuningGroupIndex][tuningIndex];
-	};
-
-	// sets the channel's centsOffset. centsOffset/100 will be subtracted from the tuning[key] value when executing noteOn.
-	ResidentSynth.prototype.setCentsOffset = function(channel, centsOffset)
-	{
-		channelControls[channel].centsOffset = centsOffset / 100;
 	};
 
 	ResidentSynth.prototype.setAudioOutputDevice = function(deviceId)

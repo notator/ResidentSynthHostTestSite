@@ -580,19 +580,25 @@ WebMIDI.host = (function(document)
         onTuningSelectChanged = function()
         {
             let channelSelect = getElem("channelSelect"),
-                tuningGroupSelectIndex = getElem("tuningGroupSelect").selectedIndex,
+                tuningGroupIndex = getElem("tuningGroupSelect").selectedIndex,
                 a4FrequencySelect = getElem("a4FrequencySelect"),
                 tuningSelect = getElem("tuningSelect"),
-                tuningSelectIndex = tuningSelect.selectedIndex,
+                tuningIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
-                hostChannelState = channelSelect.options[channel].hostState;
+                hostChannelState = channelSelect.options[channel].hostState,
+                CONST = WebMIDI.constants,
+                setTuningGroupIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_GROUP_INDEX, tuningGroupIndex]),
+                setTuningIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_INDEX, tuningIndex]);
 
-            synth.setTuning(channel, tuningGroupSelectIndex, tuningSelectIndex);
+            synth.send(setTuningGroupIndexMsg);
+            synth.send(setTuningIndexMsg);
+
+            // setTuning(channel, tuningGroupIndex, tuningIndex);
 
             a4FrequencySelect.selectedIndex = hostChannelState.a4FrequencySelectIndex;
             onA4FrequencySelectChanged();
 
-            hostChannelState.tuningSelectIndex = tuningSelectIndex;
+            hostChannelState.tuningSelectIndex = tuningIndex;
         },
 
         //exported (compare with onMixtureSelectChanged)
@@ -602,9 +608,11 @@ WebMIDI.host = (function(document)
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
                 a4FrequencySelect = getElem("a4FrequencySelect"),
-                centsOffset = a4FrequencySelect[a4FrequencySelect.selectedIndex].centsOffset;
+                centsOffset = a4FrequencySelect[a4FrequencySelect.selectedIndex].centsOffset,
+                CONST = WebMIDI.constants,
+                centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, centsOffset]);
 
-            synth.setCentsOffset(channel, centsOffset);
+            synth.send(centsOffsetMsg);
 
             hostChannelState.a4FrequencySelectIndex = a4FrequencySelect.selectedIndex;
 
@@ -1207,13 +1215,15 @@ WebMIDI.host = (function(document)
                                 function onPitchWheelSensitivityControlChanged(event)
                                 {
                                     var target = (event === undefined) ? this : event.currentTarget,
-                                        value = target.valueAsNumber;
+                                        value = target.valueAsNumber,
+                                        CONST = WebMIDI.constants,
+                                        pitchWheelSensitivityMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.PITCH_WHEEL_SENSITIVITY, value]);;
 
                                     target.twinInputElem.value = value;
 
                                     setHostChannelStateFromLongControl(target.parentElement, value);
 
-                                    synth.updatePitchWheelSensitivity(currentChannel, value);
+                                    synth.send(pitchWheelSensitivityMsg);
                                 }
 
                                 function onSendControlAgainButtonClick(event)
