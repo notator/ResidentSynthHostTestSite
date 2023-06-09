@@ -1443,7 +1443,6 @@ WebMIDI.residentSynth = (function(window)
 				// console.log("residentSynth Reverberation: channel:" + channel + " value:" + value);
 				updateReverberation(channel, value);
 			}
-
 			function setRecordingOnOff(channel, value)
 			{
 				// omits the final (stop recording) message (CHANNEL_PRESSURE has been omitted earlier)
@@ -1491,17 +1490,14 @@ WebMIDI.residentSynth = (function(window)
 					channelControls[channel].recording = undefined;
 				}
 			}
-
 			function setPitchWheelSensitivity(channel, semitones)
 			{
 				updatePitchWheelSensitivity(channel, semitones);
 			}
-
 			function setCentsOffset(channel, centsDown)
 			{
 				channelControls[channel].centsOffset = centsDown / 100;
 			}
-
 			async function playRecording(channel, value, that)
 			{
 				function wait(delay)
@@ -1522,13 +1518,11 @@ WebMIDI.residentSynth = (function(window)
 					that.send(msg);
 				}
 			}
-
 			// sets channelControl.tuning to the first tuning in the group.
 			function setTuningGroupIndex(channel, tuningGroupIndex)
 			{
 				updateTuningGroupIndex(channel, tuningGroupIndex);
 			};
-
 			function setTuning(channel, tuningIndex)
 			{
 				updateTuning(channel, tuningIndex);
@@ -1574,13 +1568,13 @@ WebMIDI.residentSynth = (function(window)
 				case CTL.RECORDING_ONOFF_SWITCH:
 					setRecordingOnOff(channel, data2);
 					break;
-				case CTL.PITCH_WHEEL_SENSITIVITY:
+				case CTL.PITCH_WHEEL_SENSITIVITY: 
 					setPitchWheelSensitivity(channel, data2);
 					break;
 				case CTL.CENTS_OFFSET:
 					setCentsOffset(channel, data2);
 					break;
-				case CTL.RECORDING_PLAY:
+				case CTL.PLAY_RECORDING_INDEX:
 					playRecording(channel, data2, that);
 					break;
 				case CTL.TUNING_GROUP_INDEX:

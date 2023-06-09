@@ -714,7 +714,7 @@ WebMIDI.host = (function(document)
             let recordingSelect = getElem("recordingSelect"),
                 index = recordingSelect.selectedIndex,
                 CONST = WebMIDI.constants,
-                playRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_PLAY, index]);
+                playRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.PLAY_RECORDING_INDEX, index]);
 
             synth.send(playRecordingMsg);
         },
