@@ -31,7 +31,7 @@ WebMIDI.residentSynth = (function(window)
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
-        recordedMsgData = [], // initialized by getRecordings()
+        recordedData = [], // initialized by getRecordings()
         tuningGroups = [],
 
         // see: https://developer.chrome.com/blog/audiocontext-setsinkid/
@@ -716,10 +716,13 @@ WebMIDI.residentSynth = (function(window)
                 for(var i = 0; i < wRecordings.length; i++)
                 {
                     let record = wRecordings[i],
-                        msgData = getMessageData(record.messages);
+                        data = {};
+
+                    data.settings = record.settings,
+                    data.messages = getMessageData(record.messages);
 
                     returnRecordingNames.push(record.name);
-                    recordedMsgData.push(msgData);
+                    recordedData.push(data);
                 }
             }
             return returnRecordingNames;
@@ -1456,6 +1459,57 @@ WebMIDI.residentSynth = (function(window)
                 // console.log("residentSynth Reverberation: channel:" + channel + " value:" + value);
                 updateReverberation(channel, value);
             }
+            function getSynthSettings(channel)
+            {
+                let chCtl = channelControls[channel],
+                    settings =
+                    {
+                        "channel": channel,
+                        "fontIndex": chCtl.fontIndex,
+                        "bankIndex": chCtl.bankIndex,
+                        "presetIndex": chCtl.presetIndex,
+                        "mixtureIndex": chCtl.mixtureIndex,
+
+                        "tuningGroupIndex": chCtl.tuningGroupIndex,
+                        "tuningIndex": chCtl.tuningIndex,
+                        "centsOffset": chCtl.centsOffset,
+
+                        "pitchWheelData1": chCtl.pitchWheelData1,
+                        "pitchWheelData2": chCtl.pitchWheelData2,
+                        "modWheel": chCtl.modWheel,
+                        "volume": chCtl.volume,
+                        "pan": chCtl.pan,
+                        "reverberation": chCtl.reverberation,
+                        "pitchWheelSensitivity": chCtl.pitchWheelSensitivity,
+
+                        "triggerKey": chCtl.triggerKey
+                    };
+                return settings;
+            }
+            function setSynthSettings(channel, settings)
+            {
+                let chCtl = channelControls[channel];
+
+                chCtl.channel = settings.channel;
+                chCtl.fontIndex = settings.fontIndex;
+                chCtl.bankIndex = settings.bankIndex;
+                chCtl.presetIndex = settings.presetIndex;
+                chCtl.mixtureIndex = settings.mixtureIndex;
+
+                chCtl.tuningGroupIndex = settings.tuningGroupIndex;
+                chCtl.tuningIndex = settings.tuningIndex;
+                chCtl.centsOffset = settings.centsOffset;
+
+                chCtl.pitchWheelData1 = settings.pitchWheelData1;
+                chCtl.pitchWheelData2 = settings.pitchWheelData2;
+                chCtl.modWheel = settings.modWheel;
+                chCtl.volume = settings.volume;
+                chCtl.pan = settings.pan;
+                chCtl.reverberation = settings.reverberation;
+                chCtl.pitchWheelSensitivity = settings.pitchWheelSensitivity;
+
+                chCtl.triggerKey = settings.triggerKey;
+            }
             function setRecordingOnOff(channel, value)
             {
                 // omits the final (stop recording) message (CHANNEL_PRESSURE has been omitted earlier)
@@ -1475,34 +1529,6 @@ WebMIDI.residentSynth = (function(window)
                         prevTime = msg.now;
                     }
                     return rval;
-                }
-
-                function getSynthSettings(channel)
-                {
-                    let chCtl = channelControls[channel],
-                        settings =
-                        {
-                            "channel": channel,
-                            "fontIndex": chCtl.fontIndex,
-                            "bankIndex": chCtl.bankIndex,
-                            "presetIndex": chCtl.presetIndex,
-                            "mixtureIndex": chCtl.mixtureIndex,
-
-                            "tuningGroupIndex": chCtl.tuningGroupIndex,
-                            "tuningIndex": chCtl.tuningIndex,
-                            "centsOffset": chCtl.centsOffset,
-
-                            "pitchWheelData1": chCtl.pitchWheelData1,
-                            "pitchWheelData2": chCtl.pitchWheelData2,
-                            "modWheel": chCtl.modWheel,
-                            "volume": chCtl.volume,
-                            "pan": chCtl.pan,
-                            "reverberation": chCtl.reverberation,                            
-                            "pitchWheelSensitivity": chCtl.pitchWheelSensitivity,
-
-                            "triggerKey": chCtl.triggerKey // TODO
-                        };
-                    return settings;
                 }
 
                 if(value === MISC.ON)
@@ -1552,9 +1578,15 @@ WebMIDI.residentSynth = (function(window)
                     return new Promise(resolve => setTimeout(resolve, delay));
                 }
 
-                checkControlExport(CTL.RECORDING_PLAY);
+                checkControlExport(CTL.PLAY_RECORDING_INDEX);
 
-                let msgData = recordedMsgData[value];
+                let channelData = recordedData[value],
+                    recordedChannel = channelData.settings.channel,
+                    originalSettings = getSynthSettings(recordedChannel);
+
+                setSynthSettings(recordedChannel, channelData.settings)
+
+                let msgData = channelData.messages;
                 for(var i = 0; i < msgData.length; i++) 
                 {
                     let msgD = msgData[i],
@@ -1564,6 +1596,8 @@ WebMIDI.residentSynth = (function(window)
                     await wait(delay);
                     that.send(msg);
                 }
+
+                setSynthSettings(recordedChannel, originalSettings)
             }
             // sets channelControl.tuning to the first tuning in the group.
             function setTuningGroupIndex(channel, tuningGroupIndex)
