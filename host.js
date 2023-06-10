@@ -486,11 +486,11 @@ WebMIDI.host = (function(document)
                 instrumentSelect = getElem("instrumentSelect"),
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
-                presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
+                insrumentOptionsArray = selectedSoundFontOption.insrumentOptionsArray;
 
             synth.setSoundFont(soundFont);
 
-            setOptions(instrumentSelect, presetOptionsArray);
+            setOptions(instrumentSelect, insrumentOptionsArray);
 
             instrumentSelect.selectedIndex = 0;
             onInstrumentSelectChanged();
@@ -518,9 +518,9 @@ WebMIDI.host = (function(document)
                 mixtureSelect = getElem("mixtureSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
-                preset = instrumentSelect.options[instrumentSelect.selectedIndex].preset,
-                bankIndex = preset.bankIndex,
-                presetIndex = preset.presetIndex, // N.B.: this is the presetIndex re the _bank_, not the original MIDI preset index.
+                instrument = instrumentSelect.options[instrumentSelect.selectedIndex].instrument,
+                bankIndex = instrument.bankIndex,
+                presetIndex = instrument.presetIndex, // N.B.: this is the presetIndex re the ResidentSynth _bank_, not the original MIDI preset index.
                 bankMsg = getBankMsg(channel, bankIndex),
                 presetMsg = getPresetMsg(channel, presetIndex);
 
@@ -626,6 +626,7 @@ WebMIDI.host = (function(document)
                 settings = WebMIDI.settings;
 
             triggerKeyInput.value = hostChannelState.triggerKey;
+            onTriggerKeyInputChanged();
 
             if(nextSettingsIndex >= settings.length)
             {
@@ -702,9 +703,14 @@ WebMIDI.host = (function(document)
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 channelOptions = channelSelect.options[channel],
-                hostChannelState = channelOptions.hostState;
+                hostChannelState = channelOptions.hostState,
+                CONST = WebMIDI.constants,
+                triggerKeyMsg;
 
             triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
+            triggerKeyMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TRIGGER_KEY, triggerKey]);
+
+            synth.send(triggerKeyMsg);            
             hostChannelState.triggerKey = triggerKey;
 
             enableSettingsSelect(false);
@@ -762,27 +768,28 @@ WebMIDI.host = (function(document)
                             let option = new Option("webAudioFontOption"),
                                 webAudioFont = webAudioFonts[fontIndex];
 
-                            let presetOptionsArray = [];
+                            let instrumentOptionsArray = [];
                             for(let bankIndex = 0; bankIndex < webAudioFont.banks.length; bankIndex++)
                             {
                                 let bank = webAudioFont.banks[bankIndex];
-                                for(var j = 0; j < bank.length; j++)
+                                for(var presetIndex = 0; presetIndex < bank.length; presetIndex++)
                                 {
-                                    let preset = bank[j],
-                                        presetOption = new Option("presetOption");
+                                    let preset = bank[presetIndex],
+                                        instrumentOption = new Option("instrumentOption");
 
-                                    presetOption.innerHTML = preset.name;
-                                    presetOption.preset = preset;
-                                    presetOption.preset.mixtureIndex = undefined; // could be omitted -- included here for instructional purposes only.
+                                    instrumentOption.innerHTML = preset.name;
+                                    instrumentOption.instrument = preset;
+                                    instrumentOption.instrument.bankIndex = bankIndex; // for finding the instrument when restoring settings
+                                    instrumentOption.instrument.presetIndex = presetIndex;  // for finding the instrument when restoring settings
+                                    instrumentOption.instrument.mixtureIndex = undefined; // could be omitted -- included here for instructional purposes only.
 
-
-                                    presetOptionsArray.push(presetOption);
+                                    instrumentOptionsArray.push(instrumentOption);
                                 }
                             }
 
                             option.innerHTML = webAudioFont.name;
                             option.soundFont = webAudioFont;
-                            option.presetOptionsArray = presetOptionsArray; // used to set the instrumentSelect
+                            option.insrumentOptionsArray = instrumentOptionsArray; // used to set the instrumentSelect
                             option.url = "https://github.com/surikov/webaudiofont";
 
                             options.push(option);
@@ -800,7 +807,7 @@ WebMIDI.host = (function(document)
 
                 function setInstrumentSelect(instrumentSelect, webAudioFontSelect)
                 {
-                    setOptions(instrumentSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].presetOptionsArray);
+                    setOptions(instrumentSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].insrumentOptionsArray);
 
                     instrumentSelect.selectedIndex = 0;
                 }

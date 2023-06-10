@@ -278,6 +278,7 @@ WebMIDI.constants = (function()
 	Object.defineProperty(CONTROL, "RECORDING_ONOFF_SWITCH", {value: 80, writable: false}); // MIDI General_purpose_button_1. Uses "ON" and "OFF" values below
 	Object.defineProperty(CONTROL, "PITCH_WHEEL_SENSITIVITY", {value: 81, writable: false}); // MIDI General_purpose_button_2. (value is semitones)
 	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is centsOffset downwards)
+	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is trigger key)
 	//
 	Object.defineProperty(CONTROL, "PLAY_RECORDING_INDEX", {value: 16, writable: false}); //  // MIDI General_purpose_slider_1 (value is the index of the recording to play)
 	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 17, writable: false}); // MIDI General_purpose_slider_2 (value is the index of the mixture)
