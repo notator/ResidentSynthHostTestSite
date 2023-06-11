@@ -7,14 +7,14 @@
 *
 * All this code is licensed under MIT
 *
-* The WebMIDI.residentSynthNote namespace containing the following constructor:
+* The ResSynth.residentSynthNote namespace containing the following constructor:
 *
 *        ResidentSynthNote(ctx, gainMaster, keyLayers) 
 */
 
-WebMIDI.namespace('residentSynthNote');
+ResSynth.namespace('residentSynthNote');
 
-WebMIDI.residentSynthNote = (function()
+ResSynth.residentSynthNote = (function()
 {
     "use strict";
 

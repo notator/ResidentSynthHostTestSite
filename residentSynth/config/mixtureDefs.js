@@ -12,7 +12,7 @@ console.log('load mixtureDefs.js');
 // relativeVelocity are usually floats > 0 and < 1, but can be <= 100.0.
 // (originalKey + keyInterval) will be silently coerced to the range 0..127 inclusive.
 // (originalvelocity * relativeVelocity) will be silently coerced to the range 1..127 inclusive.
-WebMIDI.mixtureDefs =
+ResSynth.mixtureDefs =
 [
     {
         name: "2.1: (+19)",

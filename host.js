@@ -9,11 +9,11 @@
 *  or more SoundFonts.
 */
 
-/*global WebMIDI, window,  document, performance */
+/*global ResSynth, window,  document, performance */
 
-WebMIDI.namespace('host');
+ResSynth.namespace('host');
 
-WebMIDI.host = (function(document)
+ResSynth.host = (function(document)
 {
     "use strict";
 
@@ -43,7 +43,7 @@ WebMIDI.host = (function(document)
 
         sendCommand = function(commandIndex, data1, data2)
         {
-            var CMD = WebMIDI.constants.COMMAND,
+            var CMD = ResSynth.constants.COMMAND,
                 status = commandIndex + currentChannel,
                 message;
 
@@ -85,7 +85,7 @@ WebMIDI.host = (function(document)
 
         sendLongControl = function(controlIndex, value)
         {
-            sendCommand(WebMIDI.constants.COMMAND.CONTROL_CHANGE, controlIndex, value);
+            sendCommand(ResSynth.constants.COMMAND.CONTROL_CHANGE, controlIndex, value);
         },
 
         sendShortControl = function(controlIndex)
@@ -105,13 +105,13 @@ WebMIDI.host = (function(document)
                 }
             }
 
-            if(controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF)
+            if(controlIndex === ResSynth.constants.CONTROL.ALL_CONTROLLERS_OFF)
             {
                 resetGUILongControllersAndSendButton();
             }
 
-            // controlIndex === WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === WebMIDI.constants.CONTROL.ALL_SOUND_OFF
-            sendCommand(WebMIDI.constants.COMMAND.CONTROL_CHANGE, controlIndex);
+            // controlIndex === ResSynth.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === ResSynth.constants.CONTROL.ALL_SOUND_OFF
+            sendCommand(ResSynth.constants.COMMAND.CONTROL_CHANGE, controlIndex);
         },
 
         // sets the new channel state in both the host and the synth
@@ -128,7 +128,7 @@ WebMIDI.host = (function(document)
                 return index;
             }
 
-            let webMIDISettings = WebMIDI.settings,
+            let webMIDISettings = ResSynth.settings,
                 settings = (nextSettingsIndex < webMIDISettings.length) ? webMIDISettings[settingsIndex] : undefined,
                 channelSelect = getElem("channelSelect"),
                 fontSelect = getElem("webAudioFontSelect"),
@@ -146,7 +146,7 @@ WebMIDI.host = (function(document)
                 pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");
 
             // decided _not_ to silence the synth while resetting all the controls.
-            // sendShortControl(WebMIDI.constants.CONTROL.ALL_SOUND_OFF);
+            // sendShortControl(ResSynth.constants.CONTROL.ALL_SOUND_OFF);
 
             // select controls
             if(settings.channel !== undefined)
@@ -267,13 +267,13 @@ WebMIDI.host = (function(document)
 
                     enableSettingsSelect(true); // disables the button
 
-                    nextSettingsIndex = (nextSettingsIndex < (WebMIDI.settings.length - 1)) ? nextSettingsIndex + 1 : 0;
+                    nextSettingsIndex = (nextSettingsIndex < (ResSynth.settings.length - 1)) ? nextSettingsIndex + 1 : 0;
 
                     setTriggersDiv(channelSelect.options[currentChannel].hostState);
                 }
 
                 let data = e.data,
-                    CMD = WebMIDI.constants.COMMAND,
+                    CMD = ResSynth.constants.COMMAND,
                     cmdIndex = data[0] & 0xF0,
                     now = performance.now();
 
@@ -511,8 +511,8 @@ WebMIDI.host = (function(document)
                 return new Uint8Array([CMD.PRESET + channel, presetIndex]);
             }
 
-            let CMD = WebMIDI.constants.COMMAND,
-                CTL = WebMIDI.constants.CONTROL,
+            let CMD = ResSynth.constants.COMMAND,
+                CTL = ResSynth.constants.CONTROL,
                 channelSelect = getElem("channelSelect"),
                 instrumentSelect = getElem("instrumentSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
@@ -541,8 +541,8 @@ WebMIDI.host = (function(document)
                 return new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MIXTURE_INDEX, mixtureIndex]);
             }
 
-            let CMD = WebMIDI.constants.COMMAND,
-                CTL = WebMIDI.constants.CONTROL,
+            let CMD = ResSynth.constants.COMMAND,
+                CTL = ResSynth.constants.CONTROL,
                 channelSelect = getElem("channelSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
                 channel = channelSelect.selectedIndex,
@@ -586,7 +586,7 @@ WebMIDI.host = (function(document)
                 tuningIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
-                CONST = WebMIDI.constants,
+                CONST = ResSynth.constants,
                 setTuningGroupIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_GROUP_INDEX, tuningGroupIndex]),
                 setTuningIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_INDEX, tuningIndex]);
 
@@ -607,7 +607,7 @@ WebMIDI.host = (function(document)
                 hostChannelState = channelSelect.options[channel].hostState,
                 a4FrequencySelect = getElem("a4FrequencySelect"),
                 centsOffset = a4FrequencySelect[a4FrequencySelect.selectedIndex].centsOffset,
-                CONST = WebMIDI.constants,
+                CONST = ResSynth.constants,
                 centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, centsOffset]);
 
             synth.send(centsOffsetMsg);
@@ -623,7 +623,7 @@ WebMIDI.host = (function(document)
         {
             let triggerKeyInput = getElem("triggerKeyInput"),
                 settingsNameCell = getElem("settingsNameCell"),
-                settings = WebMIDI.settings;
+                settings = ResSynth.settings;
 
             triggerKeyInput.value = hostChannelState.triggerKey;
             onTriggerKeyInputChanged();
@@ -704,7 +704,7 @@ WebMIDI.host = (function(document)
                 channel = channelSelect.selectedIndex,
                 channelOptions = channelSelect.options[channel],
                 hostChannelState = channelOptions.hostState,
-                CONST = WebMIDI.constants,
+                CONST = ResSynth.constants,
                 triggerKeyMsg;
 
             triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
@@ -719,7 +719,7 @@ WebMIDI.host = (function(document)
         {
             let recordingSelect = getElem("recordingSelect"),
                 index = recordingSelect.selectedIndex,
-                CONST = WebMIDI.constants,
+                CONST = ResSynth.constants,
                 playRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.PLAY_RECORDING_INDEX, index]);
 
             synth.send(playRecordingMsg);
@@ -729,7 +729,7 @@ WebMIDI.host = (function(document)
         {
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
-                CONST = WebMIDI.constants,
+                CONST = ResSynth.constants,
                 startRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_ONOFF_SWITCH, CONST.MISC.ON]);
 
             synth.send(startRecordingMsg);
@@ -742,7 +742,7 @@ WebMIDI.host = (function(document)
         {
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
-                CONST = WebMIDI.constants,
+                CONST = ResSynth.constants,
                 stopRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_ONOFF_SWITCH, CONST.MISC.OFF]);
 
             synth.send(stopRecordingMsg);
@@ -1011,9 +1011,9 @@ WebMIDI.host = (function(document)
                             buttonInputElem = document.createElement("input");
 
                         rangeInputElem.getValue = getInputElemValue;
-                        //rangeInputElem.onchange = "WebMIDI.host.onLongControlComponentChanged()"; -- is set later
+                        //rangeInputElem.onchange = "ResSynth.host.onLongControlComponentChanged()"; -- is set later
                         numberInputElem.getValue = getInputElemValue;
-                        //numberInputElem.onchange = "WebMIDI.host.onLongControlComponentChanged()"; -- is set later
+                        //numberInputElem.onchange = "ResSynth.host.onLongControlComponentChanged()"; -- is set later
 
                         longControlTD.appendChild(rangeInputElem);
                         longControlTD.appendChild(numberInputElem);
@@ -1079,7 +1079,7 @@ WebMIDI.host = (function(document)
                                     return info;
                                 }
 
-                                let constants = WebMIDI.constants,
+                                let constants = ResSynth.constants,
                                     cmd = constants.COMMAND,
                                     aftertouch = getStandardCommandInfo(constants, cmd.AFTERTOUCH),
                                     pitchWheel = getStandardCommandInfo(constants, cmd.PITCHWHEEL),
@@ -1095,7 +1095,7 @@ WebMIDI.host = (function(document)
                             {
                                 function baseSendCommand(cmdIndex, value)
                                 {
-                                    if(cmdIndex === WebMIDI.constants.COMMAND.PITCHWHEEL)
+                                    if(cmdIndex === ResSynth.constants.COMMAND.PITCHWHEEL)
                                     {
                                         // Note that:
                                         // 1. This function is called by the GUI controls, not by the EMU keyboard.
@@ -1117,7 +1117,7 @@ WebMIDI.host = (function(document)
 
                                         sendCommand(cmdIndex, data1, data2);
                                     }
-                                    else if(cmdIndex === WebMIDI.constants.COMMAND.AFTERTOUCH)
+                                    else if(cmdIndex === ResSynth.constants.COMMAND.AFTERTOUCH)
                                     {
                                         if(value > 0 && notesAreSounding)
                                         {
@@ -1221,7 +1221,7 @@ WebMIDI.host = (function(document)
                                 {
                                     var target = (event === undefined) ? this : event.currentTarget,
                                         value = target.valueAsNumber,
-                                        CONST = WebMIDI.constants,
+                                        CONST = ResSynth.constants,
                                         pitchWheelSensitivityMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.PITCH_WHEEL_SENSITIVITY, value]);;
 
                                     target.twinInputElem.value = value;
@@ -1314,7 +1314,7 @@ WebMIDI.host = (function(document)
                                     return info;
                                 }
 
-                                let constants = WebMIDI.constants,
+                                let constants = ResSynth.constants,
                                     ctl = constants.CONTROL,
                                     modWheelData = getStandardControlInfo(constants, ctl.MODWHEEL),
                                     volumeData = getStandardControlInfo(constants, ctl.VOLUME),
@@ -1341,7 +1341,7 @@ WebMIDI.host = (function(document)
 
                             for(let i = 0; i < controlInfos.length; ++i)
                             {
-                                let c = WebMIDI.constants,
+                                let c = ResSynth.constants,
                                     control = c.CONTROL,
                                     controlInfo = controlInfos[i],
                                     name = controlInfo.name,
@@ -1389,13 +1389,13 @@ WebMIDI.host = (function(document)
 
                     getElem("commandsAndControlsDiv").style.display = "block";
 
-                    sendShortControl(WebMIDI.constants.CONTROL.ALL_CONTROLLERS_OFF);
+                    sendShortControl(ResSynth.constants.CONTROL.ALL_CONTROLLERS_OFF);
                 }
 
                 function setSettingsSelect()
                 {
                     let settingsSelect = getElem("settingsSelect"),
-                        settings = WebMIDI.settings;
+                        settings = ResSynth.settings;
 
                     console.assert(settings.length < 127);
 
@@ -1543,7 +1543,7 @@ WebMIDI.host = (function(document)
         {
             function sendNoteOn(noteIndex, noteVelocity)
             {
-                sendCommand(WebMIDI.constants.COMMAND.NOTE_ON, noteIndex, noteVelocity);
+                sendCommand(ResSynth.constants.COMMAND.NOTE_ON, noteIndex, noteVelocity);
             }
 
             var
@@ -1572,7 +1572,7 @@ WebMIDI.host = (function(document)
                 // note that in this GUI, aftertouch is only applied to note2
                 if(aftertouchValue > 0)
                 {
-                    sendCommand(WebMIDI.constants.COMMAND.AFTERTOUCH, note2Index, aftertouchValue);
+                    sendCommand(ResSynth.constants.COMMAND.AFTERTOUCH, note2Index, aftertouchValue);
                 }
             }
             notesAreSounding = true;
@@ -1584,8 +1584,8 @@ WebMIDI.host = (function(document)
             function sendNoteOff(noteIndex, noteVelocity)
             {
                 var
-                    NOTE_ON = WebMIDI.constants.COMMAND.NOTE_ON,
-                    NOTE_OFF = WebMIDI.constants.COMMAND.NOTE_OFF;
+                    NOTE_ON = ResSynth.constants.COMMAND.NOTE_ON,
+                    NOTE_OFF = ResSynth.constants.COMMAND.NOTE_OFF;
 
                 if(synth.commands.indexOf(NOTE_OFF) >= 0)
                 {
@@ -1730,7 +1730,7 @@ WebMIDI.host = (function(document)
 
             setupInputDevice();
             setAudioOutputDeviceSelect();
-            synth = new WebMIDI.residentSynth.ResidentSynth(); // loads definitions from synthConfig.
+            synth = new ResSynth.residentSynth.ResidentSynth(); // loads definitions from synthConfig.
             setInitialDivsDisplay();
         },
 

@@ -14,15 +14,15 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* WebMIDI.residentSynth namespace containing a ResidentSynth constructor.
+/* ResSynth.residentSynth namespace containing a ResidentSynth constructor.
  * 
  * The original object of creating this code was to be able to discuss and improve the interface.
  * See the discussion at https://github.com/WebAudio/web-midi-api/issues/124
  */
 
-WebMIDI.namespace('residentSynth');
+ResSynth.namespace('residentSynth');
 
-WebMIDI.residentSynth = (function(window)
+ResSynth.residentSynth = (function(window)
 {
     "use strict";
     let
@@ -161,7 +161,7 @@ WebMIDI.residentSynth = (function(window)
                     });
                 }
 
-                let webAudioFontDefs = WebMIDI.webAudioFontDefs;
+                let webAudioFontDefs = ResSynth.webAudioFontDefs;
                 for(let i = 0; i < webAudioFontDefs.length; i++)
                 {
                     let presetNamesPerBank = webAudioFontDefs[i].presetNamesPerBank;
@@ -179,9 +179,9 @@ WebMIDI.residentSynth = (function(window)
                     }
                 }
 
-                if(WebMIDI.percussionPresets !== undefined)
+                if(ResSynth.percussionPresets !== undefined)
                 {
-                    let percussionPresets = WebMIDI.percussionPresets;
+                    let percussionPresets = ResSynth.percussionPresets;
                     for(let i = 0; i < percussionPresets.length; i++)
                     {
                         let presetKeys = percussionPresets[i].keys;
@@ -198,7 +198,7 @@ WebMIDI.residentSynth = (function(window)
             //      each zone.midi to presetIndex
             function getPercussionPresets()
             {
-                if(WebMIDI.percussionPresets === undefined)
+                if(ResSynth.percussionPresets === undefined)
                 {
                     return undefined;
                 }
@@ -206,10 +206,10 @@ WebMIDI.residentSynth = (function(window)
                 {
                     let percussionPresets = [];
 
-                    for(var i = 0; i < WebMIDI.percussionPresets.length; i++)
+                    for(var i = 0; i < ResSynth.percussionPresets.length; i++)
                     {
                         let zones = [];
-                        let presetDef = WebMIDI.percussionPresets[i];
+                        let presetDef = ResSynth.percussionPresets[i];
                         for(var j = 0; j < presetDef.keys.length; j++)
                         {
                             let keyVariable = presetDef.keys[j],
@@ -257,7 +257,7 @@ WebMIDI.residentSynth = (function(window)
                         if(truncStart > 0 && truncEnd > 0 && truncEnd > truncStart)
                         {
                             let soundFontSourceName = presetName.slice(truncStart, truncEnd),
-                                gmName = WebMIDI.constants.generalMIDIPresetName(originalPresetIndex);
+                                gmName = ResSynth.constants.generalMIDIPresetName(originalPresetIndex);
 
                             presetOptionName = bankString + ":" + presetString + " - " + gmName + " (" + soundFontSourceName + ")";
                         }
@@ -327,7 +327,7 @@ WebMIDI.residentSynth = (function(window)
 
                     if(expanded)
                     {
-                        let gmName = WebMIDI.constants.generalMIDIPresetName(originalPresetIndex);
+                        let gmName = ResSynth.constants.generalMIDIPresetName(originalPresetIndex);
                         // console.warn("WAFSynth: extended the pitch range of preset " + presetName + " (" + gmName + ").");
                     }
                 }
@@ -616,7 +616,7 @@ WebMIDI.residentSynth = (function(window)
                 }
             }
 
-            let webAudioFontDefs = WebMIDI.webAudioFontDefs, // defined in webAudioFonts/webAudioFonts.js
+            let webAudioFontDefs = ResSynth.webAudioFontDefs, // defined in webAudioFonts/webAudioFonts.js
                 webAudioFonts = [],
                 percussionPresets = getPercussionPresets(); // undefined if there are no percussion presets
 
@@ -628,7 +628,7 @@ WebMIDI.residentSynth = (function(window)
                     name = webAudioFontDef.name,
                     allPresetsPerBank = finalizeAllPresetsPerBank(webAudioFontDef, percussionPresets),
                     presetNamesPerBank = webAudioFontDef.presetNamesPerBank,
-                    webAudioFont = new WebMIDI.webAudioFont.WebAudioFont(name, allPresetsPerBank, presetNamesPerBank);
+                    webAudioFont = new ResSynth.webAudioFont.WebAudioFont(name, allPresetsPerBank, presetNamesPerBank);
 
                 // The webAudioFont's zone.file attributes need not have been completely adjusted (=unpacked) when
                 // this function is called since neither the zone.file nor the binary zone.buffer attributes are accessed.
@@ -671,9 +671,9 @@ WebMIDI.residentSynth = (function(window)
                 console.assert(nIncrVels <= 256);
             }
 
-            if(WebMIDI.mixtureDefs !== undefined)
+            if(ResSynth.mixtureDefs !== undefined)
             {
-                mixtures = WebMIDI.mixtureDefs;
+                mixtures = ResSynth.mixtureDefs;
                 checkMixtures(mixtures);
             }
 
@@ -708,7 +708,7 @@ WebMIDI.residentSynth = (function(window)
                 return msgData;
             }
 
-            let wRecordings = WebMIDI.recordings,
+            let wRecordings = ResSynth.recordings,
                 returnRecordingNames = [];
 
             if(wRecordings !== undefined)
@@ -730,8 +730,8 @@ WebMIDI.residentSynth = (function(window)
 
         getTuningGroups = function(tuningsFactory)
         {
-            let tuningGroupDefs = WebMIDI.tuningDefs,
-                wmtg = WebMIDI.tuningConstructors;
+            let tuningGroupDefs = ResSynth.tuningDefs,
+                wmtg = ResSynth.tuningConstructors;
 
             if(tuningGroupDefs === undefined || tuningGroupDefs.length === 0)
             {
@@ -1033,7 +1033,7 @@ WebMIDI.residentSynth = (function(window)
                 }
 
                 // note on
-                note = new WebMIDI.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
+                note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
                 note.noteOn();
                 chanControls.currentNoteOns.push(note);
             }
@@ -1114,7 +1114,7 @@ WebMIDI.residentSynth = (function(window)
         // Aftertouch and channelPressure start at 0, when each note is created. (channelPressure is not yet implemented.)
         setControllerDefaults = function(channel)
         {
-            let constants = WebMIDI.constants,
+            let constants = ResSynth.constants,
                 controlDefaultValue = constants.controlDefaultValue,
                 pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
 
@@ -1132,11 +1132,11 @@ WebMIDI.residentSynth = (function(window)
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
         },
 
-        CMD = WebMIDI.constants.COMMAND,
-        CTL = WebMIDI.constants.CONTROL,
-        MISC = WebMIDI.constants.MISC,
+        CMD = ResSynth.constants.COMMAND,
+        CTL = ResSynth.constants.CONTROL,
+        MISC = ResSynth.constants.MISC,
 
-        // The commands and controls arrays are part of a standard WebMIDI synth's interface.
+        // The commands and controls arrays are part of a standard ResSynth synth's interface.
         commands =
             [
                 CMD.NOTE_OFF,
@@ -1157,7 +1157,7 @@ WebMIDI.residentSynth = (function(window)
                 // The WebMIDISynthHost GUI manages banks using the preset selector, so it does not provide a separate banks
                 // control in the controls section of its GUI.
                 // ResidentSynth.prototype.send(message, ignoredTimestamp) _does_, however, use the
-                // WebMIDI.constants.CONTROL.BANK definition to call setBank(channel, data2) via handleControl(channel, data1, data2).
+                // ResSynth.constants.CONTROL.BANK definition to call setBank(channel, data2) via handleControl(channel, data1, data2).
                 // The bank can be set by other applications by sending the appropriate message.
                 CTL.BANK,
                 CTL.MODWHEEL,
@@ -1214,9 +1214,9 @@ WebMIDI.residentSynth = (function(window)
             // If supportsGeneralMIDI is defined, and is true, then
             // 1. both COMMAND.PRESET and CONTROL.BANK MUST be defined.
             // 2. the presets can be usefully named using GM preset names.
-            //    (GM preset names are returned by WebMIDI.constants.generalMIDIPresetName(originalPresetIndex). )
+            //    (GM preset names are returned by ResSynth.constants.generalMIDIPresetName(originalPresetIndex). )
             // 3. in a percussion font, notes can be usefully named using the GM percussion names.
-            //    (GM percussion names are returned by WebMIDI.constants.generalMIDIPercussionName(noteIndex). )
+            //    (GM percussion names are returned by ResSynth.constants.generalMIDIPercussionName(noteIndex). )
             // 4. the synth MAY define the function:
             //        void setSoundFont(soundFont)
             //    It is possible for a synth to support GM without using soundfonts.
@@ -1232,7 +1232,7 @@ WebMIDI.residentSynth = (function(window)
 
             Object.defineProperty(this, "webAudioFonts", {value: getWebAudioFonts(audioContext), writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
-            Object.defineProperty(this, "tuningsFactory", {value: new WebMIDI.tuningsFactory.TuningsFactory(), writable: false});
+            Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
             Object.defineProperty(this, "recordingNames", {value: getRecordings(), writable: false});
 
             getTuningGroups(this.tuningsFactory);
@@ -1295,7 +1295,7 @@ WebMIDI.residentSynth = (function(window)
             let channelInfo = {};
 
             channelInfo.panNode = audioContext.createStereoPanner();
-            channelInfo.reverberator = new WebMIDI.reverberator.Reverberator(audioContext);
+            channelInfo.reverberator = new ResSynth.reverberator.Reverberator(audioContext);
             channelInfo.modNode = audioContext.createOscillator(),
                 channelInfo.modGainNode = audioContext.createGain();
             channelInfo.gainNode = audioContext.createGain();
@@ -1703,7 +1703,7 @@ WebMIDI.residentSynth = (function(window)
 
         // Note that messages arriving on a non-recording channel will never be recorded, so
         // its not possible to change channels while recording.
-        if(channelControls[channel].recording !== undefined && command !== WebMIDI.constants.COMMAND.CHANNEL_PRESSURE)
+        if(channelControls[channel].recording !== undefined && command !== ResSynth.constants.COMMAND.CHANNEL_PRESSURE)
         {
             messageData.now = performance.now();
             channelControls[channel].recording.messages.push(messageData);

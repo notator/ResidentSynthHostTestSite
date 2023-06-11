@@ -4,17 +4,17 @@
  *
  *  Code licensed under MIT
  *
- *  The WebMIDI.constants namespace which defines read-only MIDI constants.
+ *  The ResSynth.constants namespace which defines read-only MIDI constants.
  *  ji: The CONTROL objects need to be extended to include other useful standard MIDI controls.
  *  (Not _all_ the standard MIDI controls are useful for software WebMIDISynths.)
  */
 
 /*jslint bitwise, white */
-/*global WebMIDI */
+/*global ResSynth */
 
-WebMIDI.namespace('constants');
+ResSynth.namespace('constants');
 
-WebMIDI.constants = (function()
+ResSynth.constants = (function()
 {
 	"use strict";
 

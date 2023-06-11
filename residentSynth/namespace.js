@@ -7,17 +7,17 @@
  *  
  */
 
-var WebMIDI = WebMIDI || {};
+var ResSynth = ResSynth || {};
 
-WebMIDI.namespace = function (ns_string)
+ResSynth.namespace = function (ns_string)
 {
     "use strict";
     var parts = ns_string.split('.'),
-        parent = WebMIDI,
+        parent = ResSynth,
         i;
 
     // strip redundant leading global
-    if (parts[0] === "WebMIDI")
+    if (parts[0] === "ResSynth")
     {
         parts = parts.slice(1);
     }

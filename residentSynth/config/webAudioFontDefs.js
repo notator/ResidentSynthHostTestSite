@@ -2,7 +2,7 @@ console.log('load webAudioFontDefs.js');
 
 // The following instruments are installed in the webAudioFontDefs below.
 // This object should be adjusted accordingly when different instuments are installed.
-WebMIDI.installedPresetIndex =
+ResSynth.installedPresetIndex =
 {
 	PIANO: 0,
 	HARPSICHORD: 6,
@@ -40,7 +40,7 @@ WebMIDI.installedPresetIndex =
 // Each array contained in a webAudioFontDefs.presetNamesPerBank[] defines the content of a bank.
 // Banks do not have to contain the same set of midiPreset indices (that's application specific).
 // There can be up to 127 banks in a webAudioFontDef.
-WebMIDI.webAudioFontDefs =
+ResSynth.webAudioFontDefs =
     [
         {
             name: "Test Font",
@@ -183,14 +183,14 @@ WebMIDI.webAudioFontDefs =
 		}
 	];
 
-// WebMIDI.percussionPresets should only be defined if percussion presets are used in the above definitions.
+// ResSynth.percussionPresets should only be defined if percussion presets are used in the above definitions.
 //
 // These percussion preset definitions are just examples. A General MIDI compatible implementation might have one
 // definition containing all the instruments from a particular source, with the preset assigned to channelIndex 9.
 // Each percussionPreset is created after these files have been adjusted (=unpacked).
 // The preset is given its defined .presetIndex attribute, and each zone's .midi attribute is set to the same value.
 // It is an error for two sounds to be assigned to the same key in the same preset. Not all keys have to be assigned (as here).
-WebMIDI.percussionPresets =
+ResSynth.percussionPresets =
 	[
 		{
 			name: "percussion (FluidR3 metal and wood)",

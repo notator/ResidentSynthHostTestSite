@@ -1,6 +1,6 @@
 console.log('load recordings.js');
 
-WebMIDI.recordings =
+ResSynth.recordings =
     [
         {
             "name": "ch0_recording0",

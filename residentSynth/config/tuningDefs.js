@@ -3,9 +3,9 @@ console.log('load tuningDefs.js');
 // This file can be omitted by applications that do not define special tunings.
 // (12-tone Equal Temperament tuning is always defined by default.)
 
-// WebMIDI.namespace('tuningDefs');
+// ResSynth.namespace('tuningDefs');
 
-WebMIDI.tuningConstructors =
+ResSynth.tuningConstructors =
 {
 	FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR: 0,
 	FUNCTION_GET_PARTCH_TUNING: 1,
@@ -17,7 +17,7 @@ WebMIDI.tuningConstructors =
 // All tunings are initially related to standard equal temperament A4=440Hz.
 // They can be transposed later using the function:
 //    transposeTuningToA4Frequency(tuning, A4Frequency).
-WebMIDI.tuningDefs =
+ResSynth.tuningDefs =
 	[
 		// Constant factor tunings
 		{
@@ -29,7 +29,7 @@ WebMIDI.tuningDefs =
 			//    1. The 'factor' is first applied recursively to define 11 chromatic intervals from the base 1.
 			//    2. Each interval is then transposed into each available octave (128 MIDI pitches)
 			//    3. The tuning is transposed so that the pitch at midiKey[root] is root.
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR,
 			name: "constant factor tunings",
 			tunings:
 				[
@@ -81,7 +81,7 @@ WebMIDI.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getPartchTuning(root);
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_PARTCH_TUNING,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_PARTCH_TUNING,
 			name: "Partch tunings",
 			tunings:
 				[
@@ -139,7 +139,7 @@ WebMIDI.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "octaves");
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_WARPED_OCTAVES_TUNING,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_WARPED_OCTAVES_TUNING,
 			name: "warped octave tunings",
 			tunings:
 				[
@@ -224,7 +224,7 @@ WebMIDI.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "gamut");
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_WARPED_GAMUT_TUNING,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_WARPED_GAMUT_TUNING,
 			name: "warped gamut tunings",
 			tunings:
 				[
@@ -299,7 +299,7 @@ WebMIDI.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
 			name: "Baroque (Poletti):  Circulating/Rational",
 			tunings:
 				[
@@ -344,7 +344,7 @@ WebMIDI.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
 			name: "Baroque (Poletti):  Circulating/Pragmatic",
 			tunings:
 				[
@@ -377,7 +377,7 @@ WebMIDI.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
 			name: "Baroque (Poletti):  Meantone/Mollified",
 			tunings:
 				[
@@ -454,7 +454,7 @@ WebMIDI.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: WebMIDI.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
 			name: "Baroque (Poletti):  Meantone/Regular",
 			tunings:
 				[

@@ -6,11 +6,11 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* WebMIDI.tuningsFactory namespace containing a TuningsFactory constructor. */
+/* ResSynth.tuningsFactory namespace containing a TuningsFactory constructor. */
 
-WebMIDI.namespace('tuningsFactory');
+ResSynth.namespace('tuningsFactory');
 
-WebMIDI.tuningsFactory = (function()
+ResSynth.tuningsFactory = (function()
 {
     "use strict";
     let
@@ -83,7 +83,7 @@ WebMIDI.tuningsFactory = (function()
         //// Converts a frequency in Hertz to a MidiCent value (semitones above MIDI C0)
         //getMidiCents = function(frequency)
         //{
-        //    return this.getCents(frequency / WebMIDI.constants.MIDI_0_FREQUENCY) / 100.0;
+        //    return this.getCents(frequency / ResSynth.constants.MIDI_0_FREQUENCY) / 100.0;
         //},
 
         // Returns a 128-note tuning (containing octave tunings) defined by cent offsets from equal temperament.
@@ -518,7 +518,7 @@ WebMIDI.tuningsFactory = (function()
             return sysExValues;
         }
 
-        let constants = WebMIDI.constants,
+        let constants = ResSynth.constants,
             CMD = constants.COMMAND,
             SYSEX = constants.SYSEX,
             sysExValues = getValuesForSysExMessage(tuning),

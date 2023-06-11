@@ -13,14 +13,14 @@
  */
 
 /* 
- * WebMIDI.webAudioFont namespace containing a WebAudioFont constructor.
+ * ResSynth.webAudioFont namespace containing a WebAudioFont constructor.
  */
 
-/*global WebMIDI */
+/*global ResSynth */
 
-WebMIDI.namespace('webAudioFont');
+ResSynth.namespace('webAudioFont');
 
-WebMIDI.webAudioFont = (function()
+ResSynth.webAudioFont = (function()
 {
 	"use strict";
 

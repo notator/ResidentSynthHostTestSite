@@ -14,12 +14,12 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* WebMIDI.reverberator namespace containing a Reverberator constructor.
+/* ResSynth.reverberator namespace containing a Reverberator constructor.
  */
 
-WebMIDI.namespace('reverberator');
+ResSynth.namespace('reverberator');
 
-WebMIDI.reverberator = (function()
+ResSynth.reverberator = (function()
 {
 	"use strict";
 
