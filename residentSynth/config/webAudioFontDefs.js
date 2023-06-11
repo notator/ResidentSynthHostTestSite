@@ -1,227 +1,205 @@
 console.log('load webAudioFontDefs.js');
 
-// The following instruments are installed in the webAudioFontDefs below.
+// The following presets are installed in the webAudioFontDefs below.
 // This object should be adjusted accordingly when different instuments are installed.
 ResSynth.installedPresetIndex =
 {
-	PIANO: 0,
-	HARPSICHORD: 6,
-	CELESTA: 8,
-	GLOCKENSPIEL: 9,
-	MUSICBOX: 10,
-	VIBRAPHONE: 11,
-	MARIMBA: 12,
-	XYLOPHONE: 13,
-	TUBULAR_BELLS: 14,
-	DULCIMER: 15,
-	ORGAN: 16,
-	NYLON_GUITAR: 24,
-	STEEL_GUITAR: 25,
-	ELECTRIC_GUITAR_JAZZ: 26,
-	ELECTRIC_GUITAR_CLEAN: 27,
-	HARP: 46,
-	OOHS: 53,
-	TUBA: 58,
-	HORN: 60,
-	TENOR_SAX: 66,
-	OBOE: 68,
-	BASSOON: 70,
-	CLARINET: 71,
-	FLUTE: 73,
-	OCARINA: 79,
-	PAD_2: 89,
-	PAD_5: 92,
-	PAD_6: 93,
-	PAD_8: 95,
-	PERCUSSION_METAL_AND_WOOD: 126,
-	PERCUSSION_DRUMS: 127
+    PIANO: 0,
+    HARPSICHORD: 6,
+    CELESTA: 8,
+    GLOCKENSPIEL: 9,
+    MUSICBOX: 10,
+    VIBRAPHONE: 11,
+    MARIMBA: 12,
+    XYLOPHONE: 13,
+    TUBULAR_BELLS: 14,
+    DULCIMER: 15,
+    ORGAN: 16,
+    NYLON_GUITAR: 24,
+    STEEL_GUITAR: 25,
+    ELECTRIC_GUITAR_JAZZ: 26,
+    ELECTRIC_GUITAR_CLEAN: 27,
+    HARP: 46,
+    OOHS: 53,
+    TUBA: 58,
+    HORN: 60,
+    TENOR_SAX: 66,
+    OBOE: 68,
+    BASSOON: 70,
+    CLARINET: 71,
+    FLUTE: 73,
+    OCARINA: 79,
+    PAD_2: 89,
+    PAD_5: 92,
+    PAD_6: 93,
+    PAD_8: 95,
+    PERCUSSION_METAL_AND_WOOD: 126,
+    PERCUSSION_DRUMS: 127
 };
 
-// Each array contained in a webAudioFontDefs.presetNamesPerBank[] defines the content of a bank.
-// Banks do not have to contain the same set of midiPreset indices (that's application specific).
-// There can be up to 127 banks in a webAudioFontDef.
+// Each webAudioFontDef has an array containing the instrument presets.
+// The MIDI setPreset message will set the preset using the index in the presets array.
+// The MIDI setBank message will never be used.
 ResSynth.webAudioFontDefs =
     [
         {
-            name: "Test Font",
-            presetNamesPerBank:
+            name: "Ensemble 1 (FluidR3 selection)",
+            presets:
                 [
-                    [ // bank 0
-						"_tone_0160_FluidR3_GM_sf2_file", // presetIndex:16, drawbarOrgan
-						"_tone_0580_FluidR3_GM_sf2_file", // presetIndex:58, tuba
-                        "_tone_0080_FluidR3_GM_sf2_file", // presetIndex:8,  celesta
-                        "_tone_0460_FluidR3_GM_sf2_file", // presetIndex:46, harp
-                        "_tone_0130_FluidR3_GM_sf2_file", // presetIndex:13, xylophone
-                        "_tone_0730_FluidR3_GM_sf2_file",  // presetIndex:73, flute
-                        "percussion (FluidR3 metal and wood)" // presetIndex:126, (percussion preset defined below)
-                    ]
+                    "_tone_0160_FluidR3_GM_sf2_file",     // instr: 0, drawbarOrgan -- old presetIndex:16
+                    "_tone_0580_FluidR3_GM_sf2_file",     // instr: 1, tuba         -- old presetIndex:58
+                    "_tone_0080_FluidR3_GM_sf2_file",     // instr: 2, celesta      -- old presetIndex:8 
+                    "_tone_0460_FluidR3_GM_sf2_file",     // instr: 3, harp         -- old presetIndex:46
+                    "_tone_0130_FluidR3_GM_sf2_file",     // instr: 4, xylophone    -- old presetIndex:13
+                    "_tone_0730_FluidR3_GM_sf2_file",     // instr: 5, flute        -- old presetIndex:73
+                    "percussion (FluidR3 metal and wood)" // instr: 6, percussion preset defined below -- old presetIndex:126,
                 ]
         },
-		{
-			name: "Study 2",
-			presetNamesPerBank:
-			[
-				[	// bank 0
-					"_tone_0080_FluidR3_GM_sf2_file", // presetIndex:8,  celesta
-					"_tone_0090_FluidR3_GM_sf2_file", // presetIndex:9,  glockenspiel
-					"_tone_0100_FluidR3_GM_sf2_file", // presetIndex:10, musicBox
-					"_tone_0110_FluidR3_GM_sf2_file", // presetIndex:11, vibraphone
-					"_tone_0120_FluidR3_GM_sf2_file", // presetIndex:12, marimba
-					"_tone_0130_FluidR3_GM_sf2_file", // presetIndex:13, xylophone
-					"_tone_0140_FluidR3_GM_sf2_file", // presetIndex:14, tubularBells
-					"_tone_0150_FluidR3_GM_sf2_file", // presetIndex:15, dulcimer
-					"_tone_0240_FluidR3_GM_sf2_file", // presetIndex:24, nylonGuitar
-					"_tone_0250_FluidR3_GM_sf2_file", // presetIndex:25, steelGuitar
-					"_tone_0260_FluidR3_GM_sf2_file", // presetIndex:26, electricGuitarJazz
-					"_tone_0270_FluidR3_GM_sf2_file"  // presetIndex:27, electricGuitarClean
-				]
-			]
-		},
-		{
-			name: "interesting Fluid presets",
-			presetNamesPerBank:
-			[
-				[	// bank 0
-					"_tone_0460_FluidR3_GM_sf2_file", // presetIndex:46, harp
-					"_tone_0530_FluidR3_GM_sf2_file", // presetIndex:53, oohs
-					"_tone_0580_FluidR3_GM_sf2_file", // presetIndex:58, tuba
-					"_tone_0790_FluidR3_GM_sf2_file", // presetIndex:79, ocarina
-					"_tone_0890_FluidR3_GM_sf2_file", // presetIndex:89, pad 2
-					"_tone_0920_FluidR3_GM_sf2_file", // presetIndex:92, pad 5
-					"_tone_0930_FluidR3_GM_sf2_file", // presetIndex:93, pad 6
-					"_tone_0950_FluidR3_GM_sf2_file"  // presetIndex:95, pad 8
-				]
-			]
-		},
-		{
-			name: "some Fluid winds",
-			presetNamesPerBank:
-			[
-				[	// bank 0
-					"_tone_0600_FluidR3_GM_sf2_file", // presetIndex:60, horn
-					"_tone_0660_FluidR3_GM_sf2_file", // presetIndex:66, tenor sax
-					"_tone_0680_FluidR3_GM_sf2_file", // presetIndex:68, oboe
-					"_tone_0700_FluidR3_GM_sf2_file", // presetIndex:70, bassoon
-					"_tone_0710_FluidR3_GM_sf2_file", // presetIndex:71, clarinet
-					"_tone_0730_FluidR3_GM_sf2_file"  // presetIndex:73, flute
-				]
-			]
-		},
-		{
-			name: "ensemble (two banks)",
-			presetNamesPerBank:
-				[						
-                    [	// bank 0
-						"_tone_0080_FluidR3_GM_sf2_file", // presetIndex:8, celesta
-						"_tone_0090_FluidR3_GM_sf2_file", // presetIndex:9, glockenspiel
-						"_tone_0100_FluidR3_GM_sf2_file", // presetIndex:10, musicBox
-						"_tone_0110_FluidR3_GM_sf2_file", // presetIndex:11, vibraphone
-						"_tone_0120_FluidR3_GM_sf2_file", // presetIndex:12, marimba
-						"_tone_0130_FluidR3_GM_sf2_file", // presetIndex:13, xylophone
-						"_tone_0140_FluidR3_GM_sf2_file", // presetIndex:14, tubularBells
-                        "_tone_0150_FluidR3_GM_sf2_file", // presetIndex:15, dulcimer
-                        "_tone_0160_FluidR3_GM_sf2_file", // presetIndex:16, drawbarOrgan
-						"_tone_0240_FluidR3_GM_sf2_file", // presetIndex:24, nylonGuitar
-						"_tone_0250_FluidR3_GM_sf2_file", // presetIndex:25, steelGuitar
-						"_tone_0260_FluidR3_GM_sf2_file", // presetIndex:26, electricGuitarJazz
-						"_tone_0270_FluidR3_GM_sf2_file", // presetIndex:27, electricGuitarClean
-						"_tone_0460_FluidR3_GM_sf2_file", // presetIndex:46, Harp
-						"percussion (FluidR3 metal and wood)",// presetIndex:126, (percussion preset defined below)
-						"percussion (FluidR3 drums)"	  // presetIndex:127, (percussion preset defined below)
-					],						
-					[   // bank 1
-						"_tone_0080_GeneralUserGS_sf2_file", // presetIndex:8, celesta
-						"_tone_0090_GeneralUserGS_sf2_file", // presetIndex:9, glockenspiel
-						"_tone_0100_GeneralUserGS_sf2_file", // presetIndex:10, musicBox
-						"_tone_0110_GeneralUserGS_sf2_file", // presetIndex:11, vibraphone
-						"_tone_0120_GeneralUserGS_sf2_file", // presetIndex:12, marimba
-						"_tone_0130_GeneralUserGS_sf2_file", // presetIndex:13, xylophone
-						"_tone_0140_GeneralUserGS_sf2_file", // presetIndex:14, tubularBells
-						"_tone_0160_GeneralUserGS_sf2_file", // presetIndex:16, drawbarOrgan
-						"percussion (FluidR3 drums)"		 // presetIndex:127, (percussion preset defined below)
-					]
-				]
-		},
-		{
-			name: "keyboards (two banks)",
-			presetNamesPerBank:
-				[
-					[	// bank 0
-						"_tone_0000_FluidR3_GM_sf2_file", // presetIndex:0, piano
-						"_tone_0060_FluidR3_GM_sf2_file", // presetIndex:6, harpsichord
-						"_tone_0080_FluidR3_GM_sf2_file", // presetIndex:8, celesta
-						"_tone_0160_FluidR3_GM_sf2_file"  // presetIndex:16, drawbarOrgan
-					],
-					[	// bank 1
-						"_tone_0000_GeneralUserGS_sf2_file", // presetIndex:0, piano
-						"_tone_0060_GeneralUserGS_sf2_file", // presetIndex:6, harpsichord
-						"_tone_0080_GeneralUserGS_sf2_file", // presetIndex:8, celesta
-						"_tone_0160_GeneralUserGS_sf2_file"  // presetIndex:16, drawbarOrgan
-					]
-				]
-		},
-		{
-			name: "two Acoustic Grand Pianos (two banks)",
-			presetNamesPerBank:
-				[
-					[	// bank 0
-						"_tone_0000_FluidR3_GM_sf2_file"	// presetIndex:0, piano
-					],
-					[	// bank 1
-						"_tone_0000_GeneralUserGS_sf2_file" // presetIndex:0, piano
-					]
-				]
-		},
-		{
-			name: "one Acoustic Grand Piano (one bank)",
-			presetNamesPerBank:
-				[
-					[	// bank 0
-						"_tone_0000_FluidR3_GM_sf2_file"	// presetIndex:0, piano
-					]
-				]
-		}
-	];
+        {
+            name: "Ensemble 2 (FluidR3 selection)",
+            presets:
+                [
+                    "_tone_0460_FluidR3_GM_sf2_file", // instr: 0, harp    -- old presetIndex:46, 
+                    "_tone_0530_FluidR3_GM_sf2_file", // instr: 1, oohs    -- old presetIndex:53, 
+                    "_tone_0580_FluidR3_GM_sf2_file", // instr: 2, tuba    -- old presetIndex:58, 
+                    "_tone_0790_FluidR3_GM_sf2_file", // instr: 3, ocarina -- old presetIndex:79, 
+                    "_tone_0890_FluidR3_GM_sf2_file", // instr: 4, pad 2   -- old presetIndex:89, 
+                    "_tone_0920_FluidR3_GM_sf2_file", // instr: 5, pad 5   -- old presetIndex:92, 
+                    "_tone_0930_FluidR3_GM_sf2_file", // instr: 6, pad 6   -- old presetIndex:93, 
+                    "_tone_0950_FluidR3_GM_sf2_file"  // instr: 7, pad 8   -- old presetIndex:95, 
+                ]
+        },
+        {
+            name: "Wind instruments (FluidR3)",
+            presets:
+                [
+                    "_tone_0600_FluidR3_GM_sf2_file", // instr: 0, horn      -- old presetIndex:60, 
+                    "_tone_0660_FluidR3_GM_sf2_file", // instr: 1, tenor sax -- old presetIndex:66, 
+                    "_tone_0680_FluidR3_GM_sf2_file", // instr: 2, oboe      -- old presetIndex:68, 
+                    "_tone_0700_FluidR3_GM_sf2_file", // instr: 3, bassoon   -- old presetIndex:70, 
+                    "_tone_0710_FluidR3_GM_sf2_file", // instr: 4, clarinet  -- old presetIndex:71, 
+                    "_tone_0730_FluidR3_GM_sf2_file"  // instr: 5, flute     -- old presetIndex:73, 
+                ]
+        },
+        {
+            name: "Study 2 (FluidR3)",
+            presets:
+                [
+                    "_tone_0080_FluidR3_GM_sf2_file", // instr: 0,  celesta      -- old presetIndex:8,  
+                    "_tone_0090_FluidR3_GM_sf2_file", // instr: 1,  glockenspiel -- old presetIndex:9,  
+                    "_tone_0100_FluidR3_GM_sf2_file", // instr: 2,  musicBox     -- old presetIndex:10, 
+                    "_tone_0110_FluidR3_GM_sf2_file", // instr: 3,  vibraphone   -- old presetIndex:11, 
+                    "_tone_0120_FluidR3_GM_sf2_file", // instr: 4,  marimba      -- old presetIndex:12, 
+                    "_tone_0130_FluidR3_GM_sf2_file", // instr: 5,  xylophone    -- old presetIndex:13, 
+                    "_tone_0140_FluidR3_GM_sf2_file", // instr: 6,  tubularBells -- old presetIndex:14, 
+                    "_tone_0150_FluidR3_GM_sf2_file", // instr: 7,  dulcimer     -- old presetIndex:15, 
+                    "_tone_0240_FluidR3_GM_sf2_file", // instr: 8,  nylonGuitar  -- old presetIndex:24, 
+                    "_tone_0250_FluidR3_GM_sf2_file", // instr: 9,  steelGuitar  -- old presetIndex:25, 
+                    "_tone_0260_FluidR3_GM_sf2_file", // instr: 10, electricGuitarJazz  -- old presetIndex:26, 
+                    "_tone_0270_FluidR3_GM_sf2_file"  // instr: 11, electricGuitarClean -- old presetIndex:27, 
+                ]
+        },
+        {
+            name: "ensemble (FluidR3 and GeneralUserGS)",
+            presets:
+                [
+                    "_tone_0080_FluidR3_GM_sf2_file",     // instr: 0,  celesta      -- old presetIndex:8,  
+                    "_tone_0090_FluidR3_GM_sf2_file",     // instr: 1,  glockenspiel -- old presetIndex:9,  
+                    "_tone_0100_FluidR3_GM_sf2_file",     // instr: 2,  musicBox     -- old presetIndex:10, 
+                    "_tone_0110_FluidR3_GM_sf2_file",     // instr: 3,  vibraphone   -- old presetIndex:11, 
+                    "_tone_0120_FluidR3_GM_sf2_file",     // instr: 4,  marimba      -- old presetIndex:12, 
+                    "_tone_0130_FluidR3_GM_sf2_file",     // instr: 5,  xylophone    -- old presetIndex:13, 
+                    "_tone_0140_FluidR3_GM_sf2_file",     // instr: 6,  tubularBells -- old presetIndex:14, 
+                    "_tone_0150_FluidR3_GM_sf2_file",     // instr: 7,  dulcimer     -- old presetIndex:15, 
+                    "_tone_0160_FluidR3_GM_sf2_file",     // instr: 8,  drawbarOrgan -- old presetIndex:16, 
+                    "_tone_0240_FluidR3_GM_sf2_file",     // instr: 9,  nylonGuitar  -- old presetIndex:24, 
+                    "_tone_0250_FluidR3_GM_sf2_file",     // instr: 10, steelGuitar  -- old presetIndex:25, 
+                    "_tone_0260_FluidR3_GM_sf2_file",     // instr: 11, electricGuitarJazz  -- old presetIndex:26, 
+                    "_tone_0270_FluidR3_GM_sf2_file",     // instr: 12, electricGuitarClean -- old presetIndex:27, 
+                    "_tone_0460_FluidR3_GM_sf2_file",     // instr: 13, harp         -- old presetIndex:46, 
+                    "percussion (FluidR3 metal and wood)",// instr: 14, percussion preset defined below -- old presetIndex:126,
+                    "percussion (FluidR3 drums)",	      // instr: 15, percussion preset defined below -- old presetIndex:127,
+                    "_tone_0080_GeneralUserGS_sf2_file",  // instr: 16, celesta      -- old presetIndex:8,  
+                    "_tone_0090_GeneralUserGS_sf2_file",  // instr: 17, glockenspiel -- old presetIndex:9,  
+                    "_tone_0100_GeneralUserGS_sf2_file",  // instr: 18, musicBox     -- old presetIndex:10, 
+                    "_tone_0110_GeneralUserGS_sf2_file",  // instr: 19, vibraphone   -- old presetIndex:11, 
+                    "_tone_0120_GeneralUserGS_sf2_file",  // instr: 20, marimba      -- old presetIndex:12, 
+                    "_tone_0130_GeneralUserGS_sf2_file",  // instr: 21, xylophone    -- old presetIndex:13, 
+                    "_tone_0140_GeneralUserGS_sf2_file",  // instr: 22, tubularBells -- old presetIndex:14, 
+                    "_tone_0160_GeneralUserGS_sf2_file",  // instr: 23, drawbarOrgan -- old presetIndex:16, 
+                    "percussion (FluidR3 drums)"		  // instr: 24, percussion preset defined below -- old presetIndex:127,
+                ]
+        },
+        {
+            name: "keyboards (FluidR3 and GeneralUserGS)",
+            presets:
+                [
+                    "_tone_0000_FluidR3_GM_sf2_file",    // instr: 0, piano        -- old presetIndex:0, 
+                    "_tone_0060_FluidR3_GM_sf2_file",    // instr: 1, harpsichord  -- old presetIndex:6, 
+                    "_tone_0080_FluidR3_GM_sf2_file",    // instr: 2, celesta      -- old presetIndex:8, 
+                    "_tone_0160_FluidR3_GM_sf2_file",    // instr: 3, drawbarOrgan -- old presetIndex:16,
+                    "_tone_0000_GeneralUserGS_sf2_file", // instr: 4, piano        -- old presetIndex:0, 
+                    "_tone_0060_GeneralUserGS_sf2_file", // instr: 5, harpsichord  -- old presetIndex:6, 
+                    "_tone_0080_GeneralUserGS_sf2_file", // instr: 6, celesta      -- old presetIndex:8, 
+                    "_tone_0160_GeneralUserGS_sf2_file"  // instr: 7, drawbarOrgan -- old presetIndex:16,
+                ]
+        },
+        {
+            name: "Grand Pianos (FluidR3 and GeneralUserGS)",
+            presets:
+                [
+                    "_tone_0000_FluidR3_GM_sf2_file",	// instr: 0, piano -- old presetIndex:0 
+                    "_tone_0000_GeneralUserGS_sf2_file" // instr: 1, piano -- old presetIndex:0 
+                ]
+        },
+        {
+            name: "Grand Piano (FluidR3)",
+            presets:
+                [
+                    "_tone_0000_FluidR3_GM_sf2_file"	// instr: 0, piano -- old presetIndex:0
+                ]
+        }
+    ];
 
 // ResSynth.percussionPresets should only be defined if percussion presets are used in the above definitions.
 //
 // These percussion preset definitions are just examples. A General MIDI compatible implementation might have one
-// definition containing all the instruments from a particular source, with the preset assigned to channelIndex 9.
+// definition containing all the presets from a particular source, with the preset assigned to channelIndex 9.
 // Each percussionPreset is created after these files have been adjusted (=unpacked).
 // The preset is given its defined .presetIndex attribute, and each zone's .midi attribute is set to the same value.
 // It is an error for two sounds to be assigned to the same key in the same preset. Not all keys have to be assigned (as here).
 ResSynth.percussionPresets =
-	[
-		{
-			name: "percussion (FluidR3 metal and wood)",
-			presetIndex: 126, // any index that is not otherwise used in the same bank
-			keys:
-				[
-					"_drum_56_0_FluidR3_GM_sf2_file", // keyIndex:56 Cowbell
-					"_drum_59_0_FluidR3_GM_sf2_file", // keyIndex:59 Ride Cymbal 2    
-					"_drum_70_0_FluidR3_GM_sf2_file", // keyIndex:70 Maracas 
-					"_drum_73_0_FluidR3_GM_sf2_file", // keyIndex:73 Short Guiro 
-					"_drum_74_0_FluidR3_GM_sf2_file", // keyIndex:74 Long Guiro
-					"_drum_75_0_FluidR3_GM_sf2_file", // keyIndex:75 Claves
-					"_drum_76_0_FluidR3_GM_sf2_file", // keyIndex:76 Hi Wood Block 
-					"_drum_77_0_FluidR3_GM_sf2_file", // keyIndex:77 Low Wood Block 
-					"_drum_81_0_FluidR3_GM_sf2_file"  // keyIndex:81 Open Triangle
-				]
-		},
-		{
-			name: "percussion (FluidR3 drums)",
-			presetIndex: 127, // any index that is not otherwise used in the same bank
-			keys:
-				[
-					"_drum_41_0_FluidR3_GM_sf2_file", // keyIndex:41 Low Floor Tom
-					"_drum_45_0_FluidR3_GM_sf2_file", // keyIndex:45 Low Tom
-					"_drum_48_0_FluidR3_GM_sf2_file", // keyIndex:48 Hi-Mid Tom
-					"_drum_60_0_FluidR3_GM_sf2_file", // keyIndex:60 Hi Bongo    
-					"_drum_61_0_FluidR3_GM_sf2_file", // keyIndex:61 Low Bongo   
-					"_drum_62_0_FluidR3_GM_sf2_file", // keyIndex:62 Mute Hi Conga
-					"_drum_63_0_FluidR3_GM_sf2_file"  // keyIndex:63 Open Hi Conga 
-				]
-		}
+    [
+        {
+            name: "percussion (FluidR3 metal and wood)",
+            presetIndex: 126, // any index that is not otherwise used in the same bank
+            keys:
+                [
+                    "_drum_56_0_FluidR3_GM_sf2_file", // keyIndex:56 Cowbell
+                    "_drum_59_0_FluidR3_GM_sf2_file", // keyIndex:59 Ride Cymbal 2    
+                    "_drum_70_0_FluidR3_GM_sf2_file", // keyIndex:70 Maracas 
+                    "_drum_73_0_FluidR3_GM_sf2_file", // keyIndex:73 Short Guiro 
+                    "_drum_74_0_FluidR3_GM_sf2_file", // keyIndex:74 Long Guiro
+                    "_drum_75_0_FluidR3_GM_sf2_file", // keyIndex:75 Claves
+                    "_drum_76_0_FluidR3_GM_sf2_file", // keyIndex:76 Hi Wood Block 
+                    "_drum_77_0_FluidR3_GM_sf2_file", // keyIndex:77 Low Wood Block 
+                    "_drum_81_0_FluidR3_GM_sf2_file"  // keyIndex:81 Open Triangle
+                ]
+        },
+        {
+            name: "percussion (FluidR3 drums)",
+            presetIndex: 127, // any index that is not otherwise used in the same bank
+            keys:
+                [
+                    "_drum_41_0_FluidR3_GM_sf2_file", // keyIndex:41 Low Floor Tom
+                    "_drum_45_0_FluidR3_GM_sf2_file", // keyIndex:45 Low Tom
+                    "_drum_48_0_FluidR3_GM_sf2_file", // keyIndex:48 Hi-Mid Tom
+                    "_drum_60_0_FluidR3_GM_sf2_file", // keyIndex:60 Hi Bongo    
+                    "_drum_61_0_FluidR3_GM_sf2_file", // keyIndex:61 Low Bongo   
+                    "_drum_62_0_FluidR3_GM_sf2_file", // keyIndex:62 Mute Hi Conga
+                    "_drum_63_0_FluidR3_GM_sf2_file"  // keyIndex:63 Open Hi Conga 
+                ]
+        }
     ];
 
 

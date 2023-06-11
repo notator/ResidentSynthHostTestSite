@@ -22,6 +22,7 @@ console.log('load settings.js');
 //
 // Before setting the above values, the setChannelStateMessage automatically
 //     1. sets ALL_CONTROLLERS_OFF(the synth automatically sets ALL_SOUND_OFF)
+
 ResSynth.settings =
     [
         {

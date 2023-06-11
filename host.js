@@ -9,10 +9,6 @@
 *  or more SoundFonts.
 */
 
-/*global ResSynth, window,  document, performance */
-
-ResSynth.namespace('host');
-
 ResSynth.host = (function(document)
 {
     "use strict";

@@ -12,219 +12,182 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* 
- * ResSynth.webAudioFont namespace containing a WebAudioFont constructor.
- */
-
-/*global ResSynth */
-
-ResSynth.namespace('webAudioFont');
-
 ResSynth.webAudioFont = (function()
 {
-	"use strict";
+    "use strict";
 
-	let
-		// Returns a banks array.
-		// Each bank is an array of presets.
-		// N.B.: The presets are in the order in which they are defined in "config/webAudioFontDefs.js".
-		//       This means that the .presetIndex used by the residentSynth is not the preset's original midi preset index.
-		// Each preset has a 'zones' attribute that is an array of 'zone'.
-		// A 'zone' is an object that has attributes used to when processing a single sample.
-		getBanks = function(allPresetsPerBank, presetNamesPerBank)
-		{
-			// This function just corrrects errors in the WebAudioFont preset files.
-			function correctWebAudioPresetErrors(originalPresetIndex, zones)
-			{
-				function removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones)
-				{
-					let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 88 && z.keyRangeHigh === 90)),
-						corrected = false;
+    let
+        getCorrectedPresets = function(fontPresets)
+        {
+            // This function just corrrects errors in the WebAudioFont preset files.
+            function correctWebAudioPresetErrors(originalPresetIndex, zones)
+            {
+                function removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones)
+                {
+                    let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 88 && z.keyRangeHigh === 90)),
+                        corrected = false;
 
-					if(zoneIndex > -1)
-					{
-						zones.splice(zoneIndex, 1);
-						corrected = true;
-					}
-					zoneIndex = zones.findIndex(z => (z.keyRangeLow === 61 && z.keyRangeHigh === 61));
-					if(zoneIndex > -1)
-					{
-						zones.splice(zoneIndex, 1);
-						corrected = true;
-					}
-					if(corrected)
-					{
+                    if(zoneIndex > -1)
+                    {
+                        zones.splice(zoneIndex, 1);
+                        corrected = true;
+                    }
+                    zoneIndex = zones.findIndex(z => (z.keyRangeLow === 61 && z.keyRangeHigh === 61));
+                    if(zoneIndex > -1)
+                    {
+                        zones.splice(zoneIndex, 1);
+                        corrected = true;
+                    }
+                    if(corrected)
+                    {
                         // console.warn("WebAudioFont: corrected GeneralUserGS GrandPiano zones.");
-					}
-				}
-				function removeRedundantWebAudioFontGeneralUserGSMusicBoxZones(zones)
-				{
-					let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 0 && z.keyRangeHigh === 80)),
-						corrected = false;
+                    }
+                }
+                function removeRedundantWebAudioFontGeneralUserGSMusicBoxZones(zones)
+                {
+                    let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 0 && z.keyRangeHigh === 80)),
+                        corrected = false;
 
-					if(zoneIndex > -1)
-					{
-						zones.splice(zoneIndex, 1);
-						corrected = true;
-					}
-					zoneIndex = zones.findIndex(z => (z.keyRangeLow === 81 && z.keyRangeHigh === 113));
-					if(zoneIndex > -1)
-					{
-						zones.splice(zoneIndex, 1);
-						corrected = true;
-					}
-					if(corrected)
-					{
+                    if(zoneIndex > -1)
+                    {
+                        zones.splice(zoneIndex, 1);
+                        corrected = true;
+                    }
+                    zoneIndex = zones.findIndex(z => (z.keyRangeLow === 81 && z.keyRangeHigh === 113));
+                    if(zoneIndex > -1)
+                    {
+                        zones.splice(zoneIndex, 1);
+                        corrected = true;
+                    }
+                    if(corrected)
+                    {
                         // console.warn("WebAudioFont: corrected GeneralUserGS MusicBox zones.");
-					}
-				}
-				function resetHighFluidPadZone(zones, padNumber)
-				{
-					if(zones.length === 2 && zones[1].keyRangeLow === 0)
-					{
-						zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
-						zones[1].keyRangeHigh = 127;
-						// console.warn("WebAudioFont: corrected Fluid Pad " + padNumber + " (top zone).");
-					}
-				}
-				function correctFluidPad5Zones(zones)
-				{
-					// remove the middle zone, and make the others contiguous
-					if(zones.length === 3 && zones[1].keyRangeLow === 0)
-					{
-						zones.splice(1, 1);
-						zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
-						zones[1].keyRangeHigh = 127;
+                    }
+                }
+                function resetHighFluidPadZone(zones, padNumber)
+                {
+                    if(zones.length === 2 && zones[1].keyRangeLow === 0)
+                    {
+                        zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
+                        zones[1].keyRangeHigh = 127;
+                        // console.warn("WebAudioFont: corrected Fluid Pad " + padNumber + " (top zone).");
+                    }
+                }
+                function correctFluidPad5Zones(zones)
+                {
+                    // remove the middle zone, and make the others contiguous
+                    if(zones.length === 3 && zones[1].keyRangeLow === 0)
+                    {
+                        zones.splice(1, 1);
+                        zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
+                        zones[1].keyRangeHigh = 127;
                         // console.warn("WebAudioFont: corrected Fluid Pad 5 zones.");
-					}
-				}
+                    }
+                }
 
-				switch(originalPresetIndex)
-				{
-					case 0:
-						removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones);
-						break;
-					case 10:
-						removeRedundantWebAudioFontGeneralUserGSMusicBoxZones(zones);
-						break;
-					case 89:
-						resetHighFluidPadZone(zones, 2);
-						break;
-					case 92:
-						correctFluidPad5Zones(zones);
-						break;
-					case 93:
-						resetHighFluidPadZone(zones, 6);
-						break;
-				}
-			}
+                switch(originalPresetIndex)
+                {
+                    case 0:
+                        removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones);
+                        break;
+                    case 10:
+                        removeRedundantWebAudioFontGeneralUserGSMusicBoxZones(zones);
+                        break;
+                    case 89:
+                        resetHighFluidPadZone(zones, 2);
+                        break;
+                    case 92:
+                        correctFluidPad5Zones(zones);
+                        break;
+                    case 93:
+                        resetHighFluidPadZone(zones, 6);
+                        break;
+                }
+            }
 
-			function checkZoneContiguity(presetName, originalPresetIndex, zones)
-			{
-				for(var zoneIndex = 1; zoneIndex < zones.length; zoneIndex++)
-				{
-					if(zones[zoneIndex].keyRangeLow !== (zones[zoneIndex - 1].keyRangeHigh + 1))
-					{
-						throw presetName + " (originalPresetIndex:" + originalPresetIndex + "): zoneIndex " + zoneIndex + " is not contiguous!";
-					}
-				}
-			}
+            function checkZoneContiguity(presetName, originalPresetIndex, zones)
+            {
+                for(var zoneIndex = 1; zoneIndex < zones.length; zoneIndex++)
+                {
+                    if(zones[zoneIndex].keyRangeLow !== (zones[zoneIndex - 1].keyRangeHigh + 1))
+                    {
+                        throw presetName + " (originalPresetIndex:" + originalPresetIndex + "): zoneIndex " + zoneIndex + " is not contiguous!";
+                    }
+                }
+            }
 
-			let banks = [];
+            let correctedPresets = [];
 
-			for(let bankIndex = 0; bankIndex < presetNamesPerBank.length; ++bankIndex)
-			{
-				let bank = [],
-					presetNames = presetNamesPerBank[bankIndex],
-					presetsPerBank = allPresetsPerBank[bankIndex];
+            for(let presetIndex = 0; presetIndex < fontPresets.length; ++presetIndex)
+            {
+                let preset = fontPresets[presetIndex],
+                    originalPresetIndex = preset.zones[0].midi; // Surikov's midi attribute (already set for non-percussion)                
 
-				for(let presetIndex = 0; presetIndex < presetNames.length; ++presetIndex)
-				{
-					let presetName = presetNames[presetIndex],
-						originalPresetIndex,
-						presetVariable = window[presetName];
-					
-					if(presetVariable !== undefined)
-					{
-						originalPresetIndex = presetVariable.zones[0].midi; // Surikov's midi attribute
-					}
-					else // percussion preset
-					{
-						originalPresetIndex = presetsPerBank[presetIndex].originalPresetIndex;
-					}
+                if(preset.isPercussion)
+                {
+                    originalPresetIndex = preset.originalPresetIndex; // already set                    
+                }
+                else
+                {
+                    console.assert(preset.originalPresetIndex === originalPresetIndex);
+                }
 
-					let preset = presetsPerBank[presetIndex];
+                correctWebAudioPresetErrors(originalPresetIndex, preset.zones);
 
-					if(preset === undefined)
-					{
-						throw "can't find preset";
-					}
+                if(!preset.isPercussion)
+                {
+                    checkZoneContiguity(preset.name, originalPresetIndex, preset.zones);
+                }                
 
-					correctWebAudioPresetErrors(originalPresetIndex, preset.zones);
+                correctedPresets.push(preset);
+            }
 
-					if(!presetName.includes("percussion"))
-					{
-						checkZoneContiguity(presetName, originalPresetIndex, preset.zones);
-					}
+            return correctedPresets;
+        },
 
-					preset.originalPresetIndex = originalPresetIndex;
+        // Returns true if all the contained zones have a buffer attribute.
+        // Otherwise false.
+        isReady = function()
+        {
+            let presets = this.presets;
 
-					preset.bankIndex = bankIndex;
-					preset.presetIndex = presetIndex; // used by residentSynth API
+            for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
+            {
+                let zones = presets[presetIndex].zones;
+                for(var zoneIndex = 0; zoneIndex < zones.length; zoneIndex++)
+                {
+                    if(zones[zoneIndex].buffer === undefined)
+                    {
+                        return false;
+                    }
+                }
+            }
 
+            return true;
+        },
 
-					bank.push(preset);
-				}
-				banks.push(bank);
-			}
-
-			return banks;
-		},
-
-		// Returns true if all the contained zones have a buffer attribute.
-		// Otherwise false.
-		isReady = function()
-		{
-			for(var bankIndex = 0; bankIndex < this.banks.length; bankIndex++)
-			{
-				let bank = this.banks[bankIndex];
-				for(var presetIndex = 0; presetIndex < bank.length; presetIndex++)
-				{
-					let zones = bank[presetIndex].zones;
-					for(var zoneIndex = 0; zoneIndex < zones.length; zoneIndex++)
-					{
-						if(zones[zoneIndex].buffer === undefined)
-						{
-							return false;
-						}
-					}
-				}
-			}
-
-			return true;
-		},
-
-        // This constructor checks for (and if necesary corrects) errors in the WebAudioFont preset files,
+        // This constructor checks for (and if necessary corrects) errors in the WebAudioFont preset files,
         // and then returns a WebAudioFont containing presets whose format and attributes are the same as
         // those returned by Surikov's decodeAfterLoading() function (e.g. zone.ahdsr).
         // Enhancements are done later (in the ResidentSynth code).
-        WebAudioFont = function(name, allPresetsPerBank, presetNamesPerBank)
-		{
-			if(!(this instanceof WebAudioFont))
-			{
-				return new WebAudioFont(name, allPresetsPerBank, presetNamesPerBank);
-			}
+        // Note that each WebAudioFont has a simple array of presets that are never enclosed in banks. 
+        WebAudioFont = function(name, fontPresets)
+        {
+            if(!(this instanceof WebAudioFont))
+            {
+                return new WebAudioFont(name, fontPresets);
+            }
 
-			Object.defineProperty(this, "name", { value: name, writable: false });
-			Object.defineProperty(this, "banks", { value: getBanks(allPresetsPerBank, presetNamesPerBank), writable: false });
-			Object.defineProperty(this, "isReady", { value: isReady, writable: false });
-		},
+            Object.defineProperty(this, "name", {value: name, writable: false});
+            Object.defineProperty(this, "presets", {value: getCorrectedPresets(fontPresets), writable: false});
+            Object.defineProperty(this, "isReady", {value: isReady, writable: false});
+        },
 
-		API =
-		{
-			WebAudioFont: WebAudioFont // constructor
-		};
-		// end var
+        API =
+        {
+            WebAudioFont: WebAudioFont // constructor
+        };
+    // end var
 
-	return API;
+    return API;
 }());

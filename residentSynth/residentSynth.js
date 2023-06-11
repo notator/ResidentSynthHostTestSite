@@ -14,14 +14,6 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* ResSynth.residentSynth namespace containing a ResidentSynth constructor.
- * 
- * The original object of creating this code was to be able to discuss and improve the interface.
- * See the discussion at https://github.com/WebAudio/web-midi-api/issues/124
- */
-
-ResSynth.namespace('residentSynth');
-
 ResSynth.residentSynth = (function(window)
 {
     "use strict";
@@ -38,17 +30,6 @@ ResSynth.residentSynth = (function(window)
         setAudioOutputDevice = async function(deviceId)
         {
             await audioContext.setSinkId(deviceId);
-        },
-
-        // returns a three character string representing the index
-        getIndexString = function(index)
-        {
-            let iString = index.toString();
-            while(iString.length < 3)
-            {
-                iString = "0" + iString;
-            }
-            return iString;
         },
 
         // Called by the constructor, which sets this.webAudioFonts to the return value of this function.
@@ -164,17 +145,14 @@ ResSynth.residentSynth = (function(window)
                 let webAudioFontDefs = ResSynth.webAudioFontDefs;
                 for(let i = 0; i < webAudioFontDefs.length; i++)
                 {
-                    let presetNamesPerBank = webAudioFontDefs[i].presetNamesPerBank;
-                    for(let bankIndex = 0; bankIndex < presetNamesPerBank.length; bankIndex++)
+                    let presets = webAudioFontDefs[i].presets;
+
+                    for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
                     {
-                        let presetNames = presetNamesPerBank[bankIndex];
-                        for(var nameIndex = 0; nameIndex < presetNames.length; nameIndex++)
+                        let name = presets[presetIndex];
+                        if(name.includes("_tone_")) // "percussion" presets are decoded below.
                         {
-                            let variable = presetNames[nameIndex];
-                            if(variable.includes("_tone_")) // "percussion" presets are decoded below.
-                            {
-                                decodeAfterLoading(audioContext, variable);
-                            }
+                            decodeAfterLoading(audioContext, name);
                         }
                     }
                 }
@@ -224,11 +202,9 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            function finalizeAllPresetsPerBank(webAudioFontDef, percussionPresets)
+            function getFinalizedFontPresets(fontPresetNames, percussionPresets)
             {
-                // returns a string of the form "000:000 - " + standardGMPresetName + " (" + soundFontSourceName + ")"
-                // where the "000" groups are the bank and preset indices.
-                function getPresetOptionName(presetName, bankIndex, originalPresetIndex, isPercussion)
+                function getPresetOptionName(presetName, originalPresetIndex, isPercussion)
                 {
                     function getIndex(str, substr, ind)
                     {
@@ -241,13 +217,11 @@ ResSynth.residentSynth = (function(window)
                         return i;
                     }
 
-                    let presetOptionName = "error: illegal presetVariable",
-                        bankString = getIndexString(bankIndex),
-                        presetString = getIndexString(originalPresetIndex);
+                    let presetOptionName = "error: illegal presetVariable";
 
                     if(isPercussion === true)
                     {
-                        presetOptionName = bankString + ":" + presetString + " - " + presetName;
+                        presetOptionName = presetName;
                     }
                     else
                     {
@@ -259,7 +233,7 @@ ResSynth.residentSynth = (function(window)
                             let soundFontSourceName = presetName.slice(truncStart, truncEnd),
                                 gmName = ResSynth.constants.generalMIDIPresetName(originalPresetIndex);
 
-                            presetOptionName = bankString + ":" + presetString + " - " + gmName + " (" + soundFontSourceName + ")";
+                            presetOptionName = gmName + " (" + soundFontSourceName + ")";
                         }
 
                     }
@@ -267,43 +241,34 @@ ResSynth.residentSynth = (function(window)
                     return presetOptionName;
                 }
 
-                let allPresetsPerBank = [];
+                let fontPresets = [];
 
-                let presetNamesPerBank = webAudioFontDef.presetNamesPerBank;
-                for(let bankIndex = 0; bankIndex < presetNamesPerBank.length; ++bankIndex)
+                for(var presetIndex = 0; presetIndex < fontPresetNames.length; presetIndex++)
                 {
-                    let bankPresets = [],
-                        presetNames = presetNamesPerBank[bankIndex];
+                    let isPercussion = false,
+                        presetName = fontPresetNames[presetIndex],
+                        zones;
 
-                    for(var presetIndex = 0; presetIndex < presetNames.length; presetIndex++)
+                    if(window[presetName] === undefined)
                     {
-                        let isPercussion = false,
-                            presetName = presetNames[presetIndex],
-                            zones;
-
-                        if(window[presetName] === undefined)
+                        if(percussionPresets !== undefined)
                         {
-                            if(percussionPresets !== undefined)
-                            {
-                                let percussionPreset = percussionPresets.find(preset => preset.name.localeCompare(presetName) === 0);
-                                zones = percussionPreset.zones;
-                                isPercussion = true;
-                            }
+                            let percussionPreset = percussionPresets.find(element => element.name.localeCompare(presetName) === 0);
+                            zones = percussionPreset.zones;
+                            isPercussion = true;
                         }
-                        else
-                        {
-                            zones = window[presetName].zones;
-                        }
-                        let originalPresetIndex = zones[0].midi,
-                            presetOptionName = getPresetOptionName(presetName, bankIndex, originalPresetIndex, isPercussion);
-
-                        bankPresets.push({name: presetOptionName, originalPresetIndex: originalPresetIndex, zones: zones});
                     }
+                    else
+                    {
+                        zones = window[presetName].zones;
+                    }
+                    let originalPresetIndex = zones[0].midi,
+                        presetOptionName = getPresetOptionName(presetName, originalPresetIndex, isPercussion);
 
-                    allPresetsPerBank.push(bankPresets);
+                    fontPresets.push({name: presetOptionName, originalPresetIndex: originalPresetIndex, zones: zones, isPercussion: isPercussion});
                 }
 
-                return allPresetsPerBank;
+                return fontPresets;
             }
 
             function adjustForResidentSynth(webAudioFont)
@@ -560,31 +525,28 @@ ResSynth.residentSynth = (function(window)
                     }
                 }
 
-                let banks = webAudioFont.banks;
+                let presets = webAudioFont.presets;
 
-                for(var bankIndex = 0; bankIndex < banks.length; bankIndex++)
+                for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
                 {
-                    let presets = banks[bankIndex];
-                    for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
-                    {
-                        let preset = presets[presetIndex],
-                            presetName = preset.name,
-                            originalPresetIndex = preset.originalPresetIndex,
-                            zones = preset.zones;
+                    let preset = presets[presetIndex],
+                        presetName = preset.name,
+                        originalPresetIndex = preset.originalPresetIndex,
+                        zones = preset.zones;
 
-                        setZonesToMaximumRange(presetName, originalPresetIndex, zones);
-                        // The residentSynth is going to use the zone.vEnvData attributes
-                        //(which are set below) instead of the original zone.ahdsr attributes.
-                        // The zone.ahdsr attributes are deleted here to avoid confusion.
-                        deleteZoneAHDSRs(zones);
-                        setZoneVEnvData(presetName, originalPresetIndex, zones);
+                    setZonesToMaximumRange(presetName, originalPresetIndex, zones);
+                    // The residentSynth is going to use the zone.vEnvData attributes
+                    //(which are set below) instead of the original zone.ahdsr attributes.
+                    // The zone.ahdsr attributes are deleted here to avoid confusion.
+                    deleteZoneAHDSRs(zones);
+                    setZoneVEnvData(presetName, originalPresetIndex, zones);
 
-                        // the originalPresetIndex attribute is not part of the ResidentSynth's API,
-                        // so should be deleted before it is exposed.
-                        delete preset.originalPresetIndex;
-                    }
+                    // the originalPresetIndex and isPercussion attributes
+                    // are not part of the ResidentSynth's API,
+                    // so should be deleted before it is exposed.
+                    delete preset.originalPresetIndex;
+                    delete preset.isPercussion;
                 }
-
                 return webAudioFont;
             }
 
@@ -626,9 +588,8 @@ ResSynth.residentSynth = (function(window)
             {
                 let webAudioFontDef = webAudioFontDefs[fontIndex],
                     name = webAudioFontDef.name,
-                    allPresetsPerBank = finalizeAllPresetsPerBank(webAudioFontDef, percussionPresets),
-                    presetNamesPerBank = webAudioFontDef.presetNamesPerBank,
-                    webAudioFont = new ResSynth.webAudioFont.WebAudioFont(name, allPresetsPerBank, presetNamesPerBank);
+                    fontPresets = getFinalizedFontPresets(webAudioFontDef.presets, percussionPresets),
+                    webAudioFont = new ResSynth.webAudioFont.WebAudioFont(name, fontPresets);
 
                 // The webAudioFont's zone.file attributes need not have been completely adjusted (=unpacked) when
                 // this function is called since neither the zone.file nor the binary zone.buffer attributes are accessed.

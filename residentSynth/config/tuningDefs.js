@@ -3,8 +3,6 @@ console.log('load tuningDefs.js');
 // This file can be omitted by applications that do not define special tunings.
 // (12-tone Equal Temperament tuning is always defined by default.)
 
-// ResSynth.namespace('tuningDefs');
-
 ResSynth.tuningConstructors =
 {
 	FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR: 0,

@@ -12,8 +12,6 @@
 /*jslint bitwise, white */
 /*global ResSynth */
 
-ResSynth.namespace('constants');
-
 ResSynth.constants = (function()
 {
 	"use strict";

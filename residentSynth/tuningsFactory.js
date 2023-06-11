@@ -6,10 +6,6 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-/* ResSynth.tuningsFactory namespace containing a TuningsFactory constructor. */
-
-ResSynth.namespace('tuningsFactory');
-
 ResSynth.tuningsFactory = (function()
 {
     "use strict";

@@ -6,13 +6,7 @@
 * https://github.com/gree/sf2synth.js
 *
 * All this code is licensed under MIT
-*
-* The ResSynth.residentSynthNote namespace containing the following constructor:
-*
-*        ResidentSynthNote(ctx, gainMaster, keyLayers) 
 */
-
-ResSynth.namespace('residentSynthNote');
 
 ResSynth.residentSynthNote = (function()
 {
