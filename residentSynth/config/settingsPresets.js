@@ -1,4 +1,4 @@
-console.log('load hostSettings.js');
+console.log('load settingsPresets.js');
 
 // Each preset definition has a name, and defines a set of values for all the controls in the host.
 // The full set of preset attributes is as follows:
@@ -23,7 +23,7 @@ console.log('load hostSettings.js');
 // Before setting the above values, the setChannelStateMessage automatically
 //     1. sets ALL_CONTROLLERS_OFF(the synth automatically sets ALL_SOUND_OFF)
 
-ResSynth.hostSettings =
+ResSynth.settingsPresets =
     [
         {
             "name": "settings 0: (=defaults)",

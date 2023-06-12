@@ -684,12 +684,45 @@ ResSynth.residentSynth = (function(window)
 
                     recording.name = record.name;
                     recording.settings = record.settings,
-                    recording.messages = getMessageData(record.messages);
+                        recording.messages = getMessageData(record.messages);
 
                     returnRecordings.push(recording);
                 }
             }
             return returnRecordings;
+        },
+
+        // returns an array of Settings objects containing the values set in
+        // the settingsPresets.js file
+        getSettingsPresets = function(settingsPresets)
+        {
+            let rval = [];
+
+            for(var i = 0; i < settingsPresets.length; i++)
+            {
+                let sp = settingsPresets[i],
+                    settings = new ResSynth.settings.Settings(sp.name, sp.channel);
+
+                settings.setFontIndex(sp.fontIndex);
+                settings.setPresetIndex(sp.presetIndex);
+                settings.setMixtureIndex(sp.mixtureIndex);
+                settings.setTuningGroupIndex(sp.tuningGroupIndex);
+                settings.setTuningIndex(sp.tuningIndex);
+                settings.setCentsOffset(sp.centsOffset);
+                settings.setPitchWheelData1(sp.pitchWheelData1);
+                settings.setPitchWheelData2(sp.pitchWheelData2);
+                settings.setModWheel(sp.modWheel);
+                settings.setVolume(sp.volume);
+                settings.setPan(sp.pan);
+                settings.setReverberation(sp.reverberation);
+                settings.setPitchWheelSensitivity(sp.pitchWheelSensitivity);
+                settings.setTriggerKey(sp.triggerKey);
+
+                rval.push(settings);
+            }
+
+            return rval;
+
         },
 
         getTuningGroups = function(tuningsFactory)
@@ -1170,6 +1203,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
             Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
+            Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
 
             getTuningGroups(this.tuningsFactory);
             Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
