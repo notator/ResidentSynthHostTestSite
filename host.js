@@ -113,19 +113,7 @@ ResSynth.host = (function(document)
         // sets the new channel state in both the host and the synth
         setSettings = function(settingsIndex)
         {
-            function findIndexfromOptionName(select, optionName)
-            {
-                let options = Array.from(select.options),
-                    index = options.findIndex((opt) => opt.label === optionName);
-                if(index === -1)
-                {
-                    throw "Unknown option."
-                }
-                return index;
-            }
-
-            let webMIDISettings = ResSynth.settings,
-                settings = (nextSettingsIndex < webMIDISettings.length) ? webMIDISettings[settingsIndex] : undefined,
+            let settings = ResSynth.hostSettings[settingsIndex],
                 channelSelect = getElem("channelSelect"),
                 fontSelect = getElem("webAudioFontSelect"),
                 presetSelect = getElem("presetSelect"),
@@ -144,51 +132,67 @@ ResSynth.host = (function(document)
             // decided _not_ to silence the synth while resetting all the controls.
             // sendShortControl(ResSynth.constants.CONTROL.ALL_SOUND_OFF);
 
+                //"channel": 0,
+                //"fontIndex": 2,
+                //"presetIndex": 2,
+                //"mixtureIndex": 3,
+                //"tuningGroupIndex": 2,
+                //"tuningIndex": 2,
+                //"centsOffset": 0.16,
+                //"pitchWheelData1": 0,
+                //"pitchWheelData2": 64,
+                //"modWheel": 0,
+                //"volume": 100,
+                //"pan": 64,
+                //"reverberation": 0,
+                //"pitchWheelSensitivity": 2,
+                //"triggerKey": 36
+
             // select controls
             if(settings.channel !== undefined)
             {
-                channelSelect.selectedIndex = findIndexfromOptionName(channelSelect, settings.channel);
+                channelSelect.selectedIndex = settings.channel;
                 onChannelSelectChanged();
             }
-            if(settings.font !== undefined)
+            if(settings.fontIndex !== undefined)
             {
-                fontSelect.selectedIndex = findIndexfromOptionName(fontSelect, settings.font);
+                fontSelect.selectedIndex = settings.fontIndex;
                 onWebAudioFontSelectChanged();
             }
-            if(settings.preset)
+            if(settings.presetIndex)
             {
-                presetSelect.selectedIndex = findIndexfromOptionName(presetSelect, settings.preset);
+                presetSelect.selectedIndex = settings.presetIndex;
                 onPresetSelectChanged();
             }
-            if(settings.mixture !== undefined)
+            if(settings.mixtureIndex !== undefined)
             {
-                mixtureSelect.selectedIndex = findIndexfromOptionName(mixtureSelect, settings.mixture);
+                mixtureSelect.selectedIndex = settings.mixtureIndex;
                 onMixtureSelectChanged();
             }
-            if(settings.tuningGroup !== undefined)
+            if(settings.tuningGroupIndex !== undefined)
             {
-                tuningGroupSelect.selectedIndex = findIndexfromOptionName(tuningGroupSelect, settings.tuningGroup);
+                tuningGroupSelect.selectedIndex = settings.tuningGroupIndex;
                 onTuningGroupSelectChanged();
             }
-            if(settings.tuning !== undefined)
+            if(settings.tuningIndex !== undefined)
             {
-                tuningSelect.selectedIndex = findIndexfromOptionName(tuningSelect, settings.tuning);
+                tuningSelect.selectedIndex = settings.tuningIndex;
                 onTuningSelectChanged();
             }
-            if(settings.a4Frequency !== undefined) // The a4FrequencySelect is reset above, but does this really work? If not, why not?
+            if(settings.centsOffset !== undefined)
             {
-                a4FrequencySelect.selectedIndex = findIndexfromOptionName(a4FrequencySelect, settings.a4Frequency);
+                let optionsArray = Array.from(a4FrequencySelect.options),
+                    index = optionsArray.findIndex(x => x.centsOffset === settings.centsOffset);
+ 
+                a4FrequencySelect.selectedIndex = index;
                 onA4FrequencySelectChanged();
             }
-            if(settings.triggerKey !== undefined)
-            {
-                triggerKeyInput.value = settings.triggerKey;
-                onTriggerKeyInputChanged();
-            }
             // slider controls
-            if(settings.pitchWheel !== undefined)
+            if(settings.pitchWheelData2 !== undefined)
             {
-                pitchWheelLongControl.setValue(settings.pitchWheel);
+                // pitchWheelData1 is ignored here, because the host's pitchWheel control only uses pitchWheelData2.
+                // (The appropriate data1 is calculated and sent to the synth in the pitchWheel message.)
+                pitchWheelLongControl.setValue(settings.pitchWheelData2);
             }
             if(settings.modWheel !== undefined)
             {
@@ -209,6 +213,11 @@ ResSynth.host = (function(document)
             if(settings.pitchWheelSensitivity !== undefined)
             {
                 pitchWheelSensitivityLongControl.setValue(settings.pitchWheelSensitivity);
+            }
+            if(settings.triggerKey !== undefined)
+            {
+                triggerKeyInput.value = settings.triggerKey;
+                onTriggerKeyInputChanged();
             }
         },
         setInputDeviceEventListener = function(inputDeviceSelect)
@@ -261,11 +270,11 @@ ResSynth.host = (function(document)
 
                     setSettings(nextSettingsIndex); // sets the channel and its state in both the host and the synth
 
-                    enableSettingsSelect(true); // disables the button
-
-                    nextSettingsIndex = (nextSettingsIndex < (ResSynth.settings.length - 1)) ? nextSettingsIndex + 1 : 0;
+                    nextSettingsIndex = (nextSettingsIndex < (ResSynth.hostSettings.length - 1)) ? nextSettingsIndex + 1 : 0;
 
                     setTriggersDiv(channelSelect.options[currentChannel].hostState);
+
+                    enableSettingsSelect(true); // disables the button
                 }
 
                 let data = e.data,
@@ -608,22 +617,22 @@ ResSynth.host = (function(document)
         {
             let triggerKeyInput = getElem("triggerKeyInput"),
                 settingsNameCell = getElem("settingsNameCell"),
-                settings = ResSynth.settings;
+                hostSettings = ResSynth.hostSettings;
 
             triggerKeyInput.value = hostChannelState.triggerKey;
             onTriggerKeyInputChanged();
 
-            if(nextSettingsIndex >= settings.length)
+            if(nextSettingsIndex >= hostSettings.length)
             {
                 throw "Error: settings out of range.";
             }
-            else if(settings[nextSettingsIndex].name === undefined)
+            else if(hostSettings[nextSettingsIndex].name === undefined)
             {
                 throw "Error in settings file: settings must have a name.";
             }
             else
             {
-                settingsNameCell.innerHTML = "next settings: " + settings[nextSettingsIndex].name;
+                settingsNameCell.innerHTML = "next settings: " + hostSettings[nextSettingsIndex].name;
             }
         },
 
@@ -873,11 +882,13 @@ ResSynth.host = (function(document)
                     for(var frequency = 440; frequency > 408; frequency -= 2)
                     {
                         let option = document.createElement("option"),
-                            centsOffset = synth.tuningsFactory.getCents(440 / frequency);
+                            centsOffset = synth.tuningsFactory.getCents(440 / frequency);                       
 
                         option.innerHTML = frequency.toString();
                         option.centsOffset = Math.round(centsOffset);
                         optionsArray.push(option);
+
+                        //console.log("centsOffset = " + option.centsOffset.toString());
                     }
 
                     setOptions(a4FrequencySelect, optionsArray);
@@ -1095,6 +1106,8 @@ ResSynth.host = (function(document)
                                         {
                                             data1 = data2 * 2; // data1 is in range 0..126 for data2 0..63
                                         }
+
+                                        //console.log("d1=" + data1 + " d2=" + data2);
 
                                         sendCommand(cmdIndex, data1, data2);
                                     }
@@ -1376,15 +1389,15 @@ ResSynth.host = (function(document)
                 function setSettingsSelect()
                 {
                     let settingsSelect = getElem("settingsSelect"),
-                        settings = ResSynth.settings;
+                        hostSettings = ResSynth.hostSettings;
 
-                    console.assert(settings.length < 127);
+                    console.assert(hostSettings.length < 127);
 
-                    for(var settingsIndex = 0; settingsIndex < settings.length; settingsIndex++)
+                    for(var settingsIndex = 0; settingsIndex < hostSettings.length; settingsIndex++)
                     {
                         let option = new Option();
 
-                        option.innerHTML = settings[settingsIndex].name;
+                        option.innerHTML = hostSettings[settingsIndex].name;
                         settingsSelect.options.add(option);
                     }
 
@@ -1395,13 +1408,13 @@ ResSynth.host = (function(document)
                 function setRecordingSelect()
                 {
                     let recordingSelect = getElem("recordingSelect"),
-                        recordingNames = synth.recordingNames;
+                        recordings = synth.recordings;
 
-                    for(var i = 0; i < recordingNames.length; i++)
+                    for(var i = 0; i < recordings.length; i++)
                     {
                         let option = new Option();
 
-                        option.innerHTML = recordingNames[i];
+                        option.innerHTML = recordings[i].name;
 
                         recordingSelect.options.add(option);
                     }

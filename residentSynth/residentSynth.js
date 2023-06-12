@@ -641,10 +641,13 @@ ResSynth.residentSynth = (function(window)
             return mixtures; // can be empty
         },
 
-        // returns an array of recordingNames, and sets the private .recordings array to the corresponding msgData.
-        // Each msgData object has two attributes:
-        //   msg -- a UintArray of the form[status, data1, data2] and
-        //   delay -- an integer, the number of milliseconds to delay before sending the msg.
+        // returns an array of recordings
+        // Each recording object has three attributes:
+        //   name -- the recording's name
+        //   settings: a settings object containing the initial control settings for the recording
+        //   messages: an array of msg objects, each of which has two attributes
+        //     1) msg: a UintArray of the form[status, data1, data2] and
+        //     2) delay: an integer, the number of milliseconds to delay before sending the msg.
         getRecordings = function()	
         {
             function getMessageData(msgStringsArray)
@@ -670,23 +673,23 @@ ResSynth.residentSynth = (function(window)
             }
 
             let wRecordings = ResSynth.recordings,
-                returnRecordingNames = [];
+                returnRecordings = [];
 
             if(wRecordings !== undefined)
             {
                 for(var i = 0; i < wRecordings.length; i++)
                 {
                     let record = wRecordings[i],
-                        data = {};
+                        recording = {};
 
-                    data.settings = record.settings,
-                    data.messages = getMessageData(record.messages);
+                    recording.name = record.name;
+                    recording.settings = record.settings,
+                    recording.messages = getMessageData(record.messages);
 
-                    returnRecordingNames.push(record.name);
-                    recordedData.push(data);
+                    returnRecordings.push(recording);
                 }
             }
-            return returnRecordingNames;
+            return returnRecordings;
         },
 
         getTuningGroups = function(tuningsFactory)
@@ -1166,7 +1169,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "webAudioFonts", {value: getWebAudioFonts(audioContext), writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
-            Object.defineProperty(this, "recordingNames", {value: getRecordings(), writable: false});
+            Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
 
             getTuningGroups(this.tuningsFactory);
             Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
@@ -1491,13 +1494,13 @@ ResSynth.residentSynth = (function(window)
 
                 checkControlExport(CTL.PLAY_RECORDING_INDEX);
 
-                let channelData = recordedData[value],
-                    recordedChannel = channelData.settings.channel,
+                let recording = that.recordings[value],
+                    recordedChannel = recording.settings.channel,
                     originalSettings = getSynthSettings(recordedChannel);
 
-                setSynthSettings(recordedChannel, channelData.settings)
+                setSynthSettings(recordedChannel, recording.settings)
 
-                let msgData = channelData.messages;
+                let msgData = recording.messages;
                 for(var i = 0; i < msgData.length; i++) 
                 {
                     let msgD = msgData[i],

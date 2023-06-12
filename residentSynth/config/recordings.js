@@ -7,7 +7,6 @@ ResSynth.recordings =
             "settings": {
                 "channel": 0,
                 "fontIndex": 2,
-                "bankIndex": 0,
                 "presetIndex": 2,
                 "mixtureIndex": 3,
                 "tuningGroupIndex": 2,
@@ -46,7 +45,6 @@ ResSynth.recordings =
             "settings": {
                 "channel": 0,
                 "fontIndex": 2,
-                "bankIndex": 0,
                 "presetIndex": 2,
                 "mixtureIndex": 3,
                 "tuningGroupIndex": 2,
@@ -89,7 +87,6 @@ ResSynth.recordings =
         "settings": {
             "channel": 1,
             "fontIndex": 0,
-            "bankIndex": 0,
             "presetIndex": 1,
             "mixtureIndex": 127,
             "tuningGroupIndex": 0,
@@ -119,7 +116,6 @@ ResSynth.recordings =
         "settings": {
             "channel": 2,
             "fontIndex": 0,
-            "bankIndex": 0,
             "presetIndex": 0,
             "mixtureIndex": 127,
             "tuningGroupIndex": 0,
