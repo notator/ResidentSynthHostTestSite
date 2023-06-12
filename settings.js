@@ -6,7 +6,7 @@ console.log('load settings.js');
 // selects: // The values are the strings that appear in the control.
 //		.channel // string
 //		.font // string
-//		.instrument // string
+//		.preset // string
 //      .mixture // string
 //		.tuningGroup // string
 //		.tuning // string
@@ -29,7 +29,7 @@ ResSynth.settings =
             "name": "settings 0: (=defaults)",
             "channel": "0",
             "font": "Test Font",
-            "instrument": "000:016 - Drawbar Organ (FluidR3)",
+            "preset": "000:016 - Drawbar Organ (FluidR3)",
             "mixture": "none",
             "tuningGroup": "constant factor tunings",
             "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
@@ -46,7 +46,7 @@ ResSynth.settings =
             "name": "settings 1: channel=5, font=Study 2, tuning=420",
             "channel": "5",
             "font": "Study 2",
-            "instrument": "000:008 - Celesta (FluidR3)",
+            "preset": "000:008 - Celesta (FluidR3)",
             "mixture": "none",
             "tuningGroup": "constant factor tunings",
             "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
@@ -63,7 +63,7 @@ ResSynth.settings =
             "name": "settings 2: Harp (Fluid)",
             "channel": "0",
             "font": "interesting Fluid presets",
-            "instrument": "000:046 - Orchestral Harp (FluidR3)",
+            "preset": "000:046 - Orchestral Harp (FluidR3)",
             "mixture": "none",
             "tuningGroup": "constant factor tunings",
             "tuning": "1/4 comma meantone, root=0 (C), factor=1.495348",
@@ -80,7 +80,7 @@ ResSynth.settings =
             "name": "settings 3: Vibraphone, a4Frequency=420, pan=20",
             "channel": "5",
             "font": "Study 2",
-            "instrument": "000:011 - Vibraphone (FluidR3)",
+            "preset": "000:011 - Vibraphone (FluidR3)",
             "mixture": "none",
             "tuningGroup": "constant factor tunings",
             "tuning": "Equal Temperament, root=0, factor=2^(1/12)",
@@ -93,5 +93,5 @@ ResSynth.settings =
             "reverberation": 0,
             "pitchWheelSensitivity": 2
         }
-        // etc. more preset definitions can be added here.
+        // etc. more settings definitions can be added here.
     ];

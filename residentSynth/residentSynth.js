@@ -19,7 +19,7 @@ ResSynth.residentSynth = (function(window)
     "use strict";
     let
         audioContext,
-        banks, // set in synth.setSoundFont
+        presets, // set in synth.setSoundFont
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
@@ -313,7 +313,7 @@ ResSynth.residentSynth = (function(window)
                     // envTypes:
                     // 0: short envelope (e.g. drum, xylophone, percussion)
                     // 1: long envelope (e.g. piano)
-                    // 2: unending envelope (e.g. wind instrument, organ)
+                    // 2: unending envelope (e.g. wind preset, organ)
                     const PRESET_ENVTYPE = {SHORT: 0, LONG: 1, UNENDING: 2},
                         MAX_DURATION = 300000, // five minutes should be long enough...
                         DEFAULT_NOTEOFF_RELEASE_DURATION = 0.2;
@@ -510,7 +510,7 @@ ResSynth.residentSynth = (function(window)
                     // envTypes:
                     // 0: short envelope (e.g. drum, xylophone, percussion)
                     // 1: long envelope (e.g. piano)
-                    // 2: unending envelope (e.g. wind instrument, organ)
+                    // 2: unending envelope (e.g. wind preset, organ)
                     switch(envType)
                     {
                         case PRESET_ENVTYPE.SHORT:
@@ -794,22 +794,11 @@ ResSynth.residentSynth = (function(window)
         /*****************************************/
         /* Control Functions */
 
-        // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
+        // also sets channelControl.presetIndex to 0.
         updateFontIndex = function(channel, fontIndex)
         {
             channelControls[channel].fontIndex = fontIndex;
-            channelControls[channel].bankIndex = 0;
             channelControls[channel].presetIndex = 0;
-        },
-        // sets channelControl.presetIndex to 0.
-        updateBankIndex = function(channel, bankIndex)
-        {
-            channelControls[channel].bankIndex = bankIndex;
-            channelControls[channel].presetIndex = 0;
-        },
-        updatePresetIndex = function(channel, presetIndex)
-        {
-            channelControls[channel].presetIndex = presetIndex;
         },
         updateMixtureIndex = function(channel, mixtureIndex)
         {
@@ -969,30 +958,13 @@ ResSynth.residentSynth = (function(window)
             {
                 let zone, note,
                     preset = midi.preset,
-                    keyPitchBase = Math.floor(midi.keyPitch),
-                    keyPitchBaseStr, bankIndexStr, presetIndexStr, channelStr;
+                    keyPitchBase = Math.floor(midi.keyPitch);
 
                 zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
                 if(!zone)
                 {
-                    bankIndexStr = chanControls.bankIndex.toString(10);
-                    presetIndexStr = (chanControls.presetIndex).toString(10);
-                    channelStr = channel.toString(10);
-                    keyPitchBaseStr = keyPitchBase.toString(10);
-                    let warnString = "zone not found: bank=" + bankIndexStr + " presetIndex=" + presetIndexStr + " channel=" + channelStr + " key=" + keyPitchBaseStr;
-                    if(preset.name.includes("percussion"))
-                    {
-                        warnString += "\nThis is a percussion preset containing the following instrument indices:";
-                        for(var i = 0; i < preset.zones.length; i++)
-                        {
-                            warnString += " " + preset.zones[i].keyRangeLow.toString() + ",";
-                        }
-                        warnString = warnString.slice(0, -1);
-                    }
-                    console.warn(warnString);
-                    return;
+                    console.throw("zone  not found");
                 }
-
                 // note on
                 note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
                 note.noteOn();
@@ -1000,14 +972,12 @@ ResSynth.residentSynth = (function(window)
             }
 
             let chanControls = channelControls[channel],
-                bank,
+
                 preset,
                 midi = {};
 
-            bank = banks[chanControls.bankIndex];
-            preset = bank[chanControls.presetIndex];
+            preset = presets[chanControls.presetIndex];
 
-            console.assert(bank !== undefined);
             console.assert(preset !== undefined);
 
             if(velocity === 0)
@@ -1079,7 +1049,7 @@ ResSynth.residentSynth = (function(window)
                 controlDefaultValue = constants.controlDefaultValue,
                 pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
 
-            updateFontIndex(channel, 0); // sets both channelControl.bankIndex and channelControl.presetIndex to 0.
+            updateFontIndex(channel, 0); // also sets channelControl.presetIndex to 0.
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
             updateCentsOffset(channel, 0); // centsOffset will be subtracted from the key's midiCents value in NoteOn. 
 
@@ -1115,12 +1085,9 @@ ResSynth.residentSynth = (function(window)
         controls =
             [
                 // standard 3-byte controllers.
-                // The WebMIDISynthHost GUI manages banks using the preset selector, so it does not provide a separate banks
-                // control in the controls section of its GUI.
-                // ResidentSynth.prototype.send(message, ignoredTimestamp) _does_, however, use the
-                // ResSynth.constants.CONTROL.BANK definition to call setBank(channel, data2) via handleControl(channel, data1, data2).
-                // The bank can be set by other applications by sending the appropriate message.
-                CTL.BANK,
+                // CTL.BANK: The ResSynth.webAudioFont definition contains
+                // a simple array of presets, not contained in banks,
+                // so that the MIDI BANK control never needs to be called.
                 CTL.MODWHEEL,
                 CTL.VOLUME,
                 CTL.PAN,
@@ -1172,6 +1139,11 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "isMultiChannel", {value: true, writable: false});
             // If isPolyphonic is false or undefined, the synth can only play one note at a time
             Object.defineProperty(this, "isPolyphonic", {value: true, writable: false});
+            //
+            // supportsGeneralMIDI is set to false here, because
+            // 1. the BANKS command is not supported
+            // 2. some MIDI controls have been overridden for non-standard purposes (see constants.js)
+            //
             // If supportsGeneralMIDI is defined, and is true, then
             // 1. both COMMAND.PRESET and CONTROL.BANK MUST be defined.
             // 2. the presets can be usefully named using GM preset names.
@@ -1183,7 +1155,7 @@ ResSynth.residentSynth = (function(window)
             //    It is possible for a synth to support GM without using soundfonts.
             // 5. Clients should be sure that a preset is available before setting it.
             //    Whichever way it is set, the banks variable will contain all available banks and presets.
-            Object.defineProperty(this, "supportsGeneralMIDI", {value: true, writable: false});
+            Object.defineProperty(this, "supportsGeneralMIDI", {value: false, writable: false}); // see comment above
 
             /**********************************************************************************************/
             // attributes specific to this ResidentSynth
@@ -1216,29 +1188,16 @@ ResSynth.residentSynth = (function(window)
 
         let fontIndex = this.webAudioFonts.findIndex(x => x === webAudioFont);
 
-        banks = [];
-        for(var i = 0; i < webAudioFont.banks.length; i++)
-        {
-            let wafBank = webAudioFont.banks[i],
-                bank = [];
-
-            for(var j = 0; j < wafBank.length; j++)	
-            {
-                let preset = wafBank[j];
-                bank[j] = preset;
-            }
-            banks.push(bank);
-        }
+        presets = webAudioFont.presets; // global
 
         for(let channel = 0; channel < 16; ++channel)
         {
-            // Set default bankIndex and presetIndex.
+            // Set default presetIndex.
             // The mixture index is changed neither by this function, nor by setting the preset.
             let channelInfo = channelControls[channel];
 
             channelInfo.fontIndex = fontIndex;
-            channelInfo.bankIndex = 0;
-            channelInfo.presetIndex = 0;   // the presetIndex argument is the index in banks[0]
+            channelInfo.presetIndex = 0;
         }
 
         console.log("residentSynth WebAudioFont set.");
@@ -1383,13 +1342,6 @@ ResSynth.residentSynth = (function(window)
                     }
                 }
             }
-            function setBank(channel, value)
-            {
-                checkControlExport(CTL.BANK);
-
-                channelControls[channel].bankIndex = value;
-                // console.log("residentSynth Bank: channel:" + channel + " value:" + value);
-            }
             function setModwheel(channel, value)
             {
                 checkControlExport(CTL.MODWHEEL);
@@ -1427,7 +1379,6 @@ ResSynth.residentSynth = (function(window)
                     {
                         "channel": channel,
                         "fontIndex": chCtl.fontIndex,
-                        "bankIndex": chCtl.bankIndex,
                         "presetIndex": chCtl.presetIndex,
                         "mixtureIndex": chCtl.mixtureIndex,
 
@@ -1453,7 +1404,6 @@ ResSynth.residentSynth = (function(window)
 
                 chCtl.channel = settings.channel;
                 chCtl.fontIndex = settings.fontIndex;
-                chCtl.bankIndex = settings.bankIndex;
                 chCtl.presetIndex = settings.presetIndex;
                 chCtl.mixtureIndex = settings.mixtureIndex;
 
@@ -1589,9 +1539,6 @@ ResSynth.residentSynth = (function(window)
 
             switch(data1)
             {
-                case CTL.BANK: // N.B. This is implemented for send, but is not an independent control in the WebMIDISynthHost's GUI
-                    setBank(channel, data2);
-                    break;
                 case CTL.MODWHEEL:
                     setModwheel(channel, data2);
                     break;

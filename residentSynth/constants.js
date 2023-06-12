@@ -166,8 +166,6 @@ ResSynth.constants = (function()
 	{
 		switch(control)
 		{
-			case CONTROL.BANK:
-				return ("bank");
 			case CONTROL.MODWHEEL:
 				return ("modWheel");
 			case CONTROL.VOLUME:
@@ -190,7 +188,6 @@ ResSynth.constants = (function()
 	{
 		switch(control)
 		{
-			case CONTROL.BANK:
 			case CONTROL.MODWHEEL:
 			case CONTROL.REVERBERATION:
 				return (0);
@@ -262,7 +259,7 @@ ResSynth.constants = (function()
 	Object.defineProperty(COMMAND, "SYSEX", { value: 0xF0, writable: false });
 
     // CONTROL
-    Object.defineProperty(CONTROL, "BANK", { value: 0, writable: false });
+    // Never used: Object.defineProperty(CONTROL, "BANK", { value: 0, writable: false });
 	Object.defineProperty(CONTROL, "MODWHEEL", { value: 1, writable: false });
 	Object.defineProperty(CONTROL, "VOLUME", { value: 7, writable: false });
 	Object.defineProperty(CONTROL, "PAN", { value: 10, writable: false });

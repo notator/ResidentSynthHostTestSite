@@ -128,7 +128,7 @@ ResSynth.host = (function(document)
                 settings = (nextSettingsIndex < webMIDISettings.length) ? webMIDISettings[settingsIndex] : undefined,
                 channelSelect = getElem("channelSelect"),
                 fontSelect = getElem("webAudioFontSelect"),
-                instrumentSelect = getElem("instrumentSelect"),
+                presetSelect = getElem("presetSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 tuningSelect = getElem("tuningSelect"),
@@ -155,10 +155,10 @@ ResSynth.host = (function(document)
                 fontSelect.selectedIndex = findIndexfromOptionName(fontSelect, settings.font);
                 onWebAudioFontSelectChanged();
             }
-            if(settings.instrument)
+            if(settings.preset)
             {
-                instrumentSelect.selectedIndex = findIndexfromOptionName(instrumentSelect, settings.instrument);
-                onInstrumentSelectChanged();
+                presetSelect.selectedIndex = findIndexfromOptionName(presetSelect, settings.preset);
+                onPresetSelectChanged();
             }
             if(settings.mixture !== undefined)
             {
@@ -392,17 +392,17 @@ ResSynth.host = (function(document)
             function setAndSendFontDivControlsFromState(hostChannelState)
             {
                 let fontSelectIndex = hostChannelState.fontSelectIndex, // index in webAudioFontSelect
-                    instrumentSelectIndex = hostChannelState.instrumentSelectIndex, // index in instrumentSelect
+                    presetSelectIndex = hostChannelState.presetSelectIndex, // index in presetSelect
                     mixtureSelectIndex = hostChannelState.mixtureSelectIndex, // index in mixtureSelect
                     fontSelect = getElem("webAudioFontSelect"),
-                    instrumentSelect = getElem("instrumentSelect"),
+                    presetSelect = getElem("presetSelect"),
                     mixtureSelect = getElem("mixtureSelect");
 
                 fontSelect.selectedIndex = fontSelectIndex;
-                onWebAudioFontSelectChanged(); // sets the presets in the instrumentSelect and the soundFont in the synth
+                onWebAudioFontSelectChanged(); // sets the presets in the presetSelect and the soundFont in the synth
 
-                instrumentSelect.selectedIndex = instrumentSelectIndex; // sets the instrumentSelect
-                onInstrumentSelectChanged();  // sets the preset in the synth
+                presetSelect.selectedIndex = presetSelectIndex; // sets the presetSelect
+                onPresetSelectChanged();  // sets the preset in the synth
 
                 mixtureSelect.selectedIndex = mixtureSelectIndex; // sets the mixtureSelect
                 onMixtureSelectChanged();  // sets the preset in the synth
@@ -479,54 +479,43 @@ ResSynth.host = (function(document)
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
-                instrumentSelect = getElem("instrumentSelect"),
+                presetSelect = getElem("presetSelect"),
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
-                insrumentOptionsArray = selectedSoundFontOption.insrumentOptionsArray;
+                presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
 
             synth.setSoundFont(soundFont);
 
-            setOptions(instrumentSelect, insrumentOptionsArray);
+            setOptions(presetSelect, presetOptionsArray);
 
-            instrumentSelect.selectedIndex = 0;
-            onInstrumentSelectChanged();
+            presetSelect.selectedIndex = 0;
+            onPresetSelectChanged();
 
             hostChannelState.fontSelectIndex = webAudioFontSelect.selectedIndex;
         },
 
         // exported
-        onInstrumentSelectChanged = function()
+        onPresetSelectChanged = function()
         {
-            function getBankMsg(channel, bankIndex)
-            {
-                return new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.BANK, bankIndex]);
-            }
-
             function getPresetMsg(channel, presetIndex)
             {
-                return new Uint8Array([CMD.PRESET + channel, presetIndex]);
+                return new Uint8Array([ResSynth.constants.COMMAND.PRESET + channel, presetIndex]);
             }
 
-            let CMD = ResSynth.constants.COMMAND,
-                CTL = ResSynth.constants.CONTROL,
-                channelSelect = getElem("channelSelect"),
-                instrumentSelect = getElem("instrumentSelect"),
+            let channelSelect = getElem("channelSelect"),
+                presetSelect = getElem("presetSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelState = channelSelect.options[channel].hostState,
-                instrument = instrumentSelect.options[instrumentSelect.selectedIndex].instrument,
-                bankIndex = instrument.bankIndex,
-                presetIndex = instrument.presetIndex, // N.B.: this is the presetIndex re the ResidentSynth _bank_, not the original MIDI preset index.
-                bankMsg = getBankMsg(channel, bankIndex),
+                presetIndex = presetSelect.selectedIndex,
                 presetMsg = getPresetMsg(channel, presetIndex);
 
-            synth.send(bankMsg);
             synth.send(presetMsg);
 
             mixtureSelect.selectedIndex = hostChannelState.mixtureSelectIndex;
             onMixtureSelectChanged();
 
-            hostChannelState.instrumentSelectIndex = instrumentSelect.selectedIndex;
+            hostChannelState.presetSelectIndex = presetSelect.selectedIndex;
         },
 
         // exported
@@ -650,7 +639,7 @@ ResSynth.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 fontSelect = getElem("webAudioFontSelect"),
-                instrumentSelect = getElem("instrumentSelect"),
+                presetSelect = getElem("presetSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 tuningSelect = getElem("tuningSelect"),
@@ -667,8 +656,8 @@ ResSynth.host = (function(document)
             const settings = {
                 name: settingsName, // give this settings object a unique name when adding to the online settings.js
                 channel: channelSelect.value,
-                font: fontSelect.value, // executed before bankIndex and/or presetIndex (=instrumentIndex), sets bankIndex=0, presetIndex=0
-                instrument: instrumentSelect.value,
+                font: fontSelect.value, // executed before setPreset, sets synth presetIndex=0
+                preset: presetSelect.value,
                 mixture: mixtureSelect.value,
                 tuningGroup: tuningGroupSelect.value, // executed before tuningIndex, sets tuningIndex=0
                 tuning: tuningSelect.value,
@@ -762,30 +751,26 @@ ResSynth.host = (function(document)
                         for(var fontIndex = 0; fontIndex < webAudioFonts.length; fontIndex++)
                         {
                             let option = new Option("webAudioFontOption"),
-                                webAudioFont = webAudioFonts[fontIndex];
+                                webAudioFont = webAudioFonts[fontIndex],
+                                presets = webAudioFont.presets,
+                                presetOptionsArray = [];
 
-                            let instrumentOptionsArray = [];
-                            for(let bankIndex = 0; bankIndex < webAudioFont.banks.length; bankIndex++)
-                            {
-                                let bank = webAudioFont.banks[bankIndex];
-                                for(var presetIndex = 0; presetIndex < bank.length; presetIndex++)
+                                for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
                                 {
-                                    let preset = bank[presetIndex],
-                                        instrumentOption = new Option("instrumentOption");
+                                    let preset = presets[presetIndex],
+                                        presetOption = new Option("presetOption");
 
-                                    instrumentOption.innerHTML = preset.name;
-                                    instrumentOption.instrument = preset;
-                                    instrumentOption.instrument.bankIndex = bankIndex; // for finding the instrument when restoring settings
-                                    instrumentOption.instrument.presetIndex = presetIndex;  // for finding the instrument when restoring settings
-                                    instrumentOption.instrument.mixtureIndex = undefined; // could be omitted -- included here for instructional purposes only.
+                                    presetOption.innerHTML = preset.name;
+                                    presetOption.preset = preset;
+                                    presetOption.preset.mixtureIndex = undefined; // could be omitted -- included here for instructional purposes only.
 
-                                    instrumentOptionsArray.push(instrumentOption);
+                                    presetOptionsArray.push(presetOption);
                                 }
-                            }
+
 
                             option.innerHTML = webAudioFont.name;
                             option.soundFont = webAudioFont;
-                            option.insrumentOptionsArray = instrumentOptionsArray; // used to set the instrumentSelect
+                            option.presetOptionsArray = presetOptionsArray; // used to set the presetSelect
                             option.url = "https://github.com/surikov/webaudiofont";
 
                             options.push(option);
@@ -801,11 +786,11 @@ ResSynth.host = (function(document)
                     webAudioFontSelect.selectedIndex = 0;
                 }
 
-                function setInstrumentSelect(instrumentSelect, webAudioFontSelect)
+                function setPresetSelect(presetSelect, webAudioFontSelect)
                 {
-                    setOptions(instrumentSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].insrumentOptionsArray);
+                    setOptions(presetSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].presetOptionsArray);
 
-                    instrumentSelect.selectedIndex = 0;
+                    presetSelect.selectedIndex = 0;
                 }
 
                 function setMixtureSelect(mixtureSelect)
@@ -1057,7 +1042,7 @@ ResSynth.host = (function(document)
 
                     function setCommandsTable()
                     {
-                        // sets the instrumentSelect and 
+                        // sets the presetSelect and 
                         // returns an array of tr elements
                         function getCommandRows()
                         {
@@ -1428,7 +1413,7 @@ ResSynth.host = (function(document)
                 {
                     let channelOptions = getElem("channelSelect").options,
                         fontSelectIndex = getElem("webAudioFontSelect").selectedIndex,
-                        instrumentSelectIndex = getElem("instrumentSelect").selectedIndex,
+                        presetSelectIndex = getElem("presetSelect").selectedIndex,
                         mixtureSelectIndex = getElem("mixtureSelect").selectedIndex,
                         tuningGroupSelectIndex = getElem("tuningGroupSelect").selectedIndex,
                         tuningSelectIndex = getElem("tuningSelect").selectedIndex,
@@ -1449,7 +1434,7 @@ ResSynth.host = (function(document)
                             hostState = {};
 
                         hostState.fontSelectIndex = fontSelectIndex;
-                        hostState.instrumentSelectIndex = instrumentSelectIndex;
+                        hostState.presetSelectIndex = presetSelectIndex;
                         hostState.mixtureSelectIndex = mixtureSelectIndex;
                         hostState.tuningGroupSelectIndex = tuningGroupSelectIndex;
                         hostState.tuningSelectIndex = tuningSelectIndex;
@@ -1473,14 +1458,14 @@ ResSynth.host = (function(document)
                     triggersDiv = getElem("triggersDiv"),
                     recordingDiv = getElem("recordingDiv"),
                     webAudioFontSelect = getElem("webAudioFontSelect"),
-                    instrumentSelect = getElem("instrumentSelect"),
+                    presetSelect = getElem("presetSelect"),
                     mixtureSelect = getElem("mixtureSelect"),
                     tuningGroupSelect = getElem("tuningGroupSelect");
 
                 console.assert(synth.name === "ResidentSynth", "Error: this app only uses the ResidentSynth");
 
                 setWebAudioFontSelect(webAudioFontSelect);
-                setInstrumentSelect(instrumentSelect, webAudioFontSelect);
+                setPresetSelect(presetSelect, webAudioFontSelect);
                 setMixtureSelect(mixtureSelect);
 
                 webAudioFontDiv.style.display = "block";
@@ -1741,7 +1726,7 @@ ResSynth.host = (function(document)
 
             onChannelSelectChanged: onChannelSelectChanged,
             onWebAudioFontSelectChanged: onWebAudioFontSelectChanged,
-            onInstrumentSelectChanged: onInstrumentSelectChanged,
+            onPresetSelectChanged: onPresetSelectChanged,
             onMixtureSelectChanged: onMixtureSelectChanged,
             onTuningGroupSelectChanged: onTuningGroupSelectChanged,
             onTuningSelectChanged: onTuningSelectChanged,
