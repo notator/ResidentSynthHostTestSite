@@ -100,7 +100,6 @@ ResSynth.settingsPresets =
             "pitchWheelSensitivity": 2,
             "triggerKey": 36
 
-        },
-
+        }
         // etc. more settings definitions can be added here.
     ];

@@ -703,20 +703,21 @@ ResSynth.residentSynth = (function(window)
                 let sp = settingsPresets[i],
                     settings = new ResSynth.settings.Settings(sp.name, sp.channel);
 
-                settings.setFontIndex(sp.fontIndex);
-                settings.setPresetIndex(sp.presetIndex);
-                settings.setMixtureIndex(sp.mixtureIndex);
-                settings.setTuningGroupIndex(sp.tuningGroupIndex);
-                settings.setTuningIndex(sp.tuningIndex);
-                settings.setCentsOffset(sp.centsOffset);
-                settings.setPitchWheelData1(sp.pitchWheelData1);
-                settings.setPitchWheelData2(sp.pitchWheelData2);
-                settings.setModWheel(sp.modWheel);
-                settings.setVolume(sp.volume);
-                settings.setPan(sp.pan);
-                settings.setReverberation(sp.reverberation);
-                settings.setPitchWheelSensitivity(sp.pitchWheelSensitivity);
-                settings.setTriggerKey(sp.triggerKey);
+                settings.fontIndex = sp.fontIndex;
+                settings.presetIndex = sp.presetIndex;
+                settings.mixtureIndex = sp.mixtureIndex;
+                settings.tuningGroupIndex = sp.tuningGroupIndex;
+                settings.tuningIndex = sp.tuningIndex;
+                settings.centsOffset = sp.centsOffset;
+                settings.pitchWheel = sp.pitchWheelData2;
+                settings.modWheel = sp.modWheel;
+                settings.volume = sp.volume;
+                settings.pan = sp.pan;
+                settings.reverberation = sp.reverberation;
+                settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
+                settings.triggerKey = sp.triggerKey;
+
+                Object.freeze(settings);
 
                 rval.push(settings);
             }
