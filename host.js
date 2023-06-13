@@ -259,7 +259,7 @@ ResSynth.host = (function(document)
 
                     nextSettingsIndex = (nextSettingsIndex < (settingsSelect.options.length - 1)) ? nextSettingsIndex + 1 : 0;
 
-                    setTriggersDiv(channelSelect.options[currentChannel].hostSettings);
+                    setTriggersDivControls(channelSelect.options[currentChannel].hostSettings);
 
                     enableSettingsSelect(true); // disables the button
                 }
@@ -396,46 +396,40 @@ ResSynth.host = (function(document)
         // exported
         onChannelSelectChanged = function()
         {
-            function setAndSendFontDivControlsFromState(hostSettings)
+            function setAndSendFontDivControls(hostChannelSettings)
             {
-                let fontSelectIndex = hostSettings.fontIndex, // index in webAudioFontSelect
-                    presetSelectIndex = hostSettings.presetIndex, // index in presetSelect
-                    mixtureSelectIndex = hostSettings.mixtureIndex, // index in mixtureSelect
-                    fontSelect = getElem("webAudioFontSelect"),
+                let fontSelect = getElem("webAudioFontSelect"),
                     presetSelect = getElem("presetSelect"),
                     mixtureSelect = getElem("mixtureSelect");
 
-                fontSelect.selectedIndex = fontSelectIndex;
+                fontSelect.selectedIndex = hostChannelSettings.fontIndex; // index in webAudioFontSelect
                 onWebAudioFontSelectChanged(); // sets the presets in the presetSelect and the soundFont in the synth
 
-                presetSelect.selectedIndex = presetSelectIndex; // sets the presetSelect
+                presetSelect.selectedIndex = hostChannelSettings.presetIndex; // sets the presetSelect
                 onPresetSelectChanged();  // sets the preset in the synth
 
-                mixtureSelect.selectedIndex = mixtureSelectIndex; // sets the mixtureSelect
+                mixtureSelect.selectedIndex = hostChannelSettings.mixtureIndex; // sets the mixtureSelect
                 onMixtureSelectChanged();  // sets the preset in the synth
             }
 
-            function setAndSendTuningDivFromHostSettings(hostSettings)
+            function setAndSendTuningDivControls(hostChannelSettings)
             {
                 let tuningGroupSelect = getElem("tuningGroupSelect"),
                     tuningSelect = getElem("tuningSelect"),
-                    
-                    newTuningGroupSelectIndex = hostSettings.tuningGroupIndex,
-                    newTuningSelectIndex = hostSettings.tuningIndex,
-                    newCentsOffset = hostSettings.centsOffset,
-                    newA4FrequencySelectIndex = getA4FrequencySelectIndex(newCentsOffset);                    
+                    centsOffset = hostChannelSettings.centsOffset,
+                    a4FrequencySelectIndex = getA4FrequencySelectIndex(centsOffset);                    
 
-                tuningGroupSelect.selectedIndex = newTuningGroupSelectIndex;
+                tuningGroupSelect.selectedIndex = hostChannelSettings.tuningGroupIndex;
                 onTuningGroupSelectChanged();
 
-                tuningSelect.selectedIndex = newTuningSelectIndex;
+                tuningSelect.selectedIndex = hostChannelSettings.tuningIndex;
                 onTuningSelectChanged();
 
-                a4FrequencySelect.selectedIndex = newA4FrequencySelectIndex;
+                a4FrequencySelect.selectedIndex = a4FrequencySelectIndex;
                 onA4FrequencySelectChanged();
             }
 
-            function setAndSendLongControlsFromState(hostSettings)
+            function setAndSendLongControls(hostChannelSettings)
             {
                 let aftertouchLC = getElem("aftertouchLongControl"),
                     pitchWheelLC = getElem("pitchWheelLongControl"),
@@ -446,18 +440,18 @@ ResSynth.host = (function(document)
                     pitchWheelSensitivityLC = getElem("pitchWheelSensitivityLongControl");
 
                 aftertouchLC.setValue(0);
-                pitchWheelLC.setValue(hostSettings.pitchWheel);
-                modWheelLC.setValue(hostSettings.modWheel);
-                volumeLC.setValue(hostSettings.volume);
-                panLC.setValue(hostSettings.pan);
-                reverberationLC.setValue(hostSettings.reverberation);
-                pitchWheelSensitivityLC.setValue(hostSettings.pitchWheelSensitivity);
+                pitchWheelLC.setValue(hostChannelSettings.pitchWheel);
+                modWheelLC.setValue(hostChannelSettings.modWheel);
+                volumeLC.setValue(hostChannelSettings.volume);
+                panLC.setValue(hostChannelSettings.pan);
+                reverberationLC.setValue(hostChannelSettings.reverberation);
+                pitchWheelSensitivityLC.setValue(hostChannelSettings.pitchWheelSensitivity);
             }
 
             let channelSelect = getElem("channelSelect"),
                 stopRecordingButton = getElem("stopRecordingButton"),
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings;
+                hostChannelSettings = channelSelect.options[channel].hostSettings;
 
             if(stopRecordingButton.style.display === "block")
             {
@@ -468,12 +462,12 @@ ResSynth.host = (function(document)
             {
                 currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
-                setAndSendFontDivControlsFromState(hostSettings);
-                setAndSendTuningDivFromHostSettings(hostSettings);
+                setAndSendFontDivControls(hostChannelSettings);
+                setAndSendTuningDivControls(hostChannelSettings);
 
-                setTriggersDiv(hostSettings); // uses currentChannel
+                setTriggersDivControls(hostChannelSettings); // uses currentChannel
 
-                setAndSendLongControlsFromState(hostSettings);
+                setAndSendLongControls(hostChannelSettings);
 
                 enableSettingsSelect(false);
             }
@@ -485,7 +479,7 @@ ResSynth.host = (function(document)
             let webAudioFontSelect = getElem("webAudioFontSelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 presetSelect = getElem("presetSelect"),
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
@@ -498,7 +492,7 @@ ResSynth.host = (function(document)
             presetSelect.selectedIndex = 0;
             onPresetSelectChanged();
 
-            hostSettings.fontIndex = webAudioFontSelect.selectedIndex;
+            hostChannelSettings.fontIndex = webAudioFontSelect.selectedIndex;
         },
 
         // exported
@@ -513,16 +507,16 @@ ResSynth.host = (function(document)
                 presetSelect = getElem("presetSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 presetIndex = presetSelect.selectedIndex,
                 presetMsg = getPresetMsg(channel, presetIndex);
 
             synth.send(presetMsg);
 
-            mixtureSelect.selectedIndex = hostSettings.mixtureIndex;
+            mixtureSelect.selectedIndex = hostChannelSettings.mixtureIndex;
             onMixtureSelectChanged();
 
-            hostSettings.presetIndex = presetSelect.selectedIndex;
+            hostChannelSettings.presetIndex = presetSelect.selectedIndex;
         },
 
         // exported
@@ -538,13 +532,13 @@ ResSynth.host = (function(document)
                 channelSelect = getElem("channelSelect"),
                 mixtureSelect = getElem("mixtureSelect"),
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 mixtureIndex = mixtureSelect.options[mixtureSelect.selectedIndex].mixtureIndex,
                 mixtureMessage = getMixtureMsg(channel, mixtureIndex);
 
             synth.send(mixtureMessage);
 
-            hostSettings.mixtureIndex = mixtureSelect.selectedIndex;
+            hostChannelSettings.mixtureIndex = mixtureSelect.selectedIndex;
 
             enableSettingsSelect(false);
         },
@@ -554,7 +548,7 @@ ResSynth.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 tuningSelect = getElem("tuningSelect"),
                 selectedTuningGroupOption = tuningGroupSelect[tuningGroupSelect.selectedIndex],
@@ -565,7 +559,7 @@ ResSynth.host = (function(document)
             tuningSelect.selectedIndex = 0;
             onTuningSelectChanged();
 
-            hostSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
+            hostChannelSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
         },
 
         // exported
@@ -577,7 +571,7 @@ ResSynth.host = (function(document)
                 tuningSelect = getElem("tuningSelect"),
                 tuningIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 CONST = ResSynth.constants,
                 setTuningGroupIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_GROUP_INDEX, tuningGroupIndex]),
                 setTuningIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_INDEX, tuningIndex]);
@@ -585,10 +579,10 @@ ResSynth.host = (function(document)
             synth.send(setTuningGroupIndexMsg);
             synth.send(setTuningIndexMsg);
 
-            a4FrequencySelect.selectedIndex = getA4FrequencySelectIndex(hostSettings.centsOffset);
+            a4FrequencySelect.selectedIndex = getA4FrequencySelectIndex(hostChannelSettings.centsOffset);
             onA4FrequencySelectChanged();
 
-            hostSettings.tuningIndex = tuningIndex;
+            hostChannelSettings.tuningIndex = tuningIndex;
         },
 
         //exported (compare with onMixtureSelectChanged)
@@ -596,7 +590,7 @@ ResSynth.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 a4FrequencySelect = getElem("a4FrequencySelect"),
                 centsOffset = a4FrequencySelect[a4FrequencySelect.selectedIndex].centsOffset,
                 CONST = ResSynth.constants,
@@ -604,20 +598,20 @@ ResSynth.host = (function(document)
 
             synth.send(centsOffsetMsg);
 
-            hostSettings.centsOffset = centsOffset;
+            hostChannelSettings.centsOffset = centsOffset;
 
             enableSettingsSelect(false);
         },
 
         // Throws an exception either if nextSettingsIndex is out of range,
         // or if the settings object has no name attribute.
-        setTriggersDiv = function(hostSettingsPreset)
+        setTriggersDivControls = function(hostChannelSettings)
         {
             let settingsSelect = getElem("settingsSelect"),
                 triggerKeyInput = getElem("triggerKeyInput"),
                 settingsNameCell = getElem("settingsNameCell");
 
-            triggerKeyInput.value = hostSettingsPreset.triggerKey;
+            triggerKeyInput.value = hostChannelSettings.triggerKey;
             onTriggerKeyInputChanged();
 
             if(nextSettingsIndex >= settingsSelect.length)
@@ -639,48 +633,21 @@ ResSynth.host = (function(document)
         //exported
         onExportSettingsButtonClicked = function()
         {
-            let channelSelect = getElem("channelSelect"),
-                fontSelect = getElem("webAudioFontSelect"),
-                presetSelect = getElem("presetSelect"),
-                mixtureSelect = getElem("mixtureSelect"),
-                tuningGroupSelect = getElem("tuningGroupSelect"),
-                tuningSelect = getElem("tuningSelect"),
-                a4FrequencySelect = getElem("a4FrequencySelect"),
-                triggerKeyInput = getElem("triggerKeyInput"),
-                pitchWheelLongControl = getElem("pitchWheelLongControl"),
-                modWheelLongControl = getElem("modWheelLongControl"),
-                volumeLongControl = getElem("volumeLongControl"),
-                panLongControl = getElem("panLongControl"),
-                reverberationLongControl = getElem("reverberationLongControl"),
-                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl"),
-                settingsName = "ch" + currentChannel.toString() + "_settings";
+            let channelSelect = getElem("channelSelect"),                
+                hostChannelSettings = channelSelect.options[currentChannel].hostSettings,
+                originalName = hostChannelSettings.name,
+                exportName = "ch" + currentChannel.toString() + "_settings";
 
-            const settings = {
-                name: settingsName, // give this settings object a unique name when adding to the online settings.js
-                channel: channelSelect.value,
-                font: fontSelect.value, // executed before setPreset, sets synth presetIndex=0
-                preset: presetSelect.value,
-                mixture: mixtureSelect.value,
-                tuningGroup: tuningGroupSelect.value, // executed before tuningIndex, sets tuningIndex=0
-                tuning: tuningSelect.value,
-                a4Frequency: a4FrequencySelect.value,
-                triggerKey: parseInt(triggerKeyInput.value),
-                pitchWheel: pitchWheelLongControl.getValue(), // done (value in range 0..127)
-                modWheel: modWheelLongControl.getValue(), // done (value in range 0..127)
-                volume: volumeLongControl.getValue(),// done (value in range 0..127)
-                pan: panLongControl.getValue(), // done (value in range 0..127)
-                reverberation: reverberationLongControl.getValue(), // done (value in range 0..127)
-                pitchWheelSensitivity: pitchWheelSensitivityLongControl.getValue() // done (value in range 0..127)
-            };
+            hostChannelSettings.name = exportName;
 
             const a = document.createElement("a");
-            a.href = URL.createObjectURL(new Blob([JSON.stringify(settings, null, "\t")], {
-                type: "text/plain"
-            }));
-            a.setAttribute("download", settingsName + ".json");
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(hostChannelSettings, null, "\t")], {type: "text/plain"}));
+            a.setAttribute("download", exportName + ".json");
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+
+            hostChannelSettings.name = originalName;
         },
 
         // exported (c.f. onTuningSelectChanged() )
@@ -689,7 +656,7 @@ ResSynth.host = (function(document)
             let triggerKeyInput = getElem("triggerKeyInput"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostSettings = channelSelect.options[channel].hostSettings,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 CONST = ResSynth.constants,
                 triggerKeyMsg;
 
@@ -697,7 +664,7 @@ ResSynth.host = (function(document)
             triggerKeyMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TRIGGER_KEY, triggerKey]);
 
             synth.send(triggerKeyMsg);            
-            hostSettings.triggerKey = triggerKey;
+            hostChannelSettings.triggerKey = triggerKey;
 
             enableSettingsSelect(false);
         },
@@ -916,36 +883,36 @@ ResSynth.host = (function(document)
                 function setHostSettingsFromLongControl(longControl, value)
                 {
                     let channelSelect = getElem("channelSelect"),
-                        hostSettings = channelSelect.options[channelSelect.selectedIndex].hostSettings;
+                        hostChannelSettings = channelSelect.options[channelSelect.selectedIndex].hostSettings;
 
                     enableSettingsSelect(false);
 
-                    if(hostSettings !== undefined)
+                    if(hostChannelSettings !== undefined)
                     {
                         let longControlID = longControl.id;
 
                         switch(longControlID)
                         {
                             case "aftertouchLongControl":
-                            //    hostSettings.aftertouchValue = value;
+                            //    hostChannelSettings.aftertouchValue = value;
                                 break;
                             case "pitchWheelLongControl":
-                                hostSettings.pitchWheel = value;
+                                hostChannelSettings.pitchWheel = value;
                                 break;
                             case "modWheelLongControl":
-                                hostSettings.modWheel = value;
+                                hostChannelSettings.modWheel = value;
                                 break;
                             case "volumeLongControl":
-                                hostSettings.volume = value;
+                                hostChannelSettings.volume = value;
                                 break;
                             case "panLongControl":
-                                hostSettings.pan = value;
+                                hostChannelSettings.pan = value;
                                 break;
                             case "reverberationLongControl":
-                                hostSettings.reverberation = value;
+                                hostChannelSettings.reverberation = value;
                                 break;
                             case "pitchWheelSensitivityLongControl":
-                                hostSettings.pitchWheelSensitivity = value;
+                                hostChannelSettings.pitchWheelSensitivity = value;
                                 break;
                             default:
                                 console.assert(false, "Unknown long control");
@@ -1417,14 +1384,18 @@ ResSynth.host = (function(document)
                     recordingSelect.selectedIndex = 0;
                 }
 
-                function getDefaultHostSettingss()
+                function setDefaultHostSettingsForEachChannel()
                 {
                     let channelOptions = getElem("channelSelect").options;
 
                     for(let channel = 0; channel < channelOptions.length; channel++)
                     {
-                        let hostSettings = new ResSynth.settings.Settings("hostChannel" + channel.toString() + "Settings", channel);
-                        channelOptions[channel].hostSettings = hostSettings;
+                        let hostChannelSettings = new ResSynth.settings.Settings("hostChannel" + channel.toString() + "Settings", channel);
+                        // begin test code
+                        //hostSettings.fontIndex = 6; // attributes are mutable, but new attributes are illegal
+                        //hostSettings.test = ""; // fails (correctly)
+                        // end test code
+                        channelOptions[channel].hostSettings = hostChannelSettings;
                     }
                 }
 
@@ -1459,7 +1430,7 @@ ResSynth.host = (function(document)
                 setSettingsSelect();
                 setRecordingSelect();
 
-                getDefaultHostSettingss();
+                setDefaultHostSettingsForEachChannel();
 
                 // must be called after all the GUI controls have been set.
                 // It calls all the synth's public control functions.
@@ -1687,7 +1658,7 @@ ResSynth.host = (function(document)
 
             setupInputDevice();
             setAudioOutputDeviceSelect();
-            synth = new ResSynth.residentSynth.ResidentSynth(); // loads definitions from synthConfig.
+            synth = new ResSynth.residentSynth.ResidentSynth(); // loads definitions from files in residentSynth/config.
             setInitialDivsDisplay();
         },
 

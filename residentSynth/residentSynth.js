@@ -692,8 +692,8 @@ ResSynth.residentSynth = (function(window)
             return returnRecordings;
         },
 
-        // returns an array of Settings objects containing the values set in
-        // the settingsPresets.js file
+        // returns an array of Settings objects containing the values set in the settingsPresets.js file.
+        // The values in the attributes of the returned Settings objects are immutable.
         getSettingsPresets = function(settingsPresets)
         {
             let rval = [];
@@ -717,13 +717,12 @@ ResSynth.residentSynth = (function(window)
                 settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
                 settings.triggerKey = sp.triggerKey;
 
-                Object.freeze(settings);
+                Object.freeze(settings); // attribute values are frozen
 
                 rval.push(settings);
             }
 
             return rval;
-
         },
 
         getTuningGroups = function(tuningsFactory)
@@ -940,14 +939,12 @@ ResSynth.residentSynth = (function(window)
             channelControls[channel].pan = pan;
             channelAudioNodes[channel].panNode.pan.setValueAtTime(panValue, audioContext.currentTime);
         },
-
         // The reverberation argument is in range [0..127], meaning completely dry to completely wet.
         updateReverberation = function(channel, reverberation)
         {
             channelControls[channel].reverberation = reverberation;
             channelAudioNodes[channel].reverberator.setValueAtTime(reverberation, audioContext.currentTime);
         },
-
         updatePitchWheelSensitivity = function(channel, semitones)
         {
             let currentNoteOns = controls.currentNoteOns;
@@ -965,7 +962,6 @@ ResSynth.residentSynth = (function(window)
 
             channelControls[channel].pitchWheelSensitivity = semitones; // for new noteOns
         },
-
         allSoundOff = function(channel)
         {
             function reconnectChannelInput()
@@ -1087,17 +1083,16 @@ ResSynth.residentSynth = (function(window)
                 pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
 
             updateFontIndex(channel, 0); // also sets channelControl.presetIndex to 0.
+            updateMixtureIndex(channel, controlDefaultValue(CTL.MIXTURE_INDEX));
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
             updateCentsOffset(channel, 0); // centsOffset will be subtracted from the key's midiCents value in NoteOn. 
 
             updatePitchWheel(channel, pitchWheelDefaultValue, pitchWheelDefaultValue);
-            updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
-
-            updateMixtureIndex(channel, controlDefaultValue(CTL.MIXTURE_INDEX));
             updateModWheel(channel, controlDefaultValue(CTL.MODWHEEL));
             updateVolume(channel, controlDefaultValue(CTL.VOLUME));
             updatePan(channel, controlDefaultValue(CTL.PAN));
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
+            updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
         },
 
         CMD = ResSynth.constants.COMMAND,
@@ -1413,27 +1408,23 @@ ResSynth.residentSynth = (function(window)
             function getSynthSettings(channel)
             {
                 let chCtl = channelControls[channel],
-                    settings =
-                    {
-                        "channel": channel,
-                        "fontIndex": chCtl.fontIndex,
-                        "presetIndex": chCtl.presetIndex,
-                        "mixtureIndex": chCtl.mixtureIndex,
+                    settingsName = "ch" + channel.toString() + "_settings",
+                    settings = new ResSynth.settings.Settings(settingsName, channel);
+                    
+                settings.fontIndex = chCtl.fontIndex;
+                settings.presetIndex = chCtl.presetIndex;
+                settings.mixtureIndex = chCtl.mixtureIndex;
+                settings.tuningGroupIndex = chCtl.tuningGroupIndex;
+                settings.tuningIndex = chCtl.tuningIndex;
+                settings.centsOffset = chCtl.centsOffset;
+                settings.pitchWheel = chCtl.pitchWheelData2;
+                settings.modWheel = chCtl.modWheel;
+                settings.volume = chCtl.volume;
+                settings.pan = chCtl.pan;
+                settings.reverberation = chCtl.reverberation;
+                settings.pitchWheelSensitivity = chCtl.pitchWheelSensitivity;
+                settings.triggerKey = chCtl.triggerKey;
 
-                        "tuningGroupIndex": chCtl.tuningGroupIndex,
-                        "tuningIndex": chCtl.tuningIndex,
-                        "centsOffset": chCtl.centsOffset,
-
-                        "pitchWheelData1": chCtl.pitchWheelData1,
-                        "pitchWheelData2": chCtl.pitchWheelData2,
-                        "modWheel": chCtl.modWheel,
-                        "volume": chCtl.volume,
-                        "pan": chCtl.pan,
-                        "reverberation": chCtl.reverberation,
-                        "pitchWheelSensitivity": chCtl.pitchWheelSensitivity,
-
-                        "triggerKey": chCtl.triggerKey
-                    };
                 return settings;
             }
             function setSynthSettings(channel, settings)
