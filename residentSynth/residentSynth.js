@@ -609,26 +609,27 @@ ResSynth.residentSynth = (function(window)
             // VelocityFactor components are usually floats > 0 and < 1, but can be <= 100.0.
             function checkMixtures(mixtures)
             {
-                let nIncrVels = 0;
-                for(var i = 0; i < mixtures.length; i++)
+                for(var i = 0; i < mixtures.length; i++) 
                 {
                     console.assert(mixtures[i].name !== undefined);
                     let extraNotes = mixtures[i].extraNotes;
                     for(var k = 0; k < extraNotes.length; k++)
                     {
-                        let keyVel = extraNotes[k],
-                            keyIncr = keyVel[0],
-                            velFac = keyVel[1];
-
-                        console.assert(keyVel.length === 2);
-                        console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
-                        console.assert(velFac > 0 && velFac <= 100.0);
-
-                        nIncrVels++;
+                        let data = extraNotes[k],
+                            dataLength = data.length,
+                            keyIncr, // data[0]
+                            velFac; // data[1]
+                            
+                        if(dataLength > 0)
+                        {
+                            console.assert(dataLength === 2);
+                            keyIncr = data[0]
+                            velFac = data[1]
+                            console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
+                            console.assert(velFac > 0 && velFac <= 100.0);
+                        }
                     }
                 }
-
-                console.assert(nIncrVels <= 256);
             }
 
             if(ResSynth.mixtureDefs !== undefined)
@@ -837,7 +838,7 @@ ResSynth.residentSynth = (function(window)
         },
         updateMixtureIndex = function(channel, mixtureIndex)
         {
-            channelControls[channel].mixtureIndex = mixtureIndex; // for new noteOns (127 is "no mixture")
+            channelControls[channel].mixtureIndex = mixtureIndex;
         },
 
         // sets channelControl.tuning to the first tuning in the group.
@@ -1004,7 +1005,6 @@ ResSynth.residentSynth = (function(window)
             }
 
             let chanControls = channelControls[channel],
-
                 preset,
                 midi = {};
 
@@ -1030,7 +1030,7 @@ ResSynth.residentSynth = (function(window)
 
             doNoteOn(midi);
 
-            if(chanControls.mixtureIndex < 127) // 127 is "no mixture"
+            if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
             {
                 let extraNotes = mixtures[chanControls.mixtureIndex].extraNotes;
                 for(var i = 0; i < extraNotes.length; i++)
@@ -1460,34 +1460,6 @@ ResSynth.residentSynth = (function(window)
             {
                 channelControls[channel].triggerKey = triggerKey;
             }
-            async function playRecording(channel, value, that)
-            {
-                function wait(delay)
-                {
-                    return new Promise(resolve => setTimeout(resolve, delay));
-                }
-
-                checkControlExport(CTL.PLAY_RECORDING_INDEX);
-
-                let recording = that.recordings[value],
-                    recordedChannel = recording.settings.channel,
-                    originalSettings = getSynthSettings(recordedChannel);
-
-                setSynthSettings(recordedChannel, recording.settings)
-
-                let msgData = recording.messages;
-                for(var i = 0; i < msgData.length; i++) 
-                {
-                    let msgD = msgData[i],
-                        msg = msgD.msg,
-                        delay = msgD.delay;
-
-                    await wait(delay);
-                    that.send(msg);
-                }
-
-                setSynthSettings(recordedChannel, originalSettings)
-            }
             // sets channelControl.tuning to the first tuning in the group.
             function setTuningGroupIndex(channel, tuningGroupIndex)
             {
@@ -1540,9 +1512,6 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.TRIGGER_KEY:
                     setTriggerKey(channel, data2);
-                    break;
-                case CTL.PLAY_RECORDING_INDEX:
-                    playRecording(channel, data2, that);
                     break;
                 case CTL.TUNING_GROUP_INDEX:
                     setTuningGroupIndex(channel, data2); // sets tuning to the first tuning in the group

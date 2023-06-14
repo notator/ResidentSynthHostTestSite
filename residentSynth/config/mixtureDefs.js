@@ -2,18 +2,27 @@ console.log('load mixtureDefs.js');
 
 // This file can be omitted by applications that don't use mixtures.
 // The mixtureDefs array is an array of mixture definitions.
-// The maximum number of mixture definitions is 126, since one definition is reserved for resetting to no mixture.
-// Each mixture definition contains a name and an extraNotes array containing entries of the form [keyInterval, relativeVelocity].
+// The maximum number of mixture definitions is 127.
+// Each mixture definition contains a name and an extraNotes array
+// containing entries of the form[keyInterval, relativeVelocity].
 // Each extraNotes array can have any length greater than 0.
-// Each [keyInterval, relativeVelocity] array defines a noteOn that will be sent
-// with the original noteOn message that has (originalKey, originalvelocity):
-// The new noteOn has (originalKey + keyInterval, originalvelocity * relativeVelocity)).
+// If the [keyInterval, relativeVelocity] array is not _empty_,
+// it defines a new noteOn that will be sent with the original noteOn message.
+// If the original noteOn has (originalKey, originalvelocity),
+// the new noteOn(s) will have(originalKey + keyInterval, originalvelocity * relativeVelocity).
 // keyInterval must be integers in range -127..+127 inclusive.
 // relativeVelocity are usually floats > 0 and < 1, but can be <= 100.0.
 // (originalKey + keyInterval) will be silently coerced to the range 0..127 inclusive.
 // (originalvelocity * relativeVelocity) will be silently coerced to the range 1..127 inclusive.
 ResSynth.mixtureDefs =
 [
+    {
+        name: "none",
+        extraNotes:
+            [
+                []
+            ]
+    },
     {
         name: "2.1: (+19)",
         extraNotes:

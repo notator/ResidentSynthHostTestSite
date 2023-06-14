@@ -281,9 +281,9 @@ ResSynth.host = (function(document)
                 else if(recording !== undefined)
                 {
                     if(command !== ResSynth.constants.COMMAND.CHANNEL_PRESSURE)
-                    {
-                        
+                    {                        
                         msg.now = performance.now();
+                        synth.send(msg, now);
                         recording.messages.push(msg);
                     }
                 }
@@ -542,12 +542,12 @@ ResSynth.host = (function(document)
                 mixtureSelect = getElem("mixtureSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
-                mixtureIndex = mixtureSelect.options[mixtureSelect.selectedIndex].mixtureIndex,
+                mixtureIndex = mixtureSelect.selectedIndex,
                 mixtureMessage = getMixtureMsg(channel, mixtureIndex);
 
             synth.send(mixtureMessage);
 
-            hostChannelSettings.mixtureIndex = mixtureSelect.selectedIndex;
+            hostChannelSettings.mixtureIndex = mixtureIndex;
 
             enableSettingsSelect(false);
         },
@@ -677,14 +677,41 @@ ResSynth.host = (function(document)
 
             enableSettingsSelect(false);
         },
-        onPlayRecordingButtonClicked = function()
+        onPlayRecordingButtonClicked = async function()
         {
-            let recordingSelect = getElem("recordingSelect"),
-                index = recordingSelect.selectedIndex,
-                CONST = ResSynth.constants,
-                playRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.PLAY_RECORDING_INDEX, index]);
+            function wait(delay)
+            {
+                return new Promise(resolve => setTimeout(resolve, delay));
+            }
 
-            synth.send(playRecordingMsg);
+            let recordingSelect = getElem("recordingSelect"),
+                channelSelect = getElem("channelSelect"),
+                recordingIndex = recordingSelect.selectedIndex,
+                recording = synth.recordings[recordingIndex],
+                recordedSettings = recording.settings,
+                recordedChannel = recordedSettings.channel,
+                orignalHostChannelsettings = channelSelect.options[recordedChannel].hostSettings,
+                originalChannel = channelSelect.selectedIndex;
+
+            channelSelect.options[recordedChannel].hostSettings = recordedSettings;
+            channelSelect.selectedIndex = recordedChannel;
+            onChannelSelectChanged();          
+
+            let rec = recording,
+                msgData = rec.messages;
+            for(var i = 0; i < msgData.length; i++) 
+            {
+                let msgD = msgData[i],
+                    msg = msgD.msg,
+                    delay = msgD.delay;
+
+                await wait(delay);
+                synth.send(msg);
+            }
+
+            channelSelect.options[recordedChannel].hostSettings = orignalHostChannelsettings;
+            channelSelect.selectedIndex = originalChannel;
+            onChannelSelectChanged(); 
         },
         // exported
         onStartRecordingButtonClicked = function()
@@ -705,15 +732,15 @@ ResSynth.host = (function(document)
         // exported
         onStopRecordingButtonClicked = function()
         {
-            function getStringArray(recording)
+            function getStringArray(messages)
             {
                 let rval = [],
-                    prevTime = recording[0].now,
-                    nMessages = recording.length;
+                    prevTime = messages[0].now,
+                    nMessages = messages.length;
 
                 for(let i = 0; i < nMessages; i++)
                 {
-                    let msg = recording[i],
+                    let msg = messages[i],
                         delay = Math.round(msg.now - prevTime),
                         str = msg[0].toString() + "," + msg[1].toString() + "," + msg[2].toString() + "," + delay.toString();
 
@@ -726,10 +753,10 @@ ResSynth.host = (function(document)
                 stopRecordingButton = getElem("stopRecordingButton"),
                 rec = recording;
 
-            rec.messages = getStringArray(rec.messages);
-
             if(rec.messages.length > 0)
             {
+                rec.messages = getStringArray(rec.messages);
+
                 const a = document.createElement("a");
                 a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, "\t")], {
                     type: "text/plain"
@@ -772,7 +799,7 @@ ResSynth.host = (function(document)
 
                                     presetOption.innerHTML = preset.name;
                                     presetOption.preset = preset;
-                                    presetOption.preset.mixtureIndex = undefined; // could be omitted -- included here for instructional purposes only.
+                                    presetOption.preset.mixtureIndex = 0;
 
                                     presetOptionsArray.push(presetOption);
                                 }
@@ -812,10 +839,6 @@ ResSynth.host = (function(document)
 
                         let option = new Option("mixtureOption");
 
-                        option.innerHTML = "none";
-                        option.mixtureIndex = 127; // sending the synth a MIXTURE_INDEX of 127 resets it to a "no mixture" state.
-                        options.push(option);
-
                         console.assert(mixtures.length < 127);
 
                         for(var mixtureIndex = 0; mixtureIndex < mixtures.length; mixtureIndex++)
@@ -823,7 +846,6 @@ ResSynth.host = (function(document)
                             let option = new Option("mixtureOption");
 
                             option.innerHTML = mixtures[mixtureIndex].name;
-                            option.mixtureIndex = mixtureIndex;
 
                             options.push(option);
                         }
