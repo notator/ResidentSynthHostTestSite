@@ -270,10 +270,9 @@ ResSynth.constants = (function()
 	// Custom
 	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false}); // MIDI Effects_level
 	//
-	Object.defineProperty(CONTROL, "RECORDING_ONOFF_SWITCH", {value: 80, writable: false}); // MIDI General_purpose_button_1. Uses "ON" and "OFF" values below
-	Object.defineProperty(CONTROL, "PITCH_WHEEL_SENSITIVITY", {value: 81, writable: false}); // MIDI General_purpose_button_2. (value is semitones)
-	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is centsOffset downwards)
-	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is trigger key)
+	Object.defineProperty(CONTROL, "PITCH_WHEEL_SENSITIVITY", {value: 80, writable: false}); // MIDI General_purpose_button_1. (value is semitones)
+	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 81, writable: false}); // MIDI General_purpose_button_2. (value is centsOffset downwards)
+	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is trigger key)
 	//
 	Object.defineProperty(CONTROL, "PLAY_RECORDING_INDEX", {value: 16, writable: false}); //  // MIDI General_purpose_slider_1 (value is the index of the recording to play)
 	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 17, writable: false}); // MIDI General_purpose_slider_2 (value is the index of the mixture)
@@ -281,8 +280,6 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "TUNING_INDEX", {value: 19, writable: false}); // MIDI General_purpose_slider_4 (value is the index of the tuning)
 
 	// MISC
-	Object.defineProperty(MISC, "ON", {value: 127, writable: false}); // for use as value for RECORDING_ONOFF_SWITCH
-	Object.defineProperty(MISC, "OFF", {value: 0, writable: false}); // for use as value for RECORDING_ONOFF_SWITCH
 	Object.defineProperty(MISC, "MIDI_0_FREQUENCY", { value: 8.1758, writable: false }); // Hertz
 	Object.defineProperty(MISC, "MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY", { value: 2, writable: false }); // semitones
 

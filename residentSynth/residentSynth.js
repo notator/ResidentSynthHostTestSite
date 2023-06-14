@@ -1128,7 +1128,6 @@ ResSynth.residentSynth = (function(window)
 
                 // custom controls (see constants.js)
                 CTL.REVERBERATION,
-                CTL.RECORDING_ONOFF_SWITCH,
                 CTL.PITCH_WHEEL_SENSITIVITY,
                 CTL.CENTS_OFFSET,
                 CTL.TRIGGER_KEY,
@@ -1449,11 +1448,6 @@ ResSynth.residentSynth = (function(window)
 
                 chCtl.triggerKey = settings.triggerKey;
             }
-
-            function setRecordingOnOff(channel, value)
-            {
-                
-            }
             function setPitchWheelSensitivity(channel, semitones)
             {
                 updatePitchWheelSensitivity(channel, semitones);
@@ -1537,9 +1531,6 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.REVERBERATION:
                     setReverberation(channel, data2);
-                    break;
-                case CTL.RECORDING_ONOFF_SWITCH:
-                    setRecordingOnOff(channel, data2);
                     break;
                 case CTL.PITCH_WHEEL_SENSITIVITY:
                     setPitchWheelSensitivity(channel, data2);
