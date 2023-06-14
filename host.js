@@ -20,6 +20,7 @@ ResSynth.host = (function(document)
         nextSettingsIndex = 1,
         notesAreSounding = false,
         allLongInputControls = [], // used by AllControllersOff control
+        recording = undefined, // initialized by startRecording(), reset by stopRecording()
         triggerKey,
 
         getElem = function(elemID)
@@ -266,21 +267,29 @@ ResSynth.host = (function(document)
 
                 let data = e.data,
                     CMD = ResSynth.constants.COMMAND,
-                    cmdIndex = data[0] & 0xF0,
+                    command = data[0] & 0xF0,
+                    msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]),
                     now = performance.now();
 
-                if(triggerKey !== undefined && cmdIndex === CMD.NOTE_ON && data[1] === triggerKey)
+                if(triggerKey !== undefined && command === CMD.NOTE_ON && data[1] === triggerKey)
                 {
                     if(data[2] !== 0)
                     {
                         doTriggerAction();
                     }
                 }
-                else if(!(cmdIndex === CMD.NOTE_OFF && data[1] === triggerKey)) // EMU never sends NOTE_OFF, but anyway...
+                else if(recording !== undefined)
                 {
-                    let msg = new Uint8Array([((cmdIndex + currentChannel) & 0xFF), data[1], data[2]]);
-
-                    switch(cmdIndex)
+                    if(command !== ResSynth.constants.COMMAND.CHANNEL_PRESSURE)
+                    {
+                        
+                        msg.now = performance.now();
+                        recording.messages.push(msg);
+                    }
+                }
+                else if(!(command === CMD.NOTE_OFF && data[1] === triggerKey)) // EMU never sends NOTE_OFF, but anyway...
+                {
+                    switch(command)
                     {
                         case CMD.NOTE_OFF:
                             break;
@@ -310,7 +319,7 @@ ResSynth.host = (function(document)
                             // But note that the residentSynth _does_ use both data[1] and data[2] when responding
                             // to PITCHWHEEL messages (including those that come from the E-MU keyboard), so PITCHWHEEL
                             // messages sent from this host's GUI use a data[1] value that is calculated on the fly.
-                            updateGUI_CommandsTable(cmdIndex, data[2]);
+                            updateGUI_CommandsTable(command, data[2]);
                             //console.log("pitchWheel: value=" + data[2]);
                             break;
                         default:
@@ -682,10 +691,13 @@ ResSynth.host = (function(document)
         {
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
-                CONST = ResSynth.constants,
-                startRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_ONOFF_SWITCH, CONST.MISC.ON]);
+                channelSelect = getElem("channelSelect"),
+                hostChannelSettings = channelSelect.options[channelSelect.selectedIndex].hostSettings;
 
-            synth.send(startRecordingMsg);
+            recording = {}; // global in host
+            recording.name = "ch" + channelSelect.selectedIndex.toString() + "_recording";
+            recording.settings = {...hostChannelSettings}; // clone
+            recording.messages = [];
 
             startRecordingButton.style.display = "none";
             stopRecordingButton.style.display = "block";
@@ -693,12 +705,42 @@ ResSynth.host = (function(document)
         // exported
         onStopRecordingButtonClicked = function()
         {
+            function getStringArray(recording)
+            {
+                let rval = [],
+                    prevTime = recording[0].now,
+                    nMessages = recording.length;
+
+                for(let i = 0; i < nMessages; i++)
+                {
+                    let msg = recording[i],
+                        delay = Math.round(msg.now - prevTime),
+                        str = msg[0].toString() + "," + msg[1].toString() + "," + msg[2].toString() + "," + delay.toString();
+
+                    rval.push(str);
+                    prevTime = msg.now;
+                }
+                return rval;
+            }
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
-                CONST = ResSynth.constants,
-                stopRecordingMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.RECORDING_ONOFF_SWITCH, CONST.MISC.OFF]);
+                rec = recording;
 
-            synth.send(stopRecordingMsg);
+            rec.messages = getStringArray(rec.messages);
+
+            if(rec.messages.length > 0)
+            {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, "\t")], {
+                    type: "text/plain"
+                }));
+                a.setAttribute("download", rec.name + ".json");
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            recording = undefined;
 
             stopRecordingButton.style.display = "none";
             startRecordingButton.style.display = "block";

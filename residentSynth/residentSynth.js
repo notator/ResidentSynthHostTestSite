@@ -23,7 +23,6 @@ ResSynth.residentSynth = (function(window)
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
-        recordedData = [], // initialized by getRecordings()
         tuningGroups = [],
 
         // see: https://developer.chrome.com/blog/audiocontext-setsinkid/
@@ -1450,54 +1449,10 @@ ResSynth.residentSynth = (function(window)
 
                 chCtl.triggerKey = settings.triggerKey;
             }
+
             function setRecordingOnOff(channel, value)
             {
-                // omits the final (stop recording) message (CHANNEL_PRESSURE has been omitted earlier)
-                function getStringArray(recording)
-                {
-                    let rval = [],
-                        prevTime = recording[0].now,
-                        nMessages = recording.length - 1; // omits the final (stop recording) message
-
-                    for(let i = 0; i < nMessages; i++)
-                    {
-                        let msg = recording[i],
-                            delay = Math.round(msg.now - prevTime),
-                            str = msg[0].toString() + "," + msg[1].toString() + "," + msg[2].toString() + "," + delay.toString();
-
-                        rval.push(str);
-                        prevTime = msg.now;
-                    }
-                    return rval;
-                }
-
-                if(value === MISC.ON)
-                {
-                    channelControls[channel].recording = {};
-                    channelControls[channel].recording.name = "ch" + channel.toString() + "_recording";
-                    channelControls[channel].recording.settings = getSynthSettings(channel);
-                    channelControls[channel].recording.messages = [];
-                }
-                else // value === MISC.OFF
-                {
-                    let recording = channelControls[channel].recording;
-                    
-                    recording.messages = getStringArray(recording.messages);
-
-                    if(recording.messages.length > 0)
-                    {
-                        const a = document.createElement("a");
-                        a.href = URL.createObjectURL(new Blob([JSON.stringify(recording, null, "\t")], {
-                            type: "text/plain"
-                        }));
-                        a.setAttribute("download", recording.name + ".json");
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                    }
-
-                    channelControls[channel].recording = undefined;
-                }
+                
             }
             function setPitchWheelSensitivity(channel, semitones)
             {
