@@ -184,13 +184,12 @@ ResSynth.constants = (function()
 		{
 			case CONTROL.MODWHEEL:
 			case CONTROL.REVERBERATION:
+			case CONTROL.MIXTURE_INDEX:
 				return (0);
 			case CONTROL.VOLUME:
 				return (100);
 			case CONTROL.PAN:
 				return (64);
-			case CONTROL.MIXTURE_INDEX:
-				return (127); // 127 is "no mixture"
 			default:
 				break;	// return undefined
 		}

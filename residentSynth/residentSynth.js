@@ -1351,15 +1351,6 @@ ResSynth.residentSynth = (function(window)
                 noteOn(channel, data1, data2);
             }
         }
-        // The AFTERTOUCH command can be sent from the ResidentSynthHost's GUI and, potentially,
-        // from the AssistantPerformer, but it is never sent from my EMU keyboard.
-        // It is implemented as a (single note) pitch bend parallel to the normal (channel) pitchWheel.
-        function handleAftertouch(channel, key, value)
-        {
-            checkCommandExport(CMD.AFTERTOUCH);
-            //console.log("residentSynth Aftertouch: channel:" + channel + " key:" + key + " value:" + value);
-            updateAftertouch(channel, key, value);
-        }
         function handleControl(channel, data1, data2, that)
         {
             function checkControlExport(control)
