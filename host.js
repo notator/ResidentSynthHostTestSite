@@ -48,7 +48,6 @@ ResSynth.host = (function(document)
             {
                 case CMD.NOTE_ON:
                 case CMD.NOTE_OFF:
-                case CMD.AFTERTOUCH:
                 case CMD.CONTROL_CHANGE:
                 case CMD.PITCHWHEEL:
                     message = new Uint8Array([status, data1, data2]);
@@ -303,10 +302,6 @@ ResSynth.host = (function(document)
                             }
                             //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
                             break;
-                        case CMD.AFTERTOUCH:
-                            // The EMU keyboard never sends aftertouch, so this should never happen.
-                            console.assert(false);
-                            break;
                         case CMD.CONTROL_CHANGE:
                             updateGUI_ControlsTable(data[1], data[2]);
                             //console.log("control change: " + getMsgString(data));
@@ -435,15 +430,13 @@ ResSynth.host = (function(document)
 
             function setAndSendLongControls(hostChannelSettings)
             {
-                let aftertouchLC = getElem("aftertouchLongControl"),
-                    pitchWheelLC = getElem("pitchWheelLongControl"),
+                let pitchWheelLC = getElem("pitchWheelLongControl"),
                     modWheelLC = getElem("modWheelLongControl"),
                     volumeLC = getElem("volumeLongControl"),
                     panLC = getElem("panLongControl"),
                     reverberationLC = getElem("reverberationLongControl"),
                     pitchWheelSensitivityLC = getElem("pitchWheelSensitivityLongControl");
 
-                aftertouchLC.setValue(0);
                 pitchWheelLC.setValue(hostChannelSettings.pitchWheel);
                 modWheelLC.setValue(hostChannelSettings.modWheel);
                 volumeLC.setValue(hostChannelSettings.volume);
@@ -972,9 +965,6 @@ ResSynth.host = (function(document)
 
                         switch(longControlID)
                         {
-                            case "aftertouchLongControl":
-                            //    hostChannelSettings.aftertouchValue = value;
-                                break;
                             case "pitchWheelLongControl":
                                 hostChannelSettings.pitchWheel = value;
                                 break;
@@ -1109,11 +1099,9 @@ ResSynth.host = (function(document)
 
                                 let constants = ResSynth.constants,
                                     cmd = constants.COMMAND,
-                                    aftertouch = getStandardCommandInfo(constants, cmd.AFTERTOUCH),
                                     pitchWheel = getStandardCommandInfo(constants, cmd.PITCHWHEEL),
                                     commandInfos = [];
 
-                                commandInfos.push(aftertouch);
                                 commandInfos.push(pitchWheel);
 
                                 return commandInfos;
@@ -1147,18 +1135,9 @@ ResSynth.host = (function(document)
 
                                         sendCommand(cmdIndex, data1, data2);
                                     }
-                                    else if(cmdIndex === ResSynth.constants.COMMAND.AFTERTOUCH)
-                                    {
-                                        if(value > 0 && notesAreSounding)
-                                        {
-                                            // in this GUI, only the note in the notesDivIndexInput2 gets the aftertouch
-                                            let noteIndex = getElem('notesDivIndexInput2').value;
-                                            sendCommand(cmdIndex, noteIndex, value);
-                                        }
-                                    }
                                     else
                                     {
-                                        // can only be AFTERTOUCH or PITCHWHEEL
+                                        // can only be PITCHWHEEL
                                         console.assert(false, "Error");
                                     }
                                 }
@@ -1544,7 +1523,6 @@ ResSynth.host = (function(document)
             }
 
             var
-                aftertouchValue = getElem('aftertouchLongControl').getValue(),
                 note1Checkbox = getElem("sendNote1Checkbox"),
                 note1Index = getElem("notesDivIndexInput1").valueAsNumber,
                 note1Velocity = getElem("notesDivVelocityInput1").valueAsNumber,
@@ -1566,11 +1544,6 @@ ResSynth.host = (function(document)
             if(note2Checkbox.checked)
             {
                 sendNoteOn(note2Index, note2Velocity);
-                // note that in this GUI, aftertouch is only applied to note2
-                if(aftertouchValue > 0)
-                {
-                    sendCommand(ResSynth.constants.COMMAND.AFTERTOUCH, note2Index, aftertouchValue);
-                }
             }
             notesAreSounding = true;
         },
