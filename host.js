@@ -1089,10 +1089,8 @@ ResSynth.host = (function(document)
                         return longControlTD;
                     }
 
-                    function setCommandsTable()
+                    function setCommandsAndControlsTable()
                     {
-                        // sets the presetSelect and 
-                        // returns an array of tr elements
                         function getCommandRows()
                         {
                             function getCommandInfos()
@@ -1217,19 +1215,6 @@ ResSynth.host = (function(document)
 
                             return rval;
                         }
-
-                        let commandsTable = getElem("commandsTable"),
-                            commandRows = getCommandRows();
-
-                        for(let i = 0; i < commandRows.length; ++i)
-                        {
-                            let tr = commandRows[i];
-                            commandsTable.appendChild(tr);
-                        }
-                    }
-
-                    function setControlsTable()
-                    {
                         // returns an array of tr elements
                         function getControlRows()
                         {
@@ -1403,21 +1388,26 @@ ResSynth.host = (function(document)
                             return rval;
                         }
 
-                        let controlsTable = getElem("controlsTable"),
+                        let commandsAndControlsTable = getElem("commandsAndControlsTable"),
+                            commandRows = getCommandRows(),
                             controlRows = getControlRows();
+
+                        for(let i = 0; i < commandRows.length; ++i)
+                        {
+                            let tr = commandRows[i];
+                            commandsAndControlsTable.appendChild(tr);
+                        }
 
                         for(let i = 0; i < controlRows.length; ++i)
                         {
                             let tr = controlRows[i];
-                            controlsTable.appendChild(tr);
+                            commandsAndControlsTable.appendChild(tr);
                         }
                     }
 
                     allLongInputControls.length = 0;
 
-                    setCommandsTable();
-
-                    setControlsTable();
+                    setCommandsAndControlsTable();
 
                     getElem("commandsAndControlsDiv").style.display = "block";
 
