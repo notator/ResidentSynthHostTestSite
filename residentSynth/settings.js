@@ -30,6 +30,7 @@ ResSynth.settings = (function()
         this.mixtureIndex = 0;
         this.tuningGroupIndex = 0;
         this.tuningIndex = 0;
+        this.semitonesOffset = 0;
         this.centsOffset = 0;
         this.pitchWheel = 64; // send this as both data1 and data2 to the synth
         this.modWheel = 0;

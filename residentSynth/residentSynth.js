@@ -708,6 +708,7 @@ ResSynth.residentSynth = (function(window)
                 settings.mixtureIndex = sp.mixtureIndex;
                 settings.tuningGroupIndex = sp.tuningGroupIndex;
                 settings.tuningIndex = sp.tuningIndex;
+                settings.semitonesOffset = sp.semitonesOffset;
                 settings.centsOffset = sp.centsOffset;
                 settings.pitchWheel = sp.pitchWheelData2;
                 settings.modWheel = sp.modWheel;
@@ -854,6 +855,10 @@ ResSynth.residentSynth = (function(window)
 
             channelControls[channel].tuningIndex = tuningIndex;
             channelControls[channel].tuning = tuningGroups[tuningGroupIndex][tuningIndex];
+        },
+        updateSemitonesOffset = function(channel, semitonesOffset)
+        {
+            channelControls[channel].semitonesOffset = semitonesOffset;
         },
         updateCentsOffset = function(channel, centsOffset)
         {
@@ -1005,6 +1010,7 @@ ResSynth.residentSynth = (function(window)
             }
 
             let chanControls = channelControls[channel],
+                semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,
                 midi = {};
 
@@ -1025,7 +1031,7 @@ ResSynth.residentSynth = (function(window)
 
             midi.preset = preset;
             midi.offKey = key; // the note stops when the offKey's noteOff arrives
-            midi.keyPitch = chanControls.tuning[key] - chanControls.centsOffset;
+            midi.keyPitch = chanControls.tuning[key] + semitonesOffset;
             midi.velocity = velocity;
 
             doNoteOn(midi);
@@ -1046,7 +1052,7 @@ ResSynth.residentSynth = (function(window)
 
                     // midi.preset is unchanged
                     midi.offKey = key; // the key that turns this note off (unchanged in mix)
-                    midi.keyPitch = chanControls.tuning[newKey] - chanControls.centsOffset;
+                    midi.keyPitch = chanControls.tuning[newKey] + semitonesOffset;
                     midi.velocity = newVelocity;
 
                     doNoteOn(midi);
@@ -1084,7 +1090,8 @@ ResSynth.residentSynth = (function(window)
             updateFontIndex(channel, 0); // also sets channelControl.presetIndex to 0.
             updateMixtureIndex(channel, controlDefaultValue(CTL.MIXTURE_INDEX));
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
-            updateCentsOffset(channel, 0); // centsOffset will be subtracted from the key's midiCents value in NoteOn. 
+            updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's keyPitch value in NoteOn. 
+            updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's keyPitch value in NoteOn. 
 
             updatePitchWheel(channel, pitchWheelDefaultValue, pitchWheelDefaultValue);
             updateModWheel(channel, controlDefaultValue(CTL.MODWHEEL));
@@ -1129,6 +1136,7 @@ ResSynth.residentSynth = (function(window)
                 // custom controls (see constants.js)
                 CTL.REVERBERATION,
                 CTL.PITCH_WHEEL_SENSITIVITY,
+                CTL.SEMITONES_OFFSET,
                 CTL.CENTS_OFFSET,
                 CTL.TRIGGER_KEY,
                 CTL.RECORDING_PLAY,
@@ -1414,6 +1422,7 @@ ResSynth.residentSynth = (function(window)
                 settings.mixtureIndex = chCtl.mixtureIndex;
                 settings.tuningGroupIndex = chCtl.tuningGroupIndex;
                 settings.tuningIndex = chCtl.tuningIndex;
+                settings.semitonesOffset = chCtl.semitonesOffset;
                 settings.centsOffset = chCtl.centsOffset;
                 settings.pitchWheel = chCtl.pitchWheelData2;
                 settings.modWheel = chCtl.modWheel;
@@ -1436,6 +1445,7 @@ ResSynth.residentSynth = (function(window)
 
                 chCtl.tuningGroupIndex = settings.tuningGroupIndex;
                 chCtl.tuningIndex = settings.tuningIndex;
+                chCtl.semitonesOffset = settings.semitonesOffset;
                 chCtl.centsOffset = settings.centsOffset;
 
                 chCtl.pitchWheelData1 = settings.pitchWheelData1;
@@ -1452,9 +1462,13 @@ ResSynth.residentSynth = (function(window)
             {
                 updatePitchWheelSensitivity(channel, semitones);
             }
-            function setCentsOffset(channel, centsDown)
+            function setSemitonesOffset(channel, semitonesValue)
             {
-                channelControls[channel].centsOffset = centsDown / 100;
+                channelControls[channel].semitonesOffset = semitonesValue - 50;
+            }
+            function setCentsOffset(channel, centsValue)
+            {
+                channelControls[channel].centsOffset = centsValue - 50;
             }
             function setTriggerKey(channel, triggerKey)
             {
@@ -1506,6 +1520,9 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.PITCH_WHEEL_SENSITIVITY:
                     setPitchWheelSensitivity(channel, data2);
+                    break;
+                case CTL.SEMITONES_OFFSET:
+                    setSemitonesOffset(channel, data2);
                     break;
                 case CTL.CENTS_OFFSET:
                     setCentsOffset(channel, data2);

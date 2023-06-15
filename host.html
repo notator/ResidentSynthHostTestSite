@@ -94,7 +94,7 @@
                         <span class="boldSubtitle">tuning: </span>
                     </td>
                     <td>
-                        <span class="boldSubtitle">A4: </span>
+                        <span class="boldSubtitle">offset: </span>(semi/cent)
                     </td>
                 </tr>
                 <tr>
@@ -103,14 +103,16 @@
                     </td>
                     <td id="tuningSelectCell">
                         <!--
-                            <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
-                            sendAgainButton
-                        -->
+            <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
+            sendAgainButton
+        -->
                     </td>
-                    <td id="centsOffsetInputCell">
+                    <td>
                         <!--<select id="a4FrequencySelect" class="a4FrequencySelect" onchange="ResSynth.host.onA4FrequencySelectChanged()" />-->
-                        <input id="centsOffsetNumberInput" type="number" class="number" value="0" min="-3600" max="3600" step="100" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
+                        <input id="semitonesOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-36" max="36" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
+                        <input id="centsOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-50" max="50" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
                     </td>
+                    <td id="tuningSendAgainButtonCell"></td>
                 </tr>
             </table>
         </div>
@@ -141,7 +143,7 @@
                         <span class="boldSubtitle">Trigger key: </span>
                     </td>
                     <td>
-                        <input id="triggerKeyInput" type="number" class="number" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
+                        <input id="triggerKeyInput" type="number" class="triggerKeyNumber" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
                     </td>
                     <td id="settingsNameCell">
                         <!-- settings name -->

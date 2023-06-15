@@ -274,8 +274,9 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 17, writable: false}); // MIDI General_purpose_slider_2 (value is the index of the mixture)
 	Object.defineProperty(CONTROL, "TUNING_GROUP_INDEX", {value: 18, writable: false}); // MIDI General_purpose_slider_3 (value is the index of the tuning group)
 	Object.defineProperty(CONTROL, "TUNING_INDEX", {value: 19, writable: false}); // MIDI General_purpose_slider_4 (value is the index of the tuning)
-	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 80, writable: false}); // MIDI General_purpose_button_1. (value is centsOffset downwards)
-	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 81, writable: false}); // MIDI General_purpose_button_2. (value is trigger key)
+	Object.defineProperty(CONTROL, "SEMITONES_OFFSET", {value: 80, writable: false}); // MIDI General_purpose_button_1. (sent value is semitonesOffset + 50)
+	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 81, writable: false}); // MIDI General_purpose_button_2. (sent value is centsOffset + 50)
+	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is trigger key)
 
 	// MISC
 	Object.defineProperty(MISC, "MIDI_0_FREQUENCY", { value: 8.1758, writable: false }); // Hertz

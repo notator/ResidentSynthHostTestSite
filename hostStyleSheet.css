@@ -110,17 +110,9 @@ hr
 .tuningSelect
 {
 	font-size: 11px;
-	width: 305px;
+	width: 253px;
 	height: 18px;
 	margin: 0 0 auto auto;
-}
-
-.a4FrequencySelect
-{
-	font-size: 11px;
-	width: 46px;
-	height: 18px;
-	margin: 0 4px auto auto;
 }
 
 .settingsSelect
@@ -147,11 +139,19 @@ hr
 	margin-right: 4px;
 }
 
-.number
+.tuningNumber
 {
-    font-size: 11px;
-    width: 41px;
-    margin-left: 0;
+	font-size: 11px;
+	width: 34px;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.triggerKeyNumber
+{
+	font-size: 11px;
+	width: 35px;
+	margin-left: 0;
 	margin-right: 4px;
 }
 
