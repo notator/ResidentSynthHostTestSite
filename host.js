@@ -53,7 +53,6 @@ ResSynth.host = (function(document)
                     message = new Uint8Array([status, data1, data2]);
                     break;
                 case CMD.PRESET:
-                case CMD.CHANNEL_PRESSURE:
                     message = new Uint8Array([status, data1]);
                     break;
                 default:
@@ -282,12 +281,9 @@ ResSynth.host = (function(document)
                 }
                 else if(recording !== undefined)
                 {
-                    if(command !== ResSynth.constants.COMMAND.CHANNEL_PRESSURE)
-                    {                        
-                        msg.now = performance.now();
-                        synth.send(msg, now);
-                        recording.messages.push(msg);
-                    }
+                    msg.now = performance.now();
+                    synth.send(msg, now);
+                    recording.messages.push(msg);
                 }
                 else if(!(command === CMD.NOTE_OFF && data[1] === triggerKey)) // EMU never sends NOTE_OFF, but anyway...
                 {
@@ -309,9 +305,6 @@ ResSynth.host = (function(document)
                         case CMD.PRESET:
                             //console.log("preset: " + getMsgString(data));
                             break;
-                        case CMD.CHANNEL_PRESSURE:
-                            //console.log("channel pressure: value=" + data[1]);
-                            break;
                         case CMD.PITCHWHEEL:
                             // This host uses pitchwheel values in range 0..127, so data[1] (the fine byte) is ignored here.
                             // But note that the residentSynth _does_ use both data[1] and data[2] when responding
@@ -321,7 +314,23 @@ ResSynth.host = (function(document)
                             //console.log("pitchWheel: value=" + data[2]);
                             break;
                         default:
-                            console.warn("Unknown command sent from midi input device.");
+                            try
+                            {
+                                let infoStr1 =
+                                    "Neither the residentSynth nor the residentSynthHost process\n" +
+                                    "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages,\n" +
+                                    "so the input device (the keyboard or Assistant Performer)\n" +
+                                    "should not send them (at performance time).\n" +                                   
+                                    "A separate editor could, of course, edit note velocities " +
+                                    "and add additional messages, of the types that _are_ implemented " +
+                                    "by the residentSynth, for use in the Assistant Performer.\n",
+                                infoStr2 = "(Close the debugger, and keep clicking this message until it disappears.)";
+                                alert(infoStr1 + infoStr2);
+                                throw (infoStr1);
+                            } catch(e)
+                            {
+                                console.error(e);
+                            };
                             break;
                     }
                     synth.send(msg, now);

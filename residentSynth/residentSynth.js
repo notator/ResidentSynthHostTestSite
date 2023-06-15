@@ -1108,16 +1108,12 @@ ResSynth.residentSynth = (function(window)
         // The commands and controls arrays are part of a standard ResSynth synth's interface.
         commands =
             [
+                //Neither SYSEX, AFTERTOUCH nor CHANNEL_PRESSURE are implemented.
                 CMD.NOTE_OFF,
                 CMD.NOTE_ON,
-                CMD.AFTERTOUCH,
                 CMD.CONTROL_CHANGE,
-                CMD.PRESET,
-                //CMD.CHANNEL_PRESSURE,
-                // It is very unlikely that this synth will ever need to implement CHANNEL_PRESSURE, so
-                // CHANNEL_PRESSURE has been eliminated from the ResidentSynthHost development environment.
-                CMD.PITCHWHEEL,
-                CMD.SYSEX
+                CMD.PRESET,                
+                CMD.PITCHWHEEL
             ],
 
         controls =
@@ -1548,20 +1544,18 @@ ResSynth.residentSynth = (function(window)
                     console.warn(`Controller ${data1.toString(10)} (0x${data1.toString(16)}) is not supported.`);
             }
         }
+
+        // Neither the residentSynth nor the residentSynthHost process " +
+        // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages,\n" +
+        // so the input device should be set up so as not to send them.\n" +
+        // A separate recordings editor could, of course, " +
+        // edit note velocities and add additional messages of the types " +
+        // that _are_ implemented by the residentSynth.\n",
         function handlePreset(channel, data1)
         {
             checkCommandExport(CMD.PRESET);
 
             channelControls[channel].presetIndex = data1;
-        }
-        // The CHANNEL_PRESSURE command can be sent from my EMU keyboard, but is never sent from the ResidentSynthHost GUI.
-        // It could be implemented later, to do something different from the other controls.
-        // When implemented, this function should, of course, have channel and data1 arguments.
-        function handleChannelPressure()
-        {
-            //let warnMessage = "Channel pressure: channel:" + channel + " pressure:" + data1 +
-            //	" (The ResidentSynth does not implement the channelPressure (0x" + CMD.CHANNEL_PRESSURE.toString(16) + ") command.)";
-            //console.warn(warnMessage);
         }
         function handlePitchWheel(channel, data1, data2)
         {
@@ -1570,9 +1564,8 @@ ResSynth.residentSynth = (function(window)
             updatePitchWheel(channel, data1, data2);
         }
 
-        // Note that messages arriving on a non-recording channel will never be recorded, so
-        // its not possible to change channels while recording.
-        if(channelControls[channel].recording !== undefined && command !== ResSynth.constants.COMMAND.CHANNEL_PRESSURE)
+        // Note that its not possible to change channels while recording.
+        if(channelControls[channel].recording !== undefined)
         {
             messageData.now = performance.now();
             channelControls[channel].recording.messages.push(messageData);
@@ -1586,24 +1579,14 @@ ResSynth.residentSynth = (function(window)
             case CMD.NOTE_ON:
                 handleNoteOn(channel, data1, data2);
                 break;
-            case CMD.AFTERTOUCH:
-                handleAftertouch(channel, data1, data2);
-                break;
             case CMD.CONTROL_CHANGE:
                 handleControl(channel, data1, data2, this);
                 break;
             case CMD.PRESET:
                 handlePreset(channel, data1);
                 break;
-            case CMD.CHANNEL_PRESSURE:
-                handleChannelPressure();
-                // handleChannelPressure(channel, data1);
-                break;
             case CMD.PITCHWHEEL:
                 handlePitchWheel(channel, data1, data2);
-                break;
-            case CMD.SYSEX:
-                //handleSysEx(messageData);
                 break;
             default:
                 console.assert(false, "Illegal command.");

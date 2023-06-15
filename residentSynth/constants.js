@@ -134,8 +134,6 @@ ResSynth.constants = (function()
 				return ("controlChange");
 			case COMMAND.PRESET:
 				return ("preset");
-			case COMMAND.CHANNEL_PRESSURE:
-				return ("channelPressure");
 			case COMMAND.PITCHWHEEL:
 				return ("pitchWheel");
 			default:
@@ -143,13 +141,12 @@ ResSynth.constants = (function()
 				break;
 		}
 	},
-	// Only PRESET, CHANNEL_PRESSURE and PITCHWHEEL have default values.
+	// Only PRESET and PITCHWHEEL have default values.
 	commandDefaultValue = function(command)
 	{
 		switch(command)
 		{
 			case COMMAND.PRESET:
-			case COMMAND.CHANNEL_PRESSURE:
 				return (0);
 			case COMMAND.PITCHWHEEL:
 				return (64);
@@ -250,9 +247,10 @@ ResSynth.constants = (function()
     Object.defineProperty(COMMAND, "NOTE_ON", { value: 0x90, writable: false });
     Object.defineProperty(COMMAND, "CONTROL_CHANGE", { value: 0xB0, writable: false });
     Object.defineProperty(COMMAND, "PRESET", { value: 0xC0, writable: false });
-    Object.defineProperty(COMMAND, "CHANNEL_PRESSURE", { value: 0xD0, writable: false });
+    //Object.defineProperty(COMMAND, "AFTERTOUCH", { value: 0xA0, writable: false });
+	//Object.defineProperty(COMMAND, "CHANNEL_PRESSURE", { value: 0xD0, writable: false });
 	Object.defineProperty(COMMAND, "PITCHWHEEL", { value: 0xE0, writable: false });
-	Object.defineProperty(COMMAND, "SYSEX", { value: 0xF0, writable: false });
+	//Object.defineProperty(COMMAND, "SYSEX", { value: 0xF0, writable: false });
 
     // CONTROL
     // Never used: Object.defineProperty(CONTROL, "BANK", { value: 0, writable: false });
