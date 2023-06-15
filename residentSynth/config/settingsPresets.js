@@ -64,7 +64,7 @@ ResSynth.settingsPresets =
 
         },
         {
-            "name": "settings 2: Harp (Fluid)",
+            "name": "settings 2: Harp (Fluid), semitonesOffset=-0.5",
             "channel": 0,
             "fontIndex": 1,
             "presetIndex": 0,
