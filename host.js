@@ -122,7 +122,7 @@ ResSynth.host = (function(document)
                 mixtureSelect = getElem("mixtureSelect"),
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 tuningSelect = getElem("tuningSelect"),
-                a4FrequencySelect = getElem("a4FrequencySelect"),
+                centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
                 triggerKeyInput = getElem("triggerKeyInput"),
                 pitchWheelLongControl = getElem("pitchWheelLongControl"),
                 modWheelLongControl = getElem("modWheelLongControl"),
@@ -167,11 +167,11 @@ ResSynth.host = (function(document)
             }
             if(settings.centsOffset !== undefined)
             {
-                let optionsArray = Array.from(a4FrequencySelect.options),
+                let optionsArray = Array.from(centsOffsetNumberInput.options),
                     index = optionsArray.findIndex(x => x.centsOffset === settings.centsOffset);
 
-                a4FrequencySelect.selectedIndex = index;
-                onA4FrequencySelectChanged();
+                centsOffsetNumberInput.selectedIndex = index;
+                onCentsOffsetNumberInputChanged();
             }
             // slider controls
             if(settings.pitchWheelData2 !== undefined)
@@ -393,8 +393,8 @@ ResSynth.host = (function(document)
 
         getA4FrequencySelectIndex = function(newCentsOffset)
         {
-            let a4FrequencySelect = getElem("a4FrequencySelect"),
-                optionsArray = Array.from(a4FrequencySelect.options),
+            let centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
+                optionsArray = Array.from(centsOffsetNumberInput.options),
                 selectIndex = optionsArray.findIndex(x => x.centsOffset === newCentsOffset);
 
             console.assert(selectIndex >= 0);
@@ -426,7 +426,7 @@ ResSynth.host = (function(document)
                 let tuningGroupSelect = getElem("tuningGroupSelect"),
                     tuningSelect = getElem("tuningSelect"),
                     centsOffset = hostChannelSettings.centsOffset,
-                    a4FrequencySelectIndex = getA4FrequencySelectIndex(centsOffset);                    
+                    centsOffsetNumberInputIndex = getA4FrequencySelectIndex(centsOffset);                    
 
                 tuningGroupSelect.selectedIndex = hostChannelSettings.tuningGroupIndex;
                 onTuningGroupSelectChanged();
@@ -434,8 +434,8 @@ ResSynth.host = (function(document)
                 tuningSelect.selectedIndex = hostChannelSettings.tuningIndex;
                 onTuningSelectChanged();
 
-                a4FrequencySelect.selectedIndex = a4FrequencySelectIndex;
-                onA4FrequencySelectChanged();
+                centsOffsetNumberInput.selectedIndex = centsOffsetNumberInputIndex;
+                onCentsOffsetNumberInputChanged();
             }
 
             function setAndSendLongControls(hostChannelSettings)
@@ -576,7 +576,7 @@ ResSynth.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 tuningGroupIndex = getElem("tuningGroupSelect").selectedIndex,
-                a4FrequencySelect = getElem("a4FrequencySelect"),
+                centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
                 tuningSelect = getElem("tuningSelect"),
                 tuningIndex = tuningSelect.selectedIndex,
                 channel = channelSelect.selectedIndex,
@@ -588,20 +588,20 @@ ResSynth.host = (function(document)
             synth.send(setTuningGroupIndexMsg);
             synth.send(setTuningIndexMsg);
 
-            a4FrequencySelect.selectedIndex = getA4FrequencySelectIndex(hostChannelSettings.centsOffset);
-            onA4FrequencySelectChanged();
+            centsOffsetNumberInput.selectedIndex = getA4FrequencySelectIndex(hostChannelSettings.centsOffset);
+            onCentsOffsetNumberInputChanged();
 
             hostChannelSettings.tuningIndex = tuningIndex;
         },
 
         //exported (compare with onMixtureSelectChanged)
-        onA4FrequencySelectChanged = function()
+        onCentsOffsetNumberInputChanged = function()
         {
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
-                a4FrequencySelect = getElem("a4FrequencySelect"),
-                centsOffset = a4FrequencySelect[a4FrequencySelect.selectedIndex].centsOffset,
+                centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
+                centsOffset = centsOffsetNumberInput[centsOffsetNumberInput.selectedIndex].centsOffset,
                 CONST = ResSynth.constants,
                 centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, centsOffset]);
 
@@ -897,8 +897,8 @@ ResSynth.host = (function(document)
 
                 function setA4FrequencySelect()
                 {
-                    let a4FrequencySelectCell = getElem("a4FrequencySelectCell"),
-                        a4FrequencySelect = getElem("a4FrequencySelect"),
+                    let centsOffsetInputCell = getElem("centsOffsetInputCell"),
+                        centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
                         input = document.createElement("input"),
                         optionsArray = [];
 
@@ -914,13 +914,13 @@ ResSynth.host = (function(document)
                         //console.log("centsOffset = " + option.centsOffset.toString());
                     }
 
-                    setOptions(a4FrequencySelect, optionsArray);
+                    setOptions(centsOffsetNumberInput, optionsArray);
 
                     input.type = "button";
                     input.className = "sendAgainButton";
                     input.value = "send again";
                     input.onclick = onTuningSelectChanged;
-                    a4FrequencySelectCell.appendChild(input);
+                    centsOffsetInputCell.appendChild(input);
                 }
 
                 function setTuningSelect()
@@ -1741,7 +1741,7 @@ ResSynth.host = (function(document)
             onMixtureSelectChanged: onMixtureSelectChanged,
             onTuningGroupSelectChanged: onTuningGroupSelectChanged,
             onTuningSelectChanged: onTuningSelectChanged,
-            onA4FrequencySelectChanged: onA4FrequencySelectChanged,
+            onCentsOffsetNumberInputChanged: onCentsOffsetNumberInputChanged,
 
             onSettingsSelectChanged: onSettingsSelectChanged,
             onExportSettingsButtonClicked: onExportSettingsButtonClicked,

@@ -107,8 +107,9 @@
                             sendAgainButton
                         -->
                     </td>
-                    <td id="a4FrequencySelectCell">
-                        <select id="a4FrequencySelect" class="a4FrequencySelect" onchange="ResSynth.host.onA4FrequencySelectChanged()" />
+                    <td id="centsOffsetInputCell">
+                        <!--<select id="a4FrequencySelect" class="a4FrequencySelect" onchange="ResSynth.host.onA4FrequencySelectChanged()" />-->
+                        <input id="centsOffsetNumberInput" type="number" class="number" value="0" min="-3600" max="3600" step="100" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
                     </td>
                 </tr>
             </table>
