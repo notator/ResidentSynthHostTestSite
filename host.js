@@ -455,28 +455,19 @@ ResSynth.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
-                stopRecordingButton = getElem("stopRecordingButton"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
-            if(stopRecordingButton.style.display === "block")
-            {
-                channelSelect.selectedIndex = currentChannel;
-                alert("Cant change channel while recording.");
-            }
-            else
-            {
-                currentChannel = channel; // the global currentChannel is used by synth.send(...)
+            currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
-                setAndSendFontDivControls(hostChannelSettings);
-                setAndSendTuningDivControls(hostChannelSettings);
+            setAndSendFontDivControls(hostChannelSettings);
+            setAndSendTuningDivControls(hostChannelSettings);
 
-                setTriggersDivControls(hostChannelSettings); // uses currentChannel
+            setTriggersDivControls(hostChannelSettings); // uses currentChannel
 
-                setAndSendLongControls(hostChannelSettings);
+            setAndSendLongControls(hostChannelSettings);
 
-                enableSettingsSelect(false);
-            }
+            enableSettingsSelect(false);
         },
 
         // exported
@@ -595,7 +586,7 @@ ResSynth.host = (function(document)
             hostChannelSettings.tuningIndex = tuningIndex;
         },
 
-        //exported (compare with onMixtureSelectChanged)
+        // exported
         onSemitonesOffsetNumberInputChanged = function()
         {
             let CONST = ResSynth.constants,
@@ -620,6 +611,7 @@ ResSynth.host = (function(document)
 
             enableSettingsSelect(false);
         },
+        // exported
         onCentsOffsetNumberInputChanged = function()
         {
             let CONST = ResSynth.constants,
@@ -692,7 +684,7 @@ ResSynth.host = (function(document)
             hostChannelSettings.name = originalName;
         },
 
-        // exported (c.f. onTuningSelectChanged() )
+        // exported
         onTriggerKeyInputChanged = function()
         {
             let triggerKeyInput = getElem("triggerKeyInput"),
@@ -718,41 +710,47 @@ ResSynth.host = (function(document)
             }
 
             let recordingSelect = getElem("recordingSelect"),
-                channelSelect = getElem("channelSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
-                recording = synth.recordings[recordingIndex],
-                recordedSettings = recording.settings,
-                recordedChannel = recordedSettings.channel,
-                orignalHostChannelsettings = channelSelect.options[recordedChannel].hostSettings,
-                originalChannel = channelSelect.selectedIndex;
+                messages = synth.recordings[recordingIndex].messages;        
 
-            channelSelect.options[recordedChannel].hostSettings = recordedSettings;
-            channelSelect.selectedIndex = recordedChannel;
-            onChannelSelectChanged();          
-
-            let rec = recording,
-                msgData = rec.messages;
-            for(var i = 0; i < msgData.length; i++) 
+            for(var i = 0; i < messages.length; i++) 
             {
-                let msgD = msgData[i],
-                    msg = msgD.msg,
-                    delay = msgD.delay;
+                let message = messages[i],
+                    msg = message.msg,
+                    delay = message.delay;
 
                 await wait(delay);
                 synth.send(msg);
-            }
-
-            channelSelect.options[recordedChannel].hostSettings = orignalHostChannelsettings;
-            channelSelect.selectedIndex = originalChannel;
-            onChannelSelectChanged(); 
+            } 
         },
         // exported
         onStartRecordingButtonClicked = function()
         {
+            // Overdubbing a channel is prevented here because the Assistant
+            // Performer can't deal with more than one voice per channel.
+            // On the other hand, simultaneous playback of a _different_ channel
+            // is allowed so that channel recordings can be aligned later.
+            // The new recording will only contain messages in its own channel.
+            function setPlayRecordingButton(recordingChannel)
+            {
+                let playRecordingButton = getElem("playRecordingButton"),
+                    recordingSelect = getElem("recordingSelect"),
+                    recordingIndex = recordingSelect.selectedIndex,
+                    recording = synth.recordings[recordingIndex],
+                    recordedSettings = recording.settings,
+                    recordedChannel = recordedSettings.channel;
+
+                playRecordingButton.disabled = (recordedChannel === recordingChannel) ? true : false;
+            }
+
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
                 channelSelect = getElem("channelSelect"),
-                hostChannelSettings = channelSelect.options[channelSelect.selectedIndex].hostSettings;
+                channel = channelSelect.selectedIndex,
+                hostChannelSettings = channelSelect.options[channel].hostSettings;
+
+            setPlayRecordingButton(channel);
+            channelSelect.disabled = true;
 
             recording = {}; // global in host
             recording.name = "ch" + channelSelect.selectedIndex.toString() + "_recording";
@@ -782,8 +780,10 @@ ResSynth.host = (function(document)
                 }
                 return rval;
             }
-            let startRecordingButton = getElem("startRecordingButton"),
+            let channelSelect = getElem("channelSelect"),
+                startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
+                playRecordingButton = getElem("playRecordingButton"),
                 rec = recording;
 
             if(rec.messages.length > 0)
@@ -804,7 +804,8 @@ ResSynth.host = (function(document)
 
             stopRecordingButton.style.display = "none";
             startRecordingButton.style.display = "block";
-
+            playRecordingButton.disabled = false;
+            channelSelect.disabled = false;
         },
 
         // exported

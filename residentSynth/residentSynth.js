@@ -1555,13 +1555,6 @@ ResSynth.residentSynth = (function(window)
             updatePitchWheel(channel, data1, data2);
         }
 
-        // Note that its not possible to change channels while recording.
-        if(channelControls[channel].recording !== undefined)
-        {
-            messageData.now = performance.now();
-            channelControls[channel].recording.messages.push(messageData);
-        }
-
         switch(command)
         {
             case CMD.NOTE_OFF:
