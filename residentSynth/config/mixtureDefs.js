@@ -1,43 +1,36 @@
 console.log('load mixtureDefs.js');
 
 // This file can be omitted by applications that don't use mixtures.
-// The mixtureDefs array is an array of mixture definitions.
-// The maximum number of mixture definitions is 127.
-// Each mixture definition contains a name and an noteExtraNotes array
-// containing entries that are objects having note and extraNotes attributes.
-// Each extraNotes is an array containing arrays of the form [keyInterval, relativeVelocity].
-// Each extraNotes array can have any length greater than 0.
-// If the [keyInterval, relativeVelocity] array is not _empty_,
-// it defines a new noteOn that will be sent with the original noteOn message.
-// If the original noteOn has (originalKey, originalvelocity),
-// the new noteOn(s) will have(originalKey + keyInterval, originalvelocity * relativeVelocity).
-// keyInterval must be integers in range -127..+127 inclusive.
-// relativeVelocity are usually floats > 0 and < 1, but can be <= 100.0.
-// (originalKey + keyInterval) will be silently coerced to the range 0..127 inclusive.
-// (originalvelocity * relativeVelocity) will be silently coerced to the range 1..127 inclusive.
-// If noteExtraNotes.note is undefined, its extraNotes array applies to all notes in the mixture,
-// except those having a defined noteExtraNotes.note in the mixture. 
+// There can be 1..127 mixture definitions in the mixtureDefs, each of which has the following
+// attributes:
+//   name
+//   notesExtraNotes - undefined or a possibly empty array of up to 127 noteExtraNotes objects.
+// The first mixtureDef must be named "none", and have a notesExtraNotes array that is either
+// undefined or empty. This "no mixture" option must exist because mixtures are later referenced
+// by index, and the convention will be that mixtures[0] means "no mixture".
+// If the notesExtraNotes array is defined and not empty, it contains noteExtraNotes objects having
+// the following attributes:
+//   note - undefined or in range 0..127 (keyInterval can be negative)
+//   extraNotes - undefined or a possibly empty array of up to 127 [keyInterval, relativeVelocity] arrays
+// The keyInterval is an integer in range -127..127
+// The relativeVelocity is the (float) factor by which to multiply the original
+// note's velocity. It will usually be in range 0..1, but can be <= 100.0.
+//
+// If noteExtraNote.note is undefined, its extraNotes are the default for each
+// note in the mixture, otherwise the extraNotes apply only to their note.
+// A Mixture may not contain more than one extraNotes definition for a particular note.
 ResSynth.mixtureDefs =
     [
         {
             name: "none",
-            noteExtraNotes:
-                [
-                    {
-                        note: undefined, // default for all notes not mentioned in the other noteExtraNotes
-                        extraNotes:
-                            [
-                                []
-                            ]
-                    }
-                ]
+            // notesExtraNotes: []
         },
         {
-            name: "2.1: (+19)",
-            noteExtraNotes:
+            name: "mostly +19",
+            notesExtraNotes:
                 [
                     {
-                        note: undefined, // default for all notes not mentioned in the other noteExtraNotes
+                        // note: undefined, // default for all notes not mentioned in the other notesExtraNotes
                         extraNotes:
                             [
                                 [19, 0.5]
@@ -49,15 +42,19 @@ ResSynth.mixtureDefs =
                             [
                                 [4, 0.9]
                             ]
+                    },
+                    {
+                        note: 48, // just for key 48
+                        // extraNotes: (no extra notes)
                     }
                 ]
         },
         {
-            name: "4.1 (+4, 8, 13)",
-            noteExtraNotes:
+            name: "+4, 8, 13",
+            notesExtraNotes:
                 [
                     {
-                        note: undefined, // default for all notes not mentioned in the other noteExtraNotes
+                        note: undefined, // default for all notes not mentioned in the other notesExtraNotes
                         extraNotes:
                             [
                                 [4, 0.75], [8, 0.5], [13, 0.4]
@@ -67,11 +64,11 @@ ResSynth.mixtureDefs =
 
         },
         {
-            name: "5.1: (+4, 7, 12, 24)",
-            noteExtraNotes:
+            name: "+4, 7, 12, 24",
+            notesExtraNotes:
                 [
                     {
-                        note: undefined, // default for all notes not mentioned in the other noteExtraNotes
+                        note: undefined, // default for all notes not mentioned in the other notesExtraNotes
                         extraNotes:
                             [
                                 [4, 0.75], [7, 0.5], [12, 0.4], [24, 0.2]
@@ -81,11 +78,11 @@ ResSynth.mixtureDefs =
 
         },
         {
-            name: "5.2 (+6, 12, 24, 37)",
-            noteExtraNotes:
+            name: "+6, 12, 24, 37",
+            notesExtraNotes:
                 [
                     {
-                        note: undefined, // default for all notes not mentioned in the other noteExtraNotes
+                        note: undefined, // default for all notes not mentioned in the other notesExtraNotes
                         extraNotes:
                             [
                                 [6, 0.75], [12, 0.4], [24, 0.2], [37, 0.1]
@@ -95,11 +92,11 @@ ResSynth.mixtureDefs =
 
         },
         {
-            name: "5.3 (+9, 13, 12, 24)",
-            noteExtraNotes:
+            name: "+9, 13, 12, 24",
+            notesExtraNotes:
                 [
                     {
-                        note: undefined, // default for all notes not mentioned in the other noteExtraNotes
+                        note: undefined, // default for all notes not mentioned in the other notesExtraNotes
                         extraNotes:
                             [
                                 [9, 0.4], [13, 0.3], [12, 0.2], [24, 0.1]

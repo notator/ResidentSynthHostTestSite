@@ -604,30 +604,57 @@ ResSynth.residentSynth = (function(window)
 
         getMixtures = function()
         {
-            // There can be at most 256 [keyIncrement, velocityFactor] extraNotes components.
-            // KeyIncrement components must be integers in range [-127..127].
-            // VelocityFactor components are usually floats > 0 and < 1, but can be <= 100.0.
-            function checkMixtures(mixtures)
+            // see comment in mixtureDefs.js
+            function checkMixturesInputFile(mixtures)
             {
                 for(var i = 0; i < mixtures.length; i++) 
                 {
-                    console.assert(mixtures[i].name !== undefined);
-                    let extraNotes = mixtures[i].extraNotes;
-                    for(var k = 0; k < extraNotes.length; k++)
+                    let mixture = mixtures[i],
+                        mixtureName = mixture.name,
+                        notesExtraNotes = mixture.notesExtraNotes;
+
+                    console.assert(mixtureName !== undefined);
+                    console.assert(notesExtraNotes === undefined || Array.isArray(notesExtraNotes));
+
+                    if(notesExtraNotes !== undefined && notesExtraNotes.length > 0)
                     {
-                        let data = extraNotes[k],
-                            dataLength = data.length,
-                            keyIncr, // data[0]
-                            velFac; // data[1]
-                            
-                        if(dataLength > 0)
+                        let definedNotes = [];
+                        for(let i = 0; i < notesExtraNotes.length; i++)
                         {
-                            console.assert(dataLength === 2);
-                            keyIncr = data[0]
-                            velFac = data[1]
-                            console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
-                            console.assert(velFac > 0 && velFac <= 100.0);
-                        }
+                            let noteExtraNotes = notesExtraNotes[i],
+                                note = noteExtraNotes.note,
+                                extraNotes = noteExtraNotes.extraNotes;
+
+                            console.assert(note === undefined || (note >= 0 && note <= 127));
+                            console.assert(extraNotes === undefined || Array.isArray(extraNotes));
+
+                            if(note !== undefined)
+                            {
+                                // no duplicates
+                                console.assert(!definedNotes.includes(note));
+                                definedNotes.push(note);
+                            }
+
+                            if(extraNotes !== undefined  && extraNotes.length > 0)
+                            {
+                                for(var k = 0; k < extraNotes.length; k++)
+                                {
+                                    let data = extraNotes[k],
+                                        dataLength = data.length,
+                                        keyIncr, // data[0]
+                                        velFac; // data[1]
+
+                                    if(dataLength > 0)
+                                    {
+                                        console.assert(dataLength === 2);
+                                        keyIncr = data[0]
+                                        velFac = data[1]
+                                        console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
+                                        console.assert(velFac > 0 && velFac <= 100.0);
+                                    }
+                                }
+                            }
+                        }                    
                     }
                 }
             }
@@ -635,7 +662,7 @@ ResSynth.residentSynth = (function(window)
             if(ResSynth.mixtureDefs !== undefined)
             {
                 mixtures = ResSynth.mixtureDefs;
-                checkMixtures(mixtures);
+                checkMixturesInputFile(mixtures);
             }
 
             return mixtures; // can be empty
