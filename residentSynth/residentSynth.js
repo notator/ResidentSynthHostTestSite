@@ -1060,7 +1060,16 @@ ResSynth.residentSynth = (function(window)
 
             if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
             {
-                let extraNotes = mixtures[chanControls.mixtureIndex].extraNotes;
+                let mixture = mixtures[chanControls.mixtureIndex],
+                    extraNotes = mixture.extraNotes,
+                    except = mixture.except,
+                    keyMixtureIndex
+                        = except.find(x => x[0] === key);
+
+                if(keyMixtureIndex !== undefined)
+                {
+                    extraNotes = mixtures[keyMixtureIndex[1]].extraNotes;
+                }
                 for(var i = 0; i < extraNotes.length; i++)
                 {
                     let keyVel = extraNotes[i],
