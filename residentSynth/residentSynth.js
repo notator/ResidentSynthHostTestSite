@@ -607,54 +607,49 @@ ResSynth.residentSynth = (function(window)
             // see comment in mixtureDefs.js
             function checkMixturesInputFile(mixtures)
             {
-                for(var i = 0; i < mixtures.length; i++) 
+                for(let i = 0; i < mixtures.length; i++) 
                 {
                     let mixture = mixtures[i],
                         mixtureName = mixture.name,
-                        notesExtraNotes = mixture.notesExtraNotes;
+                        extraNotes = mixture.extraNotes,
+                        except = mixture.except;
 
                     console.assert(mixtureName !== undefined);
-                    console.assert(notesExtraNotes === undefined || Array.isArray(notesExtraNotes));
+                    console.assert(extraNotes !== undefined && Array.isArray(extraNotes));
+                    console.assert(except !== undefined && Array.isArray(except));
 
-                    if(notesExtraNotes !== undefined && notesExtraNotes.length > 0)
+                    if(extraNotes.length > 0)
                     {
-                        let definedNotes = [];
-                        for(let i = 0; i < notesExtraNotes.length; i++)
+                        for(let k = 0; k < extraNotes.length; k++)
                         {
-                            let noteExtraNotes = notesExtraNotes[i],
-                                note = noteExtraNotes.note,
-                                extraNotes = noteExtraNotes.extraNotes;
+                            let extraNote = extraNotes[k],
+                                dataLength = extraNote.length,
+                                noteIncr, // extraNote[0]
+                                velFac; // extraNote[1]
 
-                            console.assert(note === undefined || (note >= 0 && note <= 127));
-                            console.assert(extraNotes === undefined || Array.isArray(extraNotes));
-
-                            if(note !== undefined)
+                            if(dataLength > 0)
                             {
-                                // no duplicates
-                                console.assert(!definedNotes.includes(note));
-                                definedNotes.push(note);
+                                console.assert(dataLength === 2);
+                                noteIncr = extraNote[0]
+                                velFac = extraNote[1]
+                                console.assert(Number.isInteger(noteIncr) && noteIncr >= -127 && noteIncr <= 127);
+                                console.assert(velFac > 0 && velFac <= 100.0);
                             }
+                        }
+                    }
 
-                            if(extraNotes !== undefined  && extraNotes.length > 0)
-                            {
-                                for(var k = 0; k < extraNotes.length; k++)
-                                {
-                                    let data = extraNotes[k],
-                                        dataLength = data.length,
-                                        keyIncr, // data[0]
-                                        velFac; // data[1]
+                    if(except.length > 0)
+                    {
+                        for(let m = 0; m < except.length; m++)
+                        {
+                            let noteMixtureIndex = except[m];
+                            console.assert(noteMixtureIndex.length === 2);
+                            let note = noteMixtureIndex[0],
+                                mixtureIndex = noteMixtureIndex[1];
 
-                                    if(dataLength > 0)
-                                    {
-                                        console.assert(dataLength === 2);
-                                        keyIncr = data[0]
-                                        velFac = data[1]
-                                        console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
-                                        console.assert(velFac > 0 && velFac <= 100.0);
-                                    }
-                                }
-                            }
-                        }                    
+                            console.assert(Number.isInteger(note) && note >= 0 && note <= 127);
+                            console.assert(Number.isInteger(mixtureIndex) && mixtureIndex >= 0 && mixtureIndex < mixtures.length);
+                        }                        
                     }
                 }
             }
@@ -665,7 +660,7 @@ ResSynth.residentSynth = (function(window)
                 checkMixturesInputFile(mixtures);
             }
 
-            return mixtures; // can be empty
+            return mixtures;
         },
 
         // returns an array of recordings
