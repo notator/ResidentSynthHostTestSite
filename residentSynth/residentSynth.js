@@ -1063,8 +1063,7 @@ ResSynth.residentSynth = (function(window)
                 let mixture = mixtures[chanControls.mixtureIndex],
                     extraNotes = mixture.extraNotes,
                     except = mixture.except,
-                    keyMixtureIndex
-                        = except.find(x => x[0] === key);
+                    keyMixtureIndex = except.find(x => x[0] === key);
 
                 if(keyMixtureIndex !== undefined)
                 {
