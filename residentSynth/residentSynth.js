@@ -666,7 +666,7 @@ ResSynth.residentSynth = (function(window)
         // returns an array of recordings
         // Each recording object has three attributes:
         //   name -- the recording's name
-        //   settings: a settings object containing the initial control settings for the recording
+        //   settingsArray: an array of settings, each of which contains the initial control settings for a channel in the recording
         //   messages: an array of msg objects, each of which has two attributes
         //     1) msg: a UintArray of the form[status, data1, data2] and
         //     2) delay: an integer, the number of milliseconds to delay before sending the msg.
@@ -705,8 +705,8 @@ ResSynth.residentSynth = (function(window)
                         recording = {};
 
                     recording.name = record.name;
-                    recording.settings = record.settings,
-                        recording.messages = getMessageData(record.messages);
+                    recording.settingsArray = record.settingsArray;
+                    recording.messages = getMessageData(record.messages);
 
                     returnRecordings.push(recording);
                 }

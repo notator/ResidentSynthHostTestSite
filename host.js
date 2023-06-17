@@ -22,7 +22,7 @@ ResSynth.host = (function(document)
         allLongInputControls = [], // used by AllControllersOff control
         recording = undefined, // initialized by startRecording(), reset by stopRecording()
         triggerKey,
-        playbackChannel = -1, // used while playing back a recording
+        playbackChannels = [], // used while playing back a recording
 
         // Put up an alert containing the message, then throw and catch a similar exception for display on the console
         stop = function(message)
@@ -296,10 +296,10 @@ ResSynth.host = (function(document)
                 }
                 else if(recording !== undefined)
                 {
-                    if(playbackChannel === currentChannel && command === CMD.NOTE_ON)
+                    if(playbackChannels.includes(currentChannel) && command === CMD.NOTE_ON)
                     {
                         stop(
-                            "New notes cannot be recorded while a recording is playing back on the same channel.\n" +
+                            "New notes cannot be recorded while a recording that uses the same channel is playing back.\n" +
                             "In this situation, only commands and controls are recorded.\n" +
                             "New notes _can_ be recorded both before and after the playback.\n" +
                             "(Channels are restricted to being homophonic, so as to simplify the conversion to " +
@@ -414,7 +414,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onChannelSelectChanged = function()
+        onChannelSelectChanged = function(playbackChannel)
         {
             function setAndSendFontDivControls(hostChannelSettings)
             {
@@ -470,7 +470,7 @@ ResSynth.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex,
+                channel = (playbackChannel === undefined) ? channelSelect.selectedIndex : playbackChannel,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
             currentChannel = channel; // the global currentChannel is used by synth.send(...)
@@ -724,12 +724,39 @@ ResSynth.host = (function(document)
                 return new Promise(resolve => setTimeout(resolve, delay));
             }
 
-            let recordingSelect = getElem("recordingSelect"),
+            function getPlaybackChannels(playbackRecording)
+            {
+                let settingsArray = playbackRecording.settingsArray,
+                    channels = [];
+
+                for(var i = 0; i < settingsArray.length; i++)
+                {
+                    channels.push( settingsArray[i].channel);
+                }
+
+                return channels;
+            }
+
+            let channelSelect = getElem("channelSelect"),
+                recordingSelect = getElem("recordingSelect"),
+                settingsSelect = getElem("settingsSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
                 playbackRecording = synth.recordings[recordingIndex],
-                messages = playbackRecording.messages;        
+                messages = playbackRecording.messages,
+                originalHostChannelSettings = [],
+                originalChannel = channelSelect.selectedIndex,
+                originalSettingsSelectDisabled = settingsSelect.disabled ;        
 
-            playbackChannel = playbackRecording.settings.channel; // global
+            playbackChannels = getPlaybackChannels(playbackRecording); // playbackChannels is global in host.            
+
+            for(var i = 0; i < playbackChannels.length; i++)
+            {
+                let playbackChannel = playbackChannels[i];
+                originalHostChannelSettings.push(channelSelect[playbackChannel].hostSettings);
+                channelSelect[playbackChannel].hostSettings = playbackRecording.settingsArray[i];
+                channelSelect.selectedIndex = playbackChannel;
+                onChannelSelectChanged(playbackChannel);
+            }
 
             for(var i = 0; i < messages.length; i++) 
             {
@@ -741,9 +768,25 @@ ResSynth.host = (function(document)
                 synth.send(msg);
             }
 
-            playbackChannel = -1;
+            for(var i = 0; i < playbackChannels.length; i++)
+            {
+                let playbackChannel = playbackChannels[i];
+                channelSelect[playbackChannel].hostSettings = originalHostChannelSettings[i];
+                onChannelSelectChanged(playbackChannel);
+                
+            }
+
+            channelSelect.selectedIndex = originalChannel;
+            onChannelSelectChanged();
+
+            playbackChannels.length = 0;
+            enableSettingsSelect(!originalSettingsSelectDisabled);
         },
         // exported
+        // This application can only record on a single channel.
+        // It can, however play back multi-channel recordings that use the same recordings format.
+        // Multichannel recordings can be created in other applications, by including the relevant
+        // channel settings in the recording's settings array, and merging the message lists.
         onStartRecordingButtonClicked = function()
         {
             let startRecordingButton = getElem("startRecordingButton"),
@@ -757,7 +800,7 @@ ResSynth.host = (function(document)
             recording = {}; // global in host
             recording.name = "ch" + channelSelect.selectedIndex.toString() + "_recording";
             recording.channel = channel;
-            recording.settings = {...hostChannelSettings}; // clone
+            recording.settings = [{...hostChannelSettings}]; // an array of settings, that contains a single settings clone
             recording.messages = [];
 
             startRecordingButton.style.display = "none";
