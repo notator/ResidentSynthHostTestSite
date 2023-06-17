@@ -22,6 +22,21 @@ ResSynth.host = (function(document)
         allLongInputControls = [], // used by AllControllersOff control
         recording = undefined, // initialized by startRecording(), reset by stopRecording()
         triggerKey,
+        playbackChannel = -1, // used while playing back a recording
+
+        // Put up an alert containing the message, then throw and catch a similar exception for display on the console
+        stop = function(message)
+        {
+            try
+            {
+                let infoStr2 = "\n\n(Close the debugger, and keep clicking this message until it disappears.)";
+                alert(message + infoStr2);
+                throw (message);
+            } catch(e)
+            {
+                console.error(e);
+            };
+        },
 
         getElem = function(elemID)
         {
@@ -281,6 +296,15 @@ ResSynth.host = (function(document)
                 }
                 else if(recording !== undefined)
                 {
+                    if(playbackChannel === currentChannel && command === CMD.NOTE_ON)
+                    {
+                        stop(
+                            "New notes cannot be recorded while a recording is playing back on the same channel.\n" +
+                            "In this situation, only commands and controls are recorded.\n" +
+                            "New notes _can_ be recorded both before and after the playback.\n" +
+                            "(Channels are restricted to being homophonic, so as to simplify the conversion to " +
+                            "scores that can be read by the Assistant Performer.)");                    
+                    }
                     msg.now = performance.now();
                     synth.send(msg, now);
                     recording.messages.push(msg);
@@ -314,23 +338,14 @@ ResSynth.host = (function(document)
                             //console.log("pitchWheel: value=" + data[2]);
                             break;
                         default:
-                            try
-                            {
-                                let infoStr1 =
+                                stop(
                                     "Neither the residentSynth nor the residentSynthHost process\n" +
                                     "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages,\n" +
                                     "so the input device (the keyboard or Assistant Performer)\n" +
-                                    "should not send them (at performance time).\n" +                                   
+                                    "should not send them (at performance time).\n" +
                                     "A separate editor could, of course, edit note velocities " +
                                     "and add additional messages, of the types that _are_ implemented " +
-                                    "by the residentSynth, for use in the Assistant Performer.\n",
-                                infoStr2 = "(Close the debugger, and keep clicking this message until it disappears.)";
-                                alert(infoStr1 + infoStr2);
-                                throw (infoStr1);
-                            } catch(e)
-                            {
-                                console.error(e);
-                            };
+                                    "by the residentSynth, for use in the Assistant Performer.\n");
                             break;
                     }
                     synth.send(msg, now);
@@ -711,7 +726,10 @@ ResSynth.host = (function(document)
 
             let recordingSelect = getElem("recordingSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
-                messages = synth.recordings[recordingIndex].messages;        
+                playbackRecording = synth.recordings[recordingIndex],
+                messages = playbackRecording.messages;        
+
+            playbackChannel = playbackRecording.settings.channel; // global
 
             for(var i = 0; i < messages.length; i++) 
             {
@@ -721,39 +739,24 @@ ResSynth.host = (function(document)
 
                 await wait(delay);
                 synth.send(msg);
-            } 
+            }
+
+            playbackChannel = -1;
         },
         // exported
         onStartRecordingButtonClicked = function()
         {
-            // Overdubbing a channel is prevented here because the Assistant
-            // Performer can't deal with more than one voice per channel.
-            // On the other hand, simultaneous playback of a _different_ channel
-            // is allowed so that channel recordings can be aligned later.
-            // The new recording will only contain messages in its own channel.
-            function setPlayRecordingButton(recordingChannel)
-            {
-                let playRecordingButton = getElem("playRecordingButton"),
-                    recordingSelect = getElem("recordingSelect"),
-                    recordingIndex = recordingSelect.selectedIndex,
-                    recording = synth.recordings[recordingIndex],
-                    recordedSettings = recording.settings,
-                    recordedChannel = recordedSettings.channel;
-
-                playRecordingButton.disabled = (recordedChannel === recordingChannel) ? true : false;
-            }
-
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
-            setPlayRecordingButton(channel);
-            channelSelect.disabled = true;
+            channelSelect.disabled = true; // can't change channel while recording
 
             recording = {}; // global in host
             recording.name = "ch" + channelSelect.selectedIndex.toString() + "_recording";
+            recording.channel = channel;
             recording.settings = {...hostChannelSettings}; // clone
             recording.messages = [];
 
@@ -783,7 +786,6 @@ ResSynth.host = (function(document)
             let channelSelect = getElem("channelSelect"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
-                playRecordingButton = getElem("playRecordingButton"),
                 rec = recording;
 
             if(rec.messages.length > 0)
@@ -804,7 +806,6 @@ ResSynth.host = (function(document)
 
             stopRecordingButton.style.display = "none";
             startRecordingButton.style.display = "block";
-            playRecordingButton.disabled = false;
             channelSelect.disabled = false;
         },
 
