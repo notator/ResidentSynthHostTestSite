@@ -26,7 +26,7 @@ ResSynth.mixtureDefs =
             except: []
         },
         {   // index 1
-            name: "just 64",
+            name: "just key 64",
             extraNotes: [],
             except:
                 [
