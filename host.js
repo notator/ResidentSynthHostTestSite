@@ -278,7 +278,7 @@ ResSynth.host = (function(document)
 
                     setTriggersDivControls(channelSelect.options[currentChannel].hostSettings);
 
-                    enableSettingsSelect(true); // disables the button
+                    enableSettingsSelect(true); // disables the export settings button
                 }
 
                 let data = e.data,
@@ -287,7 +287,9 @@ ResSynth.host = (function(document)
                     msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]),
                     now = performance.now();
 
-                if(triggerKey !== undefined && command === CMD.NOTE_ON && data[1] === triggerKey)
+                // Note that triggerKeys send normal noteOn messages while recording is in progress!
+                // This is currently by design!
+                if(triggerKey !== undefined && command === CMD.NOTE_ON && data[1] === triggerKey && recording === undefined)
                 {
                     if(data[2] !== 0)
                     {
@@ -789,13 +791,35 @@ ResSynth.host = (function(document)
         // channel settings in the recording's settings array, and merging the message lists.
         onStartRecordingButtonClicked = function()
         {
+            function disableSettingsDiv()
+            {         
+                let settingsTitle = getElem("settingsTitle"),
+                    settingsSelect = getElem("settingsSelect"),
+                    exportSettingsButton = getElem("exportSettingsButton"),
+                    triggerKeyTitle = getElem("triggerKeyTitle"),
+                    triggerKeyInput = getElem("triggerKeyInput"),
+                    settingsNameCell = getElem("settingsNameCell");
+
+                settingsTitle.style.color = "darkgray";
+                settingsSelect.prevState = settingsSelect.disabled;
+                settingsSelect.disabled = true;
+                exportSettingsButton.prevState = exportSettingsButton.disabled;
+                exportSettingsButton.disabled = true;
+
+                triggerKeyTitle.style.color = "darkgray";
+                triggerKeyInput.disabled = true;
+                settingsNameCell.style.color = "darkgray";
+            }
+
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
-            channelSelect.disabled = true; // can't change channel while recording
+            // can't change channel while recording
+            channelSelect.disabled = true;
+            disableSettingsDiv();
 
             recording = {}; // global in host
             recording.name = "ch" + channelSelect.selectedIndex.toString() + "_recording";
@@ -826,6 +850,27 @@ ResSynth.host = (function(document)
                 }
                 return rval;
             }
+
+            function restoreSettingsDivState()
+            {
+                let settingsTitle = getElem("settingsTitle"),
+                    settingsSelect = getElem("settingsSelect"),
+                    exportSettingsButton = getElem("exportSettingsButton"),
+                    triggerKeyTitle = getElem("triggerKeyTitle"),
+                    triggerKeyInput = getElem("triggerKeyInput"),
+                    settingsNameCell = getElem("settingsNameCell");
+
+                settingsTitle.style.color = "black";
+                settingsSelect.disabled = settingsSelect.prevState;
+                settingsSelect.prevState = undefined;
+                exportSettingsButton.disabled = exportSettingsButton.prevState;
+                exportSettingsButton.prevState = undefined;
+
+                triggerKeyTitle.style.color = "black";
+                triggerKeyInput.disabled = false;
+                settingsNameCell.style.color = "black";
+            }
+
             let channelSelect = getElem("channelSelect"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
@@ -845,11 +890,13 @@ ResSynth.host = (function(document)
                 document.body.removeChild(a);
             }
 
-            recording = undefined;
-
             stopRecordingButton.style.display = "none";
             startRecordingButton.style.display = "block";
+
+            restoreSettingsDivState()
             channelSelect.disabled = false;
+
+            recording = undefined;
         },
 
         // exported
