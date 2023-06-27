@@ -603,7 +603,6 @@ ResSynth.host = (function(document)
             hostChannelSettings.tuningIndex = tuningIndex;
         },
 
-
         // exported
         onSemitonesOffsetNumberInputChanged = function()
         {
