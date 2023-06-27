@@ -1479,13 +1479,20 @@ ResSynth.residentSynth = (function(window)
             {
                 updatePitchWheelSensitivity(channel, semitones);
             }
-            function setSemitonesOffset(channel, semitonesValue)
+
+            // Converts the midiValue (in range 0..127) to an integer value in range -50..+50.
+            // Used by both setSemitonesOffset(...) and setCentsOffset(...).
+            function getOffsetValue(midiValue)
             {
-                channelControls[channel].semitonesOffset = semitonesValue - 50;
+                return Math.round((midiValue / 1.27) - 50);
             }
-            function setCentsOffset(channel, centsValue)
+            function setSemitonesOffset(channel, midiValue)
             {
-                channelControls[channel].centsOffset = centsValue - 50;
+                channelControls[channel].semitonesOffset = getOffsetValue(midiValue);
+            }
+            function setCentsOffset(channel, midiValue)
+            {
+                channelControls[channel].centsOffset = getOffsetValue(midiValue);
             }
             function setTriggerKey(channel, triggerKey)
             {

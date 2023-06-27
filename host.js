@@ -305,7 +305,7 @@ ResSynth.host = (function(document)
                             "In this situation, only commands and controls are recorded.\n" +
                             "New notes _can_ be recorded both before and after the playback.\n" +
                             "(Channels are restricted to being homophonic, so as to simplify the conversion to " +
-                            "scores that can be read by the Assistant Performer.)");                    
+                            "scores that can be read by the Assistant Performer.)");
                     }
                     msg.now = performance.now();
                     synth.send(msg, now);
@@ -340,14 +340,14 @@ ResSynth.host = (function(document)
                             //console.log("pitchWheel: value=" + data[2]);
                             break;
                         default:
-                                stop(
-                                    "Neither the residentSynth nor the residentSynthHost process\n" +
-                                    "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages,\n" +
-                                    "so the input device (the keyboard or Assistant Performer)\n" +
-                                    "should not send them (at performance time).\n" +
-                                    "A separate editor could, of course, edit note velocities " +
-                                    "and add additional messages, of the types that _are_ implemented " +
-                                    "by the residentSynth, for use in the Assistant Performer.\n");
+                            stop(
+                                "Neither the residentSynth nor the residentSynthHost process\n" +
+                                "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages,\n" +
+                                "so the input device (the keyboard or Assistant Performer)\n" +
+                                "should not send them (at performance time).\n" +
+                                "A separate editor could, of course, edit note velocities " +
+                                "and add additional messages, of the types that _are_ implemented " +
+                                "by the residentSynth, for use in the Assistant Performer.\n");
                             break;
                     }
                     synth.send(msg, now);
@@ -439,7 +439,7 @@ ResSynth.host = (function(document)
                 let tuningGroupSelect = getElem("tuningGroupSelect"),
                     tuningSelect = getElem("tuningSelect"),
                     semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
-                    centsOffsetNumberInput = getElem("centsOffsetNumberInput");  
+                    centsOffsetNumberInput = getElem("centsOffsetNumberInput");
 
                 tuningGroupSelect.selectedIndex = hostChannelSettings.tuningGroupIndex;
                 onTuningGroupSelectChanged();
@@ -603,6 +603,7 @@ ResSynth.host = (function(document)
             hostChannelSettings.tuningIndex = tuningIndex;
         },
 
+
         // exported
         onSemitonesOffsetNumberInputChanged = function()
         {
@@ -612,15 +613,15 @@ ResSynth.host = (function(document)
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
                 semitonesOffset = parseInt(semitonesOffsetNumberInput.value),
-                sendSemitonesOffset,                
+                midiValue,                
                 semitonesOffsetMsg;
 
             semitonesOffset = (semitonesOffset < -36) ? -36 : semitonesOffset;
             semitonesOffset = (semitonesOffset > 36) ? 36 : semitonesOffset;
             semitonesOffsetNumberInput.value = semitonesOffset;
 
-            sendSemitonesOffset = semitonesOffset + 50;
-            semitonesOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SEMITONES_OFFSET, sendSemitonesOffset]);
+            midiValue = semitonesOffsetNumberInput.midiValue(semitonesOffset);
+            semitonesOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SEMITONES_OFFSET, midiValue]);
 
             synth.send(semitonesOffsetMsg);
 
@@ -637,15 +638,15 @@ ResSynth.host = (function(document)
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
                 centsOffset = parseInt(centsOffsetNumberInput.value),
-                sendCentsOffset,
+                midiValue,
                 centsOffsetMsg;
 
             centsOffset = (centsOffset < -50) ? -50 : centsOffset;
             centsOffset = (centsOffset > 50) ? 50 : centsOffset;
             centsOffsetNumberInput.value = centsOffset;
 
-            sendCentsOffset = centsOffset + 50;                
-            centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, sendCentsOffset]);
+            midiValue = centsOffsetNumberInput.midiValue(centsOffset);                
+            centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, midiValue]);
 
             synth.send(centsOffsetMsg);
 
@@ -1051,6 +1052,20 @@ ResSynth.host = (function(document)
                         tuningOptionsArray = tuningGroupSelect[tuningGroupSelect.selectedIndex].tuningOptionsArray;
 
                     appendTuningSelect(tuningSelectCell, tuningOptionsArray);
+                }
+
+                function setSemitonesAndCentsControls()
+                {
+                    function getMidiValue(offsetValue)
+                    {
+                        return Math.round((offsetValue + 50) * 1.27);
+                    }
+
+                    let semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
+                        centsOffsetNumberInput = getElem("centsOffsetNumberInput");
+
+                    semitonesOffsetNumberInput.midiValue = getMidiValue;
+                    centsOffsetNumberInput.midiValue = getMidiValue;
                 }
 
                 function setHostSettingsFromLongControl(longControl, value)
@@ -1568,6 +1583,7 @@ ResSynth.host = (function(document)
 
                 setTuningGroupSelect(tuningGroupSelect);
                 setTuningSelect();
+                setSemitonesAndCentsControls();
                 setTuningSendAgainButton();
                 tuningDiv.style.display = "block";
 
