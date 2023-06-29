@@ -682,12 +682,12 @@ ResSynth.residentSynth = (function(window)
                         status = parseInt(strData[0]),
                         data1 = parseInt(strData[1]),
                         data2 = parseInt(strData[2]),
-                        delay = parseInt(strData[3]),
+                        msPositionReRecording = parseInt(strData[3]),
                         msg = new Uint8Array([status, data1, data2]),
                         msgObj = {};
 
                     msgObj.msg = msg;
-                    msgObj.delay = delay;
+                    msgObj.msPositionReRecording = msPositionReRecording;
 
                     msgData.push(msgObj);
                 }

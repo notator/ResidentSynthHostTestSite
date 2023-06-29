@@ -760,14 +760,27 @@ ResSynth.host = (function(document)
                 onChannelSelectChanged(playbackChannel);
             }
 
+            if(recording !== undefined)
+            {
+                recording.settingsArray = playbackRecording.settingsArray;
+            }
+
+            let prevMsPos = 0;
             for(var i = 0; i < messages.length; i++) 
             {
                 let message = messages[i],
                     msg = message.msg,
-                    delay = message.delay;
+                    thisMsPos = message.msPositionReRecording,
+                    delay = thisMsPos - prevMsPos;
 
                 await wait(delay);
                 synth.send(msg);
+                if(recording !== undefined) // echo msg to new recording
+                {
+                    msg.now = performance.now();
+                    recording.messages.push(msg);
+                }
+                prevMsPos = thisMsPos;
             }
 
             for(var i = 0; i < playbackChannels.length; i++)
@@ -823,8 +836,7 @@ ResSynth.host = (function(document)
 
             recording = {}; // global in host
             recording.name = "ch" + channelSelect.selectedIndex.toString() + "_recording";
-            recording.channel = channel;
-            recording.settings = [{...hostChannelSettings}]; // an array of settings, that contains a single settings clone
+            recording.settingsArray = [{...hostChannelSettings}]; // an array of settings, that contains a single settings clone
             recording.messages = [];
 
             startRecordingButton.style.display = "none";
