@@ -416,7 +416,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onChannelSelectChanged = function(playbackChannel)
+        onChannelSelectChanged = function()
         {
             function setAndSendFontDivControls(hostChannelSettings)
             {
@@ -472,7 +472,7 @@ ResSynth.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
-                channel = (playbackChannel === undefined) ? channelSelect.selectedIndex : playbackChannel,
+                channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
             currentChannel = channel; // the global currentChannel is used by synth.send(...)
@@ -499,11 +499,11 @@ ResSynth.host = (function(document)
                 soundFont = selectedSoundFontOption.soundFont,
                 presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
 
-            synth.setSoundFont(soundFont);
+            synth.setSoundFont(soundFont, channel);
 
             setOptions(presetSelect, presetOptionsArray);
 
-            presetSelect.selectedIndex = 0;
+            presetSelect.selectedIndex = (hostChannelSettings.presetIndex < presetSelect.options.length) ? hostChannelSettings.presetIndex : 0;
             onPresetSelectChanged();
 
             hostChannelSettings.fontIndex = webAudioFontSelect.selectedIndex;
@@ -570,7 +570,7 @@ ResSynth.host = (function(document)
 
             setOptions(tuningSelect, tuningOptionsArray);
 
-            tuningSelect.selectedIndex = 0;
+            tuningSelect.selectedIndex = (hostChannelSettings.tuningIndex < tuningSelect.options.length) ? hostChannelSettings.tuningIndex : 0;
             onTuningSelectChanged();
 
             hostChannelSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
@@ -733,10 +733,39 @@ ResSynth.host = (function(document)
 
                 for(var i = 0; i < settingsArray.length; i++)
                 {
-                    channels.push( settingsArray[i].channel);
+                    channels.push(settingsArray[i].channel);
                 }
 
                 return channels;
+            }
+
+            function setSynthToPlaybackSettings(channelSelect, playbackSettingsArray)
+            {
+                function setSynthChannelToPlaybackSettings(playbackSettings)
+                {
+                    let channel = playbackSettings.channel;
+
+                    // TODO: compare with onChannelSelectChanged()
+
+                }
+
+                for(var settingsIndex = 0; settingsIndex < playbackSettingsArray.length; settingsIndex++)
+                {
+                    let playbackSettings = playbackSettingsArray[settingsIndex];
+
+                    setSynthChannelToPlaybackSettings(playbackSettings);
+                    //channelSelect[channel].hostSettings = playbackSettings;
+                    //onChannelSelectChanged();
+                }
+            }
+
+            function restoreSynthToHostSettings(channelSelect)
+            {
+                for(var channel = 0; channel < 16; channel++)
+                {
+                    channelSelect.selectedIndex = channel;
+                    onChannelSelectChanged();
+                }
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -747,22 +776,30 @@ ResSynth.host = (function(document)
                 messages = playbackRecording.messages,
                 originalHostChannelSettings = [],
                 originalChannel = channelSelect.selectedIndex,
-                originalSettingsSelectDisabled = settingsSelect.disabled ;        
+                originalSettingsSelectDisabled = settingsSelect.disabled;
 
-            playbackChannels = getPlaybackChannels(playbackRecording); // playbackChannels is global in host.            
+            playbackChannels = getPlaybackChannels(playbackRecording); // playbackChannels is global in host.
 
-            for(var i = 0; i < playbackChannels.length; i++)
-            {
-                let playbackChannel = playbackChannels[i];
-                originalHostChannelSettings.push(channelSelect[playbackChannel].hostSettings);
-                channelSelect[playbackChannel].hostSettings = playbackRecording.settingsArray[i];
-                channelSelect.selectedIndex = playbackChannel;
-                onChannelSelectChanged(playbackChannel);
-            }
+            originalHostChannelSettings = setSynthToPlaybackSettings(channelSelect, playbackRecording.settingsArray);
 
             if(recording !== undefined)
             {
-                recording.settingsArray = playbackRecording.settingsArray;
+                let settingsArray = [];
+
+                for(let channel = 0; channel < 16; channel++)
+                {
+                    let settings = playbackRecording.settingsArray.find(x => x.channel === channel);
+                    if(settings !== undefined)
+                    {
+                        settingsArray.push(settings);
+                    }
+                    else if(recording.channel === channel)
+                    {
+                        settingsArray.push(recording.settingsArray[0]);
+                    }
+                }
+
+                recording.settingsArray = settingsArray;
             }
 
             let prevMsPos = 0;
@@ -783,13 +820,7 @@ ResSynth.host = (function(document)
                 prevMsPos = thisMsPos;
             }
 
-            for(var i = 0; i < playbackChannels.length; i++)
-            {
-                let playbackChannel = playbackChannels[i];
-                channelSelect[playbackChannel].hostSettings = originalHostChannelSettings[i];
-                onChannelSelectChanged(playbackChannel);
-                
-            }
+            restoreSynthToHostSettings(channelSelect, originalHostChannelSettings);
 
             channelSelect.selectedIndex = originalChannel;
             onChannelSelectChanged();

@@ -1244,7 +1244,7 @@ ResSynth.residentSynth = (function(window)
 
     // end var
 
-    ResidentSynth.prototype.setSoundFont = function(webAudioFont)
+    ResidentSynth.prototype.setSoundFont = function(webAudioFont, channel)
     {
         if(!webAudioFont.isReady())
         {
@@ -1255,15 +1255,12 @@ ResSynth.residentSynth = (function(window)
 
         presets = webAudioFont.presets; // global
 
-        for(let channel = 0; channel < 16; ++channel)
-        {
-            // Set default presetIndex.
-            // The mixture index is changed neither by this function, nor by setting the preset.
-            let channelInfo = channelControls[channel];
+        // Set default presetIndex.
+        // The mixture index is changed neither by this function, nor by setting the preset.
+        let channelInfo = channelControls[channel];
 
-            channelInfo.fontIndex = fontIndex;
-            channelInfo.presetIndex = 0;
-        }
+        channelInfo.fontIndex = fontIndex;
+        channelInfo.presetIndex = 0;
 
         console.log("residentSynth WebAudioFont set.");
     };
@@ -1310,11 +1307,10 @@ ResSynth.residentSynth = (function(window)
             let controlState = {};
             channelControls.push(controlState);
             setControllerDefaults(channel);
+            this.setSoundFont(this.webAudioFonts[0], channel);
 
             channelControls[channel].currentNoteOns = [];
         }
-
-        this.setSoundFont(this.webAudioFonts[0]);
 
         console.log("residentSynth opened.");
     };
