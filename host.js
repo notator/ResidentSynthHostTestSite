@@ -1584,12 +1584,13 @@ ResSynth.host = (function(document)
                 getElem("notesDiv").style.display = "block";
             }
 
+            getElem("channelSelect").disabled = false;            
+            getElem("continueAtStartButtonDiv").style.display = "none";
+
             // Its important to call this function after user interaction with the GUI.
             synth.open();
 
             setInputDeviceEventListener(getElem("inputDeviceSelect"));
-
-            getElem("continueAtStartButtonDiv").style.display = "none";
 
             // This function should initialize the synth with the (default) values of all the host's controls
             // by calling the corresponding functions in the synth's public interface.
