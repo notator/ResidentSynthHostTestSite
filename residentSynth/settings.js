@@ -16,15 +16,15 @@ ResSynth.settings = (function()
 {
     "use strict";
 
-    let Settings = function(name, channel)
+    let Settings = function(name)
     {
         if(!(this instanceof Settings))
         {
-            return new Settings(name, channel);
+            return new Settings(name);
         }
 
         this.name = name;
-        this.channel = channel;
+        this.channel = 0;
         this.fontIndex = 0;
         this.presetIndex = 0;
         this.mixtureIndex = 0;

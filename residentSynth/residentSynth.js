@@ -716,6 +716,7 @@ ResSynth.residentSynth = (function(window)
 
         // returns an array of Settings objects containing the values set in the settingsPresets.js file.
         // The values in the attributes of the returned Settings objects are immutable.
+        // Clone using {...settings} to create an object having mutable attributes. (Attributes can never be created or destroyed.)
         getSettingsPresets = function(settingsPresets)
         {
             let rval = [];
@@ -723,7 +724,7 @@ ResSynth.residentSynth = (function(window)
             for(var settingsIndex = 0; settingsIndex < settingsPresets.length; settingsIndex++)
             {
                 let sp = settingsPresets[settingsIndex],
-                    settings = new ResSynth.settings.Settings(sp.name, sp.channel);
+                    settings = new ResSynth.settings.Settings(sp.name);
 
                 settings.fontIndex = sp.fontIndex;
                 settings.presetIndex = sp.presetIndex;
