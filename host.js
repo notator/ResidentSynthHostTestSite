@@ -425,13 +425,9 @@ ResSynth.host = (function(document)
                     mixtureSelect = getElem("mixtureSelect");
 
                 fontSelect.selectedIndex = hostChannelSettings.fontIndex; // index in webAudioFontSelect
-                onWebAudioFontSelectChanged(); // sets the presets in the presetSelect and the soundFont in the synth
 
-                presetSelect.selectedIndex = hostChannelSettings.presetIndex; // sets the presetSelect
-                onPresetSelectChanged();  // sets the preset in the synth
-
-                mixtureSelect.selectedIndex = hostChannelSettings.mixtureIndex; // sets the mixtureSelect
-                onMixtureSelectChanged();  // sets the preset in the synth
+                // set the soundFont in the synth, and the presetSelect then call onPresetSelectChanged() (which calls onMixtureSelectChanged())
+                onWebAudioFontSelectChanged(); 
             }
 
             function setAndSendTuningDivControls(hostChannelSettings)
@@ -442,16 +438,10 @@ ResSynth.host = (function(document)
                     centsOffsetNumberInput = getElem("centsOffsetNumberInput");
 
                 tuningGroupSelect.selectedIndex = hostChannelSettings.tuningGroupIndex;
+
+                // set the tuningSelect then call onTuningtSelectChanged()
+                // (which calls onSemitonesOffsetNumberInputChanged() and onCentsOffsetNumberInputChanged())
                 onTuningGroupSelectChanged();
-
-                tuningSelect.selectedIndex = hostChannelSettings.tuningIndex;
-                onTuningSelectChanged();
-
-                semitonesOffsetNumberInput.value = hostChannelSettings.semitonesOffset;
-                onSemitonesOffsetNumberInputChanged();
-
-                centsOffsetNumberInput.value = hostChannelSettings.centsOffset;
-                onCentsOffsetNumberInputChanged();
             }
 
             function setAndSendLongControls(hostChannelSettings)
@@ -503,7 +493,7 @@ ResSynth.host = (function(document)
 
             setOptions(presetSelect, presetOptionsArray);
 
-            presetSelect.selectedIndex = (hostChannelSettings.presetIndex < presetSelect.options.length) ? hostChannelSettings.presetIndex : 0;
+            presetSelect.selectedIndex = hostChannelSettings.presetIndex;
             onPresetSelectChanged();
 
             hostChannelSettings.fontIndex = webAudioFontSelect.selectedIndex;
@@ -570,7 +560,7 @@ ResSynth.host = (function(document)
 
             setOptions(tuningSelect, tuningOptionsArray);
 
-            tuningSelect.selectedIndex = (hostChannelSettings.tuningIndex < tuningSelect.options.length) ? hostChannelSettings.tuningIndex : 0;
+            tuningSelect.selectedIndex = hostChannelSettings.tuningIndex;
             onTuningSelectChanged();
 
             hostChannelSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
