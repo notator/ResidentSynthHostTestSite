@@ -1263,7 +1263,7 @@ ResSynth.residentSynth = (function(window)
         channelInfo.fontIndex = fontIndex;
         channelInfo.presetIndex = 0;
 
-        console.log("residentSynth WebAudioFont set.");
+        //console.log("residentSynth WebAudioFont set.");
     };
 
     // WebMIDIAPI §4.6 -- MIDIPort interface

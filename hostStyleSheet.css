@@ -194,12 +194,14 @@ hr
 .startRecordingButton
 {
 	font-size: 11px;
+	width: 140px;
 	height: 18px;
 }
 
 .stopRecordingButton
 {
 	font-size: 11px;
+	width: 140px;
 	height: 18px;
 	background-color: lightpink;
 	display: none;

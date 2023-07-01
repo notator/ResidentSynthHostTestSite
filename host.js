@@ -408,6 +408,8 @@ ResSynth.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
+                startRecordingButton = getElem("startRecordingButton"),
+                stopRecordingButton = getElem("stopRecordingButton"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
@@ -421,6 +423,9 @@ ResSynth.host = (function(document)
             setAndSendLongControls(hostChannelSettings);
 
             setExportState(hostChannelSettings);
+
+            startRecordingButton.value = "start recording channel " + channel.toString();
+            stopRecordingButton.value = "stop recording channel " + channel.toString();
         },
 
         // exported
