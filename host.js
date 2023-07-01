@@ -807,9 +807,14 @@ ResSynth.host = (function(document)
             channelSelect.disabled = true;
             disableSettingsDiv();
 
+            let channelInfo = {};
+            channelInfo.channel = channelSelect.selectedIndex;
+            channelInfo.settings = {...hostChannelSettings}; // a single settings clone
+
             recording = {}; // global in host
-            recording.name = "ch" + channelSelect.selectedIndex.toString() + "_recording";
-            recording.settingsArray = [{...hostChannelSettings}]; // an array of settings, that contains a single settings clone
+            recording.name = ""; // is finally set in onStopRecordingButtonClicked()
+            recording.channelSettings = [];
+            recording.channelSettings.push(channelInfo);
             recording.messages = [];
 
             startRecordingButton.style.display = "none";
@@ -855,6 +860,26 @@ ResSynth.host = (function(document)
                 settingsNameCell.style.color = "black";
             }
 
+            function getFileName(channelSettings)
+            {
+                let fileName = undefined;
+                if(channelSettings.length === 1)
+                {
+                    fileName = "ch" + channelSettings[0].channel.toString() + "_recording.json"
+                }
+                else
+                {
+                    let channelsStr = "";
+                    for(let i = 0; i < channelSettings.length; i++)
+                    {
+                        channelsStr = channelsStr + channelSettings[i].channel.toString() + ",";
+                    }
+                    channelsStr.length = channelStr.length - 1;
+                    fileName = "chs" + channelsStr + "_recording.json";
+                }
+                return fileName;                
+            }
+
             let channelSelect = getElem("channelSelect"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
@@ -862,13 +887,15 @@ ResSynth.host = (function(document)
 
             if(rec.messages.length > 0)
             {
+                let fileName = getFileName(rec.channelSettings);
+                rec.name = fileName;
                 rec.messages = getStringArray(rec.messages);
 
                 const a = document.createElement("a");
                 a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, "\t")], {
                     type: "text/plain"
                 }));
-                a.setAttribute("download", rec.name + ".json");
+                a.setAttribute("download", fileName);
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
