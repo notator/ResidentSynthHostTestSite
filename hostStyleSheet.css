@@ -111,9 +111,15 @@ hr
 .settingsSelect
 {
 	font-size: 11px;
-	width: 513px;
+	width: 468px;
 	height: 18px;
 	margin-left: 0;
+}
+
+.exportSettingsButton
+{
+	font-size: 11px;
+	height: 18px;
 }
 
 .triggerActionSelect
@@ -168,12 +174,6 @@ hr
 	height: 18px;
 	width: 45px;
 	margin-right: 5px;
-}
-
-.exportSettingsButton
-{
-	font-size: 11px;
-	height: 18px;
 }
 
 .recordingSelect
