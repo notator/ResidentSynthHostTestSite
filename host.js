@@ -43,13 +43,10 @@ ResSynth.host = (function(document)
             return document.getElementById(elemID);
         },
 
-        enableSettingsSelect = function(bool)
+        disableExportSettingsButton = function(bool)
         {
-            let settingsSelect = getElem("settingsSelect"),
-                exportSettingsButton = getElem("exportSettingsButton"),
-                notBool = (bool === true) ? false : true;
+            let exportSettingsButton = getElem("exportSettingsButton");
 
-            settingsSelect.disabled = notBool;
             exportSettingsButton.disabled = bool;
         },
 
@@ -197,7 +194,7 @@ ResSynth.host = (function(document)
 
                     setTriggersDivControls(channelSelect.options[currentChannel].hostSettings);
 
-                    enableSettingsSelect(true); // disables the export settings button
+                    disableExportSettingsButton(true); // disables the export settings button
                 }
 
                 let data = e.data,
@@ -393,7 +390,7 @@ ResSynth.host = (function(document)
 
             setAndSendLongControls(hostChannelSettings);
 
-            enableSettingsSelect(false);
+            disableExportSettingsButton(false);
         },
 
         // exported
@@ -463,7 +460,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.mixtureIndex = mixtureIndex;
 
-            enableSettingsSelect(false);
+            disableExportSettingsButton(false);
         },
 
         // exported (c.f. onWebAudioFontSelectChanged() )
@@ -535,7 +532,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.semitonesOffset = semitonesOffset;
 
-            enableSettingsSelect(false);
+            disableExportSettingsButton(false);
         },
         // exported
         onCentsOffsetNumberInputChanged = function()
@@ -560,7 +557,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.centsOffset = centsOffset;
 
-            enableSettingsSelect(false);
+            disableExportSettingsButton(false);
         },
 
         // Throws an exception either if nextSettingsIndex is out of range,
@@ -587,7 +584,7 @@ ResSynth.host = (function(document)
         onSettingsSelectChanged = function()
         {
             setSettings(getElem("settingsSelect").selectedIndex);
-            enableSettingsSelect(true); // disables the button
+            disableExportSettingsButton(true); // disables the button
         },
 
         //exported
@@ -596,7 +593,7 @@ ResSynth.host = (function(document)
             let channelSelect = getElem("channelSelect"),                
                 hostChannelSettings = channelSelect.options[currentChannel].hostSettings,
                 originalName = hostChannelSettings.name,
-                exportName = "ch" + currentChannel.toString() + "_settings";
+                exportName = originalName + " (modified)";
 
             hostChannelSettings.name = exportName;
 
@@ -626,7 +623,7 @@ ResSynth.host = (function(document)
             synth.send(triggerKeyMsg);            
             hostChannelSettings.triggerKey = triggerKey;
 
-            enableSettingsSelect(false);
+            disableExportSettingsButton(false);
         },
         onPlayRecordingButtonClicked = async function()
         {
@@ -679,13 +676,13 @@ ResSynth.host = (function(document)
 
             let channelSelect = getElem("channelSelect"),
                 recordingSelect = getElem("recordingSelect"),
-                settingsSelect = getElem("settingsSelect"),
+                exportSettingsButton = getElem("exportSettingsButton"),
                 recordingIndex = recordingSelect.selectedIndex,
                 playbackRecording = synth.recordings[recordingIndex],
                 messages = playbackRecording.messages,
                 originalHostChannelSettings = [],
                 originalChannel = channelSelect.selectedIndex,
-                originalSettingsSelectDisabled = settingsSelect.disabled;
+                originalExportSettingsButtonDisabled = exportSettingsButton.disabled;
 
             playbackChannels = getPlaybackChannels(playbackRecording); // playbackChannels is global in host.
 
@@ -735,7 +732,7 @@ ResSynth.host = (function(document)
             onChannelSelectChanged();
 
             playbackChannels.length = 0;
-            enableSettingsSelect(!originalSettingsSelectDisabled);
+            disableExportSettingsButton(originalExportSettingsButtonDisabled);
         },
         // exported
         // This application can only record on a single channel.
@@ -1023,7 +1020,7 @@ ResSynth.host = (function(document)
                     let channelSelect = getElem("channelSelect"),
                         hostChannelSettings = channelSelect.options[channelSelect.selectedIndex].hostSettings;
 
-                    enableSettingsSelect(false);
+                    disableExportSettingsButton(false);
 
                     if(hostChannelSettings !== undefined)
                     {
@@ -1551,7 +1548,7 @@ ResSynth.host = (function(document)
                 // It calls all the synth's public control functions.
                 onChannelSelectChanged();
 
-                enableSettingsSelect(true);
+                disableExportSettingsButton(true);
 
                 getElem("notesDiv").style.display = "block";
             }
