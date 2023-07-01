@@ -24,7 +24,6 @@ ResSynth.settings = (function()
         }
 
         this.name = name;
-        this.channel = 0;
         this.fontIndex = 0;
         this.presetIndex = 0;
         this.mixtureIndex = 0;
@@ -46,6 +45,32 @@ ResSynth.settings = (function()
     API =
     {
         Settings: Settings // constructor
+        };
+
+    // Returns 0 if all attributes have the same values, otherwise -1.
+    // Ignores the "name" attribute.
+    Settings.prototype.compare = function(otherSettings)
+    {
+        let rval = 0;
+
+        if(this.fontIndex !== otherSettings.fontIndex
+        || this.presetIndex !== otherSettings.presetIndex
+        || this.mixtureIndex !== otherSettings.mixtureIndex
+        || this.tuningGroupIndex !== otherSettings.tuningGroupIndex
+        || this.tuningIndex !== otherSettings.tuningIndex
+        || this.semitonesOffset !== otherSettings.semitonesOffset
+        || this.centsOffset !== otherSettings.centsOffset
+        || this.pitchWheel !== otherSettings.pitchWheel
+        || this.modWheel !== otherSettings.modWheel
+        || this.volume !== otherSettings.volume
+        || this.pan !== otherSettings.pan
+        || this.reverberation !== otherSettings.reverberation
+        || this.pitchWheelSensitivity !== otherSettings.pitchWheelSensitivity
+        || this.triggerKey !== otherSettings.triggerKey)
+        {
+            rval = -1;
+        }
+        return rval;
     };
 
     return API;
