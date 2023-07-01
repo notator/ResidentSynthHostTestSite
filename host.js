@@ -130,97 +130,16 @@ ResSynth.host = (function(document)
             let settingsSelect = getElem("settingsSelect"),
                 settings = settingsSelect.options[settingsIndex].settings,
                 channelSelect = getElem("channelSelect"),
-                fontSelect = getElem("webAudioFontSelect"),
-                presetSelect = getElem("presetSelect"),
-                mixtureSelect = getElem("mixtureSelect"),
-                tuningGroupSelect = getElem("tuningGroupSelect"),
-                tuningSelect = getElem("tuningSelect"),
-                semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
-                centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
-                triggerKeyInput = getElem("triggerKeyInput"),
-                pitchWheelLongControl = getElem("pitchWheelLongControl"),
-                modWheelLongControl = getElem("modWheelLongControl"),
-                volumeLongControl = getElem("volumeLongControl"),
-                panLongControl = getElem("panLongControl"),
-                reverberationLongControl = getElem("reverberationLongControl"),
-                pitchWheelSensitivityLongControl = getElem("pitchWheelSensitivityLongControl");
+                channel = channelSelect.selectedIndex,
+                settingsClone = {...settings};
 
             // decided _not_ to silence the synth while resetting all the controls.
             // sendShortControl(ResSynth.constants.CONTROL.ALL_SOUND_OFF);
 
-            // select controls
-            if(settings.channel !== undefined)
-            {
-                channelSelect.selectedIndex = settings.channel;
-                onChannelSelectChanged();
-            }
-            if(settings.fontIndex !== undefined)
-            {
-                fontSelect.selectedIndex = settings.fontIndex;
-                onWebAudioFontSelectChanged();
-            }
-            if(settings.presetIndex)
-            {
-                presetSelect.selectedIndex = settings.presetIndex;
-                onPresetSelectChanged();
-            }
-            if(settings.mixtureIndex !== undefined)
-            {
-                mixtureSelect.selectedIndex = settings.mixtureIndex;
-                onMixtureSelectChanged();
-            }
-            if(settings.tuningGroupIndex !== undefined)
-            {
-                tuningGroupSelect.selectedIndex = settings.tuningGroupIndex;
-                onTuningGroupSelectChanged();
-            }
-            if(settings.tuningIndex !== undefined)
-            {
-                tuningSelect.selectedIndex = settings.tuningIndex;
-                onTuningSelectChanged();
-            }
-            if(settings.semitonesOffset !== undefined)
-            {
-                semitonesOffsetNumberInput.value = settings.semitonesOffset;
-                onSemitonesOffsetNumberInputChanged();
-            }
-            if(settings.centsOffset !== undefined)
-            {
-                centsOffsetNumberInput.value = settings.centsOffset;
-                onCentsOffsetNumberInputChanged();
-            }
-            // slider controls
-            if(settings.pitchWheelData2 !== undefined)
-            {
-                // pitchWheelData1 is ignored here, because the host's pitchWheel control only uses pitchWheelData2.
-                // (The appropriate data1 is calculated and sent to the synth in the pitchWheel message.)
-                pitchWheelLongControl.setValue(settings.pitchWheelData2);
-            }
-            if(settings.modWheel !== undefined)
-            {
-                modWheelLongControl.setValue(settings.modWheel);
-            }
-            if(settings.volume !== undefined)
-            {
-                volumeLongControl.setValue(settings.volume);
-            }
-            if(settings.pan !== undefined)
-            {
-                panLongControl.setValue(settings.pan);
-            }
-            if(settings.reverberation !== undefined)
-            {
-                reverberationLongControl.setValue(settings.reverberation);
-            }
-            if(settings.pitchWheelSensitivity !== undefined)
-            {
-                pitchWheelSensitivityLongControl.setValue(settings.pitchWheelSensitivity);
-            }
-            if(settings.triggerKey !== undefined)
-            {
-                triggerKeyInput.value = settings.triggerKey;
-                onTriggerKeyInputChanged();
-            }
+            settingsClone.channel = channel;
+
+            channelSelect.options[channel].hostSettings = settingsClone;
+            onChannelSelectChanged();
         },
         setInputDeviceEventListener = function(inputDeviceSelect)
         {

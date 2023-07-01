@@ -720,9 +720,9 @@ ResSynth.residentSynth = (function(window)
         {
             let rval = [];
 
-            for(var i = 0; i < settingsPresets.length; i++)
+            for(var settingsIndex = 0; settingsIndex < settingsPresets.length; settingsIndex++)
             {
-                let sp = settingsPresets[i],
+                let sp = settingsPresets[settingsIndex],
                     settings = new ResSynth.settings.Settings(sp.name, sp.channel);
 
                 settings.fontIndex = sp.fontIndex;

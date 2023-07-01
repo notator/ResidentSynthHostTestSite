@@ -103,7 +103,6 @@ ResSynth.settingsPresets =
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
             "triggerKey": 36
-
         }
         // etc. more settings definitions can be added here.
     ];
