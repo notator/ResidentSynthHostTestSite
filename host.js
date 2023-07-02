@@ -53,7 +53,7 @@ ResSynth.host = (function(document)
                 {
                     let settings = settingsSelectOptions[i].settings;
 
-                    if(settings.compare(hostChannelSettings) === 0)
+                    if(settings.isEqual(hostChannelSettings))
                     {
                         presetName = settings.name;
                         break;

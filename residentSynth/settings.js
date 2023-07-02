@@ -47,11 +47,11 @@ ResSynth.settings = (function()
         Settings: Settings // constructor
         };
 
-    // Returns 0 if all attributes have the same values, otherwise -1.
+    // Returns true if all attributes have the same values, otherwise false.
     // Ignores the "name" attribute.
-    Settings.prototype.compare = function(otherSettings)
+    Settings.prototype.isEqual = function(otherSettings)
     {
-        let rval = 0;
+        let rval = true;
 
         if(this.fontIndex !== otherSettings.fontIndex
         || this.presetIndex !== otherSettings.presetIndex
@@ -68,7 +68,7 @@ ResSynth.settings = (function()
         || this.pitchWheelSensitivity !== otherSettings.pitchWheelSensitivity
         || this.triggerKey !== otherSettings.triggerKey)
         {
-            rval = -1;
+            rval = false;
         }
         return rval;
     };
