@@ -705,8 +705,11 @@ ResSynth.residentSynth = (function(window)
                         recording = {};
 
                     recording.name = record.name;
-                    recording.settingsArray = record.settingsArray;
-                    recording.messages = getMessageData(record.messages);
+                    recording.channels = record.channels;
+                    for(var channelIndex = 0; channelIndex < recording.channels.length; channelIndex++)
+                    {
+                        recording.channels[channelIndex].messages = getMessageData(recording.channels[channelIndex].messages);
+                    }                    
 
                     returnRecordings.push(recording);
                 }

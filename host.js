@@ -19,9 +19,10 @@ ResSynth.host = (function(document)
         currentChannel = 0,
         nextSettingsIndex = 1,
         allLongInputControls = [], // used by AllControllersOff control
-        recording = undefined, // initialized by startRecording(), reset by stopRecording()
         triggerKey,
-        playbackChannels = [], // used while playing back a recording
+        recording = undefined, // initialized by startRecording(), reset by stopRecording()
+        recordingChannelInfo = undefined, // used while recording a channel
+        playbackChannelIndices = [], // used while playing back a recording
 
         // Put up an alert containing the message, then throw and catch a similar exception for display on the console
         stop = function(message)
@@ -244,7 +245,7 @@ ResSynth.host = (function(document)
                 }
                 else if(recording !== undefined)
                 {
-                    if(playbackChannels.includes(currentChannel) && command === CMD.NOTE_ON)
+                    if(playbackChannelIndices.includes(currentChannel) && command === CMD.NOTE_ON)
                     {
                         stop(
                             "New notes cannot be recorded while a recording that uses the same channel is playing back.\n" +
@@ -255,7 +256,7 @@ ResSynth.host = (function(document)
                     }
                     msg.now = performance.now();
                     synth.send(msg, now);
-                    recording.messages.push(msg);
+                    recordingChannelInfo.messages.push(msg);
                 }
                 else if(!(command === CMD.NOTE_OFF && data[1] === triggerKey)) // EMU never sends NOTE_OFF, but anyway...
                 {
@@ -366,9 +367,7 @@ ResSynth.host = (function(document)
         {
             function setAndSendFontDivControls(hostChannelSettings)
             {
-                let fontSelect = getElem("webAudioFontSelect"),
-                    presetSelect = getElem("presetSelect"),
-                    mixtureSelect = getElem("mixtureSelect");
+                let fontSelect = getElem("webAudioFontSelect");
 
                 fontSelect.selectedIndex = hostChannelSettings.fontIndex; // index in webAudioFontSelect
 
@@ -669,106 +668,175 @@ ResSynth.host = (function(document)
                 return new Promise(resolve => setTimeout(resolve, delay));
             }
 
-            function getPlaybackChannels(playbackRecording)
+            function getPlaybackChannelIndices(playBackChannels)
             {
-                let settingsArray = playbackRecording.settingsArray,
-                    channels = [];
+                let channels = [];
 
-                for(var i = 0; i < settingsArray.length; i++)
+                for(var i = 0; i < playBackChannels.length; i++)
                 {
-                    channels.push(settingsArray[i].channel);
+                    channels.push(playBackChannels[i].channel);
                 }
 
                 return channels;
             }
 
-            function setSynthToPlaybackSettings(channelSelect, playbackSettingsArray)
+            function setSynthToPlaybackSettings(playbackChannels)
             {
-                function setSynthChannelToPlaybackSettings(playbackSettings)
+                function setSynthChannelToSettings(channel, settings)
                 {
-                    let channel = playbackSettings.channel;
+                    let CMD = ResSynth.constants.COMMAND,
+                        CTL = ResSynth.constants.CONTROL,
+                        webAudioFontSelect = getElem("webAudioFontSelect"),
+                        semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
+                        centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
+                        soundFont = webAudioFontSelect.options[settings.fontIndex].soundFont;
 
-                    // TODO: compare with onChannelSelectChanged()
-
+                    // settings.fontIndex
+                    synth.setSoundFont(soundFont, channel);
+                    // settings.presetIndex
+                    let presetMsg = new Uint8Array([CMD.PRESET + channel, settings.presetIndex]);
+                    synth.send(presetMsg);
+                    // settings.mixtureIndex
+                    let mixtureMessage = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MIXTURE_INDEX, settings.mixtureIndex]);
+                    synth.send(mixtureMessage);        
+                    // settings.tuningGroupIndex
+                    let tuningGroupIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_GROUP_INDEX, settings.tuningGroupIndex]);
+                    synth.send(tuningGroupIndexMsg); 
+                    // settings.tuningIndex
+                    let tuningIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_INDEX, settings.tuningIndex]);
+                    synth.send(tuningIndexMsg);                    
+                    // settings.semitonesOffset
+                    let sMidiValue = semitonesOffsetNumberInput.midiValue(settings.semitonesOffset);
+                    let semitonesOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SEMITONES_OFFSET, sMidiValue]);
+                    synth.send(semitonesOffsetMsg); 
+                    // settings.centsOffset
+                    let cMidiValue = centsOffsetNumberInput.midiValue(settings.centsOffset);
+                    let centsOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.CENTS_OFFSET, cMidiValue]);
+                    synth.send(centsOffsetMsg); 
+                    // settings.pitchWheel
+                    let pitchWheelMsg = new Uint8Array([CMD.PITCHWHEEL + channel, settings.pitchWheel, settings.pitchWheel]);
+                    synth.send(pitchWheelMsg);
+                    // settings.modWheel
+                    let modWheelMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MODWHEEL, settings.modWheel]);
+                    synth.send(modWheelMsg);                    
+                    // settings.volume
+                    let volMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VOLUME, settings.volume]);
+                    synth.send(volMsg);
+                    // settings.pan
+                    let panMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PAN, settings.pan]);
+                    synth.send(panMsg);
+                    // settings.reverberation 
+                    let reverbMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.REVERBERATION, settings.reverberation]);
+                    synth.send(reverbMsg);
+                    // settings.pitchWheelSensitivity
+                    let pwsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PITCH_WHEEL_SENSITIVITY, settings.pitchWheelSensitivity]);
+                    synth.send(pwsMsg);
+                    // settings.triggerKey
+                    let triggerKeyMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TRIGGER_KEY, settings.triggerKey]);
+                    synth.send(triggerKeyMsg);
                 }
 
-                for(var settingsIndex = 0; settingsIndex < playbackSettingsArray.length; settingsIndex++)
+                for(var i = 0; i < playbackChannels.length; i++)
                 {
-                    let playbackSettings = playbackSettingsArray[settingsIndex];
+                    let playbackChannel = playbackChannels[i],
+                        channel = playbackChannel.channel,
+                        settings = playbackChannel.settings;
 
-                    setSynthChannelToPlaybackSettings(playbackSettings);
-                    //channelSelect[channel].hostSettings = playbackSettings;
-                    //onChannelSelectChanged();
+                    setSynthChannelToSettings(channel, settings);
                 }
             }
 
-            function restoreSynthToHostSettings(channelSelect)
+            function sendMessages(synth, playbackChannels, recording)
             {
-                for(var channel = 0; channel < 16; channel++)
+                async function sendChannelMessages(synth, messages, recording, channel)
                 {
-                    channelSelect.selectedIndex = channel;
-                    onChannelSelectChanged();
+                    function wait(delay)
+                    {
+                        return new Promise(resolve => setTimeout(resolve, delay));
+                    }
+
+                    let prevMsPos = 0;
+                    for(var mIndex = 0; mIndex < messages.length; mIndex++)
+                    {
+                        let message = messages[mIndex],
+                            msg = message.msg,
+                            thisMsPos = message.msPositionReRecording,
+                            delay = thisMsPos - prevMsPos;
+
+                        await wait(delay);
+                        synth.send(msg);
+                        if(recording !== undefined) // echo msg to new recording
+                        {
+                            msg.now = performance.now();
+                            recording.channels[channel].messages.push(msg);
+                        }
+                        prevMsPos = thisMsPos;
+                    }
                 }
+
+                let promisses = [];
+                for(var i = 0; i < playbackChannels.length; i++) 
+                {
+                    let channel = playbackChannels[i].channel,
+                        messages = playbackChannels[i].messages;
+
+                    // async (send all channels in parallel)
+                    promisses.push(sendChannelMessages(synth, messages, recording, channel));
+                }
+                return promisses;
             }
 
-            let channelSelect = getElem("channelSelect"),
-                recordingSelect = getElem("recordingSelect"),
-                exportSettingsButton = getElem("exportSettingsButton"),
+            function tidyUp()
+            {
+                function restoreSynthToHostSettings(playbackChannelIndices)
+                {
+                    let channelSelect = getElem("channelSelect");
+
+                    for(var i = 0; i < playbackChannelIndices.length; i++)
+                    {
+                        channelSelect.selectedIndex = playbackChannelIndices[i];
+                        onChannelSelectChanged();
+                    }
+                }
+
+                // playbackChannelIndices is a global variable
+                restoreSynthToHostSettings(playbackChannelIndices);
+                playbackChannelIndices.length = 0;
+            }
+
+            let recordingSelect = getElem("recordingSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
                 playbackRecording = synth.recordings[recordingIndex],
-                messages = playbackRecording.messages,
-                originalHostChannelSettings = [],
-                originalChannel = channelSelect.selectedIndex,
-                originalExportSettingsButtonDisabled = exportSettingsButton.disabled;
+                playbackChannels = playbackRecording.channels;
 
-            playbackChannels = getPlaybackChannels(playbackRecording); // playbackChannels is global in host.
+            playbackChannelIndices = getPlaybackChannelIndices(playbackRecording.channels); // playbackChannelIndices is global in host.
 
-            originalHostChannelSettings = setSynthToPlaybackSettings(channelSelect, playbackRecording.settingsArray);
+            setSynthToPlaybackSettings(playbackRecording.channels);
 
             if(recording !== undefined)
             {
-                let settingsArray = [];
+                let channelInfos = [];
 
                 for(let channel = 0; channel < 16; channel++)
                 {
-                    let settings = playbackRecording.settingsArray.find(x => x.channel === channel);
-                    if(settings !== undefined)
+                    let channelInfo = playbackRecording.channels.find(x => x.channel === channel);
+                    if(channelInfo !== undefined)
                     {
-                        settingsArray.push(settings);
+                        channelInfos.push(channelInfo);
                     }
-                    else if(recording.channel === channel)
+                    else if(recordingChannelInfo.channel === channel)
                     {
-                        settingsArray.push(recording.settingsArray[0]);
+                        channelInfos.push(recordingChannelInfo);
                     }
                 }
 
-                recording.settingsArray = settingsArray;
+                recording.channels = channelInfos;
             }
 
-            let prevMsPos = 0;
-            for(var i = 0; i < messages.length; i++) 
-            {
-                let message = messages[i],
-                    msg = message.msg,
-                    thisMsPos = message.msPositionReRecording,
-                    delay = thisMsPos - prevMsPos;
+            let promisses = sendMessages(synth, playbackChannels, recording);
 
-                await wait(delay);
-                synth.send(msg);
-                if(recording !== undefined) // echo msg to new recording
-                {
-                    msg.now = performance.now();
-                    recording.messages.push(msg);
-                }
-                prevMsPos = thisMsPos;
-            }
-
-            restoreSynthToHostSettings(channelSelect, originalHostChannelSettings);
-
-            channelSelect.selectedIndex = originalChannel;
-            onChannelSelectChanged();
-
-            playbackChannels.length = 0;
+            // Wait for all channels to complete, before calling tidyUp().
+            Promise.allSettled(promisses).then(() => tidyUp());
         },
         // exported
         // This application can only record on a single channel.
@@ -807,15 +875,15 @@ ResSynth.host = (function(document)
             channelSelect.disabled = true;
             disableSettingsDiv();
 
-            let channelInfo = {};
-            channelInfo.channel = channelSelect.selectedIndex;
-            channelInfo.settings = {...hostChannelSettings}; // a single settings clone
+            recordingChannelInfo = {}; // is global
+            recordingChannelInfo.channel = channelSelect.selectedIndex;
+            recordingChannelInfo.settings = {...hostChannelSettings}; // a single settings clone
+            recordingChannelInfo.messages = [];
 
             recording = {}; // global in host
             recording.name = ""; // is finally set in onStopRecordingButtonClicked()
-            recording.channelSettings = [];
-            recording.channelSettings.push(channelInfo);
-            recording.messages = [];
+            recording.channels = [];
+            recording.channels.push(recordingChannelInfo);
 
             startRecordingButton.style.display = "none";
             stopRecordingButton.style.display = "block";
@@ -860,21 +928,21 @@ ResSynth.host = (function(document)
                 settingsNameCell.style.color = "black";
             }
 
-            function getFileName(channelSettings)
+            function getFileName(channels)
             {
                 let fileName = undefined;
-                if(channelSettings.length === 1)
+                if(channels.length === 1)
                 {
-                    fileName = "ch" + channelSettings[0].channel.toString() + "_recording.json"
+                    fileName = "ch" + channels[0].channel.toString() + "_recording.json"
                 }
                 else
                 {
                     let channelsStr = "";
-                    for(let i = 0; i < channelSettings.length; i++)
+                    for(let i = 0; i < channels.length; i++)
                     {
-                        channelsStr = channelsStr + channelSettings[i].channel.toString() + ",";
+                        channelsStr = channelsStr + channels[i].channel.toString() + ",";
                     }
-                    channelsStr.length = channelStr.length - 1;
+                    channelsStr = channelsStr.slice(0, channelsStr.length - 1);
                     fileName = "chs" + channelsStr + "_recording.json";
                 }
                 return fileName;                
@@ -885,11 +953,17 @@ ResSynth.host = (function(document)
                 stopRecordingButton = getElem("stopRecordingButton"),
                 rec = recording;
 
-            if(rec.messages.length > 0)
+            console.assert(recordingChannelInfo !== undefined);
+
+            if(recordingChannelInfo.messages.length > 0)
             {
-                let fileName = getFileName(rec.channelSettings);
+                let fileName = getFileName(rec.channels);
                 rec.name = fileName;
-                rec.messages = getStringArray(rec.messages);
+                for(var i = 0; i < rec.channels.length; i++)
+                {
+                    let channelsInfo = rec.channels[i];
+                    channelsInfo.messages = getStringArray(channelsInfo.messages);
+                }          
 
                 const a = document.createElement("a");
                 a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, "\t")], {
@@ -908,6 +982,7 @@ ResSynth.host = (function(document)
             channelSelect.disabled = false;
 
             recording = undefined;
+            recordingChannelInfo = undefined;
         },
 
         // exported
