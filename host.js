@@ -430,6 +430,11 @@ ResSynth.host = (function(document)
         // exported
         onWebAudioFontSelectChanged = function()
         {
+            function getFontIndexMsg(channel, fontIndex)
+            {
+                return new Uint8Array([ResSynth.constants.COMMAND.CONTROL_CHANGE + channel, ResSynth.constants.CONTROL.SOUND_FONT_INDEX, fontIndex]);
+            }
+
             let webAudioFontSelect = getElem("webAudioFontSelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
@@ -437,9 +442,10 @@ ResSynth.host = (function(document)
                 presetSelect = getElem("presetSelect"),
                 selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
                 soundFont = selectedSoundFontOption.soundFont,
-                presetOptionsArray = selectedSoundFontOption.presetOptionsArray;
+                presetOptionsArray = selectedSoundFontOption.presetOptionsArray,
+                fontIndexMsg = getFontIndexMsg(channel, webAudioFontSelect.selectedIndex);
 
-            synth.setSoundFont(soundFont, channel);
+            synth.send(fontIndexMsg);
 
             setOptions(presetSelect, presetOptionsArray);
 
@@ -692,7 +698,8 @@ ResSynth.host = (function(document)
                         soundFont = webAudioFontSelect.options[settings.fontIndex].soundFont;
 
                     // settings.fontIndex
-                    synth.setSoundFont(soundFont, channel);
+                    let fontIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SOUND_FONT_INDEX, settings.fontIndex]);
+                    synth.send(fontIndexMsg);
                     // settings.presetIndex
                     let presetMsg = new Uint8Array([CMD.PRESET + channel, settings.presetIndex]);
                     synth.send(presetMsg);
@@ -788,20 +795,19 @@ ResSynth.host = (function(document)
 
             function tidyUp()
             {
-                function restoreSynthToHostSettings(playbackChannelIndices)
-                {
-                    let channelSelect = getElem("channelSelect");
+                let channelSelect = getElem("channelSelect"),
+                    hostChannelBeforePlayback = channelSelect.selectedIndex;
 
-                    for(var i = 0; i < playbackChannelIndices.length; i++)
-                    {
-                        channelSelect.selectedIndex = playbackChannelIndices[i];
-                        onChannelSelectChanged();
-                    }
+                for(var i = 0; i < playbackChannelIndices.length; i++)
+                {
+                    channelSelect.selectedIndex = playbackChannelIndices[i];
+                    onChannelSelectChanged();
                 }
 
-                // playbackChannelIndices is a global variable
-                restoreSynthToHostSettings(playbackChannelIndices);
-                playbackChannelIndices.length = 0;
+                channelSelect.selectedIndex = hostChannelBeforePlayback;
+                // no need to call onChannelSelectChanged() here!
+
+                playbackChannelIndices.length = 0; // playbackChannelIndices is a global variable
             }
 
             let recordingSelect = getElem("recordingSelect"),

@@ -19,7 +19,7 @@ ResSynth.residentSynth = (function(window)
     "use strict";
     let
         audioContext,
-        channelPresets = [], // set in synth.setSoundFont
+        channelPresets = [], // set in updateSoundFontIndex
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
@@ -857,9 +857,11 @@ ResSynth.residentSynth = (function(window)
         /*****************************************/
         /* Control Functions */
 
-        // also sets channelControl.presetIndex to 0.
-        updateFontIndex = function(channel, fontIndex)
+        // also sets channelPresets[channel] and channelControl.presetIndex to 0.
+        updateSoundFontIndex = function(channel, fontIndex)
         {
+            channelPresets[channel] = channelPresets.allWebAudioFonts[fontIndex].presets; // global
+
             channelControls[channel].fontIndex = fontIndex;
             channelControls[channel].presetIndex = 0;
         },
@@ -1120,8 +1122,8 @@ ResSynth.residentSynth = (function(window)
             let constants = ResSynth.constants,
                 controlDefaultValue = constants.controlDefaultValue,
                 pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
-
-            updateFontIndex(channel, 0); // also sets channelControl.presetIndex to 0.
+            
+            updateSoundFontIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
             updateMixtureIndex(channel, controlDefaultValue(CTL.MIXTURE_INDEX));
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
             updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's keyPitch value in NoteOn. 
@@ -1165,6 +1167,7 @@ ResSynth.residentSynth = (function(window)
 
                 // custom controls (see constants.js)
                 CTL.REVERBERATION,
+                CTL.SOUND_FONT_INDEX,
                 CTL.PITCH_WHEEL_SENSITIVITY,
                 CTL.SEMITONES_OFFSET,
                 CTL.CENTS_OFFSET,
@@ -1219,7 +1222,7 @@ ResSynth.residentSynth = (function(window)
             // 3. in a percussion font, notes can be usefully named using the GM percussion names.
             //    (GM percussion names are returned by ResSynth.constants.generalMIDIPercussionName(noteIndex). )
             // 4. the synth MAY define the function:
-            //        void setSoundFont(soundFont)
+            //        void setSoundFont(soundFont) // ji: I've defined this as a non-standard MIDI control (like TUNING_GROUP)
             //    It is possible for a synth to support GM without using soundfonts.
             // 5. Clients should be sure that a preset is available before setting it.
             //    Whichever way it is set, the banks variable will contain all available banks and presets.
@@ -1231,7 +1234,8 @@ ResSynth.residentSynth = (function(window)
 
             audioContext = new AudioContextFunc();
 
-            Object.defineProperty(this, "webAudioFonts", {value: getWebAudioFonts(audioContext), writable: false});
+            channelPresets.allWebAudioFonts = getWebAudioFonts(audioContext);
+            Object.defineProperty(this, "webAudioFonts", {value: channelPresets.allWebAudioFonts, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
             Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
@@ -1247,27 +1251,6 @@ ResSynth.residentSynth = (function(window)
         };
 
     // end var
-
-    ResidentSynth.prototype.setSoundFont = function(webAudioFont, channel)
-    {
-        if(!webAudioFont.isReady())
-        {
-            throw "This function should not be called before the webAudioFont is ready!";
-        }
-
-        let fontIndex = this.webAudioFonts.findIndex(x => x === webAudioFont);
-
-        channelPresets[channel] = webAudioFont.presets; // global
-
-        // Set default presetIndex.
-        // The mixture index is changed neither by this function, nor by setting the preset.
-        let channelInfo = channelControls[channel];
-
-        channelInfo.fontIndex = fontIndex;
-        channelInfo.presetIndex = 0;
-
-        //console.log("residentSynth WebAudioFont set.");
-    };
 
     // WebMIDIAPI §4.6 -- MIDIPort interface
     // See https://github.com/notator/WebMIDISynthHost/issues/24
@@ -1311,7 +1294,6 @@ ResSynth.residentSynth = (function(window)
             let controlState = {};
             channelControls.push(controlState);
             setControllerDefaults(channel);
-            this.setSoundFont(this.webAudioFonts[0], channel);
 
             channelControls[channel].currentNoteOns = [];
         }
@@ -1428,6 +1410,12 @@ ResSynth.residentSynth = (function(window)
                 // console.log("residentSynth Reverberation: channel:" + channel + " value:" + value);
                 updateReverberation(channel, value);
             }
+
+            function setSoundFontIndex(channel, fontIndex)
+            {
+                checkControlExport(CTL.SOUND_FONT_INDEX);
+                updateSoundFontIndex(channel, fontIndex);
+            }
             function getSynthSettings(channel)
             {
                 let chCtl = channelControls[channel],
@@ -1542,6 +1530,9 @@ ResSynth.residentSynth = (function(window)
                 case CTL.REVERBERATION:
                     setReverberation(channel, data2);
                     break;
+                case CTL.SOUND_FONT_INDEX:
+                    setSoundFontIndex(channel, data2);
+                    break;                    
                 case CTL.PITCH_WHEEL_SENSITIVITY:
                     setPitchWheelSensitivity(channel, data2);
                     break;

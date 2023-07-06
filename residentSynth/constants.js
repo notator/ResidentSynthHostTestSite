@@ -184,7 +184,14 @@ ResSynth.constants = (function()
 		{
 			case CONTROL.MODWHEEL:
 			case CONTROL.REVERBERATION:
+			case CONTROL.SOUND_FONT_INDEX:
+			case CONTROL.PITCH_WHEEL_SENSITIVITY:
 			case CONTROL.MIXTURE_INDEX:
+			case CONTROL.TUNING_GROUP_INDEX:
+			case CONTROL.TUNING_INDEX:
+			case CONTROL.SEMITONES_OFFSET:
+			case CONTROL.CENTS_OFFSET:
+			case CONTROL.TRIGGER_KEY:
 				return (0);
 			case CONTROL.VOLUME:
 				return (100);
@@ -263,13 +270,14 @@ ResSynth.constants = (function()
 	// Custom
 	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false}); // MIDI Effects_level
 	//
-	Object.defineProperty(CONTROL, "PITCH_WHEEL_SENSITIVITY", {value: 16, writable: false}); // MIDI General_purpose_slider_1. (value is semitones)	
-	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 17, writable: false}); // MIDI General_purpose_slider_2 (value is the index of the mixture)
-	Object.defineProperty(CONTROL, "TUNING_GROUP_INDEX", {value: 18, writable: false}); // MIDI General_purpose_slider_3 (value is the index of the tuning group)
-	Object.defineProperty(CONTROL, "TUNING_INDEX", {value: 19, writable: false}); // MIDI General_purpose_slider_4 (value is the index of the tuning)
-	Object.defineProperty(CONTROL, "SEMITONES_OFFSET", {value: 80, writable: false}); // MIDI General_purpose_button_1. (sent value is semitonesOffset + 50)
-	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 81, writable: false}); // MIDI General_purpose_button_2. (sent value is centsOffset + 50)
-	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is trigger key)
+	Object.defineProperty(CONTROL, "SOUND_FONT_INDEX", {value: 16, writable: false}); // MIDI General_purpose_slider_1 (value is the index of the tuning)
+	Object.defineProperty(CONTROL, "PITCH_WHEEL_SENSITIVITY", {value: 17, writable: false}); // MIDI General_purpose_slider_2. (value is semitones)	
+	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 18, writable: false}); // MIDI General_purpose_slider_3 (value is the index of the mixture)
+	Object.defineProperty(CONTROL, "TUNING_GROUP_INDEX", {value: 19, writable: false}); // MIDI General_purpose_slider_4 (value is the index of the tuning group)
+	Object.defineProperty(CONTROL, "TUNING_INDEX", {value: 80, writable: false}); // MIDI General_purpose_button_1 (value is the index of the tuning)	
+	Object.defineProperty(CONTROL, "SEMITONES_OFFSET", {value: 81, writable: false}); // MIDI General_purpose_button_2. (sent value is semitonesOffset + 50)
+	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 82, writable: false}); // MIDI General_purpose_button_3. (sent value is centsOffset + 50)
+	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is trigger key)
 
 	// MISC
 	Object.defineProperty(MISC, "MIDI_0_FREQUENCY", { value: 8.1758, writable: false }); // Hertz
