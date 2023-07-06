@@ -2,9 +2,9 @@ console.log('load recordings.js');
 
 ResSynth.recordings =
     [
-        {
-            "name": "ch0_recording0 (horn mixture)",
-            "channels":
+    {
+        "name": "ch0_recording0 (horn mixture)",
+        "channels":
             [
                 {
                     "channel": 0,
@@ -27,27 +27,103 @@ ResSynth.recordings =
                         "triggerKey": 36
                     },
                     "messages":
-                    [
-                        "144,65,73,0",
-                        "144,65,0,275",
-                        "144,67,35,1172",
-                        "144,69,70,1774",
-                        "144,67,0,1797",
-                        "144,67,78,2187",
-                        "144,69,0,2216",
-                        "144,65,80,2527",
-                        "144,67,0,2568",
-                        "144,64,80,2952",
-                        "144,65,0,2999",
-                        "144,62,66,3440",
-                        "144,64,0,3482",
-                        "144,60,73,4526",
-                        "144,62,0,4701",
-                        "144,60,0,5499"
-                    ]
+                        [
+                            "144,65,73,0",
+                            "144,65,0,275",
+                            "144,67,35,1172",
+                            "144,69,70,1774",
+                            "144,67,0,1797",
+                            "144,67,78,2187",
+                            "144,69,0,2216",
+                            "144,65,80,2527",
+                            "144,67,0,2568",
+                            "144,64,80,2952",
+                            "144,65,0,2999",
+                            "144,62,66,3440",
+                            "144,64,0,3482",
+                            "144,60,73,4526",
+                            "144,62,0,4701",
+                            "144,60,0,5499"
+                        ]
                 }
             ]
-        },
+    },
+    {
+        "name": "ch0,1_recording (horn mixture + tuba) (hand edited)",
+        "channels":
+            [
+                {
+                    "channel": 0,
+                    "settings":
+                    {
+                        "name": "horn mixture etc.",
+                        "fontIndex": 2,
+                        "presetIndex": 0,
+                        "mixtureIndex": 4,
+                        "tuningGroupIndex": 2,
+                        "tuningIndex": 0,
+                        "semitonesOffset": 0,
+                        "centsOffset": 0,
+                        "pitchWheel": 64,
+                        "modWheel": 0,
+                        "volume": 100,
+                        "pan": 64,
+                        "reverberation": 0,
+                        "pitchWheelSensitivity": 2,
+                        "triggerKey": 36
+                    },
+                    "messages":
+                        [
+                            "144,65,73,0",
+                            "144,65,0,275",
+                            "144,67,35,1172",
+                            "144,69,70,1774",
+                            "144,67,0,1797",
+                            "144,67,78,2187",
+                            "144,69,0,2216",
+                            "144,65,80,2527",
+                            "144,67,0,2568",
+                            "144,64,80,2952",
+                            "144,65,0,2999",
+                            "144,62,66,3440",
+                            "144,64,0,3482",
+                            "144,60,73,4526",
+                            "144,62,0,4701",
+                            "144,60,0,5499"
+                        ]
+                },
+                {
+                    "channel": 1,
+                    "settings":
+                    {
+                        "name": "preset 1 Tuba",
+                        "fontIndex": 0,
+                        "presetIndex": 1,
+                        "mixtureIndex": 0,
+                        "tuningGroupIndex": 0,
+                        "tuningIndex": 0,
+                        "semitonesOffset": 0,
+                        "centsOffset": 0,
+                        "pitchWheel": 64,
+                        "modWheel": 0,
+                        "volume": 100,
+                        "pan": 64,
+                        "reverberation": 0,
+                        "pitchWheelSensitivity": 2,
+                        "triggerKey": 36
+                    },
+                    "messages":
+                        [
+                            "145,67,101,0",
+                            "145,75,93,916",
+                            "145,67,0,956",
+                            "145,81,85,2015",
+                            "145,75,0,2027",
+                            "145,81,0,5093"
+                        ]
+                }
+            ]
+    },
         {
             "name": "ch0_recording1 (horn mixture)",
             "channels":
