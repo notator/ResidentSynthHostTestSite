@@ -19,7 +19,7 @@ ResSynth.residentSynth = (function(window)
     "use strict";
     let
         audioContext,
-        presets, // set in synth.setSoundFont
+        channelPresets = [], // set in synth.setSoundFont
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
@@ -1040,7 +1040,7 @@ ResSynth.residentSynth = (function(window)
                 preset,
                 midi = {};
 
-            preset = presets[chanControls.presetIndex];
+            preset = channelPresets[channel][chanControls.presetIndex];
 
             console.assert(preset !== undefined);
 
@@ -1257,7 +1257,7 @@ ResSynth.residentSynth = (function(window)
 
         let fontIndex = this.webAudioFonts.findIndex(x => x === webAudioFont);
 
-        presets = webAudioFont.presets; // global
+        channelPresets[channel] = webAudioFont.presets; // global
 
         // Set default presetIndex.
         // The mixture index is changed neither by this function, nor by setting the preset.
