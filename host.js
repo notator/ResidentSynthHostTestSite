@@ -86,7 +86,7 @@ ResSynth.host = (function(document)
         {
             var CMD = ResSynth.constants.COMMAND,
                 status = commandIndex + currentChannel,
-                message;
+                msg;
 
             switch(commandIndex)
             {
@@ -94,15 +94,15 @@ ResSynth.host = (function(document)
                 case CMD.NOTE_OFF:
                 case CMD.CONTROL_CHANGE:
                 case CMD.PITCHWHEEL:
-                    message = new Uint8Array([status, data1, data2]);
+                    msg = new Uint8Array([status, data1, data2]);
                     break;
                 case CMD.PRESET:
-                    message = new Uint8Array([status, data1]);
+                    msg = new Uint8Array([status, data1]);
                     break;
                 default:
                     console.warn("Error: Not a command, or attempt to set the value of a command that has no value.");
             }
-            synth.send(message, performance.now());
+            synth.send(msg);
         },
 
         setOptions = function(select, options)
@@ -231,8 +231,7 @@ ResSynth.host = (function(document)
                 let data = e.data,
                     CMD = ResSynth.constants.COMMAND,
                     command = data[0] & 0xF0,
-                    msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]),
-                    now = performance.now();
+                    msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]);
 
                 // Note that triggerKeys send normal noteOn messages while recording is in progress!
                 // This is currently by design!
@@ -254,9 +253,9 @@ ResSynth.host = (function(document)
                             "(Channels are restricted to being homophonic, so as to simplify the conversion to " +
                             "scores that can be read by the Assistant Performer.)");
                     }
-                    msg.now = performance.now();
-                    synth.send(msg, now);
-                    recordingChannelInfo.messages.push(msg);
+                    synth.send(msg);
+                    let now = performance.now();
+                    recordingChannelInfo.messages.push({msg, now});
                 }
                 else if(!(command === CMD.NOTE_OFF && data[1] === triggerKey)) // EMU never sends NOTE_OFF, but anyway...
                 {
@@ -297,7 +296,7 @@ ResSynth.host = (function(document)
                                 "by the residentSynth, for use in the Assistant Performer.\n");
                             break;
                     }
-                    synth.send(msg, now);
+                    synth.send(msg);
                 }
             }
 
@@ -755,40 +754,53 @@ ResSynth.host = (function(document)
 
             function sendMessages(synth, playbackChannels, recording)
             {
-                async function sendChannelMessages(synth, messages, recording, channel)
+                async function sendPlaybackChannelMessages(synth, playbackMessages, isBeingRecorded)
                 {
                     function wait(delay)
                     {
                         return new Promise(resolve => setTimeout(resolve, delay));
                     }
 
-                    let prevMsPos = 0;
-                    for(var mIndex = 0; mIndex < messages.length; mIndex++)
+                    let complete = false;
+                    function onCompletion(resolve, reject)
                     {
-                        let message = messages[mIndex],
-                            msg = message.msg,
-                            thisMsPos = message.msPositionReRecording,
+                        if(complete)
+                        {
+                            resolve();
+                        }
+                    }
+
+                    let promise = new Promise(onCompletion);
+
+                    let prevMsPos = 0;
+                    for(var mIndex = 0; mIndex < playbackMessages.length; mIndex++)
+                    {
+                        let playbackMessage = playbackMessages[mIndex],
+                            msg = playbackMessage.msg,
+                            thisMsPos = playbackMessage.msPositionReRecording,
                             delay = thisMsPos - prevMsPos;
 
                         await wait(delay);
                         synth.send(msg);
-                        if(recording !== undefined) // echo msg to new recording
+                        if(isBeingRecorded) // set message.now
                         {
-                            msg.now = performance.now();
-                            recording.channels[channel].messages.push(msg);
+                            playbackMessage.now = performance.now();
                         }
                         prevMsPos = thisMsPos;
                     }
+
+                    complete = true;
+
+                    return promise;
                 }
 
                 let promisses = [];
                 for(var i = 0; i < playbackChannels.length; i++) 
                 {
-                    let channel = playbackChannels[i].channel,
-                        messages = playbackChannels[i].messages;
-
-                    // async (send all channels in parallel)
-                    promisses.push(sendChannelMessages(synth, messages, recording, channel));
+                    let playbackMessages = playbackChannels[i].messages,
+                        promise = sendPlaybackChannelMessages(synth, playbackMessages, recording !== undefined); // async (send all channels in parallel)
+                    
+                    promisses.push(promise);
                 }
                 return promisses;
             }
@@ -842,7 +854,9 @@ ResSynth.host = (function(document)
             let promisses = sendMessages(synth, playbackChannels, recording);
 
             // Wait for all channels to complete, before calling tidyUp().
-            Promise.allSettled(promisses).then(() => tidyUp());
+            const results = await Promise.allSettled(promisses);
+
+            tidyUp();
         },
         // exported
         // This application can only record on a single channel.
@@ -900,13 +914,13 @@ ResSynth.host = (function(document)
             function getStringArray(messages)
             {
                 let rval = [],
-                    startTime = messages[0].now,
                     nMessages = messages.length;
 
                 for(let i = 0; i < nMessages; i++)
                 {
-                    let msg = messages[i],
-                        msPositionReRecording = Math.round(msg.now - startTime),
+                    let message = messages[i],
+                        msg = message.msg,
+                        msPositionReRecording = message.msPositionReRecording,
                         str = msg[0].toString() + "," + msg[1].toString() + "," + msg[2].toString() + "," + msPositionReRecording.toString();
 
                     rval.push(str);
@@ -954,6 +968,28 @@ ResSynth.host = (function(document)
                 return fileName;                
             }
 
+            function setMsPosReRecording(recChannels)
+            {
+                let startNow = Number.MAX_VALUE;
+                for(let chIndex = 0; chIndex < recChannels.length; chIndex++)
+                {
+                    let firstChannelMessageNow = recChannels[chIndex].messages[0].now;
+
+                    startNow = (startNow < firstChannelMessageNow) ? startNow : firstChannelMessageNow;
+                }
+                for(let cIndex = 0; cIndex < recChannels.length; cIndex++)
+                {
+                    let messages = recChannels[cIndex].messages;
+
+                    for(let i = 0; i < messages.length; i++)
+                    {
+                        let msgNow = messages[i].now;
+
+                        messages[i].msPositionReRecording = Math.round(msgNow - startNow);
+                    }
+                }
+            }
+
             let channelSelect = getElem("channelSelect"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
@@ -965,9 +1001,11 @@ ResSynth.host = (function(document)
             {
                 let fileName = getFileName(rec.channels);
                 rec.name = fileName;
-                for(var i = 0; i < rec.channels.length; i++)
+                setMsPosReRecording(rec.channels);
+
+                for(var cIndex = 0; cIndex < rec.channels.length; cIndex++)
                 {
-                    let channelsInfo = rec.channels[i];
+                    let channelsInfo = rec.channels[cIndex];
                     channelsInfo.messages = getStringArray(channelsInfo.messages);
                 }          
 
