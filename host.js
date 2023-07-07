@@ -22,6 +22,7 @@ ResSynth.host = (function(document)
         triggerKey,
         recording = undefined, // initialized by startRecording(), reset by stopRecording()
         recordingChannelInfo = undefined, // used while recording a channel
+        playbackChannelInfos = undefined, // used while playing back or recording a channel
         playbackChannelIndices = [], // used while playing back a recording
 
         // Put up an alert containing the message, then throw and catch a similar exception for display on the console
@@ -752,57 +753,62 @@ ResSynth.host = (function(document)
                 }
             }
 
-            function sendMessages(synth, playbackChannels, recording)
+            function sendMessages(synth, playbackChannelInfos, recordingChannelInfo)
             {
-                async function sendPlaybackChannelMessages(synth, playbackMessages, isBeingRecorded)
+                async function sendPlaybackChannelMessages(synth, playbackChannelInfo, recordingChannelInfo)
                 {
                     function wait(delay)
                     {
                         return new Promise(resolve => setTimeout(resolve, delay));
                     }
 
-                    let complete = false;
-                    function onCompletion(resolve, reject)
+                    let prevMsPos = 0,
+                        playbackChannelMessages = playbackChannelInfo.messages;
+
+                    if(recordingChannelInfo !== undefined && playbackChannelInfo.channel === recordingChannelInfo.channel)
                     {
-                        if(complete)
+                        let recordingChannelMessages = recordingChannelInfo.messages;
+
+                        for(let mIndex = 0; mIndex < playbackChannelMessages.length; mIndex++)
                         {
-                            resolve();
+                            let playbackMessage = playbackChannelMessages[mIndex],
+                                msg = playbackMessage.msg,
+                                thisMsPos = playbackMessage.msPositionReRecording,
+                                delay = thisMsPos - prevMsPos;
+
+                            await wait(delay);
+                            synth.send(msg);
+                            let now = performance.now();
+                            recordingChannelMessages.push({msg, now});
+
+                            prevMsPos = thisMsPos;
                         }
                     }
-
-                    let promise = new Promise(onCompletion);
-
-                    let prevMsPos = 0;
-                    for(var mIndex = 0; mIndex < playbackMessages.length; mIndex++)
+                    else
                     {
-                        let playbackMessage = playbackMessages[mIndex],
-                            msg = playbackMessage.msg,
-                            thisMsPos = playbackMessage.msPositionReRecording,
-                            delay = thisMsPos - prevMsPos;
-
-                        await wait(delay);
-                        synth.send(msg);
-                        if(isBeingRecorded) // set message.now
+                        for(let mIndex = 0; mIndex < playbackChannelMessages.length; mIndex++)
                         {
+                            let playbackMessage = playbackChannelMessages[mIndex],
+                                msg = playbackMessage.msg,
+                                thisMsPos = playbackMessage.msPositionReRecording,
+                                delay = thisMsPos - prevMsPos;
+
+                            await wait(delay);
+                            synth.send(msg);
                             playbackMessage.now = performance.now();
+
+                            prevMsPos = thisMsPos;
                         }
-                        prevMsPos = thisMsPos;
+
                     }
-
-                    complete = true;
-
-                    return promise;
                 }
 
-                let promisses = [];
-                for(var i = 0; i < playbackChannels.length; i++) 
+                let promises = [];
+                for(var i = 0; i < playbackChannelInfos.length; i++) 
                 {
-                    let playbackMessages = playbackChannels[i].messages,
-                        promise = sendPlaybackChannelMessages(synth, playbackMessages, recording !== undefined); // async (send all channels in parallel)
-                    
-                    promisses.push(promise);
+                    promises.push(sendPlaybackChannelMessages(synth, playbackChannelInfos[i], recordingChannelInfo)); // async (send all channels in parallel)
                 }
-                return promisses;
+                return promises;
             }
 
             function tidyUp()
@@ -819,42 +825,38 @@ ResSynth.host = (function(document)
                 channelSelect.selectedIndex = hostChannelBeforePlayback;
                 // no need to call onChannelSelectChanged() here!
 
-                playbackChannelIndices.length = 0; // playbackChannelIndices is a global variable
+                playbackChannelIndices = []; // playbackChannelIndices is a global variable
+                if(recording === undefined)
+                {
+                    // needed in onStopRecordingButtonClicked()
+                    playbackChannelInfos = undefined; // playbackChannelInfos is global
+                }
             }
 
             let recordingSelect = getElem("recordingSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
-                playbackRecording = synth.recordings[recordingIndex],
-                playbackChannels = playbackRecording.channels;
+                playbackRecording = synth.recordings[recordingIndex];
+                
+            playbackChannelInfos = playbackRecording.channels; // playbackChannelInfos is global
 
             playbackChannelIndices = getPlaybackChannelIndices(playbackRecording.channels); // playbackChannelIndices is global in host.
 
             setSynthToPlaybackSettings(playbackRecording.channels);
 
-            if(recording !== undefined)
+            if(recordingChannelInfo !== undefined)
             {
-                let channelInfos = [];
-
-                for(let channel = 0; channel < 16; channel++)
+                let playbackChannelInfo = playbackChannelInfos.find(x => x.channel === recordingChannelInfo.channel);
+                if(playbackChannelInfo !== undefined)
                 {
-                    let channelInfo = playbackRecording.channels.find(x => x.channel === channel);
-                    if(channelInfo !== undefined)
-                    {
-                        channelInfos.push(channelInfo);
-                    }
-                    else if(recordingChannelInfo.channel === channel)
-                    {
-                        channelInfos.push(recordingChannelInfo);
-                    }
+                    recordingChannelInfo = {...playbackChannelInfo};
+                    recordingChannelInfo.messages = [];
                 }
-
-                recording.channels = channelInfos;
             }
 
-            let promisses = sendMessages(synth, playbackChannels, recording);
+            let promises = sendMessages(synth, playbackChannelInfos, recordingChannelInfo);
 
             // Wait for all channels to complete, before calling tidyUp().
-            const results = await Promise.allSettled(promisses);
+            await Promise.allSettled(promises);
 
             tidyUp();
         },
@@ -990,6 +992,36 @@ ResSynth.host = (function(document)
                 }
             }
 
+            function getAgglommeratedChannelInfos(playbackChannelInfos, recordingChannelInfo)
+            {
+                let channelInfos = [];
+                if(playbackChannelInfos === undefined)
+                {
+                    channelInfos.push(recordingChannelInfo);
+                }
+                else
+                {
+                    let playbackChannelInfo = undefined;
+
+                    for(let channelIndex = 0; channelIndex < 16; channelIndex++)
+                    {
+                        if(recordingChannelInfo.channel === channelIndex)
+                        {
+                            channelInfos.push(recordingChannelInfo);
+                        }
+                        else
+                        {
+                            playbackChannelInfo = playbackChannelInfos.find(x => x.channel === channelIndex);
+                            if(playbackChannelInfo !== undefined)
+                            {
+                                channelInfos.push(playbackChannelInfo);
+                            }
+                        }
+                    }
+                }
+                return channelInfos;
+            }
+
             let channelSelect = getElem("channelSelect"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
@@ -999,8 +1031,11 @@ ResSynth.host = (function(document)
 
             if(recordingChannelInfo.messages.length > 0)
             {
+                rec.channels = getAgglommeratedChannelInfos(playbackChannelInfos, recordingChannelInfo);
+
                 let fileName = getFileName(rec.channels);
                 rec.name = fileName;
+
                 setMsPosReRecording(rec.channels);
 
                 for(var cIndex = 0; cIndex < rec.channels.length; cIndex++)
@@ -1026,6 +1061,7 @@ ResSynth.host = (function(document)
             channelSelect.disabled = false;
 
             recording = undefined;
+            playbackChannelInfos = undefined;
             recordingChannelInfo = undefined;
         },
 
