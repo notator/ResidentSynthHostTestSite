@@ -24,20 +24,7 @@ ResSynth.host = (function(document)
         recordingChannelInfo = undefined, // used while recording a channel
         playbackChannelInfos = undefined, // used while playing back or recording a channel
         playbackChannelIndices = [], // used while playing back a recording
-
-        // Put up an alert containing the message, then throw and catch a similar exception for display on the console
-        stop = function(message)
-        {
-            try
-            {
-                let infoStr2 = "\n\n(Close the debugger, and keep clicking this message until it disappears.)";
-                alert(message + infoStr2);
-                throw (message);
-            } catch(e)
-            {
-                console.error(e);
-            };
-        },
+        cancelPlayback = false, // used while playing back.
 
         getElem = function(elemID)
         {
@@ -247,16 +234,14 @@ ResSynth.host = (function(document)
                 {
                     if(playbackChannelIndices.includes(currentChannel) && command === CMD.NOTE_ON)
                     {
-                        stop(
-                            "New notes cannot be recorded while a recording that uses the same channel is playing back.\n" +
-                            "In this situation, only commands and controls are recorded.\n" +
-                            "New notes _can_ be recorded both before and after the playback.\n" +
-                            "(Channels are restricted to being homophonic, so as to simplify the conversion to " +
-                            "scores that can be read by the Assistant Performer.)");
+                        cancelPlayback = true;
                     }
-                    synth.send(msg);
-                    let now = performance.now();
-                    recordingChannelInfo.messages.push({msg, now});
+                    else
+                    {
+                        synth.send(msg);
+                        let now = performance.now();
+                        recordingChannelInfo.messages.push({msg, now});
+                    }
                 }
                 else if(!(command === CMD.NOTE_OFF && data[1] === triggerKey)) // EMU never sends NOTE_OFF, but anyway...
                 {
@@ -279,22 +264,20 @@ ResSynth.host = (function(document)
                             //console.log("preset: " + getMsgString(data));
                             break;
                         case CMD.PITCHWHEEL:
-                            // This host uses pitchwheel values in range 0..127, so data[1] (the fine byte) is ignored here.
+                            // This host uses pitchWheel values in range 0..127, so data[1] (the fine byte) is ignored here.
                             // But note that the residentSynth _does_ use both data[1] and data[2] when responding
                             // to PITCHWHEEL messages (including those that come from the E-MU keyboard), so PITCHWHEEL
                             // messages sent from this host's GUI use a data[1] value that is calculated on the fly.
                             updateGUI_CommandsTable(command, data[2]);
                             //console.log("pitchWheel: value=" + data[2]);
                             break;
-                        default:
-                            stop(
-                                "Neither the residentSynth nor the residentSynthHost process\n" +
-                                "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages,\n" +
-                                "so the input device (the keyboard or Assistant Performer)\n" +
-                                "should not send them (at performance time).\n" +
-                                "A separate editor could, of course, edit note velocities " +
-                                "and add additional messages, of the types that _are_ implemented " +
-                                "by the residentSynth, for use in the Assistant Performer.\n");
+                        default:               
+                            // Neither the residentSynth nor the residentSynthHost process
+                            // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages
+                            // so the input device (the keyboard or Assistant Performer)
+                            // should not send them (at performance time)
+                            // These commands will be sent to the ResidentSynth, but flagged
+                            // as errors there.
                             break;
                     }
                     synth.send(msg);
@@ -776,6 +759,11 @@ ResSynth.host = (function(document)
                                 thisMsPos = playbackMessage.msPositionReRecording,
                                 delay = thisMsPos - prevMsPos;
 
+                            if(cancelPlayback)
+                            {
+                                break;
+                            }
+
                             await wait(delay);
                             synth.send(msg);
                             let now = performance.now();
@@ -792,6 +780,11 @@ ResSynth.host = (function(document)
                                 msg = playbackMessage.msg,
                                 thisMsPos = playbackMessage.msPositionReRecording,
                                 delay = thisMsPos - prevMsPos;
+
+                            if(cancelPlayback)
+                            {
+                                break;
+                            }
 
                             await wait(delay);
                             synth.send(msg);
@@ -814,7 +807,26 @@ ResSynth.host = (function(document)
             function tidyUp()
             {
                 let channelSelect = getElem("channelSelect"),
+                    startRecordingButton = getElem("startRecordingButton"),
+                    stopRecordingButton = getElem("stopRecordingButton"),
                     hostChannelBeforePlayback = channelSelect.selectedIndex;
+
+                if(cancelPlayback)
+                {
+                    for(var i = 0; i < playbackChannelIndices.length; i++)
+                    {
+                        let channel = playbackChannelIndices[i],
+                            CMD = ResSynth.constants.COMMAND,
+                            CTL = ResSynth.constants.CONTROL,
+                            msg = new Uint8Array([((channel + CMD.CONTROL_CHANGE) & 0xFF), CTL.ALL_SOUND_OFF, 0]);
+
+                        synth.send(msg);
+                    }
+
+                    alert("Playback Canceled:\n\n" +
+                        "Either the 'cancel playback' button was clicked, or an attempt was made to record new notes in an existing channel. " +
+                        "Only commands and controls can be overdubbed in an existing channel.");
+                }
 
                 for(var i = 0; i < playbackChannelIndices.length; i++)
                 {
@@ -822,14 +834,20 @@ ResSynth.host = (function(document)
                     onChannelSelectChanged();
                 }
 
-                channelSelect.selectedIndex = hostChannelBeforePlayback;
-                // no need to call onChannelSelectChanged() here!
+                channelSelect.selectedIndex = hostChannelBeforePlayback; // no need to call onChannelSelectChanged() here!
+                startRecordingButton.value = "start recording channel " + hostChannelBeforePlayback.toString();
+                stopRecordingButton.value = "stop recording channel " + hostChannelBeforePlayback.toString();
 
                 playbackChannelIndices = []; // playbackChannelIndices is a global variable
                 if(recording === undefined)
                 {
                     // needed in onStopRecordingButtonClicked()
                     playbackChannelInfos = undefined; // playbackChannelInfos is global
+                    cancelPlayback = false; // default state
+                }
+                else if(cancelPlayback)
+                {
+                    onStopRecordingButtonClicked();
                 }
             }
 
@@ -863,8 +881,6 @@ ResSynth.host = (function(document)
         // exported
         // This application can only record on a single channel.
         // It can, however play back multi-channel recordings that use the same recordings format.
-        // Multichannel recordings can be created in other applications, by including the relevant
-        // channel settings in the recording's settings array, and merging the message lists.
         onStartRecordingButtonClicked = function()
         {
             function disableSettingsDiv()
@@ -1029,7 +1045,7 @@ ResSynth.host = (function(document)
 
             console.assert(recordingChannelInfo !== undefined);
 
-            if(recordingChannelInfo.messages.length > 0)
+            if(cancelPlayback === false && recordingChannelInfo.messages.length > 0)
             {
                 rec.channels = getAgglommeratedChannelInfos(playbackChannelInfos, recordingChannelInfo);
 
@@ -1063,6 +1079,7 @@ ResSynth.host = (function(document)
             recording = undefined;
             playbackChannelInfos = undefined;
             recordingChannelInfo = undefined;
+            cancelPlayback = false;
         },
 
         // exported

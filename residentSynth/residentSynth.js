@@ -1601,7 +1601,8 @@ ResSynth.residentSynth = (function(window)
                 handlePitchWheel(channel, data1, data2);
                 break;
             default:
-                console.assert(false, "Illegal command.");
+                console.assert(false, "The residentSynth does not process\n" +
+                        "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages.");
                 break;
         }
     };

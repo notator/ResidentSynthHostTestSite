@@ -703,6 +703,109 @@ ResSynth.recordings =
                     ]
                 }
             ]
-        }
+    },
+    {
+        "name": "chs0,1,3_recording (08.07.2023).json",
+        "channels": [
+            {
+                "channel": 0,
+                "settings": {
+                    "name": "horn mixture etc.",
+                    "fontIndex": 2,
+                    "presetIndex": 0,
+                    "mixtureIndex": 4,
+                    "tuningGroupIndex": 2,
+                    "tuningIndex": 0,
+                    "semitonesOffset": 0,
+                    "centsOffset": 0,
+                    "pitchWheel": 64,
+                    "modWheel": 0,
+                    "volume": 100,
+                    "pan": 64,
+                    "reverberation": 0,
+                    "pitchWheelSensitivity": 2,
+                    "triggerKey": 36
+                },
+                "messages": [
+                    "144,65,73,0",
+                    "144,65,0,276",
+                    "144,67,35,1176",
+                    "144,69,70,1781",
+                    "144,67,0,1806",
+                    "144,67,78,2199",
+                    "144,69,0,2228",
+                    "144,65,80,2541",
+                    "144,67,0,2582",
+                    "144,64,80,2968",
+                    "144,65,0,3016",
+                    "144,62,66,3460",
+                    "144,64,0,3503",
+                    "144,60,73,4549",
+                    "144,62,0,4724",
+                    "144,60,0,5524"
+                ]
+            },
+            {
+                "channel": 1,
+                "settings": {
+                    "name": "preset 1 Tuba",
+                    "fontIndex": 0,
+                    "presetIndex": 1,
+                    "mixtureIndex": 0,
+                    "tuningGroupIndex": 0,
+                    "tuningIndex": 0,
+                    "semitonesOffset": 0,
+                    "centsOffset": 0,
+                    "pitchWheel": 64,
+                    "modWheel": 0,
+                    "volume": 100,
+                    "pan": 64,
+                    "reverberation": 0,
+                    "pitchWheelSensitivity": 2,
+                    "triggerKey": 36
+                },
+                "messages": [
+                    "145,67,101,0",
+                    "145,75,93,917",
+                    "145,67,0,958",
+                    "145,81,85,2019",
+                    "145,75,0,2032",
+                    "145,81,0,5099"
+                ]
+            },
+            {
+                "channel": 3,
+                "settings": {
+                    "name": "settings 0: (=defaults)",
+                    "fontIndex": 0,
+                    "presetIndex": 0,
+                    "mixtureIndex": 0,
+                    "tuningGroupIndex": 0,
+                    "tuningIndex": 0,
+                    "semitonesOffset": 0,
+                    "centsOffset": 0,
+                    "pitchWheel": 64,
+                    "modWheel": 0,
+                    "volume": 100,
+                    "pan": 64,
+                    "reverberation": 0,
+                    "pitchWheelSensitivity": 2,
+                    "triggerKey": 36
+                },
+                "messages": [
+                    "147,42,99,1503",
+                    "147,41,109,2375",
+                    "147,42,0,2386",
+                    "147,44,118,3273",
+                    "147,41,0,3332",
+                    "147,44,0,3972",
+                    "145,41,46,8807",
+                    "145,44,111,9544",
+                    "145,41,0,9585",
+                    "145,44,0,10389"
+                ]
+            }
+        ]
+    }
         // etc. more recordings can be added here.
     ];
