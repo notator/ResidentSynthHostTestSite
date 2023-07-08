@@ -650,6 +650,7 @@ ResSynth.host = (function(document)
 
             setExportState(hostChannelSettings);
         },
+        // exported
         onPlayRecordingButtonClicked = async function()
         {
             function wait(delay)
@@ -688,27 +689,27 @@ ResSynth.host = (function(document)
                     synth.send(presetMsg);
                     // settings.mixtureIndex
                     let mixtureMessage = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MIXTURE_INDEX, settings.mixtureIndex]);
-                    synth.send(mixtureMessage);        
+                    synth.send(mixtureMessage);
                     // settings.tuningGroupIndex
                     let tuningGroupIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_GROUP_INDEX, settings.tuningGroupIndex]);
-                    synth.send(tuningGroupIndexMsg); 
+                    synth.send(tuningGroupIndexMsg);
                     // settings.tuningIndex
                     let tuningIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_INDEX, settings.tuningIndex]);
-                    synth.send(tuningIndexMsg);                    
+                    synth.send(tuningIndexMsg);
                     // settings.semitonesOffset
                     let sMidiValue = semitonesOffsetNumberInput.midiValue(settings.semitonesOffset);
                     let semitonesOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SEMITONES_OFFSET, sMidiValue]);
-                    synth.send(semitonesOffsetMsg); 
+                    synth.send(semitonesOffsetMsg);
                     // settings.centsOffset
                     let cMidiValue = centsOffsetNumberInput.midiValue(settings.centsOffset);
                     let centsOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.CENTS_OFFSET, cMidiValue]);
-                    synth.send(centsOffsetMsg); 
+                    synth.send(centsOffsetMsg);
                     // settings.pitchWheel
                     let pitchWheelMsg = new Uint8Array([CMD.PITCHWHEEL + channel, settings.pitchWheel, settings.pitchWheel]);
                     synth.send(pitchWheelMsg);
                     // settings.modWheel
                     let modWheelMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MODWHEEL, settings.modWheel]);
-                    synth.send(modWheelMsg);                    
+                    synth.send(modWheelMsg);
                     // settings.volume
                     let volMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VOLUME, settings.volume]);
                     synth.send(volMsg);
@@ -851,10 +852,15 @@ ResSynth.host = (function(document)
                 }
             }
 
-            let recordingSelect = getElem("recordingSelect"),
+            let playRecordingButton = getElem("playRecordingButton"),
+                cancelPlaybackButton = getElem("cancelPlaybackButton"),
+                recordingSelect = getElem("recordingSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
                 playbackRecording = synth.recordings[recordingIndex];
-                
+
+            playRecordingButton.style.display = "none";
+            cancelPlaybackButton.style.display = "block";
+
             playbackChannelInfos = playbackRecording.channels; // playbackChannelInfos is global
 
             playbackChannelIndices = getPlaybackChannelIndices(playbackRecording.channels); // playbackChannelIndices is global in host.
@@ -877,6 +883,19 @@ ResSynth.host = (function(document)
             await Promise.allSettled(promises);
 
             tidyUp();
+
+            cancelPlaybackButton.style.display = "none";
+            playRecordingButton.style.display = "block";
+        },
+        onCancelPlaybackButtonClicked = function()
+        {
+            let playRecordingButton = getElem("playRecordingButton"),
+                cancelPlaybackButton = getElem("cancelPlaybackButton");
+
+            cancelPlaybackButton.style.display = "none";
+            playRecordingButton.style.display = "block";
+
+            cancelPlayback = true; // global
         },
         // exported
         // This application can only record on a single channel.
@@ -2022,6 +2041,7 @@ ResSynth.host = (function(document)
             onTriggerKeyInputChanged: onTriggerKeyInputChanged,
 
             onPlayRecordingButtonClicked: onPlayRecordingButtonClicked,
+            onCancelPlaybackButtonClicked: onCancelPlaybackButtonClicked,
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 

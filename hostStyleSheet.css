@@ -182,13 +182,23 @@ hr
 	width: 250px;
 	height: 18px;
 	margin-left: 3px;
+	margin-right: 0px;
 }
 
 .playRecordingButton
 {
 	font-size: 11px;
 	height: 18px;
-	margin-left: 4px;
+	margin-left: 0px;
+}
+
+.cancelPlaybackButton
+{
+	font-size: 11px;
+	height: 18px;
+	margin-left: 0px;
+	background-color:azure;
+	display: none;
 }
 
 .startRecordingButton
@@ -203,7 +213,7 @@ hr
 	font-size: 11px;
 	width: 140px;
 	height: 18px;
-	background-color: lightpink;
+	background-color:mistyrose;
 	display: none;
 }
 

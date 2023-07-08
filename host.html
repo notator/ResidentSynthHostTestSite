@@ -154,14 +154,18 @@
             <hr />
             <table width="660px">
                 <colgroup>
-                    <col width="560" />
+                    <col width="344" />
+                    <col width="216" />
                     <col width="100" />
                 </colgroup>
                 <tr>
                     <td>
                         <span class="boldSubtitle">Recordings: </span>
                         <select id="recordingSelect" class="recordingSelect" />
+                    </td>
+                    <td>
                         <input id="playRecordingButton" type="button" class="playRecordingButton" value="play recording" onclick="ResSynth.host.onPlayRecordingButtonClicked()" />
+                        <input id="cancelPlaybackButton" type="button" class="cancelPlaybackButton" value="cancel playback" onclick="ResSynth.host.onCancelPlaybackButtonClicked()" />
                     </td>
                     <td align="right">
                         <input id="startRecordingButton" type="button" class="startRecordingButton" value="start recording channel" onclick="ResSynth.host.onStartRecordingButtonClicked()" />
