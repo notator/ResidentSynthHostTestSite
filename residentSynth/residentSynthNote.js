@@ -37,8 +37,8 @@ ResSynth.residentSynthNote = (function()
 			this.pitchWheel14Bit = channelControls.pitchWheel14Bit; // a value in range [-8192..+8191]
 			this.pitchWheelSensitivity = channelControls.pitchWheelSensitivity;
 
-			this.velocityPitchChange14Bit = (((midi.velocity & 0x7f) << 7) | (midi.velocity & 0x7f)) - 8192;
-			this.velocityPitchChangeSensitivity = 0.6; // TODO: channelControls.velocityPitchChangeSensitivity // host sends range 0..0.6;
+			this.velocityPitchValue14Bit = channelControls.velocityPitchValue14Bit[midi.offKey % 12];
+			this.velocityPitchSensitivity = channelControls.velocityPitchSensitivity; // host sends range 0..0.6;
 
 			if(channelAudioNodes.modNode !== undefined)
 			{
@@ -145,8 +145,8 @@ ResSynth.residentSynthNote = (function()
 		{
 			let pitchBend = this.pitchWheel14Bit,
 				pitchBendFactor = Math.pow(Math.pow(2, 1 / 12), (this.pitchWheelSensitivity * (pitchBend / (pitchBend < 0 ? 8192 : 8191)))),
-				velocityPitchChange = this.velocityPitchChange14Bit,
-				velocityPitchChangeFactor = Math.pow(Math.pow(2, 1 / 12), (this.velocityPitchChangeSensitivity * (velocityPitchChange / (velocityPitchChange < 0 ? 8192 : 8191)))),
+				velocityPitchValue = this.velocityPitchValue14Bit,
+				velocityPitchChangeFactor = Math.pow(Math.pow(2, 1 / 12), (this.velocityPitchSensitivity * (velocityPitchValue / (velocityPitchValue < 0 ? 8192 : 8191)))),
 				factor = pitchBendFactor * velocityPitchChangeFactor,
 				bufferSourceNode = this.bufferSourceNode,
 				newPlaybackRate = bufferSourceNode.standardPlaybackRate * factor;

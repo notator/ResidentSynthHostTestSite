@@ -971,6 +971,14 @@ ResSynth.residentSynth = (function(window)
 
             channelControls[channel].pitchWheelSensitivity = semitones; // for new noteOns
         },
+        setDefaultVelocityPitch = function(channel)
+        {
+            channelControls[channel].velocityPitchValue14Bit = []; // will later contain one 14Bit value per absolute pitch. The value is undefined by default.
+        },
+        updateVelocityPitchSensitivity = function(channel, data2)
+        {
+            channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones -- host currently limits data2 / 127 to range 0..0.6
+        },
         allSoundOff = function(channel)
         {
             function reconnectChannelInput()
@@ -1038,6 +1046,16 @@ ResSynth.residentSynth = (function(window)
             midi.keyPitch = chanControls.tuning[key] + semitonesOffset;
             midi.velocity = velocity;
 
+            if(chanControls.velocityPitchValue14Bit[key % 12] === undefined)
+            {
+                midi.velocityPitchValue14Bit = (((velocity & 0x7f) << 7) | (velocity & 0x7f)) - 8192;
+                chanControls.velocityPitchValue14Bit[key % 12] = midi.velocityPitchValue14Bit
+            }
+            else
+            {
+                midi.velocityPitchValue14Bit = chanControls.velocityPitchValue14Bit[key % 12];
+            }
+
             doNoteOn(midi);
 
             if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
@@ -1073,7 +1091,8 @@ ResSynth.residentSynth = (function(window)
         },
         noteOff = function(channel, key) // velocity is unused
         {
-            let currentNoteOns = channelControls[channel].currentNoteOns,
+            let channelControl =channelControls[channel],
+                currentNoteOns = channelControl.currentNoteOns,
                 stopTime = 0;
 
             for(var index = currentNoteOns.length - 1; index >= 0; index--)
@@ -1082,6 +1101,11 @@ ResSynth.residentSynth = (function(window)
                 {
                     stopTime = currentNoteOns[index].noteOff();
                     currentNoteOns.splice(index, 1);
+                    let absKey = key % 12;
+                    if(currentNoteOns.find(x => (x.offKey % 12) === absKey) === undefined)
+                    {
+                        channelControl.velocityPitchValue14Bit[absKey] = undefined;
+                    }
                 }
             }
 
@@ -1091,8 +1115,6 @@ ResSynth.residentSynth = (function(window)
         /*****************************************/
 
         // This command sets the pitchWheel, pitchWheelSensitivity, modWheel, volume, pan and reverberation controllers
-        // to their default values, but does *not* reset the current aftertouch or channelPressure.
-        // Aftertouch and channelPressure start at 0, when each note is created. (channelPressure is not yet implemented.)
         setControllerDefaults = function(channel)
         {
             let constants = ResSynth.constants,
@@ -1111,6 +1133,9 @@ ResSynth.residentSynth = (function(window)
             updatePan(channel, controlDefaultValue(CTL.PAN));
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
             updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
+
+            setDefaultVelocityPitch(channel); // sets all 12 values to undefined
+            updateVelocityPitchSensitivity(channel, 0);
         },
 
         CMD = ResSynth.constants.COMMAND,
@@ -1151,7 +1176,8 @@ ResSynth.residentSynth = (function(window)
                 CTL.RECORDING_PLAY,
                 CTL.MIXTURE_INDEX,
                 CTL.TUNING_GROUP_INDEX,
-                CTL.TUNING_INDEX
+                CTL.TUNING_INDEX,
+                CTL.VELOCITY_PITCH_SENSITIVITY
             ],
 
         ResidentSynth = function()
@@ -1443,7 +1469,6 @@ ResSynth.residentSynth = (function(window)
             {
                 updatePitchWheelSensitivity(channel, semitones);
             }
-
             // Converts the midiValue (in range 0..127) to an integer value in range -50..+50.
             // Used by both setSemitonesOffset(...) and setCentsOffset(...).
             function getOffsetValue(midiValue)
@@ -1471,6 +1496,10 @@ ResSynth.residentSynth = (function(window)
             {
                 updateTuning(channel, tuningIndex);
             };
+            function setVelocityPitchSensitivity(channel, data2)
+            {
+                updateVelocityPitchSensitivity(channel, data2);
+            }
 
             function allControllersOff(channel)
             {
@@ -1511,7 +1540,7 @@ ResSynth.residentSynth = (function(window)
                     break;                    
                 case CTL.PITCH_WHEEL_SENSITIVITY:
                     setPitchWheelSensitivity(channel, data2);
-                    break;
+                    break;                   
                 case CTL.SEMITONES_OFFSET:
                     setSemitonesOffset(channel, data2);
                     break;
@@ -1527,6 +1556,9 @@ ResSynth.residentSynth = (function(window)
                 case CTL.TUNING_INDEX:
                     setTuning(channel, data2); // sets tuning to the tuning at value (=index) in the group
                     break;
+                case CTL.VELOCITY_PITCH_SENSITIVITY:
+                    setVelocityPitchSensitivity(channel, data2);
+                    break; 
                 case CTL.ALL_CONTROLLERS_OFF:
                     allControllersOff(channel);
                     break;

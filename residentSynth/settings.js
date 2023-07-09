@@ -38,6 +38,7 @@ ResSynth.settings = (function()
         this.reverberation = 0;
         this.pitchWheelSensitivity = 2;
         this.triggerKey = 36;
+        this.velocityPitchSensitivity = 0;
 
         Object.preventExtensions(this); // disallow new attribute creation 
     },
@@ -66,7 +67,8 @@ ResSynth.settings = (function()
         || this.pan !== otherSettings.pan
         || this.reverberation !== otherSettings.reverberation
         || this.pitchWheelSensitivity !== otherSettings.pitchWheelSensitivity
-        || this.triggerKey !== otherSettings.triggerKey)
+        || this.triggerKey !== otherSettings.triggerKey
+        || this.velocityPitchSensitivity !== otherSettings.velocityPitchSensitivity)
         {
             rval = false;
         }

@@ -725,6 +725,9 @@ ResSynth.host = (function(document)
                     // settings.triggerKey
                     let triggerKeyMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TRIGGER_KEY, settings.triggerKey]);
                     synth.send(triggerKeyMsg);
+                    // settings.velocityPitchSensitivity
+                    let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, settings.velocityPitchSensitivity * 127]);
+                    synth.send(vpsMsg);
                 }
 
                 for(var i = 0; i < playbackChannels.length; i++)
@@ -1099,6 +1102,31 @@ ResSynth.host = (function(document)
             playbackChannelInfos = undefined;
             recordingChannelInfo = undefined;
             cancelPlayback = false;
+        },
+
+        // exported
+        onVelocityPitchSensitivityNumberInputChanged = function()
+        {
+            let CONST = ResSynth.constants,
+                channelSelect = getElem("channelSelect"),
+                channel = channelSelect.selectedIndex,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
+                velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
+                semitonesVelocityPitchSensitivity = parseFloat(velocityPitchSensitivityNumberInput.value),
+                midiValue,
+                velocityPitchSensitivityMsg;
+
+            // host can actually limit the values to a smaller range (e.g. 0..0.6)
+            console.assert(semitonesVelocityPitchSensitivity >= 0 && semitonesVelocityPitchSensitivity <= 1);
+
+            midiValue = Math.round(semitonesVelocityPitchSensitivity * 127);
+            velocityPitchSensitivityMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.VELOCITY_PITCH_SENSITIVITY, midiValue]);
+
+            synth.send(velocityPitchSensitivityMsg);
+
+            hostChannelSettings.velocityPitchSensitivity = semitonesVelocityPitchSensitivity;
+
+            setExportState(hostChannelSettings);
         },
 
         // exported
@@ -2044,6 +2072,8 @@ ResSynth.host = (function(document)
             onCancelPlaybackButtonClicked: onCancelPlaybackButtonClicked,
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
+
+            onVelocityPitchSensitivityNumberInputChanged: onVelocityPitchSensitivityNumberInputChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,
             holdCheckboxClicked: holdCheckboxClicked,
