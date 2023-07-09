@@ -122,25 +122,6 @@ ResSynth.constants = (function()
 		"Open Triangle"  // 81	 
 	],
 
-	commandName = function(command)
-	{
-		switch(command)
-		{
-			case COMMAND.NOTE_OFF:
-				return ("noteOff");
-			case COMMAND.NOTE_ON:
-				return ("noteOn");
-			case COMMAND.CONTROL_CHANGE:
-				return ("controlChange");
-			case COMMAND.PRESET:
-				return ("preset");
-			case COMMAND.PITCHWHEEL:
-				return ("pitchWheel");
-			default:
-				console.warn("Bad argument");
-				break;
-		}
-	},
 	// Only PRESET and PITCHWHEEL have default values.
 	commandDefaultValue = function(command)
 	{
@@ -156,26 +137,6 @@ ResSynth.constants = (function()
 		}
 	},
 	
-	controlName = function(control)
-	{
-		switch(control)
-		{
-			case CONTROL.MODWHEEL:
-				return ("modWheel");
-			case CONTROL.VOLUME:
-				return ("volume");
-			case CONTROL.PAN:
-				return ("pan");
-			case CONTROL.REVERBERATION:
-				return ("reverberation");
-			case CONTROL.ALL_SOUND_OFF:
-				return ("allSoundOff");
-			case CONTROL.ALL_CONTROLLERS_OFF:
-				return ("allControllersOff");
-			case CONTROL.ALL_NOTES_OFF:
-			    return ("allNotesOff");
-		}
-	},
 	// Only 3-byte controls have default values.
 	// The return value is undefined for 2-byte controls.
 	controlDefaultValue = function(control)
@@ -241,9 +202,7 @@ ResSynth.constants = (function()
 		CONTROL: CONTROL,
 		SYSEX: SYSEX,
 		MISC: MISC,
-        commandName: commandName,
         commandDefaultValue: commandDefaultValue,
-        controlName: controlName,
         controlDefaultValue: controlDefaultValue,
         generalMIDIPresetName: generalMIDIPresetName,
         generalMIDIPercussionName: generalMIDIPercussionName
@@ -267,7 +226,7 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "EXPRESSION", {value: 11, writable: false});
 	Object.defineProperty(CONTROL, "ALL_SOUND_OFF", {value: 120, writable: false});
 	Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", {value: 121, writable: false});
-	Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});
+	//Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});
 	// Custom
 	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false}); // MIDI Effects_level
 	//

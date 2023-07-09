@@ -21,6 +21,8 @@ console.log('load settingsPresets.js');
 //		.pan // 0..127
 //		.reverberation// 0..127
 //		.pitchWheelSensitivity// 0..127
+// floatInputs:
+//      .velocityPitchSensitivity // 0.0..1.0
 //
 // Before setting the above values, the setChannelStateMessage automatically
 //     1. sets ALL_CONTROLLERS_OFF(the synth automatically sets ALL_SOUND_OFF)
@@ -42,7 +44,8 @@ ResSynth.settingsPresets =
             "pan": 64,
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
-            "triggerKey": 36
+            "triggerKey": 36,
+            "velocityPitchSensitivity": 0
         },
         {
             "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
@@ -59,7 +62,8 @@ ResSynth.settingsPresets =
             "pan": 64,
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
-            "triggerKey": 36
+            "triggerKey": 36,
+            "velocityPitchSensitivity": 0
         },
         {
             "name": "settings 2: Harp (Fluid), semitonesOffset=0.5",
@@ -76,7 +80,8 @@ ResSynth.settingsPresets =
             "pan": 64,
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
-            "triggerKey": 36
+            "triggerKey": 36,
+            "velocityPitchSensitivity": 0
         },
         {
             "name": "settings 3: Vibraphone, semitonesOffset=-0.5, pan=20",
@@ -93,7 +98,8 @@ ResSynth.settingsPresets =
             "pan": 20,
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
-            "triggerKey": 36
+            "triggerKey": 36,
+            "velocityPitchSensitivity": 0
         }
         // etc. more settings definitions can be added here.
     ];

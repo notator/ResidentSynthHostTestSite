@@ -360,10 +360,7 @@ ResSynth.host = (function(document)
 
             function setAndSendTuningDivControls(hostChannelSettings)
             {
-                let tuningGroupSelect = getElem("tuningGroupSelect"),
-                    tuningSelect = getElem("tuningSelect"),
-                    semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
-                    centsOffsetNumberInput = getElem("centsOffsetNumberInput");
+                let tuningGroupSelect = getElem("tuningGroupSelect");
 
                 tuningGroupSelect.selectedIndex = hostChannelSettings.tuningGroupIndex;
 
@@ -389,6 +386,14 @@ ResSynth.host = (function(document)
                 pitchWheelSensitivityLC.setValue(hostChannelSettings.pitchWheelSensitivity);
             }
 
+            function setAndSendVelocityPitchSensitivity(velocityPitchSensitivity)
+            {
+                let velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput");
+
+                velocityPitchSensitivityNumberInput.value = velocityPitchSensitivity;
+                onVelocityPitchSensitivityNumberInputChanged();
+            }
+
             let channelSelect = getElem("channelSelect"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
@@ -403,6 +408,8 @@ ResSynth.host = (function(document)
             setTriggersDivControls(hostChannelSettings); // uses currentChannel
 
             setAndSendLongControls(hostChannelSettings);
+
+            setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
 
             setExportState(hostChannelSettings);
 
@@ -1887,7 +1894,6 @@ ResSynth.host = (function(document)
             {
                 sendNoteOn(note2Index, note2Velocity);
             }
-            notesAreSounding = true;
         },
 
         // exported
@@ -1925,7 +1931,6 @@ ResSynth.host = (function(document)
             {
                 sendNoteOff(note2Index, note2Velocity);
             }
-            notesAreSounding = false;
         },
 
         // exported

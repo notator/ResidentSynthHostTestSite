@@ -145,7 +145,13 @@ hr
 	margin-left: 0;
 	margin-right: 0;
 }
-
+.velocityPitchSensitivityNumber
+{
+	font-size: 11px;
+	width: 40px;
+	margin-left: 0;
+	margin-right: 0;
+}
 .triggerKeyNumber
 {
 	font-size: 11px;

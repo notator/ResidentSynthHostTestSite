@@ -1418,53 +1418,6 @@ ResSynth.residentSynth = (function(window)
                 checkControlExport(CTL.SOUND_FONT_INDEX);
                 updateSoundFontIndex(channel, fontIndex);
             }
-            function getSynthSettings(channel)
-            {
-                let chCtl = channelControls[channel],
-                    settingsName = "ch" + channel.toString() + "_settings",
-                    settings = new ResSynth.settings.Settings(settingsName, channel);
-                    
-                settings.fontIndex = chCtl.fontIndex;
-                settings.presetIndex = chCtl.presetIndex;
-                settings.mixtureIndex = chCtl.mixtureIndex;
-                settings.tuningGroupIndex = chCtl.tuningGroupIndex;
-                settings.tuningIndex = chCtl.tuningIndex;
-                settings.semitonesOffset = chCtl.semitonesOffset;
-                settings.centsOffset = chCtl.centsOffset;
-                settings.pitchWheel = chCtl.pitchWheelData2;
-                settings.modWheel = chCtl.modWheel;
-                settings.volume = chCtl.volume;
-                settings.pan = chCtl.pan;
-                settings.reverberation = chCtl.reverberation;
-                settings.pitchWheelSensitivity = chCtl.pitchWheelSensitivity;
-                settings.triggerKey = chCtl.triggerKey;
-
-                return settings;
-            }
-            function setSynthSettings(channel, settings)
-            {
-                let chCtl = channelControls[channel];
-
-                chCtl.channel = settings.channel;
-                chCtl.fontIndex = settings.fontIndex;
-                chCtl.presetIndex = settings.presetIndex;
-                chCtl.mixtureIndex = settings.mixtureIndex;
-
-                chCtl.tuningGroupIndex = settings.tuningGroupIndex;
-                chCtl.tuningIndex = settings.tuningIndex;
-                chCtl.semitonesOffset = settings.semitonesOffset;
-                chCtl.centsOffset = settings.centsOffset;
-
-                chCtl.pitchWheelData1 = settings.pitchWheelData1;
-                chCtl.pitchWheelData2 = settings.pitchWheelData2;
-                chCtl.modWheel = settings.modWheel;
-                chCtl.volume = settings.volume;
-                chCtl.pan = settings.pan;
-                chCtl.reverberation = settings.reverberation;
-                chCtl.pitchWheelSensitivity = settings.pitchWheelSensitivity;
-
-                chCtl.triggerKey = settings.triggerKey;
-            }
             function setPitchWheelSensitivity(channel, semitones)
             {
                 updatePitchWheelSensitivity(channel, semitones);
