@@ -35,8 +35,11 @@ ResSynth.residentSynthNote = (function()
 			this.velocityFactor = midi.velocity / 127;
 
 			this.pitchWheel14Bit = channelControls.pitchWheel14Bit; // a value in range [-8192..+8191]
-			this.aftertouch14Bit = 0; // the default value = no aftertouch (in range [-8192..+8191])
 			this.pitchWheelSensitivity = channelControls.pitchWheelSensitivity;
+
+			this.velocityPitchChange14Bit = (((midi.velocity & 0x7f) << 7) | (midi.velocity & 0x7f)) - 8192;
+			this.velocityPitchChangeSensitivity = 0.6; // TODO: channelControls.velocityPitchChangeSensitivity // host sends range 0..0.6;
+
 			if(channelAudioNodes.modNode !== undefined)
 			{
 				this.updateModWheel(channelAudioNodes.modNode, channelAudioNodes.modGainNode, channelControls.modWheel);
@@ -140,8 +143,11 @@ ResSynth.residentSynthNote = (function()
 	{
 		if((this.startTime + this.envelopeDuration) > this.audioContext.currentTime)
 		{
-			let pitchBend = this.pitchWheel14Bit + this.aftertouch14Bit,
-				factor = Math.pow(Math.pow(2, 1 / 12), (this.pitchWheelSensitivity * (pitchBend / (pitchBend < 0 ? 8192 : 8191)))),
+			let pitchBend = this.pitchWheel14Bit,
+				pitchBendFactor = Math.pow(Math.pow(2, 1 / 12), (this.pitchWheelSensitivity * (pitchBend / (pitchBend < 0 ? 8192 : 8191)))),
+				velocityPitchChange = this.velocityPitchChange14Bit,
+				velocityPitchChangeFactor = Math.pow(Math.pow(2, 1 / 12), (this.velocityPitchChangeSensitivity * (velocityPitchChange / (velocityPitchChange < 0 ? 8192 : 8191)))),
+				factor = pitchBendFactor * velocityPitchChangeFactor,
 				bufferSourceNode = this.bufferSourceNode,
 				newPlaybackRate = bufferSourceNode.standardPlaybackRate * factor;
 
@@ -155,14 +161,6 @@ ResSynth.residentSynthNote = (function()
 	ResidentSynthNote.prototype.updatePitchWheel = function(pitchWheel14Bit)
 	{
 		this.pitchWheel14Bit = pitchWheel14Bit;
-		this.updatePlaybackRate();
-	};
-
-	// The argument will be added to the pitchWheel14Bit (from the pitchWheel value) to give
-	// the pitch deviation
-	ResidentSynthNote.prototype.updateAftertouch = function(aftertouch14Bit)
-	{
-		this.aftertouch14Bit = aftertouch14Bit;
 		this.updatePlaybackRate();
 	};
 

@@ -893,30 +893,6 @@ ResSynth.residentSynth = (function(window)
             channelControls[channel].centsOffset = centsOffset;
         },
 
-        updateAftertouch = function(channel, key, value)
-        {
-            let currentNoteOns = channelControls[channel].currentNoteOns,
-                noteIndex = currentNoteOns.findIndex(obj => obj.keyPitch === key),
-                aftertouch14Bit = "undefined"; // will be set in range -8192..8191;
-
-            if(noteIndex !== undefined)
-            {
-                if(value <= 64)
-                {
-                    aftertouch14Bit = (128 * (value - 64)); // valueRange(0..64): -> range: 128*-64 (= -8192) .. 0
-                }
-                else
-                {
-                    aftertouch14Bit = Math.floor((8191 / 63) * (value - 64)); // valueRange(65..127): -> range: 127..8191
-                }
-
-                currentNoteOns[noteIndex].updateAftertouch(aftertouch14Bit);
-            }
-
-            // channelControls[channel].aftertouch is not required because new noteOns always start with aftertouch=0.
-
-            //console.log("updateAftertouch() key: " + key + " value:" + value + " aftertouch14Bit=" + aftertouch14Bit);
-        },
         updatePitchWheel = function(channel, data1, data2)
         {
             var pitchWheel14Bit = (((data2 & 0x7f) << 7) | (data1 & 0x7f)) - 8192,
