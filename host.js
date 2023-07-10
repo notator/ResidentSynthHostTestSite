@@ -1111,22 +1111,40 @@ ResSynth.host = (function(document)
             cancelPlayback = false;
         },
 
-        // Validation: A valid value for this stringInput contains zero or more
-        // key:ornamentIndex; sequences, separated by an optional space,
-        // whereby each key and ornamentIndex is a number in range 0..127.
-        // The ':' and ';' characters must be literally present.
-        // Valid examples are "", "64:0;", "78:1; 50:34;" etc.
-        // Note that the final ";" must always be present, and that
-        // the keys do not have to be in any particular order. 
+        // Validation: A valid value for the stringInput contains zero or more
+        // key:ornamentIndex sequences, separated by a ; and an optional space.
+        // Each key and ornamentIndex is a number in range 0..127.
+        // The ':' and ';' characters must be present.
+        // Valid examples are "", "64:0;", "78:1; 50:34;", "78:1; 50:34" etc.
+        // Note that a final ";" and " " can, but need not be, present, and
+        // that the keys do not have to be in any particular order.
+        // It is an error if:
+        // 1) the regex for the above fails,
+        // 2) there are duplicate keys, or
+        // 3) an ornamentIndex is out of range of the available ornaments
+        //    stored in the synth.
         onOrnamentsStringInputChanged = function()
         {
-            function getKeyOrnaments(str)
+            function normalizedDisplayStr(str)
             {
-                const keyOrnaments = [];
+                let lastIndex = str.lastIndexOf(";");
 
-                str = str.substring(0, str.lastIndexOf(";"));
+                str = str.trim();
+                if(lastIndex === str.length - 1)
+                {
+                    str = str.substring(0, lastIndex);
+                }
 
-                let components = str.split(";");
+                str = str.replace(/;/g, "; ");
+                str = str.replace(/  /g, " ");
+
+                return str;
+            }
+            function getKeyOrnaments(normalizedDisplayStr)
+            {
+                let keyOrnaments = [];
+
+                let components = normalizedDisplayStr.split(";");
                 for(let i = 0; i < components.length; i++)
                 {
                     let component = components[i].trim(),
@@ -1141,21 +1159,68 @@ ResSynth.host = (function(document)
 
                 return keyOrnaments;
             }
+            function duplicateKeys(keyOrnaments)
+            {
+                let error = false;
+                for(let i = 0; i < keyOrnaments.length; i++)
+                {
+                    let key = keyOrnaments[i].key,
+                        lastIndex = keyOrnaments.findLastIndex(x => x.key === key);
+
+                    if(lastIndex !== i)
+                    {
+                        alert("Duplicate key " + key.toString());
+                        error = true;
+                        break;
+                    }
+                }
+                return error;
+            }
+            function ornamentOutOfRange(keyOrnaments)
+            {
+                let error = false;
+
+                // TODO
+                //let error = false,
+                //    nOrnaments = synth.ornaments.length;
+
+                //for(let i = 0; i < keyOrnaments.length; i++)
+                //{
+                //    if(keyOrnaments[i].ornament >= nOrnaments)
+                //    {
+                //        alert("Ornament out of range 0.." + (nOrnaments - 1).toString());
+                //        error = true;
+                //        break;
+                //    }
+                //}
+
+                return error;
+            }
 
             const ornamentsStringInput = getElem("ornamentsStringInput"),
-                regex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*$'),
-                value = ornamentsStringInput.value;
+                regex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
 
-            let keyOrnaments = undefined;
+            let value = ornamentsStringInput.value,
+                error = (regex.test(value) === false),
+                keyOrnaments = undefined;
 
-            if(regex.test(value) === true)
+            if(!error)
             {
                 ornamentsStringInput.style.backgroundColor = "white";
+                value = normalizedDisplayStr(value);
                 keyOrnaments = getKeyOrnaments(value);
+                ornamentsStringInput.value = value;
+
+                if(duplicateKeys(keyOrnaments) || ornamentOutOfRange(keyOrnaments))
+                {
+                    error = true;
+                }
             }
-            else
+
+            if(error)
             {
                 ornamentsStringInput.style.backgroundColor = "#FDD";
+                // TODO
             }
         },
 
