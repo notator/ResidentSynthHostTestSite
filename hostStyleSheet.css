@@ -168,10 +168,18 @@ hr
 	margin-right: 4px;
 }
 
+.ornamentsStringInput
+{
+	font-size: 11px;
+	width: 345px;
+	margin-left: 0;
+	margin-right: 0;
+}
+
 .sendAgainButton
 {
-    font-size: 11px;
-	height:18px;
+	font-size: 11px;
+	height: 18px;
 }
 
 .sendButton

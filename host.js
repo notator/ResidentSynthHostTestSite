@@ -271,7 +271,7 @@ ResSynth.host = (function(document)
                             updateGUI_CommandsTable(command, data[2]);
                             //console.log("pitchWheel: value=" + data[2]);
                             break;
-                        default:               
+                        default:
                             // Neither the residentSynth nor the residentSynthHost process
                             // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages
                             // so the input device (the keyboard or Assistant Performer)
@@ -355,7 +355,7 @@ ResSynth.host = (function(document)
                 fontSelect.selectedIndex = hostChannelSettings.fontIndex; // index in webAudioFontSelect
 
                 // set the soundFont in the synth, and the presetSelect then call onPresetSelectChanged() (which calls onMixtureSelectChanged())
-                onWebAudioFontSelectChanged(); 
+                onWebAudioFontSelectChanged();
             }
 
             function setAndSendTuningDivControls(hostChannelSettings)
@@ -556,7 +556,7 @@ ResSynth.host = (function(document)
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
                 semitonesOffset = parseInt(semitonesOffsetNumberInput.value),
-                midiValue,                
+                midiValue,
                 semitonesOffsetMsg;
 
             semitonesOffset = (semitonesOffset < -36) ? -36 : semitonesOffset;
@@ -588,7 +588,7 @@ ResSynth.host = (function(document)
             centsOffset = (centsOffset > 50) ? 50 : centsOffset;
             centsOffsetNumberInput.value = centsOffset;
 
-            midiValue = centsOffsetNumberInput.midiValue(centsOffset);                
+            midiValue = centsOffsetNumberInput.midiValue(centsOffset);
             centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, midiValue]);
 
             synth.send(centsOffsetMsg);
@@ -627,7 +627,7 @@ ResSynth.host = (function(document)
         //exported
         onExportSettingsButtonClicked = function()
         {
-            let channelSelect = getElem("channelSelect"),                
+            let channelSelect = getElem("channelSelect"),
                 hostChannelSettings = channelSelect.options[currentChannel].hostSettings,
                 exportName = hostChannelSettings.name;
 
@@ -652,7 +652,7 @@ ResSynth.host = (function(document)
             triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
             triggerKeyMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TRIGGER_KEY, triggerKey]);
 
-            synth.send(triggerKeyMsg);            
+            synth.send(triggerKeyMsg);
             hostChannelSettings.triggerKey = triggerKey;
 
             setExportState(hostChannelSettings);
@@ -913,7 +913,7 @@ ResSynth.host = (function(document)
         onStartRecordingButtonClicked = function()
         {
             function disableSettingsDiv()
-            {         
+            {
                 let settingsTitle = getElem("settingsTitle"),
                     settingsSelect = getElem("settingsSelect"),
                     exportSettingsButton = getElem("exportSettingsButton"),
@@ -1012,7 +1012,7 @@ ResSynth.host = (function(document)
                     channelsStr = channelsStr.slice(0, channelsStr.length - 1);
                     fileName = "chs" + channelsStr + "_recording.json";
                 }
-                return fileName;                
+                return fileName;
             }
 
             function setMsPosReRecording(recChannels)
@@ -1087,7 +1087,7 @@ ResSynth.host = (function(document)
                 {
                     let channelsInfo = rec.channels[cIndex];
                     channelsInfo.messages = getStringArray(channelsInfo.messages);
-                }          
+                }
 
                 const a = document.createElement("a");
                 a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, "\t")], {
@@ -1111,7 +1111,15 @@ ResSynth.host = (function(document)
             cancelPlayback = false;
         },
 
+        onOrnamentsStringInputChanged = function()
+        {
+
+        },
+
         // exported
+        // The value in the NumberInput is
+        // the number of semitones down for minimum velocity, and
+        // the number of semitones up for maximum velocity)
         onVelocityPitchSensitivityNumberInputChanged = function()
         {
             let CONST = ResSynth.constants,
@@ -1801,6 +1809,7 @@ ResSynth.host = (function(document)
                     tuningDiv = getElem("tuningDiv"),
                     triggersDiv = getElem("triggersDiv"),
                     recordingDiv = getElem("recordingDiv"),
+                    simpleInputDiv = getElem("simpleInputDiv"),
                     webAudioFontSelect = getElem("webAudioFontSelect"),
                     presetSelect = getElem("presetSelect"),
                     mixtureSelect = getElem("mixtureSelect"),
@@ -1822,6 +1831,7 @@ ResSynth.host = (function(document)
 
                 triggersDiv.style.display = "block";
                 recordingDiv.style.display = "block";
+                simpleInputDiv.style.display = "block";
 
                 setCommandsAndControlsDivs();
 
@@ -2078,6 +2088,7 @@ ResSynth.host = (function(document)
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
+            onOrnamentsStringInputChanged: onOrnamentsStringInputChanged,
             onVelocityPitchSensitivityNumberInputChanged: onVelocityPitchSensitivityNumberInputChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,

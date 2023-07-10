@@ -103,9 +103,9 @@
                     </td>
                     <td id="tuningSelectCell">
                         <!--
-            <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
-            sendAgainButton
-        -->
+                        <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
+                        sendAgainButton
+                    -->
                     </td>
                     <td>
                         <!--<select id="a4FrequencySelect" class="a4FrequencySelect" onchange="ResSynth.host.onA4FrequencySelectChanged()" />-->
@@ -120,6 +120,26 @@
             <hr />
             <span class="boldSubtitle">Commands and Controls:</span>
             <table id="commandsAndControlsTable" class="midiMessagesTable"></table>
+        </div>
+        <div id="notesDiv" style="display:none;">
+
+            <hr />
+            <table width="660px">
+                <colgroup>
+                    <col width="460" />
+                    <col width="200" />
+                </colgroup>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">Notes: </span><span>ornaments</span>
+                        <input type="text" id="ornamentsStringInput" class="ornamentsStringInput" onchange="ResSynth.host.onOrnamentsStringInputChanged()">
+                    </td>
+                    <td align="right">
+                        <span>velocityPitchSensitivity</span>
+                        <input id="velocityPitchSensitivityNumberInput" type="number" class="velocityPitchSensitivityNumber" value="0" step="0.1" min="0" max="1" onchange="ResSynth.host.onVelocityPitchSensitivityNumberInputChanged()" />
+                    </td>
+                </tr>
+            </table>
         </div>
         <div id="triggersDiv" style="display:none">
             <hr />
@@ -174,7 +194,7 @@
                 </tr>
             </table>
         </div>
-        <div id="notesDiv" style="display:none;">
+        <div id="simpleInputDiv" style="display:none;">
             <hr />
             <table width="660px">
                 <colgroup>
@@ -183,18 +203,10 @@
                     <col style="width:170px" />
                 </colgroup>
                 <tr>
-                    <td colspan="3">
-                        <span class="boldSubtitle">Notes: </span><span>velocityPitchSensitivity</span>
-                        <input id="velocityPitchSensitivityNumberInput" type="number" class="velocityPitchSensitivityNumber" value="0" step="0.1" min="0" max="1" onchange="ResSynth.host.onVelocityPitchSensitivityNumberInputChanged()" />
-                        <span> (semitones down for minimum velocity, semitones up for maximum velocity)</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span>&nbsp;</span>
+                    <td valign="top">
+                        <span class="boldSubtitle">Simple Input:</span>
                     </td>
                     <td>
-                        <hr style="height:1px; background-color: #777" />
                         <span>note</span>
                         <input id="notesDivIndexInput1" type="number" name="value" class="number" min="0" max="127" value="68" />
                         <span>velocity</span>
