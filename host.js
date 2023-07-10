@@ -1120,9 +1120,9 @@ ResSynth.host = (function(document)
         // the keys do not have to be in any particular order. 
         onOrnamentsStringInputChanged = function()
         {
-            function getKeyOrnamentMap(str)
+            function getKeyOrnaments(str)
             {
-                const keyOrnamentMap = new Map();
+                const keyOrnaments = [];
 
                 str = str.substring(0, str.lastIndexOf(";"));
 
@@ -1131,25 +1131,27 @@ ResSynth.host = (function(document)
                 {
                     let component = components[i].trim(),
                         keyValueArray = component.split(":"),
-                        key = parseInt(keyValueArray[0]),
-                        value = parseInt(keyValueArray[1]);
+                        keyOrnament = {};
 
-                    keyOrnamentMap.set(key, value);
+                    keyOrnament.key = parseInt(keyValueArray[0]);
+                    keyOrnament.ornament = parseInt(keyValueArray[1]);
+
+                    keyOrnaments.push(keyOrnament);
                 }
 
-                return keyOrnamentMap;
+                return keyOrnaments;
             }
 
             const ornamentsStringInput = getElem("ornamentsStringInput"),
                 regex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*$'),
                 value = ornamentsStringInput.value;
 
-            let keyOrnamentMap = undefined;
+            let keyOrnaments = undefined;
 
             if(regex.test(value) === true)
             {
                 ornamentsStringInput.style.backgroundColor = "white";
-                keyOrnamentMap = getKeyOrnamentMap(value);
+                keyOrnaments = getKeyOrnaments(value);
             }
             else
             {
