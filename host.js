@@ -1111,9 +1111,27 @@ ResSynth.host = (function(document)
             cancelPlayback = false;
         },
 
+        // Validation: A valid value for this stringInput contains zero or more
+        // key:ornamentIndex; sequences, separated by an optional space,
+        // whereby each key and ornamentIndex is a number in range 0..127.
+        // The ':' and ';' characters must be literally present.
+        // Valid examples are "", "64:0;", "78:1; 50:34;" etc.
+        // Note that the final ";" must always be present, and that
+        // the keys do not have to be in any particular order. 
         onOrnamentsStringInputChanged = function()
         {
+            const ornamentsStringInput = getElem("ornamentsStringInput"),
+                regex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*$'),
+                value = ornamentsStringInput.value;
 
+            if(regex.test(value) === true)
+            {
+                ornamentsStringInput.style.backgroundColor = "white";
+            }
+            else
+            {
+                ornamentsStringInput.style.backgroundColor = "pink";
+            }
         },
 
         // exported
