@@ -25,6 +25,7 @@ ResSynth.host = (function(document)
         playbackChannelInfos = undefined, // used while playing back or recording a channel
         playbackChannelIndices = [], // used while playing back a recording
         cancelPlayback = false, // used while playing back.
+        keyOrnaments = [], // contains current keyOrnament objects
 
         getElem = function(elemID)
         {
@@ -1201,15 +1202,16 @@ ResSynth.host = (function(document)
                 regex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
 
             let value = ornamentsStringInput.value,
-                error = (regex.test(value) === false),
-                keyOrnaments = undefined;
+                error = (regex.test(value) === false);
 
             if(!error)
             {
                 ornamentsStringInput.style.backgroundColor = "white";
                 value = normalizedDisplayStr(value);
-                keyOrnaments = getKeyOrnaments(value);
                 ornamentsStringInput.value = value;
+
+                // keyOrnaments is global
+                keyOrnaments = getKeyOrnaments(value);                
 
                 if(duplicateKeys(keyOrnaments) || ornamentOutOfRange(keyOrnaments))
                 {
@@ -1220,7 +1222,7 @@ ResSynth.host = (function(document)
             if(error)
             {
                 ornamentsStringInput.style.backgroundColor = "#FDD";
-                // TODO
+                keyOrnaments = [];
             }
         },
 
