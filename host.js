@@ -32,6 +32,26 @@ ResSynth.host = (function(document)
             return document.getElementById(elemID);
         },
 
+        // Should be called immediately before any CMD.NOTE_ON && velocity !== 0 messages are sent.)
+        checkSendSetOrnament = function(currentChannel, key, recordingMessages)
+        {
+            let keyOrnament = keyOrnaments.find(x => x.key === key);
+            if(keyOrnament !== undefined)
+            {
+                let constants = ResSynth.constants,
+                    CONTROL_CHANGE_STATUS = constants.COMMAND.CONTROL_CHANGE + currentChannel,
+                    SET_ORNAMENT_CONTROL = constants.CONTROL.SET_ORNAMENT,
+                    msg = new Uint8Array([CONTROL_CHANGE_STATUS, SET_ORNAMENT_CONTROL, keyOrnament.ornament]);
+
+                synth.send(msg);
+                if(recordingMessages !== undefined)
+                {
+                    let now = performance.now();
+                    recordingMessages.push({msg, now});
+                }
+            }
+        },
+
         setExportState = function(hostChannelSettings)
         {
             function getNameOfIdenticalPresetSettings(hostChannelSettings)
@@ -80,6 +100,12 @@ ResSynth.host = (function(document)
             switch(commandIndex)
             {
                 case CMD.NOTE_ON:
+                    if(data2 > 0)
+                    {
+                        checkSendSetOrnament(currentChannel, data1, undefined);
+                    }
+                    msg = new Uint8Array([status, data1, data2]);
+                    break;
                 case CMD.NOTE_OFF:
                 case CMD.CONTROL_CHANGE:
                 case CMD.PITCHWHEEL:
@@ -239,6 +265,10 @@ ResSynth.host = (function(document)
                     }
                     else
                     {
+                        if(command === CMD.NOTE_ON && data[2] !== 0)
+                        {
+                            checkSendSetOrnament(currentChannel, data[1], recordingChannelInfo.messages);
+                        }
                         synth.send(msg);
                         let now = performance.now();
                         recordingChannelInfo.messages.push({msg, now});
@@ -251,10 +281,14 @@ ResSynth.host = (function(document)
                         case CMD.NOTE_OFF:
                             break;
                         case CMD.NOTE_ON:
+                            if(data[2] !== 0)
+                            {
+                                checkSendSetOrnament(currentChannel, msg[1], undefined);
+                            }
                             if(inputDevice.name.localeCompare("E-MU Xboard49") === 0)
                             {
                                 msg[2] = getRectifiedEMUVelocity(msg[2]);
-                            }
+                            }                            
                             //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
                             break;
                         case CMD.CONTROL_CHANGE:
@@ -1179,21 +1213,19 @@ ResSynth.host = (function(document)
             }
             function ornamentOutOfRange(keyOrnaments)
             {
-                let error = false;
+                let error = false,
+                    nOrnaments = synth.ornaments.length;
 
-                // TODO
-                //let error = false,
-                //    nOrnaments = synth.ornaments.length;
-
-                //for(let i = 0; i < keyOrnaments.length; i++)
-                //{
-                //    if(keyOrnaments[i].ornament >= nOrnaments)
-                //    {
-                //        alert("Ornament out of range 0.." + (nOrnaments - 1).toString());
-                //        error = true;
-                //        break;
-                //    }
-                //}
+                for(let i = 0; i < keyOrnaments.length; i++)
+                {
+                    if(keyOrnaments[i].ornament >= nOrnaments)
+                    {
+                        alert("Ornament index out of range.\n" +
+                              "(There are " + nOrnaments.toString() + " ornament definitions.)");
+                        error = true;
+                        break;
+                    }
+                }
 
                 return error;
             }
@@ -1986,12 +2018,12 @@ ResSynth.host = (function(document)
         // exported
         doNotesOn = function()
         {
-            function sendNoteOn(noteIndex, noteVelocity)
+            function sendNoteOn(key, velocity)
             {
-                sendCommand(ResSynth.constants.COMMAND.NOTE_ON, noteIndex, noteVelocity);
+                sendCommand(ResSynth.constants.COMMAND.NOTE_ON, key, velocity);
             }
 
-            var
+            let
                 note1Checkbox = getElem("sendNote1Checkbox"),
                 note1Index = getElem("notesDivIndexInput1").valueAsNumber,
                 note1Velocity = getElem("notesDivVelocityInput1").valueAsNumber,

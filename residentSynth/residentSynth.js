@@ -649,7 +649,7 @@ ResSynth.residentSynth = (function(window)
 
                             console.assert(Number.isInteger(note) && note >= 0 && note <= 127);
                             console.assert(Number.isInteger(mixtureIndex) && mixtureIndex >= 0 && mixtureIndex < mixtures.length);
-                        }                        
+                        }
                     }
                 }
             }
@@ -709,7 +709,7 @@ ResSynth.residentSynth = (function(window)
                     for(var channelIndex = 0; channelIndex < recording.channels.length; channelIndex++)
                     {
                         recording.channels[channelIndex].messages = getMessageData(recording.channels[channelIndex].messages);
-                    }                    
+                    }
 
                     returnRecordings.push(recording);
                 }
@@ -750,6 +750,25 @@ ResSynth.residentSynth = (function(window)
             }
 
             return rval;
+        },
+
+        getOrnaments = function(ornamentDefs)
+        {
+            // Returns an array of relatively timestamped basic noteOn and noteOff messages.
+            // Each message will be finalized before sending.
+            function getBasicOrnamentMsgs(ornamentDef)
+            {
+                // TODO
+                return ["dummy"];
+            }
+
+            let ornaments = []
+            for(let i = 0; i < ornamentDefs.length; i++) 
+            {
+                let basicOrnamentMsgs = getBasicOrnamentMsgs(ornamentDefs[i]);
+                ornaments.push(basicOrnamentMsgs);
+            }
+            return ornaments;
         },
 
         getTuningGroups = function(tuningsFactory)
@@ -979,6 +998,10 @@ ResSynth.residentSynth = (function(window)
         {
             channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones -- host currently limits data2 / 127 to range 0..0.6
         },
+        updateOrnamentIndex = function(channel, ornamentIndex)
+        {
+            channelControls[channel].ornamentIndex = ornamentIndex; // -1 is no ornament
+        },
         allSoundOff = function(channel)
         {
             function reconnectChannelInput()
@@ -1136,6 +1159,7 @@ ResSynth.residentSynth = (function(window)
 
             setDefaultVelocityPitch(channel); // sets all 12 values to undefined
             updateVelocityPitchSensitivity(channel, 0);
+            updateOrnamentIndex(channel, -1);
         },
 
         CMD = ResSynth.constants.COMMAND,
@@ -1242,6 +1266,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
             Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
+            Object.defineProperty(this, "ornaments", {value: getOrnaments(ResSynth.ornamentDefs), writable: false});
 
             getTuningGroups(this.tuningsFactory);
             Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
@@ -1453,7 +1478,10 @@ ResSynth.residentSynth = (function(window)
             {
                 updateVelocityPitchSensitivity(channel, data2);
             }
-
+            function setOrnament(channel, ornamentIndex)
+            {
+                updateOrnamentIndex(channel, ornamentIndex);
+            }
             function allControllersOff(channel)
             {
                 checkControlExport(CTL.ALL_CONTROLLERS_OFF);
@@ -1511,7 +1539,10 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.VELOCITY_PITCH_SENSITIVITY:
                     setVelocityPitchSensitivity(channel, data2);
-                    break; 
+                    break;
+                case CTL.SET_ORNAMENT:
+                    setOrnament(channel, data2);
+                    break;
                 case CTL.ALL_CONTROLLERS_OFF:
                     allControllersOff(channel);
                     break;
