@@ -45,7 +45,8 @@ ResSynth.settingsPresets =
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
-            "velocityPitchSensitivity": 0
+            "velocityPitchSensitivity": 0,
+            "keyOrnamentsString": ""
         },
         {
             "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
@@ -63,7 +64,8 @@ ResSynth.settingsPresets =
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
-            "velocityPitchSensitivity": 0
+            "velocityPitchSensitivity": 0,
+            "keyOrnamentsString": "64:0"
         },
         {
             "name": "settings 2: Harp (Fluid), semitonesOffset=0.5",
@@ -81,7 +83,8 @@ ResSynth.settingsPresets =
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
-            "velocityPitchSensitivity": 0
+            "velocityPitchSensitivity": 0,
+            "keyOrnamentsString": "64:0; 66:1"
         },
         {
             "name": "settings 3: Vibraphone, semitonesOffset=-0.5, pan=20",
@@ -99,7 +102,8 @@ ResSynth.settingsPresets =
             "reverberation": 0,
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
-            "velocityPitchSensitivity": 0
+            "velocityPitchSensitivity": 0,
+            "keyOrnamentsString": "64:0; 66:1; 68:2"
         }
         // etc. more settings definitions can be added here.
     ];

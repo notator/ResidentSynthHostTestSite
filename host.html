@@ -122,7 +122,6 @@
             <table id="commandsAndControlsTable" class="midiMessagesTable"></table>
         </div>
         <div id="notesDiv" style="display:none;">
-
             <hr />
             <table width="660px">
                 <colgroup>
@@ -132,7 +131,7 @@
                 <tr>
                     <td>
                         <span class="boldSubtitle">Notes: </span><span>ornaments</span>
-                        <input type="text" id="ornamentsStringInput" class="ornamentsStringInput" onchange="ResSynth.host.onOrnamentsStringInputChanged()">
+                        <input type="text" id="keyOrnamentsStringInput" class="keyOrnamentsStringInput" onchange="ResSynth.host.onKeyOrnamentsStringInputChanged()">
                     </td>
                     <td align="right">
                         <span>velocityPitchSensitivity</span>
@@ -143,12 +142,14 @@
         </div>
         <div id="triggersDiv" style="display:none">
             <hr />
-            <table>
+            <table width="660px">
+                <colgroup>
+                    <col width="530" />
+                    <col width="130" />
+                </colgroup>
                 <tr>
                     <td>
-                        <span id="settingsTitle" class="boldSubtitle">Settings: </span>
-                    </td>
-                    <td>
+                        <span id="settingsTitle" class="boldSubtitle">Preset Settings: </span>
                         <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
                     </td>
                     <td align="right">

@@ -33,7 +33,7 @@ ResSynth.host = (function(document)
         },
 
         // Should be called immediately before any CMD.NOTE_ON && velocity !== 0 messages are sent.)
-        checkSendSetOrnament = function(currentChannel, key, recordingMessages)
+        checkSendSetOrnament = function(keyOrnaments, currentChannel, key, recordingMessages)
         {
             let keyOrnament = keyOrnaments.find(x => x.key === key);
             if(keyOrnament !== undefined)
@@ -102,7 +102,7 @@ ResSynth.host = (function(document)
                 case CMD.NOTE_ON:
                     if(data2 > 0)
                     {
-                        checkSendSetOrnament(currentChannel, data1, undefined);
+                        checkSendSetOrnament(keyOrnaments, currentChannel, data1, undefined);
                     }
                     msg = new Uint8Array([status, data1, data2]);
                     break;
@@ -267,7 +267,7 @@ ResSynth.host = (function(document)
                     {
                         if(command === CMD.NOTE_ON && data[2] !== 0)
                         {
-                            checkSendSetOrnament(currentChannel, data[1], recordingChannelInfo.messages);
+                            checkSendSetOrnament(keyOrnaments, currentChannel, data[1], recordingChannelInfo.messages);
                         }
                         synth.send(msg);
                         let now = performance.now();
@@ -283,7 +283,7 @@ ResSynth.host = (function(document)
                         case CMD.NOTE_ON:
                             if(data[2] !== 0)
                             {
-                                checkSendSetOrnament(currentChannel, msg[1], undefined);
+                                checkSendSetOrnament(keyOrnaments, currentChannel, msg[1], undefined);
                             }
                             if(inputDevice.name.localeCompare("E-MU Xboard49") === 0)
                             {
@@ -429,6 +429,14 @@ ResSynth.host = (function(document)
                 onVelocityPitchSensitivityNumberInputChanged();
             }
 
+            function setKeyOrnamentsString(keyOrnamentsString)
+            {
+                let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
+
+                keyOrnamentsStringInput.value = keyOrnamentsString;
+                onKeyOrnamentsStringInputChanged();
+            }
+
             let channelSelect = getElem("channelSelect"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
@@ -445,6 +453,8 @@ ResSynth.host = (function(document)
             setAndSendLongControls(hostChannelSettings);
 
             setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
+
+            setKeyOrnamentsString(hostChannelSettings.keyOrnamentsString);
 
             setExportState(hostChannelSettings);
 
@@ -765,6 +775,7 @@ ResSynth.host = (function(document)
                     // settings.velocityPitchSensitivity
                     let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, settings.velocityPitchSensitivity * 127]);
                     synth.send(vpsMsg);
+                    // no need to set settings.keyOrnamentsString in synth here.
                 }
 
                 for(var i = 0; i < playbackChannels.length; i++)
@@ -786,8 +797,10 @@ ResSynth.host = (function(document)
                         return new Promise(resolve => setTimeout(resolve, delay));
                     }
 
-                    let prevMsPos = 0,
-                        playbackChannelMessages = playbackChannelInfo.messages;
+                    let NOTE_ON = ResSynth.constants.COMMAND.NOTE_ON,
+                        prevMsPos = 0,
+                        playbackChannelMessages = playbackChannelInfo.messages,
+                        keyOrnaments = getKeyOrnaments(playbackChannelInfo.settings.keyOrnamentsString);
 
                     if(recordingChannelInfo !== undefined && playbackChannelInfo.channel === recordingChannelInfo.channel)
                     {
@@ -806,6 +819,10 @@ ResSynth.host = (function(document)
                             }
 
                             await wait(delay);
+                            if((msg[0] & 0xF0) === NOTE_ON && msg[2] !== 0)
+                            {
+                                checkSendSetOrnament(keyOrnaments, (msg[0] & 0xF), msg[1], undefined);
+                            }
                             synth.send(msg);
                             let now = performance.now();
                             recordingChannelMessages.push({msg, now});
@@ -828,6 +845,10 @@ ResSynth.host = (function(document)
                             }
 
                             await wait(delay);
+                            if((msg[0] & 0xF0) === NOTE_ON && msg[2] !== 0)
+                            {
+                                checkSendSetOrnament(keyOrnaments, (msg[0] & 0xF), msg[1], undefined);
+                            }
                             synth.send(msg);
                             playbackMessage.now = performance.now();
 
@@ -1140,6 +1161,28 @@ ResSynth.host = (function(document)
             recordingChannelInfo = undefined;
             cancelPlayback = false;
         },
+        getKeyOrnaments = function(normalizedDisplayStr)
+        {
+            let keyOrnaments = [];
+
+            if(normalizedDisplayStr.length > 0)
+            {
+                let components = normalizedDisplayStr.split(";");
+                for(let i = 0; i < components.length; i++)
+                {
+                    let component = components[i].trim(),
+                        keyValueArray = component.split(":"),
+                        keyOrnament = {};
+
+                    keyOrnament.key = parseInt(keyValueArray[0]);
+                    keyOrnament.ornament = parseInt(keyValueArray[1]);
+
+                    keyOrnaments.push(keyOrnament);
+                }
+            }
+
+            return keyOrnaments;
+        },
 
         // Validation: A valid value for the stringInput contains zero or more
         // key:ornamentIndex sequences, separated by a ; and an optional space.
@@ -1153,7 +1196,7 @@ ResSynth.host = (function(document)
         // 2) there are duplicate keys, or
         // 3) an ornamentIndex is out of range of the available ornaments
         //    stored in the synth.
-        onOrnamentsStringInputChanged = function()
+        onKeyOrnamentsStringInputChanged = function()
         {
             function normalizedDisplayStr(str)
             {
@@ -1169,25 +1212,6 @@ ResSynth.host = (function(document)
                 str = str.replace(/  /g, " ");
 
                 return str;
-            }
-            function getKeyOrnaments(normalizedDisplayStr)
-            {
-                let keyOrnaments = [];
-
-                let components = normalizedDisplayStr.split(";");
-                for(let i = 0; i < components.length; i++)
-                {
-                    let component = components[i].trim(),
-                        keyValueArray = component.split(":"),
-                        keyOrnament = {};
-
-                    keyOrnament.key = parseInt(keyValueArray[0]);
-                    keyOrnament.ornament = parseInt(keyValueArray[1]);
-
-                    keyOrnaments.push(keyOrnament);
-                }
-
-                return keyOrnaments;
             }
             function duplicateKeys(keyOrnaments)
             {
@@ -1225,17 +1249,17 @@ ResSynth.host = (function(document)
                 return error;
             }
 
-            const ornamentsStringInput = getElem("ornamentsStringInput"),
+            const keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
                 regex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
 
-            let value = ornamentsStringInput.value,
+            let value = keyOrnamentsStringInput.value,
                 error = (regex.test(value) === false);
 
             if(!error)
             {
-                ornamentsStringInput.style.backgroundColor = "white";
+                keyOrnamentsStringInput.style.backgroundColor = "white";
                 value = normalizedDisplayStr(value);
-                ornamentsStringInput.value = value;
+                keyOrnamentsStringInput.value = value;
 
                 // keyOrnaments is global
                 keyOrnaments = getKeyOrnaments(value);                
@@ -1244,11 +1268,20 @@ ResSynth.host = (function(document)
                 {
                     error = true;
                 }
+                else
+                {
+                    let channelSelect = getElem("channelSelect"),
+                        channel = channelSelect.selectedIndex,
+                        hostChannelSettings = channelSelect.options[channel].hostSettings;
+
+                    hostChannelSettings.keyOrnamentsString = value;
+                    setExportState(hostChannelSettings);
+                }
             }
 
             if(error)
             {
-                ornamentsStringInput.style.backgroundColor = "#FDD";
+                keyOrnamentsStringInput.style.backgroundColor = "#FDD";
                 keyOrnaments = [];
             }
         },
@@ -1885,11 +1918,18 @@ ResSynth.host = (function(document)
 
                     setCommandsAndControlsTable();
 
-                    getElem("commandsAndControlsDiv").style.display = "block";
-
                     sendShortControl(ResSynth.constants.CONTROL.ALL_CONTROLLERS_OFF);
                 }
 
+                function setNotesDiv()
+                {
+                    let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
+                        velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
+                        defaultSettingsPreset = synth.settingsPresets[0];
+
+                    keyOrnamentsStringInput.value = defaultSettingsPreset.keyOrnamentsString;
+                    velocityPitchSensitivityNumberInput.value = defaultSettingsPreset.velocityPitchSensitivity;
+                }
                 function setSettingsSelect()
                 {
                     let settingsSelect = getElem("settingsSelect"),
@@ -1941,12 +1981,26 @@ ResSynth.host = (function(document)
                     }
                 }
 
+                function displayAllPage2Divs()
+                {
+                    let webAudioFontDiv = getElem("webAudioFontDiv"),
+                        tuningDiv = getElem("tuningDiv"),
+                        commandsAndControlsDiv = getElem("commandsAndControlsDiv"),
+                        notesDiv = getElem("notesDiv"),
+                        triggersDiv = getElem("triggersDiv"),
+                        recordingDiv = getElem("recordingDiv"),
+                        simpleInputDiv = getElem("simpleInputDiv");
+
+                    webAudioFontDiv.style.display = "block";
+                    tuningDiv.style.display = "block";
+                    commandsAndControlsDiv.style.display = "block";
+                    notesDiv.style.display = "block";
+                    triggersDiv.style.display = "block";
+                    recordingDiv.style.display = "block";
+                    simpleInputDiv.style.display = "block";
+                }
+
                 let
-                    webAudioFontDiv = getElem("webAudioFontDiv"),
-                    tuningDiv = getElem("tuningDiv"),
-                    triggersDiv = getElem("triggersDiv"),
-                    recordingDiv = getElem("recordingDiv"),
-                    simpleInputDiv = getElem("simpleInputDiv"),
                     webAudioFontSelect = getElem("webAudioFontSelect"),
                     presetSelect = getElem("presetSelect"),
                     mixtureSelect = getElem("mixtureSelect"),
@@ -1956,32 +2010,26 @@ ResSynth.host = (function(document)
 
                 setWebAudioFontSelect(webAudioFontSelect);
                 setPresetSelect(presetSelect, webAudioFontSelect);
-                setMixtureSelect(mixtureSelect);
-
-                webAudioFontDiv.style.display = "block";
+                setMixtureSelect(mixtureSelect);                
 
                 setTuningGroupSelect(tuningGroupSelect);
                 setTuningSelect();
                 setSemitonesAndCentsControls();
                 setTuningSendAgainButton();
-                tuningDiv.style.display = "block";
-
-                triggersDiv.style.display = "block";
-                recordingDiv.style.display = "block";
-                simpleInputDiv.style.display = "block";
 
                 setCommandsAndControlsDivs();
-
+                setNotesDiv();
                 setSettingsSelect();
                 setRecordingSelect();
 
                 setDefaultHostSettingsForEachChannel();
 
                 // must be called after all the GUI controls have been set.
-                // It calls all the synth's public control functions.
+                // It calls all the synth's public control functions, and
+                // sets corresponding values in the synth.
                 onChannelSelectChanged();
 
-                getElem("notesDiv").style.display = "block";
+                displayAllPage2Divs();
             }
 
             getElem("channelSelect").disabled = false;            
@@ -1992,7 +2040,7 @@ ResSynth.host = (function(document)
 
             setInputDeviceEventListener(getElem("inputDeviceSelect"));
 
-            // This function should initialize the synth with the (default) values of all the host's controls
+            // This function initializes the synth with the (default) values of all the host's controls
             // by calling the corresponding functions in the synth's public interface.
             setPage2Display(synth);
         },
@@ -2225,7 +2273,7 @@ ResSynth.host = (function(document)
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
-            onOrnamentsStringInputChanged: onOrnamentsStringInputChanged,
+            onKeyOrnamentsStringInputChanged: onKeyOrnamentsStringInputChanged,
             onVelocityPitchSensitivityNumberInputChanged: onVelocityPitchSensitivityNumberInputChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,

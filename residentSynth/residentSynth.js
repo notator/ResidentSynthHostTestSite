@@ -743,6 +743,8 @@ ResSynth.residentSynth = (function(window)
                 settings.reverberation = sp.reverberation;
                 settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
                 settings.triggerKey = sp.triggerKey;
+                settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
+                settings.keyOrnamentsString = sp.keyOrnamentsString;
 
                 Object.freeze(settings); // attribute values are frozen
 

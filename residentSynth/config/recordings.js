@@ -25,7 +25,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                         [
@@ -72,7 +73,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                         [
@@ -113,7 +115,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                         [
@@ -150,7 +153,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                     [
@@ -201,7 +205,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                     [
@@ -238,7 +243,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                     [
@@ -293,7 +299,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                     [
@@ -449,7 +456,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                         [
@@ -695,7 +703,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "triggerKey": 36,
-                        "velocityPitchSensitivity": 0
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
                     },
                     "messages":
                     [
@@ -734,7 +743,8 @@ ResSynth.recordings =
                     "reverberation": 0,
                     "pitchWheelSensitivity": 2,
                     "triggerKey": 36,
-                    "velocityPitchSensitivity": 0
+                    "velocityPitchSensitivity": 0,
+                    "keyOrnamentsString": "64:0"
                 },
                 "messages": [
                     "144,65,73,0",
@@ -773,7 +783,8 @@ ResSynth.recordings =
                     "reverberation": 0,
                     "pitchWheelSensitivity": 2,
                     "triggerKey": 36,
-                    "velocityPitchSensitivity": 0
+                    "velocityPitchSensitivity": 0,
+                    "keyOrnamentsString": "64:0"
                 },
                 "messages": [
                     "145,67,101,0",
@@ -802,7 +813,8 @@ ResSynth.recordings =
                     "reverberation": 0,
                     "pitchWheelSensitivity": 2,
                     "triggerKey": 36,
-                    "velocityPitchSensitivity": 0
+                    "velocityPitchSensitivity": 0,
+                    "keyOrnamentsString" : "64:0"
                 },
                 "messages": [
                     "147,42,99,1503",

@@ -39,6 +39,7 @@ ResSynth.settings = (function()
         this.pitchWheelSensitivity = 2;
         this.triggerKey = 36;
         this.velocityPitchSensitivity = 0;
+        this.keyOrnamentsString = "";
 
         Object.preventExtensions(this); // disallow new attribute creation 
     },
@@ -46,7 +47,7 @@ ResSynth.settings = (function()
     API =
     {
         Settings: Settings // constructor
-        };
+    };
 
     // Returns true if all attributes have the same values, otherwise false.
     // Ignores the "name" attribute.
@@ -68,7 +69,8 @@ ResSynth.settings = (function()
         || this.reverberation !== otherSettings.reverberation
         || this.pitchWheelSensitivity !== otherSettings.pitchWheelSensitivity
         || this.triggerKey !== otherSettings.triggerKey
-        || this.velocityPitchSensitivity !== otherSettings.velocityPitchSensitivity)
+        || this.velocityPitchSensitivity !== otherSettings.velocityPitchSensitivity
+        || this.keyOrnamentsString !== otherSettings.keyOrnamentsString)
         {
             rval = false;
         }
