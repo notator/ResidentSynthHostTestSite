@@ -754,18 +754,57 @@ ResSynth.residentSynth = (function(window)
 
         getOrnaments = function(ornamentDefs)
         {
-            // Returns an array of relatively timestamped basic noteOn and noteOff messages.
-            // Each message will be finalized before sending.
-            function getBasicOrnamentMsgs(ornamentDef)
+            // Returns an array of objects, all but last of which have the following attributes:
+            //    msg -- either a noteOn or a noteOff message
+            //    msDuration -- NoteOns have their msDuration until the corresponding NoteOff,
+            //                  NoteOff msDurations are always 0.
+            // The final message is a NoteOn that has no msDuration. It stops when the original
+            // triggering NoteOff arrives.
+            //
+            // Each message will be finalized by adding:
+            //    1. the currentChannel to the status byte
+            //    2. the current noteOn key to the key byte
+            //    3. the current noteOn velocity to the velocity byte
+            // before sending.
+            //
+            // A demo ornamentDef looks like this:
+            // [
+            //     [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
+            //     [2, 0, 125],
+            //     [0, 0, 125],
+            //     [-1, 0, 125],
+            //     [0, 0, 0] // final noteOn is same pitch+velocity as original note, 500ms later.
+            // ]
+            function getBasicOrnamentMsgs(ornamentDefNotes)
             {
-                // TODO
-                return ["dummy"];
+                let ornamentMessages = [],
+                    nNoteOnNoteOffs = ornamentDefNotes.length - 1;
+
+                for(let i = 0; i < nNoteOnNoteOffs; i++)
+                {
+                    let noteData = ornamentDefNotes[i];
+
+                    let noteOn = {};
+                    noteOn.msg = new Uint8Array(ResSynth.constants.COMMAND.NOTE_ON, noteData[0], noteData[1]);
+                    noteOn.msDuration = parseInt(noteData[2]);
+                    ornamentMessages.push(noteOn);
+                    let noteOff = {};
+                    noteOff.msg = new Uint8Array(ResSynth.constants.COMMAND.NOTE_OFF, noteData[0], noteData[1]);
+                    noteOff.msDuration = 0;
+                    ornamentMessages.push(noteOff);
+                }
+                let finalNoteData = ornamentDefNotes[ornamentDefNotes.length - 1];
+                let noteOn = {};
+                noteOn.msg = new Uint8Array(ResSynth.constants.COMMAND.NOTE_ON, finalNoteData[0], finalNoteData[1]);
+                ornamentMessages.push(noteOn);
+
+                return ornamentMessages;
             }
 
             let ornaments = []
             for(let i = 0; i < ornamentDefs.length; i++) 
             {
-                let basicOrnamentMsgs = getBasicOrnamentMsgs(ornamentDefs[i]);
+                let basicOrnamentMsgs = getBasicOrnamentMsgs(ornamentDefs[i].notes);
                 ornaments.push(basicOrnamentMsgs);
             }
             return ornaments;
@@ -1000,7 +1039,7 @@ ResSynth.residentSynth = (function(window)
         },
         updateOrnamentIndex = function(channel, ornamentIndex)
         {
-            channelControls[channel].ornamentIndex = ornamentIndex; // -1 is no ornament
+            channelControls[channel].ornamentIndex = ornamentIndex; // -1 is no ornament (is reset after each ornament performance)
         },
         allSoundOff = function(channel)
         {
