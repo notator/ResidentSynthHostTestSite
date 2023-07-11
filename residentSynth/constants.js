@@ -122,7 +122,27 @@ ResSynth.constants = (function()
 		"Open Triangle"  // 81	 
 	],
 
-	// Only PRESET and PITCHWHEEL have default values.
+	commandName = function(command)
+	{
+		switch(command)
+		{
+			case COMMAND.NOTE_OFF:
+				return ("noteOff");
+			case COMMAND.NOTE_ON:
+				return ("noteOn");
+			case COMMAND.CONTROL_CHANGE:
+				return ("controlChange");
+			case COMMAND.PRESET:
+				return ("preset");
+			case COMMAND.PITCHWHEEL:
+				return ("pitchWheel");
+			default:
+				console.warn("Bad argument");
+				break;
+		}
+	},
+
+    // Only PRESET and PITCHWHEEL have default values.
 	commandDefaultValue = function(command)
 	{
 		switch(command)
@@ -137,6 +157,26 @@ ResSynth.constants = (function()
 		}
 	},
 	
+	controlName = function(control)
+	{
+		switch(control)
+		{
+			case CONTROL.MODWHEEL:
+				return ("modWheel");
+			case CONTROL.VOLUME:
+				return ("volume");
+			case CONTROL.PAN:
+				return ("pan");
+			case CONTROL.REVERBERATION:
+				return ("reverberation");
+			case CONTROL.ALL_SOUND_OFF:
+				return ("allSoundOff");
+			case CONTROL.ALL_CONTROLLERS_OFF:
+				return ("allControllersOff");
+			case CONTROL.ALL_NOTES_OFF:
+				return ("allNotesOff");
+		}
+	},
 	// Only 3-byte controls have default values.
 	// The return value is undefined for 2-byte controls.
 	controlDefaultValue = function(control)
@@ -202,7 +242,9 @@ ResSynth.constants = (function()
 		CONTROL: CONTROL,
 		SYSEX: SYSEX,
 		MISC: MISC,
-        commandDefaultValue: commandDefaultValue,
+		commandName: commandName,
+		commandDefaultValue: commandDefaultValue,
+		controlName: controlName,
         controlDefaultValue: controlDefaultValue,
         generalMIDIPresetName: generalMIDIPresetName,
         generalMIDIPercussionName: generalMIDIPercussionName
