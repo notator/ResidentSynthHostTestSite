@@ -695,11 +695,6 @@ ResSynth.host = (function(document)
         // exported
         onPlayRecordingButtonClicked = async function()
         {
-            function wait(delay)
-            {
-                return new Promise(resolve => setTimeout(resolve, delay));
-            }
-
             function getPlaybackChannelIndices(playBackChannels)
             {
                 let channels = [];
