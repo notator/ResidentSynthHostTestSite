@@ -281,14 +281,14 @@ ResSynth.host = (function(document)
                         case CMD.NOTE_OFF:
                             break;
                         case CMD.NOTE_ON:
-                            if(data[2] !== 0)
-                            {
-                                checkSendSetOrnament(keyOrnaments, currentChannel, msg[1], undefined);
-                            }
                             if(inputDevice.name.localeCompare("E-MU Xboard49") === 0)
                             {
                                 msg[2] = getRectifiedEMUVelocity(msg[2]);
-                            }                            
+                            }
+                            if(msg[2] !== 0)
+                            {
+                                checkSendSetOrnament(keyOrnaments, currentChannel, msg[1], undefined);
+                            }
                             //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
                             break;
                         case CMD.CONTROL_CHANGE:
@@ -792,9 +792,12 @@ ResSynth.host = (function(document)
             {
                 async function sendPlaybackChannelMessages(synth, playbackChannelInfo, recordingChannelInfo)
                 {
-                    function wait(delay)
+                    function wait(delay, cancel)
                     {
-                        return new Promise(resolve => setTimeout(resolve, delay));
+                        if(!cancel)
+                        {
+                            return new Promise(resolve => setTimeout(resolve, delay));
+                        }
                     }
 
                     let NOTE_ON = ResSynth.constants.COMMAND.NOTE_ON,
@@ -818,7 +821,7 @@ ResSynth.host = (function(document)
                                 break;
                             }
 
-                            await wait(delay);
+                            await wait(delay, cancelPlayback);
                             if((msg[0] & 0xF0) === NOTE_ON && msg[2] !== 0)
                             {
                                 checkSendSetOrnament(keyOrnaments, (msg[0] & 0xF), msg[1], undefined);
