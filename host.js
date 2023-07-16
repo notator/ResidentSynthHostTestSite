@@ -1236,7 +1236,7 @@ ResSynth.host = (function(document)
             function ornamentOutOfRange(keyOrnaments)
             {
                 let error = false,
-                    nOrnaments = synth.ornaments.length;
+                    nOrnaments = ResSynth.ornamentDefs.length;
 
                 for(let i = 0; i < keyOrnaments.length; i++)
                 {

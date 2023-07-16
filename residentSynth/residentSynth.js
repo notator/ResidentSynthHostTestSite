@@ -754,64 +754,6 @@ ResSynth.residentSynth = (function(window)
             return rval;
         },
 
-        getOrnaments = function(ornamentDefs)
-        {
-            // Returns an array of objects, all but last of which have the following attributes:
-            //    msg -- either a noteOn or a noteOff message
-            //    msDuration -- NoteOns have their msDuration until the corresponding NoteOff,
-            //                  NoteOff msDurations are always 0.
-            // The final message is a NoteOn that has no msDuration. It stops when the original
-            // triggering NoteOff arrives.
-            //
-            // Each message will be finalized by adding:
-            //    1. the currentChannel to the status byte
-            //    2. the current noteOn key to the key byte
-            //    3. the current noteOn velocity to the velocity byte
-            // before sending.
-            //
-            // A demo ornamentDef looks like this:
-            // [
-            //     [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
-            //     [2, 0, 125],
-            //     [0, 0, 125],
-            //     [-1, 0, 125],
-            //     [0, 0, 0] // final noteOn is same pitch+velocity as original note, 500ms later.
-            // ]
-            function getBasicOrnamentMsgs(ornamentDefNotes)
-            {
-                let ornamentMessages = [],
-                    nNoteOnNoteOffs = ornamentDefNotes.length - 1;
-
-                for(let i = 0; i < nNoteOnNoteOffs; i++)
-                {
-                    let noteData = ornamentDefNotes[i];
-
-                    let noteOn = {};
-                    noteOn.msg = new Uint8Array(ResSynth.constants.COMMAND.NOTE_ON, noteData[0], noteData[1]);
-                    noteOn.msDuration = parseInt(noteData[2]);
-                    ornamentMessages.push(noteOn);
-                    let noteOff = {};
-                    noteOff.msg = new Uint8Array(ResSynth.constants.COMMAND.NOTE_OFF, noteData[0], noteData[1]);
-                    noteOff.msDuration = 0;
-                    ornamentMessages.push(noteOff);
-                }
-                let finalNoteData = ornamentDefNotes[ornamentDefNotes.length - 1];
-                let noteOn = {};
-                noteOn.msg = new Uint8Array(ResSynth.constants.COMMAND.NOTE_ON, finalNoteData[0], finalNoteData[1]);
-                ornamentMessages.push(noteOn);
-
-                return ornamentMessages;
-            }
-
-            let ornaments = []
-            for(let i = 0; i < ornamentDefs.length; i++) 
-            {
-                let basicOrnamentMsgs = getBasicOrnamentMsgs(ornamentDefs[i].notes);
-                ornaments.push(basicOrnamentMsgs);
-            }
-            return ornaments;
-        },
-
         getTuningGroups = function(tuningsFactory)
         {
             let tuningGroupDefs = ResSynth.tuningDefs,
@@ -1148,21 +1090,35 @@ ResSynth.residentSynth = (function(window)
                 {
                     for(var i = 0; i < offKeys.length; i++)
                     {
-                        let key = offKeys[i];
-                        if(final == false || key != outerKey)
+                        let offKey = offKeys[i];
+                        if(final == false || offKey != outerKey)
                         {
-                            let note = currentNoteOns.find(note => note.offKey === key);
-                            if(note !== undefined)
+                            for(var index = currentNoteOns.length - 1; index >= 0; index--)
                             {
-                                note.noteOff();
+                                if(currentNoteOns[index].offKey === offKey)
+                                {
+                                    currentNoteOns[index].noteOff(); // stopTime = currentNoteOns[index].noteOff(); -- don't need stopTime here (?)
+                                    currentNoteOns.splice(index, 1);
+                                    let absKey = offKey % 12;
+                                    if(currentNoteOns.find(x => (x.offKey % 12) === absKey) === undefined)
+                                    {
+                                        channelControls.velocityPitchValue14Bit[absKey] = undefined;
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                // async functions invisibly return a promise
                 async function playOrnament(ornamentObject)
                 {
+                    function midiVal(value)
+                    {
+                        value = (value < 0) ? 0 : value;
+                        value = (value > 127) ? 127 : value;
+                        return value;
+                    }
+
                     function wait(delay, cancel)
                     {
                         if(!cancel)
@@ -1171,11 +1127,10 @@ ResSynth.residentSynth = (function(window)
                         }
                     }
 
-                    let notes = ResSynth.ornamentDefs[channelControls.ornamentIndex].notes,
-                        outerKey = midi.offKey,
-                        oOffKeys = [];
-
-                    for(var i = 0; i < notes.length; i++)
+                    let noteInfos = ResSynth.ornamentDefs[channelControls.ornamentIndex].notes,
+                        outerKey = midi.offKey;
+                        
+                    for(var i = 0; i < noteInfos.length; i++)
                     {
                         // [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
                         // [2, 0, 125],
@@ -1183,18 +1138,23 @@ ResSynth.residentSynth = (function(window)
                         // [-1, 0, 125],
                         // [0, 0, 0]
 
-                        let oNote = notes[i],
+                        let oNoteInfo = noteInfos[i],
                             oMidi = {},
-                            final = (i === notes.length - 1),
+                            final = (i === noteInfos.length - 1),
+                            oOffKeys = [],
                             delay;
 
                         oMidi.preset = midi.preset;
-                        oMidi.offKey = midi.offKey + oNote[0]; // the note stops when the offKey's noteOff arrives
-                        oMidi.keyPitch = midi.keyPitch + oNote[0];
-                        oMidi.velocity = midi.velocity + oNote[1];
+                        oMidi.offKey = midiVal(midi.offKey + oNoteInfo[0]); // the note stops when the offKey's noteOff arrives
+                        oMidi.keyPitch = midi.keyPitch - channelControls.tuning[midi.offKey] + channelControls.tuning[oMidi.offKey];
+                        oMidi.velocity = midiVal(midi.velocity + oNoteInfo[1]);
                         oMidi.velocityPitchValue14Bit = midi.velocityPitchValue14Bit;
+                        if(channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] === undefined)
+                        {
+                            channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] = midi.velocityPitchValue14Bit;
+                        }
 
-                        delay = oNote[2];
+                        delay = oNoteInfo[2];
 
                         if(ornamentObject.cancel === true)
                         {
@@ -1216,16 +1176,18 @@ ResSynth.residentSynth = (function(window)
                             break;
                         }
 
-                        wait(delay, ornamentObject.cancel);
+                        await wait(delay, ornamentObject.cancel);
 
                         doNoteOffs(final, outerKey, oOffKeys, channelControls.currentNoteOns);
-                    }
+                    } 
+                    ornamentObject.complete = true;
                 }
 
                 let ornamentObject = {};
                 channelControls.ornamentObjects[midi.offKey] = ornamentObject;
                 ornamentObject.cancel = false;
-                ornamentObject.ornamentPromises = [playOrnament(ornamentObject)]; // actually there's only one promise, but Promise.allSettled(...) wants an array.
+                ornamentObject.complete = false;
+                playOrnament(ornamentObject); // async
             }
 
             let chanControls = channelControls[channel],
@@ -1262,10 +1224,16 @@ ResSynth.residentSynth = (function(window)
             else
             {
                 doOrnamentedNote(midi, chanControls);
+                chanControls.ornamentIndex = -1;
             }
         },
-        noteOff = async function(channel, key) // velocity is unused. async required for await
+        noteOff = async function(channel, key)
         {
+            function wait(milliseconds)
+            {
+                return new Promise(resolve => setTimeout(resolve, milliseconds));
+            }
+
             let channelControl = channelControls[channel],
                 currentNoteOns = channelControl.currentNoteOns,
                 ornamentObject = channelControl.ornamentObjects[key],
@@ -1274,7 +1242,10 @@ ResSynth.residentSynth = (function(window)
             if(ornamentObject !== undefined)
             {
                 ornamentObject.cancel = true;
-                await Promise.allSettled(ornamentObject.ornamentPromises);
+                while(!ornamentObject.complete)
+                {
+                    await wait(10);
+                }                                
                 channelControl.ornamentObjects[key] = undefined;
             }
 
@@ -1426,7 +1397,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
             Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
-            Object.defineProperty(this, "ornaments", {value: getOrnaments(ResSynth.ornamentDefs), writable: false});
+            // ornaments attribute is not needed
 
             getTuningGroups(this.tuningsFactory);
             Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
