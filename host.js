@@ -790,6 +790,8 @@ ResSynth.host = (function(document)
 
             function sendMessages(synth, playbackChannelInfos, recordingChannelInfo)
             {
+                // Recordings contain appropriate setOrnament messages, which this function simply relays to the synth.
+                // There is therefore no need to call checkSendSetOrnament(..) before noteOns in this function.
                 async function sendPlaybackChannelMessages(synth, playbackChannelInfo, recordingChannelInfo)
                 {
                     function wait(delay, cancel)
@@ -812,7 +814,7 @@ ResSynth.host = (function(document)
                         for(let mIndex = 0; mIndex < playbackChannelMessages.length; mIndex++)
                         {
                             let playbackMessage = playbackChannelMessages[mIndex],
-                                msg = playbackMessage.msg,
+                                pbMsg = playbackMessage.msg,
                                 thisMsPos = playbackMessage.msPositionReRecording,
                                 delay = thisMsPos - prevMsPos;
 
@@ -822,13 +824,9 @@ ResSynth.host = (function(document)
                             }
 
                             await wait(delay, cancelPlayback);
-                            if((msg[0] & 0xF0) === NOTE_ON && msg[2] !== 0)
-                            {
-                                checkSendSetOrnament(keyOrnaments, (msg[0] & 0xF), msg[1], undefined);
-                            }
-                            synth.send(msg);
+                            synth.send(pbMsg);
                             let now = performance.now();
-                            recordingChannelMessages.push({msg, now});
+                            recordingChannelMessages.push({pbMsg, now});
 
                             prevMsPos = thisMsPos;
                         }
@@ -838,7 +836,7 @@ ResSynth.host = (function(document)
                         for(let mIndex = 0; mIndex < playbackChannelMessages.length; mIndex++)
                         {
                             let playbackMessage = playbackChannelMessages[mIndex],
-                                msg = playbackMessage.msg,
+                                pbMsg = playbackMessage.msg,
                                 thisMsPos = playbackMessage.msPositionReRecording,
                                 delay = thisMsPos - prevMsPos;
 
@@ -847,12 +845,8 @@ ResSynth.host = (function(document)
                                 break;
                             }
 
-                            await wait(delay);
-                            if((msg[0] & 0xF0) === NOTE_ON && msg[2] !== 0)
-                            {
-                                checkSendSetOrnament(keyOrnaments, (msg[0] & 0xF), msg[1], undefined);
-                            }
-                            synth.send(msg);
+                            await wait(delay, cancelPlayback);
+                            synth.send(pbMsg);
                             playbackMessage.now = performance.now();
 
                             prevMsPos = thisMsPos;
