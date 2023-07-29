@@ -1010,6 +1010,7 @@ ResSynth.residentSynth = (function(window)
         },
         noteOn = function(channel, key, velocity)
         {
+            // returns a new midiAttributes object
             function getMidiAttributes(preset, key, keyPitch, velocity, chanControlsVelocityPitchValue14Bit)
             {
                 let midi = {};
@@ -1033,58 +1034,71 @@ ResSynth.residentSynth = (function(window)
 
             function doNoteOn(midi)
             {
-                let zone, note,
-                    preset = midi.preset,
-                    keyPitchBase = Math.floor(midi.keyPitch);
-
-                zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
-                if(!zone)
+                function doNewIndividualNoteOn(midi)
                 {
-                    console.throw("zone  not found");
+                    let zone, note,
+                        preset = midi.preset,
+                        keyPitchBase = Math.floor(midi.keyPitch);
+
+                    zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
+                    if(!zone)
+                    {
+                        console.throw("zone  not found");
+                    }
+                    // note on
+                    note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
+                    note.noteOn();
+                    chanControls.currentNoteOns.push(note);
                 }
-                // note on
-                note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
-                note.noteOn();
-                chanControls.currentNoteOns.push(note);
+
+                function doMixture(midi, mixtureIndex)
+                {
+                    let mixture = mixtures[mixtureIndex],
+                        extraNotes = mixture.extraNotes,
+                        except = mixture.except,
+                        keyMixtureIndex = except.find(x => x[0] === key),
+                        offKeys = [];
+
+                    if(keyMixtureIndex !== undefined)
+                    {
+                        extraNotes = mixtures[keyMixtureIndex[1]].extraNotes;
+                    }
+                    for(var i = 0; i < extraNotes.length; i++)
+                    {
+                        let keyVel = extraNotes[i],
+                            newKey = key + keyVel[0],
+                            newVelocity = Math.floor(velocity * keyVel[1]);
+
+                        newKey = (newKey > 127) ? 127 : newKey;
+                        newKey = (newKey < 0) ? 0 : newKey;
+                        newVelocity = (newVelocity > 127) ? 127 : newVelocity;
+                        newVelocity = (newVelocity < 1) ? 1 : newVelocity;
+
+                        // midi.preset is unchanged
+                        midi.offKey = key; // the key that turns this note off (unchanged in mix)
+                        midi.keyPitch = chanControls.tuning[newKey] + semitonesOffset;
+                        midi.velocity = newVelocity;
+
+                        offKeys.push(midi.offKey);
+
+                        doNewIndividualNoteOn(midi);
+                    }
+
+                    return offKeys;
+                }
+
+                doNewIndividualNoteOn(midi);
+
+                if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
+                {
+                    doMixture(midi, chanControls.mixtureIndex);
+                }
             }
 
-            function doMixture(midi, mixtureIndex)
-            {
-                let mixture = mixtures[mixtureIndex],
-                    extraNotes = mixture.extraNotes,
-                    except = mixture.except,
-                    keyMixtureIndex = except.find(x => x[0] === key),
-                    offKeys = [];
-
-                if(keyMixtureIndex !== undefined)
-                {
-                    extraNotes = mixtures[keyMixtureIndex[1]].extraNotes;
-                }
-                for(var i = 0; i < extraNotes.length; i++)
-                {
-                    let keyVel = extraNotes[i],
-                        newKey = key + keyVel[0],
-                        newVelocity = Math.floor(velocity * keyVel[1]);
-
-                    newKey = (newKey > 127) ? 127 : newKey;
-                    newKey = (newKey < 0) ? 0 : newKey;
-                    newVelocity = (newVelocity > 127) ? 127 : newVelocity;
-                    newVelocity = (newVelocity < 1) ? 1 : newVelocity;
-
-                    // midi.preset is unchanged
-                    midi.offKey = key; // the key that turns this note off (unchanged in mix)
-                    midi.keyPitch = chanControls.tuning[newKey] + semitonesOffset;
-                    midi.velocity = newVelocity;
-
-                    offKeys.push(midi.offKey);
-                    doNoteOn(midi);
-                }
-
-                return offKeys;
-            }
+            
 
             // Uses chanControls.ornamentIndex, chanControls.mixtureIndex, chanControls.cancelOrnament.
-            function doOrnamentedNote(midi, channelControls)
+            function doOrnamentedNote(firstMidi, channelControls)
             {
                 function doNoteOffs(final, outerKey, offKeys, currentNoteOns)
                 {
@@ -1128,7 +1142,7 @@ ResSynth.residentSynth = (function(window)
                     }
 
                     let noteInfos = ResSynth.ornamentDefs[channelControls.ornamentIndex].notes,
-                        outerKey = midi.offKey;
+                        cancelKey = firstMidi.offKey;
                         
                     for(var i = 0; i < noteInfos.length; i++)
                     {
@@ -1139,52 +1153,57 @@ ResSynth.residentSynth = (function(window)
                         // [0, 0, 0]
 
                         let oNoteInfo = noteInfos[i],
-                            oMidi = {},
+                            //oMidi = {},
                             final = (i === noteInfos.length - 1),
                             oOffKeys = [],
                             delay;
 
-                        oMidi.preset = midi.preset;
-                        oMidi.offKey = midiVal(midi.offKey + oNoteInfo[0]); // the note stops when the offKey's noteOff arrives
-                        oMidi.keyPitch = midi.keyPitch - channelControls.tuning[midi.offKey] + channelControls.tuning[oMidi.offKey];
-                        oMidi.velocity = midiVal(midi.velocity + oNoteInfo[1]);
-                        oMidi.velocityPitchValue14Bit = midi.velocityPitchValue14Bit;
-                        if(channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] === undefined)
-                        {
-                            channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] = midi.velocityPitchValue14Bit;
-                        }
+                        // get a new oMidi (= midiAttributes object), setting the following arguments appropriately (see below).
+                        oMidi = getMidiAttributes(preset, key, keyPitch, velocity, chanControlsVelocityPitchValue14Bit)
+
+                        // implement the following code using the above call to getMidiAttributes().
+                        //
+                        //oMidi.preset = firstMidi.preset;
+                        //oMidi.offKey = midiVal(firstMidi.offKey + oNoteInfo[0]); // the note stops when the offKey's noteOff arrives
+                        //oMidi.keyPitch = firstMidi.keyPitch - channelControls.tuning[firstMidi.offKey] + channelControls.tuning[oMidi.offKey];
+                        //oMidi.velocity = midiVal(firstMidi.velocity + oNoteInfo[1]);
+                        //oMidi.velocityPitchValue14Bit = firstMidi.velocityPitchValue14Bit;
+                        //if(channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] === undefined)
+                        //{
+                        //    channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] = firstMidi.velocityPitchValue14Bit;
+                        //}
 
                         delay = oNoteInfo[2];
 
                         if(ornamentObject.cancel === true)
                         {
-                            doNoteOffs(final, outerKey, oOffKeys, channelControls.currentNoteOns);
+                            doNoteOffs(final, cancelKey, oOffKeys, channelControls.currentNoteOns);
                             break;
                         }
 
                         oOffKeys.push(oMidi.offKey);
-                        doNoteOn(oMidi);
-                        if(channelControls.mixtureIndex > 0) // 0 is "no mixture"
-                        {
-                            let newOffKeys = doMixture(oMidi, chanControls.mixtureIndex);
-                            oOffKeys = oOffKeys.concat(newOffKeys);
-                        }
+                        doNoteOn(oMidi); // this does the mixture, if necessary.
+                        //if(channelControls.mixtureIndex > 0) // 0 is "no mixture"
+                        //{
+                        //    let newOffKeys = doMixture(oMidi, chanControls.mixtureIndex);
+                        //    oOffKeys = oOffKeys.concat(newOffKeys);
+                        //}
 
                         if(ornamentObject.cancel === true)
                         {
-                            doNoteOffs(final, outerKey, oOffKeys, channelControls.currentNoteOns);
+                            doNoteOffs(final, cancelKey, oOffKeys, channelControls.currentNoteOns);
                             break;
                         }
 
                         await wait(delay, ornamentObject.cancel);
 
-                        doNoteOffs(final, outerKey, oOffKeys, channelControls.currentNoteOns);
+                        doNoteOffs(final, cancelKey, oOffKeys, channelControls.currentNoteOns);
                     } 
                     ornamentObject.complete = true;
                 }
 
                 let ornamentObject = {};
-                channelControls.ornamentObjects[midi.offKey] = ornamentObject;
+                channelControls.ornamentObjects[firstMidi.offKey] = ornamentObject;
                 ornamentObject.cancel = false;
                 ornamentObject.complete = false;
                 playOrnament(ornamentObject); // async
@@ -1215,11 +1234,6 @@ ResSynth.residentSynth = (function(window)
             if(chanControls.ornamentIndex < 0) // -1 is "no ornament"
             {
                 doNoteOn(midi);
-
-                if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
-                {
-                    doMixture(midi, chanControls.mixtureIndex);
-                }
             }
             else
             {
