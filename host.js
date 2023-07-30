@@ -1181,6 +1181,22 @@ ResSynth.host = (function(document)
             return keyOrnaments;
         },
 
+        normalizedOrnamentsString = function(str)
+        {
+            let lastIndex = str.lastIndexOf(";");
+
+            str = str.trim();
+            if(lastIndex === str.length - 1)
+            {
+                str = str.substring(0, lastIndex);
+            }
+
+            str = str.replace(/;/g, "; ");
+            str = str.replace(/  /g, " ");
+
+            return str;
+        },
+
         // Validation: A valid value for the stringInput contains zero or more
         // key:ornamentIndex sequences, separated by a ; and an optional space.
         // Each key and ornamentIndex is a number in range 0..127.
@@ -1195,21 +1211,6 @@ ResSynth.host = (function(document)
         //    stored in the synth.
         onKeyOrnamentsStringInputChanged = function()
         {
-            function normalizedDisplayStr(str)
-            {
-                let lastIndex = str.lastIndexOf(";");
-
-                str = str.trim();
-                if(lastIndex === str.length - 1)
-                {
-                    str = str.substring(0, lastIndex);
-                }
-
-                str = str.replace(/;/g, "; ");
-                str = str.replace(/  /g, " ");
-
-                return str;
-            }
             function duplicateKeys(keyOrnaments)
             {
                 let error = false;
@@ -1237,7 +1238,7 @@ ResSynth.host = (function(document)
                     if(keyOrnaments[i].ornament >= nOrnaments)
                     {
                         alert("Ornament index out of range.\n" +
-                              "(There are " + nOrnaments.toString() + " ornament definitions.)");
+                            "(There are " + nOrnaments.toString() + " ornament definitions.)");
                         error = true;
                         break;
                     }
@@ -1249,17 +1250,15 @@ ResSynth.host = (function(document)
             const keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
                 regex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
 
-            let value = keyOrnamentsStringInput.value,
-                error = (regex.test(value) === false);
+            let normalisedValue = normalizedOrnamentsString(keyOrnamentsStringInput.value),
+                error = (regex.test(normalisedValue) === false);
 
             if(!error)
             {
                 keyOrnamentsStringInput.style.backgroundColor = "white";
-                value = normalizedDisplayStr(value);
-                keyOrnamentsStringInput.value = value;
 
                 // keyOrnaments is global
-                keyOrnaments = getKeyOrnaments(value);                
+                keyOrnaments = getKeyOrnaments(normalisedValue);
 
                 if(duplicateKeys(keyOrnaments) || ornamentOutOfRange(keyOrnaments))
                 {
@@ -1271,16 +1270,26 @@ ResSynth.host = (function(document)
                         channel = channelSelect.selectedIndex,
                         hostChannelSettings = channelSelect.options[channel].hostSettings;
 
-                    hostChannelSettings.keyOrnamentsString = value;
+                    hostChannelSettings.keyOrnamentsString = normalisedValue;
                     setExportState(hostChannelSettings);
                 }
             }
 
             if(error)
             {
-                keyOrnamentsStringInput.style.backgroundColor = "#FDD";
+                keyOrnamentsStringInput.style.backgroundColor = "#FDD"; // color used by onKeyOrnamentsStringInputBlurred() to signify an error.
                 keyOrnaments = [];
             }
+        },
+
+        onKeyOrnamentsStringInputBlurred = function()
+        {
+            const keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
+
+            if(keyOrnamentsStringInput.style.backgroundColor !== "#FDD") // "#FDD" indicates an error, see above
+            {
+                keyOrnamentsStringInput.value = normalizedOrnamentsString(keyOrnamentsStringInput.value);
+            }            
         },
 
         // exported
@@ -2271,6 +2280,7 @@ ResSynth.host = (function(document)
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
             onKeyOrnamentsStringInputChanged: onKeyOrnamentsStringInputChanged,
+            onKeyOrnamentsStringInputBlurred: onKeyOrnamentsStringInputBlurred,
             onVelocityPitchSensitivityNumberInputChanged: onVelocityPitchSensitivityNumberInputChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,
