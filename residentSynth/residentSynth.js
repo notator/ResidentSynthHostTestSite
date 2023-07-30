@@ -1142,8 +1142,6 @@ ResSynth.residentSynth = (function(window)
                             oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
                             delay;
 
-                        oMidi.velocityPitchValue14Bit = ornamentObject.velocityPitchValue14Bit; // override
-
                         delay = oNoteInfo[2];
 
                         if(ornamentObject.cancel === true)
