@@ -1178,7 +1178,6 @@ ResSynth.residentSynth = (function(window)
                 channelControls.ornamentObjects[firstMidi.keyKey] = ornamentObject;
                 ornamentObject.cancel = false;
                 ornamentObject.complete = false;
-                ornamentObject.velocityPitchValue14Bit = firstMidi.velocityPitchValue14Bit;
                 playOrnament(ornamentObject); // async
             }
 
