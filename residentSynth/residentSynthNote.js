@@ -30,7 +30,7 @@ ResSynth.residentSynthNote = (function()
 			this.channelInputNode = channelInputNode;
 			this.zone = zone;
 
-			this.offKey = midi.offKey; // the noteOff key that stops this note.
+			this.keyKey = midi.keyKey; // the noteOff key that stops this note.
 			this.keyPitch = midi.keyPitch;
 			this.velocityFactor = midi.velocity / 127;
 

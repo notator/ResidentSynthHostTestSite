@@ -973,10 +973,7 @@ ResSynth.residentSynth = (function(window)
 
             channelControls[channel].pitchWheelSensitivity = semitones; // for new noteOns
         },
-        setDefaultVelocityPitch = function(channel)
-        {
-            channelControls[channel].velocityPitchValue14Bit = []; // will later contain one 14Bit value per absolute pitch. The value is undefined by default.
-        },
+
         updateVelocityPitchSensitivity = function(channel, data2)
         {
             channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones -- host currently limits data2 / 127 to range 0..0.6
@@ -1004,29 +1001,30 @@ ResSynth.residentSynth = (function(window)
             while(currentNoteOns.length > 0)
             {
                 now = audioContext.currentTime;
-                stopTime = noteOff(channel, currentNoteOns[0].offKey);
+                stopTime = noteOff(channel, currentNoteOns[0].keyKey);
             }
             setTimeout(reconnectChannelInput(), stopTime - now);
         },
         noteOn = function(channel, key, velocity)
         {
             // returns a new midiAttributes object
-            function getMidiAttributes(preset, key, keyPitch, velocity, chanControlsVelocityPitchValue14Bit)
+            function getMidiAttributes(preset, keyKey, keyPitch, velocity)
             {
                 let midi = {};
+
                 midi.preset = preset;
-                midi.offKey = key; // the note stops when the offKey's noteOff arrives
+                midi.keyKey = keyKey; // the note stops when the keyKey's noteOff arrives
                 midi.keyPitch = keyPitch;
                 midi.velocity = velocity;
 
-                if(chanControlsVelocityPitchValue14Bit[key % 12] === undefined)
+                let noteOn = chanControls.currentNoteOns.find(x => (x.keyPitch % 12) === (midi.keyPitch % 12));
+                if(noteOn !== undefined)
                 {
-                    midi.velocityPitchValue14Bit = (((velocity & 0x7f) << 7) | (velocity & 0x7f)) - 8192;
-                    chanControlsVelocityPitchValue14Bit[key % 12] = midi.velocityPitchValue14Bit;
+                    midi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
                 }
                 else
                 {
-                    midi.velocityPitchValue14Bit = chanControlsVelocityPitchValue14Bit[key % 12];
+                    midi.velocityPitchValue14Bit = (((velocity & 0x7f) << 7) | (velocity & 0x7f)) - 8192;
                 }
 
                 return midi;
@@ -1051,19 +1049,20 @@ ResSynth.residentSynth = (function(window)
                     chanControls.currentNoteOns.push(note);
                 }
 
-                function doMixture(midi, mixtureIndex)
+                function doMixture(midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
                 {
                     let mixture = mixtures[mixtureIndex],
                         extraNotes = mixture.extraNotes,
                         except = mixture.except,
                         keyMixtureIndex = except.find(x => x[0] === key),
-                        offKeys = [];
+                        keyKeys = [];
 
                     if(keyMixtureIndex !== undefined)
                     {
                         extraNotes = mixtures[keyMixtureIndex[1]].extraNotes;
                     }
-                    for(var i = 0; i < extraNotes.length; i++)
+
+                    for(let i = 0; i < extraNotes.length; i++)
                     {
                         let keyVel = extraNotes[i],
                             newKey = key + keyVel[0],
@@ -1075,53 +1074,36 @@ ResSynth.residentSynth = (function(window)
                         newVelocity = (newVelocity < 1) ? 1 : newVelocity;
 
                         // midi.preset is unchanged
-                        midi.offKey = key; // the key that turns this note off (unchanged in mix)
+                        midi.keyKey = key; // the key that turns this note off (unchanged in mix)
                         midi.keyPitch = chanControls.tuning[newKey] + semitonesOffset;
                         midi.velocity = newVelocity;
 
-                        offKeys.push(midi.offKey);
+                        keyKeys.push(midi.keyKey);
 
                         doNewIndividualNoteOn(midi);
                     }
 
-                    return offKeys;
+                    return keyKeys;
                 }
 
                 doNewIndividualNoteOn(midi);
 
                 if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
                 {
-                    doMixture(midi, chanControls.mixtureIndex);
+                    doMixture(midi, chanControls.mixtureIndex, midi.velocityPitchValue14Bit);
                 }
             }
-
-            
 
             // Uses chanControls.ornamentIndex, chanControls.mixtureIndex, chanControls.cancelOrnament.
             function doOrnamentedNote(firstMidi, channelControls)
             {
-                function doNoteOffs(final, outerKey, offKeys, currentNoteOns)
+                function doOrnamentNoteOffs(currentNoteOns)
                 {
-                    for(var i = 0; i < offKeys.length; i++)
+                    for(var i = 0; i < currentNoteOns.length; i++)
                     {
-                        let offKey = offKeys[i];
-                        if(final == false || offKey != outerKey)
-                        {
-                            for(var index = currentNoteOns.length - 1; index >= 0; index--)
-                            {
-                                if(currentNoteOns[index].offKey === offKey)
-                                {
-                                    currentNoteOns[index].noteOff(); // stopTime = currentNoteOns[index].noteOff(); -- don't need stopTime here (?)
-                                    currentNoteOns.splice(index, 1);
-                                    let absKey = offKey % 12;
-                                    if(currentNoteOns.find(x => (x.offKey % 12) === absKey) === undefined)
-                                    {
-                                        channelControls.velocityPitchValue14Bit[absKey] = undefined;
-                                    }
-                                }
-                            }
-                        }
+                        currentNoteOns[i].noteOff();
                     }
+                    currentNoteOns.length = 0;
                 }
 
                 async function playOrnament(ornamentObject)
@@ -1142,8 +1124,8 @@ ResSynth.residentSynth = (function(window)
                     }
 
                     let noteInfos = ResSynth.ornamentDefs[channelControls.ornamentIndex].notes,
-                        cancelKey = firstMidi.offKey;
-                        
+                        preset = firstMidi.preset;
+
                     for(var i = 0; i < noteInfos.length; i++)
                     {
                         // [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
@@ -1153,65 +1135,58 @@ ResSynth.residentSynth = (function(window)
                         // [0, 0, 0]
 
                         let oNoteInfo = noteInfos[i],
-                            //oMidi = {},
                             final = (i === noteInfos.length - 1),
-                            oOffKeys = [],
+                            keyKey = midiVal(firstMidi.keyKey + oNoteInfo[0]),
+                            keyPitch = firstMidi.keyPitch - channelControls.tuning[firstMidi.keyKey] + channelControls.tuning[keyKey],
+                            velocity = midiVal(firstMidi.velocity + oNoteInfo[1]),
+                            oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
                             delay;
 
-                        // get a new oMidi (= midiAttributes object), setting the following arguments appropriately (see below).
-                        oMidi = getMidiAttributes(preset, key, keyPitch, velocity, chanControlsVelocityPitchValue14Bit)
-
-                        // implement the following code using the above call to getMidiAttributes().
-                        //
-                        //oMidi.preset = firstMidi.preset;
-                        //oMidi.offKey = midiVal(firstMidi.offKey + oNoteInfo[0]); // the note stops when the offKey's noteOff arrives
-                        //oMidi.keyPitch = firstMidi.keyPitch - channelControls.tuning[firstMidi.offKey] + channelControls.tuning[oMidi.offKey];
-                        //oMidi.velocity = midiVal(firstMidi.velocity + oNoteInfo[1]);
-                        //oMidi.velocityPitchValue14Bit = firstMidi.velocityPitchValue14Bit;
-                        //if(channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] === undefined)
-                        //{
-                        //    channelControls.velocityPitchValue14Bit[oMidi.offKey % 12] = firstMidi.velocityPitchValue14Bit;
-                        //}
+                        oMidi.velocityPitchValue14Bit = ornamentObject.velocityPitchValue14Bit; // override
 
                         delay = oNoteInfo[2];
 
                         if(ornamentObject.cancel === true)
                         {
-                            doNoteOffs(final, cancelKey, oOffKeys, channelControls.currentNoteOns);
+                            if(final == false)
+                            {
+                                doOrnamentNoteOffs(channelControls.currentNoteOns);
+                            }
                             break;
                         }
 
-                        oOffKeys.push(oMidi.offKey);
-                        doNoteOn(oMidi); // this does the mixture, if necessary.
-                        //if(channelControls.mixtureIndex > 0) // 0 is "no mixture"
-                        //{
-                        //    let newOffKeys = doMixture(oMidi, chanControls.mixtureIndex);
-                        //    oOffKeys = oOffKeys.concat(newOffKeys);
-                        //}
+                        doNoteOn(oMidi); // this does the mixture, if there is one.
 
                         if(ornamentObject.cancel === true)
                         {
-                            doNoteOffs(final, cancelKey, oOffKeys, channelControls.currentNoteOns);
+                            if(final == false)
+                            {
+                                doOrnamentNoteOffs(channelControls.currentNoteOns);
+                            }
                             break;
                         }
 
                         await wait(delay, ornamentObject.cancel);
 
-                        doNoteOffs(final, cancelKey, oOffKeys, channelControls.currentNoteOns);
-                    } 
+                        if(final == false)
+                        {
+                            doOrnamentNoteOffs(channelControls.currentNoteOns);
+                        }
+                    }
                     ornamentObject.complete = true;
                 }
 
                 let ornamentObject = {};
-                channelControls.ornamentObjects[firstMidi.offKey] = ornamentObject;
+                channelControls.ornamentObjects[firstMidi.keyKey] = ornamentObject;
                 ornamentObject.cancel = false;
                 ornamentObject.complete = false;
+                ornamentObject.velocityPitchValue14Bit = firstMidi.velocityPitchValue14Bit;
                 playOrnament(ornamentObject); // async
             }
 
             let chanControls = channelControls[channel],
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
-                preset,
+                preset,  
                 midi = {};
 
             preset = channelPresets[channel][chanControls.presetIndex];
@@ -1229,7 +1204,7 @@ ResSynth.residentSynth = (function(window)
                 return;
             }
 
-            midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, velocity, chanControls.velocityPitchValue14Bit);
+            midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, velocity);
 
             if(chanControls.ornamentIndex < 0) // -1 is "no ornament"
             {
@@ -1259,21 +1234,16 @@ ResSynth.residentSynth = (function(window)
                 while(!ornamentObject.complete)
                 {
                     await wait(10);
-                }                                
+                }
                 channelControl.ornamentObjects[key] = undefined;
             }
 
             for(var index = currentNoteOns.length - 1; index >= 0; index--)
             {
-                if(currentNoteOns[index].offKey === key)
+                if(currentNoteOns[index].keyKey === key)
                 {
                     stopTime = currentNoteOns[index].noteOff();
                     currentNoteOns.splice(index, 1);
-                    let absKey = key % 12;
-                    if(currentNoteOns.find(x => (x.offKey % 12) === absKey) === undefined)
-                    {
-                        channelControl.velocityPitchValue14Bit[absKey] = undefined;
-                    }
                 }
             }
 
@@ -1288,7 +1258,7 @@ ResSynth.residentSynth = (function(window)
             let constants = ResSynth.constants,
                 controlDefaultValue = constants.controlDefaultValue,
                 pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
-            
+
             updateSoundFontIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
             updateMixtureIndex(channel, controlDefaultValue(CTL.MIXTURE_INDEX));
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
@@ -1302,7 +1272,6 @@ ResSynth.residentSynth = (function(window)
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
             updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
 
-            setDefaultVelocityPitch(channel); // sets all 12 values to undefined
             updateVelocityPitchSensitivity(channel, 0);
             updateOrnamentIndex(channel, -1);
         },
@@ -1318,7 +1287,7 @@ ResSynth.residentSynth = (function(window)
                 CMD.NOTE_OFF,
                 CMD.NOTE_ON,
                 CMD.CONTROL_CHANGE,
-                CMD.PRESET,                
+                CMD.PRESET,
                 CMD.PITCHWHEEL
             ],
 
@@ -1664,10 +1633,10 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.SOUND_FONT_INDEX:
                     setSoundFontIndex(channel, data2);
-                    break;                    
+                    break;
                 case CTL.PITCH_WHEEL_SENSITIVITY:
                     setPitchWheelSensitivity(channel, data2);
-                    break;                   
+                    break;
                 case CTL.SEMITONES_OFFSET:
                     setSemitonesOffset(channel, data2);
                     break;
@@ -1740,7 +1709,7 @@ ResSynth.residentSynth = (function(window)
                 break;
             default:
                 console.assert(false, "The residentSynth does not process\n" +
-                        "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages.");
+                    "SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages.");
                 break;
         }
     };
