@@ -37,7 +37,7 @@ ResSynth.residentSynthNote = (function()
 			this.pitchWheel14Bit = channelControls.pitchWheel14Bit; // a value in range [-8192..+8191]
 			this.pitchWheelSensitivity = channelControls.pitchWheelSensitivity;
 
-			this.velocityPitchValue14Bit = channelControls.velocityPitchValue14Bit[midi.offKey % 12];
+			this.velocityPitchValue14Bit = midi.velocityPitchValue14Bit;
 			this.velocityPitchSensitivity = channelControls.velocityPitchSensitivity; // host sends range 0..0.6;
 
 			if(channelAudioNodes.modNode !== undefined)
@@ -68,7 +68,7 @@ ResSynth.residentSynthNote = (function()
 				decayEndTime = holdEndTime + vEnvData.decay;				
 
 			gain.cancelScheduledValues(now);
-			gain.setValueAtTime(0, now); // initialise volume
+			gain.setValueAtTime(0, now); // initialize volume
 			gain.linearRampToValueAtTime(volume, attackEndTime); // attack
 			gain.linearRampToValueAtTime(volume, holdEndTime); // hold
 			gain.linearRampToValueAtTime(0, decayEndTime); // decay
