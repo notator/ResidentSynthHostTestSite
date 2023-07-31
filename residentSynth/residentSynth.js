@@ -1390,7 +1390,7 @@ ResSynth.residentSynth = (function(window)
 
     // end var
 
-    // WebMIDIAPI §4.6 -- MIDIPort interface
+    // WebMIDIAPI §6.2 -- MIDIPort interface
     // See https://github.com/notator/WebMIDISynthHost/issues/24
     // This is called after user interaction with the page.
     // This function sets internal default values for all the synth's commands, and controls in all channels.
@@ -1440,7 +1440,7 @@ ResSynth.residentSynth = (function(window)
         console.log("residentSynth opened.");
     };
 
-    // WebMIDIAPI §4.6 -- MIDIPort interface
+    // WebMIDIAPI §6.2 -- MIDIPort interface
     // See https://github.com/notator/WebMIDISynthHost/issues/24
     ResidentSynth.prototype.close = function()
     {
@@ -1458,8 +1458,17 @@ ResSynth.residentSynth = (function(window)
         }
     };
 
-    // WebMIDIAPI MIDIOutput send()
-    // This synth does not yet support timestamps (05.11.2015)
+    // WebMIDIAPI §6.4 MIDIOutput interface
+    // This function is provided because it is part of the MIDIOutput interface,
+    // but there seems to be no reason to implement it: The send() function does not
+    // support timestamps, so all messages are sent immediately.
+    ResidentSynth.prototype.clear = function()
+    {
+        throw "Not implemented exception.";
+    };
+
+    // WebMIDIAPI §6.4 MIDIOutput interface
+    // This synth does not support timestamps (05.11.2015)
     ResidentSynth.prototype.send = function(messageData, ignoredTimestamp)
     {
         var
