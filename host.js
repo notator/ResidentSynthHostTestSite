@@ -1852,9 +1852,9 @@ ResSynth.host = (function(document)
                                     volumeData = getStandardControlInfo(constants, ctl.VOLUME),
                                     panData = getStandardControlInfo(constants, ctl.PAN),
                                     reverberationData = getStandardControlInfo(constants, ctl.REVERBERATION),
+                                    pitchWheelSensitivityData = getStandardControlInfo(constants, ctl.PITCH_WHEEL_SENSITIVITY),
                                     allControllersOff = getStandardControlInfo(constants, ctl.ALL_CONTROLLERS_OFF),
                                     allSoundOff = getStandardControlInfo(constants, ctl.ALL_SOUND_OFF),
-                                    pitchWheelSensitivityData = {name: "pitchWheelSensitivity", defaultValue: 2},
                                     controlInfos = [];
 
                                 controlInfos.push(modWheelData);

@@ -169,6 +169,8 @@ ResSynth.constants = (function()
 				return ("pan");
 			case CONTROL.REVERBERATION:
 				return ("reverberation");
+			case CONTROL.PITCH_WHEEL_SENSITIVITY:
+				return ("pitchWheelSensitivity");
 			case CONTROL.ALL_SOUND_OFF:
 				return ("allSoundOff");
 			case CONTROL.ALL_CONTROLLERS_OFF:
@@ -186,7 +188,6 @@ ResSynth.constants = (function()
 			case CONTROL.MODWHEEL:
 			case CONTROL.REVERBERATION:
 			case CONTROL.SOUND_FONT_INDEX:
-			case CONTROL.PITCH_WHEEL_SENSITIVITY:
 			case CONTROL.MIXTURE_INDEX:
 			case CONTROL.TUNING_GROUP_INDEX:
 			case CONTROL.TUNING_INDEX:
@@ -195,6 +196,8 @@ ResSynth.constants = (function()
 			case CONTROL.TRIGGER_KEY:
 			case CONTROL.VELOCITY_PITCH_SENSITIVITY:
 				return (0);
+			case CONTROL.PITCH_WHEEL_SENSITIVITY:
+				return (2);
 			case CONTROL.VOLUME:
 				return (100);
 			case CONTROL.PAN:
