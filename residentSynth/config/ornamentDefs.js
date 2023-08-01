@@ -25,7 +25,7 @@ ResSynth.ornamentDefs =
                     [4, 10, 125],
                     [0, 0, 400],
                     [-2, 20, 125],
-                    [0, 0, 0] // final noteOn is same pitch+velocity as original note, 500ms later.
+                    [0, 0, 0] // final noteOn is same pitch+velocity as original note, 1150ms (=500+125+400+400)ms later.
                 ]
         },
         {
