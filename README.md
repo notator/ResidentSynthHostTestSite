@@ -134,7 +134,7 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 	TUNING_INDEX (CC 80)  
 	SEMITONES_OFFSET (CC 81)  
 	CENTS_OFFSET (CC 82)  
-	TRIGGER_KEY (CC 83)  
+	SET_SETTINGS (CC 83)  
 	VELOCITY_PITCH_SENSITIVITY (CC 75)  
 	SET_ORNAMENT (CC 76)
 

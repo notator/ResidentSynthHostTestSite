@@ -460,6 +460,13 @@ ResSynth.host = (function(document)
 
             startRecordingButton.value = "start recording channel " + channel.toString();
             stopRecordingButton.value = "stop recording channel " + channel.toString();
+
+            // test code for setSettingsMsg (its effect has already been achieved by the above code)
+            //let settingsIndex = getElem("settingsSelect").selectedIndex,
+            //    CONST = ResSynth.constants,
+            //    setSettingsMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SET_SETTINGS, settingsIndex]);
+
+            //synth.send(setSettingsMsg);
         },
 
         // exported
@@ -690,16 +697,10 @@ ResSynth.host = (function(document)
             let triggerKeyInput = getElem("triggerKeyInput"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostChannelSettings = channelSelect.options[channel].hostSettings,
-                CONST = ResSynth.constants,
-                triggerKeyMsg;
+                hostChannelSettings = channelSelect.options[channel].hostSettings;
 
             triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
-            triggerKeyMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TRIGGER_KEY, triggerKey]);
-
-            synth.send(triggerKeyMsg);
             hostChannelSettings.triggerKey = triggerKey;
-
             setExportState(hostChannelSettings);
         },
         // exported
@@ -769,9 +770,6 @@ ResSynth.host = (function(document)
                     // settings.pitchWheelSensitivity
                     let pwsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PITCH_WHEEL_SENSITIVITY, settings.pitchWheelSensitivity]);
                     synth.send(pwsMsg);
-                    // settings.triggerKey
-                    let triggerKeyMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TRIGGER_KEY, settings.triggerKey]);
-                    synth.send(triggerKeyMsg);
                     // settings.velocityPitchSensitivity
                     let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, settings.velocityPitchSensitivity * 127]);
                     synth.send(vpsMsg);

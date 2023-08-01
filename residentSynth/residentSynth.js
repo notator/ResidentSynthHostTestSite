@@ -24,6 +24,7 @@ ResSynth.residentSynth = (function(window)
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
         tuningGroups = [],
+        settingsPresets = [],
 
         // see: https://developer.chrome.com/blog/audiocontext-setsinkid/
         setAudioOutputDevice = async function(deviceId)
@@ -720,13 +721,11 @@ ResSynth.residentSynth = (function(window)
         // returns an array of Settings objects containing the values set in the settingsPresets.js file.
         // The values in the attributes of the returned Settings objects are immutable.
         // Clone using {...settings} to create an object having mutable attributes. (Attributes can never be created or destroyed.)
-        getSettingsPresets = function(settingsPresets)
+        getSettingsPresets = function(resSynthSettingsPresets)
         {
-            let rval = [];
-
-            for(var settingsIndex = 0; settingsIndex < settingsPresets.length; settingsIndex++)
+            for(var settingsIndex = 0; settingsIndex < resSynthSettingsPresets.length; settingsIndex++)
             {
-                let sp = settingsPresets[settingsIndex],
+                let sp = resSynthSettingsPresets[settingsIndex],
                     settings = new ResSynth.settings.Settings(sp.name);
 
                 settings.fontIndex = sp.fontIndex;
@@ -748,10 +747,10 @@ ResSynth.residentSynth = (function(window)
 
                 Object.freeze(settings); // attribute values are frozen
 
-                rval.push(settings);
+                settingsPresets.push(settings);
             }
 
-            return rval;
+            return settingsPresets;
         },
 
         getTuningGroups = function(tuningsFactory)
@@ -1309,7 +1308,7 @@ ResSynth.residentSynth = (function(window)
                 CTL.TUNING_INDEX,
                 CTL.SEMITONES_OFFSET,
                 CTL.CENTS_OFFSET,
-                CTL.TRIGGER_KEY,
+                CTL.SET_SETTINGS,
                 CTL.VELOCITY_PITCH_SENSITIVITY,
                 CTL.SET_ORNAMENT
             ],
@@ -1581,9 +1580,31 @@ ResSynth.residentSynth = (function(window)
             {
                 channelControls[channel].centsOffset = getOffsetValue(midiValue);
             }
-            function setTriggerKey(channel, triggerKey)
+
+            // Note that the ResidentSynthHost does not call this function (i.e. send SET_SETTINGS messages)
+            // because it needs to update the ResidentSynth's settings incrementally.
+            // This function is provided for use in other applications, such as the AssistantPerformer.
+            // Note also that the settings.triggerKey and settings.keyOrnamentsString attributes are
+            // ignored here because they only apply to the ResidentSynthHost.
+            // Other applications use SET_SETTINGS and SET_ORNAMENT messages instead.
+            function setSettings(channel, settingsIndex)
             {
-                channelControls[channel].triggerKey = triggerKey;
+                let settings = settingsPresets[settingsIndex];
+
+                setSoundFontIndex(channel, settings.fontIndex);
+                channelControls[channel].presetIndex = settings.presetIndex;
+                updateMixtureIndex(channel, settings.mixtureIndex);
+                updateTuningGroupIndex(channel, settings.tuningGroupIndex);
+                updateTuning(channel, settings.tuningIndex);
+                updateSemitonesOffset(channel, settings.semitonesOffset);
+                updateCentsOffset(channel, settings.centsOffset);
+                updatePitchWheel(channel, settings.pitchWheel, settings.pitchWheel);
+                updateModWheel(channel, settings.modWheel);
+                updateVolume(channel, settings.volume);
+                updatePan(channel, settings.pan);
+                updateReverberation(channel, settings.reverberation);
+                updatePitchWheelSensitivity(channel, settings.pitchWheelSensitivity);
+                updateVelocityPitchSensitivity(channel, settings.velocityPitchSensitivity);
             }
             // sets channelControl.tuning to the first tuning in the group.
             function setTuningGroupIndex(channel, tuningGroupIndex)
@@ -1648,8 +1669,8 @@ ResSynth.residentSynth = (function(window)
                 case CTL.CENTS_OFFSET:
                     setCentsOffset(channel, data2);
                     break;
-                case CTL.TRIGGER_KEY:
-                    setTriggerKey(channel, data2);
+                case CTL.SET_SETTINGS:
+                    setSettings(channel, data2);
                     break;
                 case CTL.TUNING_GROUP_INDEX:
                     setTuningGroupIndex(channel, data2); // sets tuning to the first tuning in the group

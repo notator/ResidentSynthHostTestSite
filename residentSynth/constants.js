@@ -193,7 +193,7 @@ ResSynth.constants = (function()
 			case CONTROL.TUNING_INDEX:
 			case CONTROL.SEMITONES_OFFSET:
 			case CONTROL.CENTS_OFFSET:
-			case CONTROL.TRIGGER_KEY:
+			case CONTROL.SET_SETTINGS:
 			case CONTROL.VELOCITY_PITCH_SENSITIVITY:
 				return (0);
 			case CONTROL.PITCH_WHEEL_SENSITIVITY:
@@ -281,7 +281,7 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "TUNING_INDEX", {value: 80, writable: false}); // MIDI General_purpose_button_1 (value is the index of the tuning)	
 	Object.defineProperty(CONTROL, "SEMITONES_OFFSET", {value: 81, writable: false}); // MIDI General_purpose_button_2. (sent value is semitonesOffset + 50)
 	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 82, writable: false}); // MIDI General_purpose_button_3. (sent value is centsOffset + 50)
-	Object.defineProperty(CONTROL, "TRIGGER_KEY", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is trigger key)
+	Object.defineProperty(CONTROL, "SET_SETTINGS", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is trigger key)
 	Object.defineProperty(CONTROL, "VELOCITY_PITCH_SENSITIVITY", {value: 75, writable: false}); // MIDI Sound Control 6. (value is semitones / 127)
 	Object.defineProperty(CONTROL, "SET_ORNAMENT", {value: 76, writable: false}); // MIDI Sound Control 7. (value is ornament index)
 	// If more are needed, use Sound Controls 8-10 (control values 77, 78, 79).
