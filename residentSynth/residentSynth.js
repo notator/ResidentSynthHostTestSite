@@ -1249,7 +1249,6 @@ ResSynth.residentSynth = (function(window)
 
         /*****************************************/
 
-        // This command sets the pitchWheel, pitchWheelSensitivity, modWheel, volume, pan and reverberation controllers
         setControllerDefaults = function(channel)
         {
             let constants = ResSynth.constants,
@@ -1267,7 +1266,7 @@ ResSynth.residentSynth = (function(window)
             updateVolume(channel, controlDefaultValue(CTL.VOLUME));
             updatePan(channel, controlDefaultValue(CTL.PAN));
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
-            updatePitchWheelSensitivity(channel, MISC.MIDI_DEFAULT_PITCHWHEEL_SENSITIVITY);
+            updatePitchWheelSensitivity(channel, controlDefaultValue(CTL.PITCH_WHEEL_SENSITIVITY));
 
             updateVelocityPitchSensitivity(channel, 0);
             updateOrnamentIndex(channel, -1);
