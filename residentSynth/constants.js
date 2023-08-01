@@ -274,7 +274,6 @@ ResSynth.constants = (function()
 	//Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});
 	// Custom
 	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false}); // MIDI Effects_level
-	//
 	Object.defineProperty(CONTROL, "SOUND_FONT_INDEX", {value: 16, writable: false}); // MIDI General_purpose_slider_1 (value is the index of the tuning)
 	Object.defineProperty(CONTROL, "PITCH_WHEEL_SENSITIVITY", {value: 17, writable: false}); // MIDI General_purpose_slider_2. (value is semitones)	
 	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 18, writable: false}); // MIDI General_purpose_slider_3 (value is the index of the mixture)

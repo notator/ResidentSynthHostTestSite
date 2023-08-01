@@ -1304,14 +1304,14 @@ ResSynth.residentSynth = (function(window)
                 CTL.REVERBERATION,
                 CTL.SOUND_FONT_INDEX,
                 CTL.PITCH_WHEEL_SENSITIVITY,
+                CTL.MIXTURE_INDEX, 
+                CTL.TUNING_GROUP_INDEX,
+                CTL.TUNING_INDEX,
                 CTL.SEMITONES_OFFSET,
                 CTL.CENTS_OFFSET,
                 CTL.TRIGGER_KEY,
-                CTL.RECORDING_PLAY,
-                CTL.MIXTURE_INDEX,
-                CTL.TUNING_GROUP_INDEX,
-                CTL.TUNING_INDEX,
-                CTL.VELOCITY_PITCH_SENSITIVITY
+                CTL.VELOCITY_PITCH_SENSITIVITY,
+                CTL.SET_ORNAMENT
             ],
 
         ResidentSynth = function()
