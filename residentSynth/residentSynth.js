@@ -1122,54 +1122,65 @@ ResSynth.residentSynth = (function(window)
                         }
                     }
 
-                    let noteInfos = ResSynth.ornamentDefs[channelControls.ornamentIndex].notes,
+                    let ornamentDef = ResSynth.ornamentDefs[channelControls.ornamentIndex],
+                        noteInfos = ornamentDef.notes,
+                        doRepeats = (ornamentDef.repeats === "yes") ? true : false,
                         preset = firstMidi.preset;
 
-                    for(var i = 0; i < noteInfos.length; i++)
+                    do
                     {
-                        // [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
-                        // [2, 0, 125],
-                        // [0, 0, 125],
-                        // [-1, 0, 125],
-                        // [0, 0, 0]
-
-                        let oNoteInfo = noteInfos[i],
-                            final = (i === noteInfos.length - 1),
-                            keyKey = midiVal(firstMidi.keyKey + oNoteInfo[0]),
-                            keyPitch = firstMidi.keyPitch - channelControls.tuning[firstMidi.keyKey] + channelControls.tuning[keyKey],
-                            velocity = midiVal(firstMidi.velocity + oNoteInfo[1]),
-                            oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
-                            delay;
-
-                        delay = oNoteInfo[2];
-
-                        if(ornamentObject.cancel === true)
+                        for(var i = 0; i < noteInfos.length; i++)
                         {
+                            // [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
+                            // [2, 0, 125],
+                            // [0, 0, 125],
+                            // [-1, 0, 125],
+                            // [0, 0, 0]
+
+                            let oNoteInfo = noteInfos[i],
+                                final = (i === noteInfos.length - 1),
+                                keyKey = midiVal(firstMidi.keyKey + oNoteInfo[0]),
+                                keyPitch = firstMidi.keyPitch - channelControls.tuning[firstMidi.keyKey] + channelControls.tuning[keyKey],
+                                velocity = midiVal(firstMidi.velocity + oNoteInfo[1]),
+                                oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
+                                delay;
+
+                            delay = oNoteInfo[2];
+
+                            if(ornamentObject.cancel === true)
+                            {
+                                if(final == false)
+                                {
+                                    doOrnamentNoteOffs(channelControls.currentNoteOns);
+                                }
+                                break;
+                            }
+
+                            doNoteOn(oMidi); // this does the mixture, if there is one.
+
+                            if(ornamentObject.cancel === true)
+                            {
+                                if(final == false)
+                                {
+                                    doOrnamentNoteOffs(channelControls.currentNoteOns);
+                                }
+                                break;
+                            }
+
+                            await wait(delay, ornamentObject.cancel);
+
                             if(final == false)
                             {
                                 doOrnamentNoteOffs(channelControls.currentNoteOns);
                             }
-                            break;
                         }
+                    } while((ornamentObject.cancel === false) && (doRepeats === true));
 
-                        doNoteOn(oMidi); // this does the mixture, if there is one.
-
-                        if(ornamentObject.cancel === true)
-                        {
-                            if(final == false)
-                            {
-                                doOrnamentNoteOffs(channelControls.currentNoteOns);
-                            }
-                            break;
-                        }
-
-                        await wait(delay, ornamentObject.cancel);
-
-                        if(final == false)
-                        {
-                            doOrnamentNoteOffs(channelControls.currentNoteOns);
-                        }
+                    if(doRepeats)
+                    {
+                        doOrnamentNoteOffs(channelControls.currentNoteOns);
                     }
+
                     ornamentObject.complete = true;
                 }
 
