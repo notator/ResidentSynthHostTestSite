@@ -1,75 +1,88 @@
-## ResidentSynthHost
-This is a [Web Audio application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html),
-written in HTML5 and Javascript, that hosts a GUI-less _ResidentSynth_ synthesizer.<br />
-The application is best used with an attached MIDI input device such as a keyboard. This requires that the
-browser supports the Web MIDI [_MIDIInput_ interface](https://www.w3.org/TR/webmidi/#midiinput-interface).
-All the major browsers now do this.<br />
-Software synthesizers like the _ResidentSynth_ can be included in any web application as a substitute for
-end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my
+## ResidentSynthHost and ResidentSynth
+The _ResidentSynthHost_ is a [Web Audio application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html), written in HTML5 and Javascript, that hosts a GUI-less _ResidentSynth_ synthesizer.  
+Software synthesizers like the _ResidentSynth_ can be included in any web application as a substitute 
+for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my
 [AssistantPerformer](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)
-web application.<br />
-Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.
-Issues relating to either of them should be raised here.
-#### Screenshot
+web application. 
+
+Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.  
+Issues relating to either of them should be raised here.  
+**Note that this page contains separate documentation for the _ResidentSynthHost_ and _ResidentSynth_.** 
+
+---
+
+### ResidentSynthHost
+
+This web application is best used with an attached MIDI input device such as a keyboard. This requires that the browser supports the Web MIDI 
+[_MIDIInput_ interface](https://www.w3.org/TR/webmidi/#midiinput-interface).
+All the major browsers now do this.  
+  
+
+
 ![screenshot](../images/ResidentSynthHost.png "screenshot")  
-The _ResidentSynth_ is configurable, as described in the documentation below, but first here's a summary
-of the _ResidentSynthHost_'s controls:
 
+The GUI is divided into horizontal areas that group similar concepts:  
+Top Level:  
 ![screenshot_Top](../images/ResidentSynthHost_0_Top.png "screenshot_Top")  
-On loading, the host searches for any available MIDI input devices, and lists them in the **Input Device** selector.  
-Similarly, available audio outputs are listed in the **Audio Output** selector.  
-Messages sent by the _ResidentSynthHost_ to the _ResidentSynth_ are sent, using the settings visible in its GUI,
-on the channel set in the **ResidentSynth** channel selector.  
-The _ResidentSynth_ is multi-channel. Changing the channel selector updates the GUI with the current settings
-for that channel.
-
+Available MIDI input devices can be selected from the **Input Device** selector.  
+Similarly, available audio outputs can be selected from the **Audio Output** selector.  
+Changing the **channel** selector updates the whole GUI with the current settings for that channel.  
+This is the channel on which MIDI messages will be sent to the multi-channel _ResidentSynth_.
+  
+Sounds:  
 ![screenshot_Fonts](../images/ResidentSynthHost_1_Font.png "screenshot_Fonts")  
-WebAudioFonts can be configured in the _ResidentSynth_ (see below). On loading, the
-_ResidentSynthHost_ adds their names to the **WebAudioFont** selector.  
-The **preset** selector always contains the presets available in the current WebAudioFont.  
-Mixtures can be configured in the _ResidentSynth_ (see below). They are available in the **mixture** selector.
+WebAudioFonts can be configured in the _ResidentSynth_, and selected from the **WebAudioFont** selector.  
+The **preset** selector always contains the presets available in the currently selected WebAudioFont.  
+Mixtures can also be configured in the _ResidentSynth_. They are selected from the **mixture** selector.  
 
+Tuning:  
 ![screenshot_Tuning](../images/ResidentSynthHost_2_Tuning.png "screenshot_Tuning")  
-Tuning groups can be configured in the _ResidentSynth_ (see below). On loading, the
-_ResidentSynthHost_ adds their names to the **Tuning group** selector.
+Tuning groups can be configured in the _ResidentSynth_, and selected from the **Tuning group** selector.  
 The **tuning** selector always contains the tunings available in the current tuning group.  
-The two **offset** numerical inputs determine the tuning offset in (equal temperament)
-semitones and cents respectively. The semitones input takes integer values in the range -36 to +36.
-The cents input takes values in the range -50 to +50.
+The two **offset** numerical inputs determine the tuning offset in (equal temperament) semitones and cents respectively. The semitones input takes integer values in the range -36 to +36.
+The cents input takes values in the range -50 to +50.  
 
-![screenshot_Commands&Controls](../images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls") 
+Commands and Controls:  
+![screenshot_Commands&Controls](../images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
 Except for reverberation and pitchWheelSensitivity, these are standard MIDI commands and controls.  
 Reverberation and pitchWheelSensitivity use non-standard MIDI control messages (CC 91 and CC17 respectively).  
+The top six controls can be changed either by dragging the sliders, or entering values in the numeric input fields.  
 
+Individual Note Controls:  
 ![screenshot_Notes](../images/ResidentSynthHost_4_Notes.png "screenshot_Notes")  
 Ornaments can be configured in the _ResidentSynth_ (see below).  
-The _ResidentSynthHost_ can assign particular ornaments to particular MIDI input key numbers.
-This is done in the **ornaments** string input field using a format like a CSS style string: up to 127 repeats 
-of <code>\<key>:\<ornamentIndex>;</code> separated by whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
-An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON.   
-When the ornament completes, its final note is sustained until the performed NOTE_ON's corresponding
-NOTE_OFF (or NOTE_ON velocity 0) arrives. If the NOTE_OFF arrives before the ornament has completed,
-the ornament is simply cut short.  
-This is implemented in the _ResidentSynth_ using a non-standard SET_ORNAMENT control message that applies only to the single,
-following NOTE_ON (as described further below).  
+The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string uses ":", ";" and whitespace characters as in a CSS _style_ string. It can have up to 127 repeats of `<key>:<ornamentIndex>;` separated by whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
+An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON.
+There are two types of ornament: _non-repeating_ and _repeating_:  
+When a _non-repeating_ ornament completes, its final note is sustained until the performed NOTE_ON's corresponding NOTE_OFF (or NOTE_ON velocity 0) arrives. If the NOTE_OFF arrives before the ornament has completed, the ornament is simply cut short.   
+The notes of a _repeating_ ornament are repeated continuously until the performed NOTE_ON's corresponding NOTE_OFF (or NOTE_ON velocity 0) arrives, at which point the ornament stops.  
+Ornaments are implemented in the _ResidentSynth_ using a non-standard SET_ORNAMENT control message that applies only to the single, following NOTE_ON (as further described in the _ResidentSynth_ documentation below).  
+
 The **velocityPitchSensitivity** input is a floating point value between 0 and 1. This value
 raises an individual note's output pitch depending on its velocity. If this value is 0, the velocity has no effect
-on the pitch. If this value is 1, a velocity of 127 will raise the pitch by one (equal temperament) semitone.  
+on the pitch. If this value is 1, the velocity has some maximum effect, depending on the current tuning.
+In equal temperament tuning, with velocityPitchSensitivity set to 1, a velocity of 127 will raise the pitch by one
+(equal temperament) semitone.  
 
+Preset Settings:  
 ![screenshot_Settings](../images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
-Preset settings can be configured in the _ResidentSynth_ (see below), and are channel independent.
-On loading, these are added to the **Preset Settings** selector. Selecting one will only change the current
-channel. If any setting is subsequently changed in the GUI, the **export channel settings** button is activated,
-allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder, from where
-it can be copied to the _ResidentSynth_'s settingsPresets.js configuration file.
-The **Trigger key** is the note number whose NOTE_ON will trigger the following settings in the list in the
-**PresetSettings** selector, rather than play a note. The trigger key can be any number from 0 to 127. 
+Preset settings can be configured in the _ResidentSynth_, and selected from the **Preset Settings** selector. These settings are channel-independent. Selecting one just sets the settings for the current channel.  
+If any setting is subsequently changed in the GUI, the **export modified settings** button is activated, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported settings can then be copied to the _ResidentSynth_'s settingsPresets.js configuration file.  
+The **Trigger key** is a note number whose NOTE_ON will trigger the following settings in the list in the **Preset Settings** selector, rather than play a note. The trigger key can be any number from 0 to 127.  
 
-![screenshot_Recording](../images/ResidentSynthHost_6_Recordings.png "screenshot_Recording") 
+Recordings:  
+![screenshot_Recording](../images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
+Recordings made with this application can be saved and added to the _ResidentSynth_'s configuration. When that has been done, and the synth is reloaded, they are added to the **Recordings** selector.  
+Clicking the **play recording** button plays the selected recording. (The button changes into a **cancel playback** button).  
+The **start recording channel** button initiates recording of the current channel. (Its text includes the current channel index.) While recording, this button becomes a **stop recording channel** button, which, when clicked, saves the recording to the user's _Downloads_ folder.  
+Note that while only one channel at a time can be recorded, it _is_ possible to simultaneously play back a recording of one or more other channels. These channels will then be included in the output recording. Overdubbing is possible.
 
-![screenshot_SimpleInput](../images/ResidentSynthHost_7_SimpleInput.png "screenshot_SimpleInput") 
+Simple Input:  
+![screenshot_SimpleInput](../images/ResidentSynthHost_7_SimpleInput.png "screenshot_SimpleInput")  
+These controls can be used when no other MIDI Input device is attached to the computer.  
+They can also be useful while debugging, since both hands can be kept free while holding a note.
 
-
+---
 
 ### ResidentSynth
 The _ResidentSynth_ is a MIDI Output device, written entirely in Javascript,
@@ -79,7 +92,9 @@ Web MIDI [_MIDIOutput_ interface](https://www.w3.org/TR/webmidi/#midioutput-inte
 In addition to implementing the most common MIDI messages, the _ResidentSynth_ uses some 
 MIDI Controller messages for non-standard purposes. These are documented below.<br />
 #### Acknowledgements
-This synthesizer uses clones of freeware wavetables (=presets, instruments) found on [Sergey Surikov's WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organised into custom sound fonts.<br />
+This synthesizer uses clones of freeware wavetables (=presets, instruments) found on 
+[Sergey Surikov's WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organized into 
+custom sound fonts.<br />
 For illustration and test purposes, the _ResidentSynthHost_ installs a deliberately large number of presets,
 organising them into several different fonts. Other installations would typically use less.<br />
 On loading, these presets are automatically adjusted as follows:
@@ -87,9 +102,16 @@ On loading, these presets are automatically adjusted as follows:
 - where possible and meaningful, zones are extended to cover the full range of MIDI keys
 - any errors in the wavetables are silently corrected
 
-The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ and _Resident**Sf2**Synth_.<br />
-These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ ([repository](https://github.com/notator/WebMIDISynthHost) and [application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)).<br />
-The inherited code owes a lot to [Sergey Surikov's WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his `WebAudioFontReverberator`.<br />
+The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ 
+and _Resident**Sf2**Synth_.<br />
+These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ 
+([repository](https://github.com/notator/WebMIDISynthHost) and 
+[application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)).<br />
+The inherited code owes a lot to 
+[Sergey Surikov's WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). 
+Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets 
+very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his
+`WebAudioFontReverberator`.<br />
 
 
 #### MIDI Messages
@@ -142,7 +164,8 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 The _ResidentSynth_ can be configured by editing the files in the
 [residentSynth/config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/TestSite/residentSynth/config).  
 This currently contains:  
-&nbsp;&nbsp;&nbsp;&nbsp;webAudioFontFiles : a folder containing the required preset definitions (clones of Surikov's files)  
+&nbsp;&nbsp;&nbsp;&nbsp;webAudioFontFiles : a folder containing the required preset definitions (clones of Surikov's 
+files)  
 &nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js  
 &nbsp;&nbsp;&nbsp;&nbsp;ornamentDefs.js  
 &nbsp;&nbsp;&nbsp;&nbsp;recordings.js  
@@ -150,7 +173,8 @@ This currently contains:
 &nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js  
 &nbsp;&nbsp;&nbsp;&nbsp;webAudioFontDefs.js  
    
-More complete instructions as to how to edit the definitions are given in the respective files, but here's an overview:
+More complete instructions as to how to edit the definitions are given in the respective files, but 
+here's an overview:
 ##### Presets
 The preset definitions used here can be found in
 [Surikov's catalog](https://github.com/surikov/webaudiofont#catalog-of-instruments).<br />
@@ -160,14 +184,14 @@ Use the SOUND_FONT_INDEX control and PRESET command to activate it. Note that th
 ##### Mixtures
 A _mixture_, defined in mixtureDefs.js, is a chord that plays when a single noteOn is sent to the synth.
 Mixtures are like freely configurable [Organ stops](https://en.wikipedia.org/wiki/Mixture_(organ_stop)).  
-Mixtures are set using their index as the value in a MIXTURE_INDEX control message, whereby index 0 is always defined to mean
-"no mixture".
+Mixtures are set using their index as the value in a MIXTURE_INDEX control message, whereby index 0 is always defined
+to mean "no mixture".
 ##### Ornaments
-An _ornament_, defined in ornamentDefs.js, is a series of consecutive notes sent automatically when the synthesizer receives
-a NOTE_ON. When the ornament completes, its final note is sustained until a NOTE_OFF (or NOTE_ON velocity 0) is received.
-Ornaments are simply cut short if the synthesizer receives a NOTE_OFF before they have completed.   
-To add an ornament to a NOTE_ON, send a SET_ORNAMENT control message (with the index of the required ornament) immediately before
-sending the NOTE_ON itself. The NOTE_ON command un-sets the ornament again.
+An _ornament_, defined in ornamentDefs.js, is a series of consecutive notes sent automatically when the synthesizer 
+receives a NOTE_ON. When the ornament completes, its final note is sustained until a NOTE_OFF (or NOTE_ON velocity 0) 
+is received. Ornaments are simply cut short if the synthesizer receives a NOTE_OFF before they have completed.   
+To add an ornament to a NOTE_ON, send a SET_ORNAMENT control message (with the index of the required ornament) 
+immediately before sending the NOTE_ON itself. The NOTE_ON command un-sets the ornament again.
 In other words, SET_ORNAMENT sets an ornament that is only valid for one note. It must be sent again if required.
 ##### Recordings
 The _ResidentSynthHost_ can record and save sequences of MIDI messages sent to the _ResidentSynth_.
@@ -195,6 +219,6 @@ The triggers defined for this host can change the preset and/or the tuning. Trig
 The _ResidentSynth_ is also used by my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
 
 James Ingram<br />
-May 2022<br />
+August 2023<br />
 
 
