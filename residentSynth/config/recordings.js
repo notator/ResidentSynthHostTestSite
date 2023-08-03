@@ -681,7 +681,7 @@ ResSynth.recordings =
                 ]
         },
         {
-            "name": "ch0_recording (new).json",
+            "name": "ch0_recording (new)",
             "channels":
                 [
                     {
@@ -723,7 +723,7 @@ ResSynth.recordings =
                 ]
         },
         {
-            "name": "chs0,1,3_recording (08.07.2023).json",
+            "name": "chs0,1,3_recording (08.07.2023)",
             "channels": [
                 {
                     "channel": 0,
@@ -827,6 +827,53 @@ ResSynth.recordings =
                         "145,44,111,9544",
                         "145,41,0,9585",
                         "145,44,0,10389"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ch0_ornament_recording_test",
+            "channels": [
+                {
+                    "channel": 0,
+                    "settings": {
+                        "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
+                        "fontIndex": 3,
+                        "presetIndex": 0,
+                        "mixtureIndex": 0,
+                        "tuningGroupIndex": 3,
+                        "tuningIndex": 0,
+                        "semitonesOffset": -2,
+                        "centsOffset": 10,
+                        "pitchWheel": 64,
+                        "modWheel": 0,
+                        "volume": 100,
+                        "pan": 64,
+                        "reverberation": 0,
+                        "pitchWheelSensitivity": 2,
+                        "triggerKey": 36,
+                        "velocityPitchSensitivity": 0,
+                        "keyOrnamentsString": "64:0"
+                    },
+                    "messages": [
+                        "144,60,61,0",
+                        "144,61,104,576",
+                        "144,60,0,634",
+                        "144,62,104,1122",
+                        "144,61,0,1123",
+                        "144,63,96,1652",
+                        "144,62,0,1703",
+                        "176,76,0,2233",
+                        "144,64,93,2233",
+                        "144,63,0,2235",
+                        "144,65,107,4026",
+                        "144,64,0,4033",
+                        "176,76,0,5332",
+                        "144,64,95,5332",
+                        "144,65,0,5333",
+                        "144,63,79,6927",
+                        "144,64,0,6955",
+                        "144,63,0,8390"
                     ]
                 }
             ]
