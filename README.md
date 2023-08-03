@@ -22,37 +22,37 @@ All the major browsers now do this.
   
 
 
-![screenshot](../images/ResidentSynthHost.png "screenshot")  
+![screenshot](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost.png "screenshot")  
 
 The GUI is divided into horizontal areas that group similar concepts:  
 Top Level:  
-![screenshot_Top](../images/ResidentSynthHost_0_Top.png "screenshot_Top")  
+![screenshot_Top](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_0_Top.png "screenshot_Top")  
 Available MIDI input devices can be selected from the **Input Device** selector.  
 Similarly, available audio outputs can be selected from the **Audio Output** selector.  
 Changing the **channel** selector updates the whole GUI with the current settings for that channel.  
 This is the channel on which MIDI messages will be sent to the multi-channel _ResidentSynth_.
   
 Sounds:  
-![screenshot_Fonts](../images/ResidentSynthHost_1_Font.png "screenshot_Fonts")  
+![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Font.png "screenshot_Fonts")  
 WebAudioFonts can be configured in the _ResidentSynth_, and selected from the **WebAudioFont** selector.  
 The **preset** selector always contains the presets available in the currently selected WebAudioFont.  
 Mixtures can also be configured in the _ResidentSynth_. They are selected from the **mixture** selector.  
 
 Tuning:  
-![screenshot_Tuning](../images/ResidentSynthHost_2_Tuning.png "screenshot_Tuning")  
+![screenshot_Tuning](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_2_Tuning.png "screenshot_Tuning")  
 Tuning groups can be configured in the _ResidentSynth_, and selected from the **Tuning group** selector.  
 The **tuning** selector always contains the tunings available in the current tuning group.  
 The two **offset** numerical inputs determine the tuning offset in (equal temperament) semitones and cents respectively. The semitones input takes integer values in the range -36 to +36.
 The cents input takes values in the range -50 to +50.  
 
 Commands and Controls:  
-![screenshot_Commands&Controls](../images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
+![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
 Except for reverberation and pitchWheelSensitivity, these are standard MIDI commands and controls.  
 Reverberation and pitchWheelSensitivity use non-standard MIDI control messages (CC 91 and CC17 respectively).  
 The top six controls can be changed either by dragging the sliders, or entering values in the numeric input fields.  
 
 Individual Note Controls:  
-![screenshot_Notes](../images/ResidentSynthHost_4_Notes.png "screenshot_Notes")  
+![screenshot_Notes](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Notes.png "screenshot_Notes")  
 Ornaments can be configured in the _ResidentSynth_ (see below).  
 The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string uses ":", ";" and whitespace characters as in a CSS _style_ string. It can have up to 127 repeats of `<key>:<ornamentIndex>;` separated by whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
 An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON.
@@ -68,20 +68,20 @@ In equal temperament tuning, with velocityPitchSensitivity set to 1, a velocity 
 (equal temperament) semitone.  
 
 Preset Settings:  
-![screenshot_Settings](../images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
+![screenshot_Settings](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
 Preset settings can be configured in the _ResidentSynth_, and selected from the **Preset Settings** selector. These settings are channel-independent. Selecting one just sets the settings for the current channel.  
 If any setting is subsequently changed in the GUI, the **export modified settings** button is activated, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported settings can then be copied to the _ResidentSynth_'s settingsPresets.js configuration file.  
 The **Trigger key** is a note number whose NOTE_ON will trigger the following settings in the list in the **Preset Settings** selector, rather than play a note. The trigger key can be any number from 0 to 127.  
 
 Recordings:  
-![screenshot_Recording](../images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
+![screenshot_Recording](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
 Recordings made with this application can be saved and added to the _ResidentSynth_'s configuration. When that has been done, and the synth is reloaded, they are added to the **Recordings** selector.  
 Clicking the **play recording** button plays the selected recording. (The button changes into a **cancel playback** button).  
 The **start recording channel** button initiates recording of the current channel. (Its text includes the current channel index.) While recording, this button becomes a **stop recording channel** button, which, when clicked, saves the recording to the user's _Downloads_ folder.  
 Note that while only one channel at a time can be recorded, it _is_ possible to simultaneously play back a recording of one or more other channels. These channels will then be included in the output recording. Overdubbing is possible.
 
 Simple Input:  
-![screenshot_SimpleInput](../images/ResidentSynthHost_7_SimpleInput.png "screenshot_SimpleInput")  
+![screenshot_SimpleInput](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_7_SimpleInput.png "screenshot_SimpleInput")  
 These controls can be used when no other MIDI Input device is attached to the computer.  
 They can also be useful while debugging, since both hands can be kept free while holding a note.
 
