@@ -957,10 +957,12 @@ ResSynth.residentSynth = (function(window)
         },
         updatePitchWheelSensitivity = function(channel, semitones)
         {
-            let currentNoteOns = controls.currentNoteOns;
+            let chanControls = channelControls[channel],
+                currentNoteOns = chanControls.currentNoteOns;
+
             if(currentNoteOns !== undefined && currentNoteOns.length > 0) // required for sounding notes
             {
-                let pitchWheel14Bit = channelControls[channel].pitchWheel14Bit,
+                let pitchWheel14Bit = chanControls.pitchWheel14Bit,
                     nNoteOns = currentNoteOns.length;
 
                 for(let i = 0; i < nNoteOns; ++i)
@@ -970,7 +972,7 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            channelControls[channel].pitchWheelSensitivity = semitones; // for new noteOns
+            chanControls.pitchWheelSensitivity = semitones; // for new noteOns
         },
 
         updateVelocityPitchSensitivity = function(channel, data2)
@@ -1483,113 +1485,16 @@ ResSynth.residentSynth = (function(window)
         var
             command = messageData[0] & 0xF0,
             channel = messageData[0] & 0xF,
-            data1 = messageData[1],
-            data2 = messageData[2];
+            control = messageData[1],
+            value = messageData[2];
 
-        function checkCommandExport(checkCommand)
+        function handleControl(channel, control, value)
         {
-            if(checkCommand === undefined)
-            {
-                console.warn("Illegal command");
-            }
-            else
-            {
-                let cmd = commands.find(cmd => cmd === checkCommand);
-                if(cmd === undefined)
-                {
-                    console.warn("Command " + checkCommand.toString(10) + " (0x" + checkCommand.toString(16) + ") is not supported.");
-                }
-            }
-        }
-        function handleNoteOff(channel, data1)
-        {
-            checkCommandExport(CMD.NOTE_OFF);
-            // console.log("residentSynth NoteOff: channel:" + channel + " note:" + data1 + " velocity:" + data2);
-            noteOff(channel, data1);
-        }
-        function handleNoteOn(channel, data1, data2)
-        {
-            checkCommandExport(CMD.NOTE_ON);
-            // console.log("residentSynth NoteOn: channel:" + channel + " note:" + data1 + " velocity:" + data2);
-            if(data2 === 0)
-            {
-                noteOff(channel, data1);
-            }
-            else
-            {
-                noteOn(channel, data1, data2);
-            }
-        }
-        function handleControl(channel, data1, data2, that)
-        {
-            function checkControlExport(control)
-            {
-                if(control === undefined)
-                {
-                    console.warn("Illegal control");
-                }
-                else
-                {
-                    let ctl = controls.find(ctl => ctl === control);
-                    if(ctl === undefined)
-                    {
-                        console.warn("Controller " + control.toString(10) + " (0x" + control.toString(16) + ") is not supported.");
-                    }
-                }
-            }
-            function setModwheel(channel, value)
-            {
-                checkControlExport(CTL.MODWHEEL);
-                // console.log("residentSynth ModWheel: channel:" + channel + " value:" + value);
-                updateModWheel(channel, value);
-            }
-            function setVolume(channel, value)
-            {
-                checkControlExport(CTL.VOLUME);
-                // console.log("residentSynth Volume: channel:" + channel + " value:" + value);
-                updateVolume(channel, value);
-            }
-            function setPan(channel, value)
-            {
-                checkControlExport(CTL.PAN);
-                // console.log("residentSynth Pan: channel:" + channel + " value:" + value);
-                updatePan(channel, value);
-            }
-            function setMixtureIndex(channel, mixtureIndex)
-            {
-                checkControlExport(CTL.MIXTURE_INDEX);
-                // console.log("residentSynth Pan: channel:" + channel + " value:" + value);
-                updateMixtureIndex(channel, mixtureIndex);
-            }
-            function setReverberation(channel, value)
-            {
-                checkControlExport(CTL.REVERBERATION);
-                // console.log("residentSynth Reverberation: channel:" + channel + " value:" + value);
-                updateReverberation(channel, value);
-            }
-
-            function setSoundFontIndex(channel, fontIndex)
-            {
-                checkControlExport(CTL.SOUND_FONT_INDEX);
-                updateSoundFontIndex(channel, fontIndex);
-            }
-            function setPitchWheelSensitivity(channel, semitones)
-            {
-                updatePitchWheelSensitivity(channel, semitones);
-            }
             // Converts the midiValue (in range 0..127) to an integer value in range -50..+50.
             // Used by both setSemitonesOffset(...) and setCentsOffset(...).
             function getOffsetValue(midiValue)
             {
                 return Math.round((midiValue / 1.27) - 50);
-            }
-            function setSemitonesOffset(channel, midiValue)
-            {
-                channelControls[channel].semitonesOffset = getOffsetValue(midiValue);
-            }
-            function setCentsOffset(channel, midiValue)
-            {
-                channelControls[channel].centsOffset = getOffsetValue(midiValue);
             }
 
             // Note that the ResidentSynthHost does not call this function (i.e. send SET_SETTINGS messages)
@@ -1617,132 +1522,86 @@ ResSynth.residentSynth = (function(window)
                 updatePitchWheelSensitivity(channel, settings.pitchWheelSensitivity);
                 updateVelocityPitchSensitivity(channel, settings.velocityPitchSensitivity);
             }
-            // sets channelControl.tuning to the first tuning in the group.
-            function setTuningGroupIndex(channel, tuningGroupIndex)
-            {
-                updateTuningGroupIndex(channel, tuningGroupIndex);
-            };
-            function setTuning(channel, tuningIndex)
-            {
-                updateTuning(channel, tuningIndex);
-            };
-            function setVelocityPitchSensitivity(channel, data2)
-            {
-                updateVelocityPitchSensitivity(channel, data2);
-            }
-            function setOrnament(channel, ornamentIndex)
-            {
-                updateOrnamentIndex(channel, ornamentIndex);
-            }
-            function allControllersOff(channel)
-            {
-                checkControlExport(CTL.ALL_CONTROLLERS_OFF);
-                // console.log("residentSynth AllControllersOff: channel:" + channel);
 
-                allSoundOff(channel);
-                setControllerDefaults(channel);
-            }
-            function setAllSoundOff(channel)
-            {
-                checkControlExport(CTL.ALL_SOUND_OFF);
-                // console.log("residentSynth AllSoundOff: channel:" + channel);
-                allSoundOff(channel);
-            }
-
-            checkCommandExport(CMD.CONTROL_CHANGE);
-
-            switch(data1)
+            switch(control)
             {
                 case CTL.MODWHEEL:
-                    setModwheel(channel, data2);
+                    updateModWheel(channel, value);
                     break;
                 case CTL.VOLUME:
-                    setVolume(channel, data2);
+                    updateVolume(channel, value);
                     break;
                 case CTL.PAN:
-                    setPan(channel, data2);
+                    updatePan(channel, value);
                     break;
                 case CTL.MIXTURE_INDEX:
-                    setMixtureIndex(channel, data2);
+                    updateMixtureIndex(channel, value);
                     break;
                 case CTL.REVERBERATION:
-                    setReverberation(channel, data2);
+                    updateReverberation(channel, value);
                     break;
                 case CTL.SOUND_FONT_INDEX:
-                    setSoundFontIndex(channel, data2);
+                    updateSoundFontIndex(channel, value);
                     break;
                 case CTL.PITCH_WHEEL_SENSITIVITY:
-                    setPitchWheelSensitivity(channel, data2);
+                    updatePitchWheelSensitivity(channel, value);
                     break;
                 case CTL.SEMITONES_OFFSET:
-                    setSemitonesOffset(channel, data2);
+                    channelControls[channel].semitonesOffset = getOffsetValue(value);
                     break;
                 case CTL.CENTS_OFFSET:
-                    setCentsOffset(channel, data2);
+                    channelControls[channel].centsOffset = getOffsetValue(value);
                     break;
                 case CTL.SET_SETTINGS:
-                    setSettings(channel, data2);
+                    setSettings(channel, value);
                     break;
                 case CTL.TUNING_GROUP_INDEX:
-                    setTuningGroupIndex(channel, data2); // sets tuning to the first tuning in the group
+                    updateTuningGroupIndex(channel, value); // sets tuning to the first tuning in the group
                     break;
                 case CTL.TUNING_INDEX:
-                    setTuning(channel, data2); // sets tuning to the tuning at value (=index) in the group
+                    updateTuning(channel, value); // sets tuning to the tuning at value (=index) in the group 
                     break;
                 case CTL.VELOCITY_PITCH_SENSITIVITY:
-                    setVelocityPitchSensitivity(channel, data2);
+                    updateVelocityPitchSensitivity(channel, value);
                     break;
                 case CTL.SET_ORNAMENT:
-                    setOrnament(channel, data2);
+                    updateOrnamentIndex(channel, value);
                     break;
                 case CTL.ALL_CONTROLLERS_OFF:
-                    allControllersOff(channel);
+                    allSoundOff(channel);
+                    setControllerDefaults(channel);
                     break;
                 case CTL.ALL_SOUND_OFF:
-                    setAllSoundOff(channel);
+                    allSoundOff(channel);
                     break;
-
                 default:
-                    // FINE versions of controllers are not supported (i.e. are ignored by) this synth.
-                    console.warn(`Controller ${data1.toString(10)} (0x${data1.toString(16)}) is not supported.`);
+                    console.warn(`Controller ${control.toString(10)} (0x${control.toString(16)}) is not supported.`);
             }
-        }
-
-        // Neither the residentSynth nor the residentSynthHost process " +
-        // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages,\n" +
-        // so the input device should be set up so as not to send them.\n" +
-        // A separate recordings editor could, of course, " +
-        // edit note velocities and add additional messages of the types " +
-        // that _are_ implemented by the residentSynth.\n",
-        function handlePreset(channel, data1)
-        {
-            checkCommandExport(CMD.PRESET);
-
-            channelControls[channel].presetIndex = data1;
-        }
-        function handlePitchWheel(channel, data1, data2)
-        {
-            checkCommandExport(CMD.PITCHWHEEL);
-            //console.log("residentSynth PitchWheel: channel:" + channel + " data1:" + data1 + " data2:" + data2);
-            updatePitchWheel(channel, data1, data2);
         }
 
         switch(command)
         {
             case CMD.NOTE_OFF:
-                handleNoteOff(channel, data1);
+                noteOff(channel, control);
                 break;
             case CMD.NOTE_ON:
-                handleNoteOn(channel, data1, data2);
+                if(value === 0)
+                {
+                    noteOff(channel, control);
+                }
+                else
+                {
+                    noteOn(channel, control, value);
+                }
                 break;
             case CMD.CONTROL_CHANGE:
-                handleControl(channel, data1, data2, this);
+                handleControl(channel, control, value);
                 break;
             case CMD.PRESET:
-                handlePreset(channel, data1);
+                channelControls[channel].presetIndex = control;
                 break;
             case CMD.PITCHWHEEL:
-                handlePitchWheel(channel, data1, data2);
+                updatePitchWheel(channel, control, value);
                 break;
             default:
                 console.assert(false, "The residentSynth does not process\n" +
