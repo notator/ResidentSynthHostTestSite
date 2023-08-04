@@ -20,6 +20,7 @@ ResSynth.host = (function(document)
         nextSettingsIndex = 1,
         allLongInputControls = [], // used by AllControllersOff control
         triggerKey,
+        recordings, // the recordings in recordings.js converted
         recording = undefined, // initialized by startRecording(), reset by stopRecording()
         recordingChannelInfo = undefined, // used while recording a channel
         playbackChannelInfos = undefined, // used while playing back or recording a channel
@@ -912,7 +913,7 @@ ResSynth.host = (function(document)
                 cancelPlaybackButton = getElem("cancelPlaybackButton"),
                 recordingSelect = getElem("recordingSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
-                playbackRecording = synth.recordings[recordingIndex];
+                playbackRecording = ResSynth.recordings[recordingIndex];
 
             playRecordingButton.style.display = "none";
             cancelPlaybackButton.style.display = "block";
@@ -1958,10 +1959,9 @@ ResSynth.host = (function(document)
                 // The synth has a private array, parallel to the names, containing the MIDI recordings
                 function setRecordingSelect()
                 {
-                    let recordingSelect = getElem("recordingSelect"),
-                        recordings = synth.recordings;
+                    let recordingSelect = getElem("recordingSelect");
 
-                    for(var i = 0; i < recordings.length; i++)
+                    for(var i = 0; i < recordings.length; i++) // recordings is global (has been retrieved from recodings.js)
                     {
                         let option = new Option();
 
@@ -2231,6 +2231,60 @@ ResSynth.host = (function(document)
                 }
             }
 
+            // returns an array of recordings
+            // Each recording object has three attributes:
+            //   name -- the recording's name
+            //   settingsArray: an array of settings, each of which contains the initial control settings for a channel in the recording
+            //   messages: an array of msg objects, each of which has two attributes
+            //     1) msg: a UintArray of the form[status, data1, data2] and
+            //     2) delay: an integer, the number of milliseconds to delay before sending the msg.
+            function getRecordings()	
+            {
+                function getMessageData(msgStringsArray)
+                {
+                    let msgData = [];
+                    for(var i = 0; i < msgStringsArray.length; i++)
+                    {
+                        let msgStr = msgStringsArray[i],
+                            strData = msgStr.split(","),
+                            status = parseInt(strData[0]),
+                            data1 = parseInt(strData[1]),
+                            data2 = parseInt(strData[2]),
+                            msPositionReRecording = parseInt(strData[3]),
+                            msg = new Uint8Array([status, data1, data2]),
+                            msgObj = {};
+
+                        msgObj.msg = msg;
+                        msgObj.msPositionReRecording = msPositionReRecording;
+
+                        msgData.push(msgObj);
+                    }
+                    return msgData;
+                }
+
+                let wRecordings = ResSynth.recordings,
+                    returnRecordings = [];
+
+                if(wRecordings !== undefined)
+                {
+                    for(var i = 0; i < wRecordings.length; i++)
+                    {
+                        let record = wRecordings[i],
+                            recording = {};
+
+                        recording.name = record.name;
+                        recording.channels = record.channels;
+                        for(var channelIndex = 0; channelIndex < recording.channels.length; channelIndex++)
+                        {
+                            recording.channels[channelIndex].messages = getMessageData(recording.channels[channelIndex].messages);
+                        }
+
+                        returnRecordings.push(recording);
+                    }
+                }
+                return returnRecordings;
+            }
+
             function setInitialDivsDisplay()
             {
                 getElem("loadingMsgDiv").style.display = "none";
@@ -2246,6 +2300,7 @@ ResSynth.host = (function(document)
 
             setupInputDevice();
             setAudioOutputDeviceSelect();
+            recordings = getRecordings();  // loads definitions from recordings.js.
             synth = new ResSynth.residentSynth.ResidentSynth(); // loads definitions from files in residentSynth/config.
             setInitialDivsDisplay();
         },

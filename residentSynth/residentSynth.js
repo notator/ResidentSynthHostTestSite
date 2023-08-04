@@ -664,60 +664,6 @@ ResSynth.residentSynth = (function(window)
             return mixtures;
         },
 
-        // returns an array of recordings
-        // Each recording object has three attributes:
-        //   name -- the recording's name
-        //   settingsArray: an array of settings, each of which contains the initial control settings for a channel in the recording
-        //   messages: an array of msg objects, each of which has two attributes
-        //     1) msg: a UintArray of the form[status, data1, data2] and
-        //     2) delay: an integer, the number of milliseconds to delay before sending the msg.
-        getRecordings = function()	
-        {
-            function getMessageData(msgStringsArray)
-            {
-                let msgData = [];
-                for(var i = 0; i < msgStringsArray.length; i++)
-                {
-                    let msgStr = msgStringsArray[i],
-                        strData = msgStr.split(","),
-                        status = parseInt(strData[0]),
-                        data1 = parseInt(strData[1]),
-                        data2 = parseInt(strData[2]),
-                        msPositionReRecording = parseInt(strData[3]),
-                        msg = new Uint8Array([status, data1, data2]),
-                        msgObj = {};
-
-                    msgObj.msg = msg;
-                    msgObj.msPositionReRecording = msPositionReRecording;
-
-                    msgData.push(msgObj);
-                }
-                return msgData;
-            }
-
-            let wRecordings = ResSynth.recordings,
-                returnRecordings = [];
-
-            if(wRecordings !== undefined)
-            {
-                for(var i = 0; i < wRecordings.length; i++)
-                {
-                    let record = wRecordings[i],
-                        recording = {};
-
-                    recording.name = record.name;
-                    recording.channels = record.channels;
-                    for(var channelIndex = 0; channelIndex < recording.channels.length; channelIndex++)
-                    {
-                        recording.channels[channelIndex].messages = getMessageData(recording.channels[channelIndex].messages);
-                    }
-
-                    returnRecordings.push(recording);
-                }
-            }
-            return returnRecordings;
-        },
-
         // returns an array of Settings objects containing the values set in the settingsPresets.js file.
         // The values in the attributes of the returned Settings objects are immutable.
         // Clone using {...settings} to create an object having mutable attributes. (Attributes can never be created or destroyed.)
@@ -1261,17 +1207,22 @@ ResSynth.residentSynth = (function(window)
 
         /*****************************************/
 
+        setFontAndTuningDefaults = function(channel)
+        {
+            updateSoundFontIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
+            updateMixtureIndex(channel, 0);
+            updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
+            updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's keyPitch value in NoteOn. 
+            updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's keyPitch value in NoteOn. 
+
+            updateVelocityPitchSensitivity(channel, 0);
+            updateOrnamentIndex(channel, -1);
+        },
         setControllerDefaults = function(channel)
         {
             let constants = ResSynth.constants,
                 controlDefaultValue = constants.controlDefaultValue,
                 pitchWheelDefaultValue = constants.commandDefaultValue(CMD.PITCHWHEEL);
-
-            updateSoundFontIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
-            updateMixtureIndex(channel, controlDefaultValue(CTL.MIXTURE_INDEX));
-            updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
-            updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's keyPitch value in NoteOn. 
-            updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's keyPitch value in NoteOn. 
 
             updatePitchWheel(channel, pitchWheelDefaultValue, pitchWheelDefaultValue);
             updateModWheel(channel, controlDefaultValue(CTL.MODWHEEL));
@@ -1279,9 +1230,6 @@ ResSynth.residentSynth = (function(window)
             updatePan(channel, controlDefaultValue(CTL.PAN));
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
             updatePitchWheelSensitivity(channel, controlDefaultValue(CTL.PITCH_WHEEL_SENSITIVITY));
-
-            updateVelocityPitchSensitivity(channel, 0);
-            updateOrnamentIndex(channel, -1);
         },
 
         CMD = ResSynth.constants.COMMAND,
@@ -1389,10 +1337,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "webAudioFonts", {value: channelPresets.allWebAudioFonts, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
-            Object.defineProperty(this, "recordings", {value: getRecordings(), writable: false});
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
-            // ornaments attribute is not needed
-
             getTuningGroups(this.tuningsFactory);
             Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
         },
@@ -1445,6 +1390,7 @@ ResSynth.residentSynth = (function(window)
 
             let controlState = {};
             channelControls.push(controlState);
+            setFontAndTuningDefaults(channel);
             setControllerDefaults(channel);
 
             channelControls[channel].currentNoteOns = [];
