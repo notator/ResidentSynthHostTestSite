@@ -1288,7 +1288,8 @@ ResSynth.residentSynth = (function(window)
         CTL = ResSynth.constants.CONTROL,
         MISC = ResSynth.constants.MISC,
 
-        // The commands and controls arrays are part of a standard ResSynth synth's interface.
+        // The commands and controls arrays are part of a standard ResSynth synth's interface,
+        // These attributes are not actually used by the ResidentSynth's code.
         commands =
             [
                 //Neither SYSEX, AFTERTOUCH nor CHANNEL_PRESSURE are implemented.
@@ -1299,12 +1300,14 @@ ResSynth.residentSynth = (function(window)
                 CMD.PITCHWHEEL
             ],
 
+        // The commands and controls arrays are part of a standard ResSynth synth's interface,
+        // These attributes are not actually used by the ResidentSynth's code.
         controls =
             [
                 // standard 3-byte controllers.
-                // CTL.BANK: The ResSynth.webAudioFont definition contains
-                // a simple array of presets, not contained in banks,
-                // so that the MIDI BANK control never needs to be called.
+                // CTL.BANK is never used: Each ResSynth.webAudioFont definition contains a simple
+                // array of presets, not contained in banks, so SOUND_FONT_INDEX and PRESET are
+                // used instead of BANK and PRESET.
                 CTL.MODWHEEL,
                 CTL.VOLUME,
                 CTL.PAN,
@@ -1330,7 +1333,7 @@ ResSynth.residentSynth = (function(window)
         {
             if(!(this instanceof ResidentSynth))
             {
-                return new ResidentSynth(midiConstants);
+                return new ResidentSynth();
             }
 
             // WebMIDIAPI §4.6 -- MIDIPort interface
@@ -1349,7 +1352,7 @@ ResSynth.residentSynth = (function(window)
 
             /*** Extensions for software synths ***/
             // The synth author's webpage hosting the synth. 
-            Object.defineProperty(this, "url", {value: "https://github.com/notator/WebMIDISynthHost", writable: false});
+            Object.defineProperty(this, "url", {value: "https://github.com/notator/ResidentSynthHostTestSite", writable: false});
             // The commands supported by this synth (see above).
             Object.defineProperty(this, "commands", {value: commands, writable: false});
             // The controls supported by this synth (see above).
