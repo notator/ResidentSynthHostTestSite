@@ -106,8 +106,50 @@ The inherited code owes a lot to
 [Sergey Surikov's WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). 
 Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets 
 very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his
-`WebAudioFontReverberator`.  
+`WebAudioFontReverberator`. 
 
+#### MIDI Messages
+See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/TestSite/residentSynth/constants.js).
+##### Commands
+* <em>Implemented</em>:<br />
+   NOTE_OFF (128, 0x80)  
+   NOTE_ON (144, 0x90) <em><small>(A NOTE_ON with velocity 0 is also treated as a NOTE_OFF.)</small></em>  
+   CONTROL_CHANGE (176, 0xB0)  
+   PRESET(192, 0xC0)  
+   PITCHWHEEL (224, 0xE0)
+
+* <em>Not Implemented</em>:<br />
+   AFTERTOUCH (160, 0xA0)   
+   CHANNEL_PRESSURE (208, 0xD0)  
+   SYSEX (240, 0xF0)<br />
+
+##### Standard Controls
+* <em>Implemented</em>:<br />
+	MODWHEEL (CC 1, 0x1)  
+	VOLUME (CC 7, 0x7)  
+	PAN (CC 10, 0xA)  
+	EXPRESSION (CC 11, 0xB)  
+	ALL_SOUND_OFF (CC 120, 0x78)  
+	ALL_CONTROLLERS_OFF (CC 121, 0x79)
+
+* <em>NB: Not Used</em>:<br />
+   BANK (CC 0, 0x0) (See SOUND_FONT_INDEX)  
+   ALL_NOTES_OFF (CC 123, 0x7B)
+
+##### Non-standard Controls
+* <em>Implemented</em> (See documentation below):<br />
+	REVERBERATION (CC 91, 0x5B)  
+	SOUND_FONT_INDEX (CC 0, 0x0)  
+	PITCH_WHEEL_SENSITIVITY (CC 16, 0x10)  
+	MIXTURE_INDEX (CC 17, 0x11)  
+	TUNING_GROUP_INDEX (CC 18, 0x12)  
+	TUNING_INDEX (CC 19, 0x13)  
+	SEMITONES_OFFSET (CC 80, 0x50)  
+	CENTS_OFFSET (CC 81, 0x51)  
+	SET_SETTINGS (CC 82, 0x52)  
+	VELOCITY_PITCH_SENSITIVITY (CC 83, 0x53)  
+	SET_ORNAMENT (CC 75, 0x4B)
+	
 #### Using the _ResidentSynth_ in other web applications:
 
 1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
@@ -150,10 +192,11 @@ Ornaments are implemented in the _ResidentSynth_ using a non-standard SET_ORNAME
 To add an ornament to a NOTE_ON, send a SET_ORNAMENT control message (with the index of the required ornament) 
 immediately before sending the NOTE_ON itself. After executing the ornament, the NOTE_ON command automatically resets the synth's state to "no ornament". The SET_ORNAMENT control message has to be sent again if required.
 ##### Recordings
+The _ResidentSynth_ has no special functions related to recordings.  
 The _ResidentSynthHost_ can record and save sequences of MIDI messages sent to the _ResidentSynth_.
 The recordings are saved as JSON files in the user's _Downloads_ folder, from where they can be copied into the [recordings.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/recordings.js) file (in the application's root folder).  
-If a recording is present in the recordings.js file when the _ResidentSynthHost_ starts up, it will appear in the recordings selector and can be played back.  
-The _ResidentSynth_ has no recordings-related functions.
+If a recording is present in the recordings.js file when the _ResidentSynthHost_ starts up, it will appear in its recordings selector and can be played back.  
+
 ##### Settings Presets
 Each settings preset, defined in settingsPresets.js, is a complete set of settings for a single channel. The creation of such presets is described in the above _ResidentSynthHost_ documentation. They can, of course also be edited manually.  
 To set a settings preset in a MIDI channel, send it a SET_SETTINGS message with a value giving the required settings index in the settingsPresets.js file.
@@ -166,48 +209,6 @@ The following types of tuning can be created by the synth using the (configurabl
 - free keyboard : warped tunings in which the only restriction is that pitches ascend from left to right of the keyboard
 
 To set a channel to a particular tuning in a channel, send the tuning group index in a SET_TUNING_GROUP message, and the tuning index (in the group) in a SET_TUNING message. This provides the tuning's address in tuningDefs.js.
-
-#### MIDI Messages
-See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/TestSite/residentSynth/constants.js).
-##### Commands
-* <em>Implemented</em>:<br />
-   NOTE_OFF (128, 0x80)  
-   NOTE_ON (144, 0x90) <em><small>(A NOTE_ON with velocity 0 is also treated as a NOTE_OFF.)</small></em>  
-   CONTROL_CHANGE (176, 0xB0)  
-   PRESET(192, 0xC0)  
-   PITCHWHEEL (224, 0xE0)
-
-* <em>Not Implemented</em>:<br />
-   AFTERTOUCH (160, 0xA0)   
-   CHANNEL_PRESSURE (208, 0xD0)  
-   SYSEX (240, 0xF0)<br />
-
-##### Standard Controls
-* <em>Implemented</em>:<br />
-	MODWHEEL (CC 1, 0x1)  
-	VOLUME (CC 7, 0x7)  
-	PAN (CC 10, 0xA)  
-	EXPRESSION (CC 11, 0xB)  
-	ALL_SOUND_OFF (CC 120, 0x78)  
-	ALL_CONTROLLERS_OFF (CC 121, 0x79)
-
-* <em>NB: Not Used</em>:<br />
-   BANK (CC 0, 0x0)  
-   ALL_NOTES_OFF (CC 123, 0x7B)
-
-##### Non-standard Controls
-* <em>Implemented</em> (See documentation below):<br />
-	REVERBERATION (CC 91, 0x5B)  
-	SOUND_FONT_INDEX (CC 0, 0x0)  
-	PITCH_WHEEL_SENSITIVITY (CC 16, 0x10)  
-	MIXTURE_INDEX (CC 17, 0x11)  
-	TUNING_GROUP_INDEX (CC 18, 0x12)  
-	TUNING_INDEX (CC 19, 0x13)  
-	SEMITONES_OFFSET (CC 80, 0x50)  
-	CENTS_OFFSET (CC 81, 0x51)  
-	SET_SETTINGS (CC 82, 0x52)  
-	VELOCITY_PITCH_SENSITIVITY (CC 83, 0x53)  
-	SET_ORNAMENT (CC 75, 0x4B)
 
 James Ingram  
 August 2023  
