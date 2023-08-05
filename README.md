@@ -109,16 +109,14 @@ Not only is the code for loading and adjusting [WebAudioFont](https://github.com
 very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his
 `WebAudioFontReverberator`.  
 
-#### Use in other web applications
+#### Using the _ResidentSynth_ in other web applications
 
 1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
 2. adjust the files in the in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
-3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html).
+3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that `recordings.js` is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
 4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
-5. call `synth.open();`. By web standard, this has to be done after a user interaction with the GUI.
-6. send MIDI messages to the synth using `synth.send(midiMessage)`.
-
-The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
+5. call `synth.open();`. This has to be done after a user interaction with the GUI in order to comply with a web standard.
+6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
 
 
 #### Configuration
