@@ -68,10 +68,10 @@ The **Trigger key** is a note number whose NOTE_ON will trigger the following se
 
 Recordings:  
 ![screenshot_Recording](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
-The _ResidentSynthHost_ can record and save the MIDI messages being set to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s `recordings.js` configuration file (in the application's root folder). On loading, the _ResidentSynthHost_ loads such recordings into its **Recordings** selector.  
+The _ResidentSynthHost_ can record and save the MIDI messages being set to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s `recordings.js` file (in the application's root folder). The _ResidentSynthHost_ loads such recordings into its **Recordings** selector on startup. The `recordings.js` file may be missing or empty. 
 Clicking the **play recording** button plays the selected recording. (The button changes into a **cancel playback** button).  
 The **start recording channel** button initiates recording of the current channel. (Its text includes the current channel index.) While recording, this button becomes a **stop recording channel** button, which, when clicked, saves the recording to the user's _Downloads_ folder.  
-Note that while only one channel at a time can be recorded, it _is_ possible to simultaneously play back a recording of one or more other channels. These channels will then be included in the output recording. Overdubbing is possible.
+Note that while only one channel at a time can be recorded, it _is_ possible to simultaneously play back a recording of one or more other channels. These channels will then be included in the output recording. In other words, overdubbing is possible.
 
 Simple Input:  
 ![screenshot_SimpleInput](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_7_SimpleInput.png "screenshot_SimpleInput")  
