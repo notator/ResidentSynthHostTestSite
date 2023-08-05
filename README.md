@@ -171,54 +171,49 @@ The following types of tuning can be created by the synth using the (configurabl
 - free keyboard : warped tunings in which the only restriction is that pitches ascend from left to right of the keyboard
 
 
-
 The _ResidentSynth_ is also used by my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
 
 #### MIDI Messages
 See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/TestSite/residentSynth/constants.js).
 ##### Commands
-* <em>Implemented</em>:
+* <em>Implemented</em>:<br />
+   NOTE_OFF (128, 0x80)  
+   NOTE_ON (144, 0x90) <em><small>(A NOTE_ON with velocity 0 is also treated as a NOTE_OFF.)</small></em>  
+   CONTROL_CHANGE (176, 0xB0)  
+   PRESET(192, 0xC0)  
+   PITCHWHEEL (224, 0xE0)
 
-   NOTE_OFF (0x80)  
-   NOTE_ON (0x90) <em><small>(A NOTE_ON with velocity 0 is also treated as a NOTE_OFF.)</small></em>  
-   CONTROL_CHANGE (0x80)  
-   PRESET(0xC0)  
-   PITCHWHEEL (0xE0)
+* <em>Not Implemented</em>:<br />
+   AFTERTOUCH (160, 0xA0)   
+   CHANNEL_PRESSURE (208, 0xD0)  
+   SYSEX (240, 0xF0)<br />
 
-* <em>Not Implemented</em>:
-
-   AFTERTOUCH (0xA0)   
-   CHANNEL_PRESSURE (0xD0)  
-   SYSEX (0xF0)
 ##### Standard Controls
-* <em>Implemented</em>:
+* <em>Implemented</em>:<br />
+	MODWHEEL (CC 1, 0x1)  
+	VOLUME (CC 7, 0x7)  
+	PAN (CC 10, 0xA)  
+	EXPRESSION (CC 11, 0xB)  
+	ALL_SOUND_OFF (CC 120, 0x78)  
+	ALL_CONTROLLERS_OFF (CC 121, 0x79)
 
-	MODWHEEL (CC 1)  
-	VOLUME (CC 7)  
-	PAN (CC 10)  
-	EXPRESSION (CC 11)  
-	ALL_SOUND_OFF (CC 120)  
-	ALL_CONTROLLERS_OFF (CC 121)
-
-* <em>NB: Not Used</em>:
-
-   BANK (CC 0)  
-   ALL_NOTES_OFF (CC 123)
+* <em>NB: Not Used</em>:<br />
+   BANK (CC 0, 0x0)  
+   ALL_NOTES_OFF (CC 123, 0x7B)
 
 ##### Non-standard Controls
-* <em>Implemented</em> (See documentation below):
-
-	REVERBERATION (CC 91)  
-	SOUND_FONT_INDEX (CC 16)  
-	PITCH_WHEEL_SENSITIVITY (CC 17)  
-	MIXTURE_INDEX (CC 18)  
-	TUNING_GROUP_INDEX (CC 19)  
-	TUNING_INDEX (CC 80)  
-	SEMITONES_OFFSET (CC 81)  
-	CENTS_OFFSET (CC 82)  
-	SET_SETTINGS (CC 83)  
-	VELOCITY_PITCH_SENSITIVITY (CC 75)  
-	SET_ORNAMENT (CC 76)
+* <em>Implemented</em> (See documentation below):<br />
+	REVERBERATION (CC 91, 0x5B)  
+	SOUND_FONT_INDEX (CC 16, 0x10)  
+	PITCH_WHEEL_SENSITIVITY (CC 17, 0x11)  
+	MIXTURE_INDEX (CC 18, 0x12)  
+	TUNING_GROUP_INDEX (CC 19, 0x13)  
+	TUNING_INDEX (CC 80, 0x50)  
+	SEMITONES_OFFSET (CC 81, 0x51)  
+	CENTS_OFFSET (CC 82, 0x52)  
+	SET_SETTINGS (CC 83, 0x53)  
+	VELOCITY_PITCH_SENSITIVITY (CC 75, 0x4B)  
+	SET_ORNAMENT (CC 76, 0x4C)
 
 James Ingram  
 August 2023  
