@@ -4,9 +4,8 @@ This repository contains two major branches:
 &nbsp;&nbsp;&nbsp;&nbsp;**main**: the current stable version, which can be used [here](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html).  
 &nbsp;&nbsp;&nbsp;&nbsp;**testSite**: the unstable development version, which can be tested [here](https://james-ingram-act-two.de/open-source/ResidentSynthHostTestSite/host.html).  
 Software synthesizers like the _ResidentSynth_ can be included in any web application as a substitute 
-for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my
-[AssistantPerformer](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)
-web application. 
+for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
+ 
 
 Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.  
 Issues relating to either of them should be raised here.  
@@ -53,8 +52,8 @@ The **AllControllersOff** button silences the _ResidentSynth_, and sets the six 
 
 Individual Note Controls:  
 ![screenshot_Notes](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Notes.png "screenshot_Notes")  
-Ornaments can be configured in the _ResidentSynth_, and are described more fully in the ResidentSynth ornaments documentation below.    
-The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string uses ":", ";" and whitespace characters as in a CSS _style_ string. It can have up to 127 repeats of `<key>:<ornamentIndex>;` separated by whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
+Ornaments can be configured in the _ResidentSynth_, and are described more fully in its _Ornaments_ documentation below.    
+The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
 The **velocityPitchSensitivity** input is a floating point value between 0 and 1. This value
 raises an individual note's output pitch depending on its velocity. If this value is 0, the velocity has no effect
 on the pitch. If this value is 1, the velocity has some maximum effect, depending on the current tuning.
@@ -68,7 +67,7 @@ The **Trigger key** is a note number whose NOTE_ON will trigger the following se
 
 Recordings:  
 ![screenshot_Recording](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
-The _ResidentSynthHost_ can record and save the MIDI messages it sends to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s `recordings.js` file (in the application's root folder). The _ResidentSynthHost_ loads such recordings into its **Recordings** selector on startup. The `recordings.js` file may be missing or empty. 
+The _ResidentSynthHost_ can record and save the MIDI messages it sends to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s [recordings.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/recordings.js) file (in the application's root folder). The _ResidentSynthHost_ loads such recordings into its **Recordings** selector on startup. The recordings.js file may be missing or empty. 
 Clicking the **play recording** button plays the selected recording. (The button changes into a **cancel playback** button).  
 The **start recording channel** button initiates recording of the current channel. (Its text includes the current channel index.) While recording, this button becomes a **stop recording channel** button, which, when clicked, saves the recording to the user's _Downloads_ folder.  
 Note that while only one channel at a time can be recorded, it _is_ possible to simultaneously play back a recording of one or more other channels. These channels will then be included in the output recording. In other words, overdubbing is possible.
@@ -109,29 +108,27 @@ Not only is the code for loading and adjusting [WebAudioFont](https://github.com
 very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his
 `WebAudioFontReverberator`.  
 
-#### Using the _ResidentSynth_ in other web applications
+#### Using the _ResidentSynth_ in other web applications:
 
 1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
 2. adjust the files in the in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
-3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that `recordings.js` is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
+3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
 4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
 5. call `synth.open();`<br /> In order to comply with a web standard, this has to be done after a user interaction with the GUI.
 6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
 
 
 #### Configuration
-The _ResidentSynth_ can be configured by editing the (JSON) files in the
+The _ResidentSynth_ can be configured by editing the files in the
 [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/TestSite/residentSynth/config).  
 This currently contains:  
-&nbsp;&nbsp;&nbsp;&nbsp;webAudioFontFiles (a folder)  
-&nbsp;&nbsp;&nbsp;&nbsp;webAudioFontDefs.js  
-&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js  
-&nbsp;&nbsp;&nbsp;&nbsp;ornamentDefs.js  
-&nbsp;&nbsp;&nbsp;&nbsp;recordings.js  
-&nbsp;&nbsp;&nbsp;&nbsp;settingsPresets.js  
-&nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js  
- 
-   
+&nbsp;&nbsp;&nbsp;&nbsp;[webAudioFontFiles](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config/webAudioFontFiles) (a folder containing clones of Surikov's preset files)  
+&nbsp;&nbsp;&nbsp;&nbsp;[webAudioFontDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/webAudioFontDefs.js) (required)  
+&nbsp;&nbsp;&nbsp;&nbsp;[mixtureDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/mixtureDefs.js) (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;[ornamentDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/ornamentDefs.js) (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;[settingsPresets.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/settingsPresets.js) (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;[tuningDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/tuningDefs.js) (optional)  
+  
 More complete instructions as to how to edit the definitions are given in the respective files, but 
 here's an overview:
 ##### WebAudioFonts and Presets
@@ -154,14 +151,12 @@ To add an ornament to a NOTE_ON, send a SET_ORNAMENT control message (with the i
 immediately before sending the NOTE_ON itself. After executing the ornament, the NOTE_ON command automatically resets the synth's state to "no ornament". The SET_ORNAMENT control message has to be sent again if required.
 ##### Recordings
 The _ResidentSynthHost_ can record and save sequences of MIDI messages sent to the _ResidentSynth_.
-The recordings are saved as JSON files in the user's _Downloads_ folder, from where they can be copied into the recordings.js file.  
-If a recording is present in the recordings.js file when the _ResidentSynthHost_ starts up, it will appear in the recordings
-selector and can be played back.
+The recordings are saved as JSON files in the user's _Downloads_ folder, from where they can be copied into the [recordings.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/recordings.js) file (in the application's root folder).  
+If a recording is present in the recordings.js file when the _ResidentSynthHost_ starts up, it will appear in the recordings selector and can be played back.  
+The _ResidentSynth_ has no recordings-related functions.
 ##### Settings Presets
-Each settings preset, defined in settingsPresets.js, is a complete set of settings for the multichannel _ResidentSynth_.  
-The current settings can be saved to the user's _Downloads_ folder, and copied from there to the settingsPresets.js file.
-If a settings preset is present in the settingsPresets.js file when the _ResidentSynthHost_ starts up, it will appear in the
-preset settings selector, which can be used to set the current settings.
+Each settings preset, defined in settingsPresets.js, is a complete set of settings for a single channel. The creation of such presets is described in the above _ResidentSynthHost_ documentation. They can, of course also be edited manually.  
+To set a settings preset in a MIDI channel, send it a SET_SETTINGS message with a value giving the required settings index in the settingsPresets.js file.
 ##### Tunings
 A _tuning_ associates each of the 127 MIDI keys with a pitch value (expressed as cents above MIDI C0).  
 The following types of tuning can be created by the synth using the (configurable) definitions provided in tuningDefs.js: 
@@ -170,8 +165,7 @@ The following types of tuning can be created by the synth using the (configurabl
 - warped octaves : Tunings containing internally warped octaves
 - free keyboard : warped tunings in which the only restriction is that pitches ascend from left to right of the keyboard
 
-
-The _ResidentSynth_ is also used by my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
+To set a channel to a particular tuning in a channel, send the tuning group index in a SET_TUNING_GROUP message, and the tuning index (in the group) in a SET_TUNING message. This provides the tuning's address in tuningDefs.js.
 
 #### MIDI Messages
 See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/TestSite/residentSynth/constants.js).
@@ -204,16 +198,16 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 ##### Non-standard Controls
 * <em>Implemented</em> (See documentation below):<br />
 	REVERBERATION (CC 91, 0x5B)  
-	SOUND_FONT_INDEX (CC 16, 0x10)  
-	PITCH_WHEEL_SENSITIVITY (CC 17, 0x11)  
-	MIXTURE_INDEX (CC 18, 0x12)  
-	TUNING_GROUP_INDEX (CC 19, 0x13)  
-	TUNING_INDEX (CC 80, 0x50)  
-	SEMITONES_OFFSET (CC 81, 0x51)  
-	CENTS_OFFSET (CC 82, 0x52)  
-	SET_SETTINGS (CC 83, 0x53)  
-	VELOCITY_PITCH_SENSITIVITY (CC 75, 0x4B)  
-	SET_ORNAMENT (CC 76, 0x4C)
+	SOUND_FONT_INDEX (CC 0, 0x0)  
+	PITCH_WHEEL_SENSITIVITY (CC 16, 0x10)  
+	MIXTURE_INDEX (CC 17, 0x11)  
+	TUNING_GROUP_INDEX (CC 18, 0x12)  
+	TUNING_INDEX (CC 19, 0x13)  
+	SEMITONES_OFFSET (CC 80, 0x50)  
+	CENTS_OFFSET (CC 81, 0x51)  
+	SET_SETTINGS (CC 82, 0x52)  
+	VELOCITY_PITCH_SENSITIVITY (CC 83, 0x53)  
+	SET_ORNAMENT (CC 75, 0x4B)
 
 James Ingram  
 August 2023  
