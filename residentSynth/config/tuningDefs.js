@@ -12,9 +12,7 @@ ResSynth.tuningConstructors =
 	FUNCTION_GET_BAROQUE_TUNING: 4
 };
 
-// All tunings are initially related to standard equal temperament A4=440Hz.
-// They can be transposed later using the function:
-//    transposeTuningToA4Frequency(tuning, A4Frequency).
+// All tunings are initially related to standard A4=440Hz.
 ResSynth.tuningDefs =
 	[
 		// Constant factor tunings

@@ -62,13 +62,13 @@ In equal temperament tuning, with velocityPitchSensitivity set to 1, a velocity 
 
 Preset Settings:  
 ![screenshot_Settings](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
-Preset settings can be configured in the _ResidentSynth_, and selected from the **Preset Settings** selector. These settings are channel-independent. Selecting one just sets the settings for the current channel.  
-If any setting is subsequently changed in the GUI, the **export modified settings** button is activated, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported settings can then be copied to the _ResidentSynth_'s `settingsPresets.js` configuration file.  
+Preset settings can be configured in the _ResidentSynth_, and selected from the **Preset Settings** selector. These settings are channel-independent. Selecting one only sets the settings for the current channel.  
+If any individual control setting is subsequently changed in the GUI, the **export modified settings** button is activated, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported settings can then be copied to the _ResidentSynth_'s `settingsPresets.js` configuration file, and loaded into the **Preset Settings** selector when the app restarts.  
 The **Trigger key** is a note number whose NOTE_ON will trigger the following settings in the list in the **Preset Settings** selector, rather than play a note. The trigger key can be any number from 0 to 127.  
 
 Recordings:  
 ![screenshot_Recording](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
-The _ResidentSynthHost_ can record and save the MIDI messages being set to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s `recordings.js` file (in the application's root folder). The _ResidentSynthHost_ loads such recordings into its **Recordings** selector on startup. The `recordings.js` file may be missing or empty. 
+The _ResidentSynthHost_ can record and save the MIDI messages it sends to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s `recordings.js` file (in the application's root folder). The _ResidentSynthHost_ loads such recordings into its **Recordings** selector on startup. The `recordings.js` file may be missing or empty. 
 Clicking the **play recording** button plays the selected recording. (The button changes into a **cancel playback** button).  
 The **start recording channel** button initiates recording of the current channel. (Its text includes the current channel index.) While recording, this button becomes a **stop recording channel** button, which, when clicked, saves the recording to the user's _Downloads_ folder.  
 Note that while only one channel at a time can be recorded, it _is_ possible to simultaneously play back a recording of one or more other channels. These channels will then be included in the output recording. In other words, overdubbing is possible.
@@ -82,7 +82,7 @@ They can also be useful while debugging, since both hands can be kept free while
 
 ### ResidentSynth
 The _ResidentSynth_ is a 16-channel MIDI Output device, written entirely in Javascript,
-that can be installed and used on any website. It uses Web Audio, but does _not_ require
+that can be installed and used on any website. It uses Web Audio API, but does _not_ require
 Web MIDI support from the browser since it implements the 
 Web MIDI [_MIDIOutput_ interface](https://www.w3.org/TR/webmidi/#midioutput-interface) itself.  
 In addition to implementing the most common MIDI messages, the _ResidentSynth_ uses some 
@@ -115,12 +115,12 @@ very similar to his `WebAudioFontLoader`, but the reverberation control is pract
 2. adjust the files in the in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
 3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that `recordings.js` is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
 4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
-5. call `synth.open();`. This has to be done after a user interaction with the GUI in order to comply with a web standard.
+5. call `synth.open();`<br /> In order to comply with a web standard, this has to be done after a user interaction with the GUI.
 6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
 
 
 #### Configuration
-The _ResidentSynth_ can be configured by editing the files in the
+The _ResidentSynth_ can be configured by editing the (JSON) files in the
 [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/TestSite/residentSynth/config).  
 This currently contains:  
 &nbsp;&nbsp;&nbsp;&nbsp;webAudioFontFiles (a folder)  

@@ -1,7 +1,7 @@
 console.log('load webAudioFontDefs.js');
 
 // The following presets are installed in the webAudioFontDefs below.
-// This object should be adjusted accordingly when different instuments are installed.
+// This object should be adjusted accordingly when different instruments are installed.
 ResSynth.installedPresetIndex =
 {
     PIANO: 0,

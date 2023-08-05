@@ -10,12 +10,11 @@ console.log('load settingsPresets.js');
 //		.tuningGroupIndex // integer
 //		.tuningIndex // integer
 // integerInputs: // The values are the numbers in the input elements.
-//      .semitonesOffset // -50..+50
+//      .semitonesOffset // -36..+36
 //      .centsOffset // -50..+50
-//		.triggerKey // 0..127
+//		.triggerKey // 0..127 (Not used by the ResidentSynth)
 // sliders:
-//		.pitchWheelData1 // 0..127 (not used by the slider)
-//		.pitchWheelData2 // 0..127
+//      .pitchWheel // 0..127 (default 64) (The value is used for both MSB and LSB)
 //		.modWheel // 0..127
 //		.volume // 0..127
 //		.pan // 0..127
@@ -23,9 +22,10 @@ console.log('load settingsPresets.js');
 //		.pitchWheelSensitivity// 0..127
 // floatInputs:
 //      .velocityPitchSensitivity // 0.0..1.0
+// string:
+//      .keyOrnamentsString // e.g "64:0 43:1 78:0" (Not used by the ResidentSynth)
 //
-// Before setting the above values, the setChannelStateMessage automatically
-//     1. sets ALL_CONTROLLERS_OFF(the synth automatically sets ALL_SOUND_OFF)
+// An ALL_CONTROLLERS_OFF message is sent before applying any settingsPreset.
 
 ResSynth.settingsPresets =
     [
