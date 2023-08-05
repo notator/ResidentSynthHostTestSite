@@ -20,7 +20,7 @@ ResSynth.host = (function(document)
         nextSettingsIndex = 1,
         allLongInputControls = [], // used by AllControllersOff control
         triggerKey,
-        recordings, // the recordings in recordings.js converted
+        recordings = [], // the recordings in recordings.js, converted
         recording = undefined, // initialized by startRecording(), reset by stopRecording()
         recordingChannelInfo = undefined, // used while recording a channel
         playbackChannelInfos = undefined, // used while playing back or recording a channel
@@ -1956,18 +1956,30 @@ ResSynth.host = (function(document)
                     settingsSelect.selectedIndex = 0;
                 }
 
-                // The synth has a private array, parallel to the names, containing the MIDI recordings
                 function setRecordingSelect()
                 {
-                    let recordingSelect = getElem("recordingSelect");
+                    let recordingSelect = getElem("recordingSelect"),
+                        playRecordingButton = getElem("playRecordingButton"); 
 
-                    for(var i = 0; i < recordings.length; i++) // recordings is global (has been retrieved from recodings.js)
+                    // recordings is a global array (has been retrieved from recodings.js)
+                    if(recordings.length > 0)
+                    {
+                        for(var i = 0; i < recordings.length; i++)
+                        {
+                            let option = new Option();
+                            option.innerHTML = recordings[i].name;
+                            recordingSelect.options.add(option);
+                        }
+                        recordingSelect.disabled = false;
+                        playRecordingButton.disabled = false;
+                    }
+                    else
                     {
                         let option = new Option();
-
-                        option.innerHTML = recordings[i].name;
-
+                        option.innerHTML = "no recordings available (see docs)";
                         recordingSelect.options.add(option);
+                        recordingSelect.disabled = true;
+                        playRecordingButton.disabled = true;
                     }
 
                     recordingSelect.selectedIndex = 0;
@@ -2282,6 +2294,7 @@ ResSynth.host = (function(document)
                         returnRecordings.push(recording);
                     }
                 }
+
                 return returnRecordings;
             }
 
