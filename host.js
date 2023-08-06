@@ -186,6 +186,18 @@ ResSynth.host = (function(document)
         },
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
+            function waitOnPromise(promise)
+            {
+                if(promise !== undefined)
+                {
+                    promise.then(()=>{});
+                }
+                else
+                {
+                    setTimeout(()=>{}, 250);
+                }
+            }
+
             function handleInputMessage(e)
             {
                 // Rectify performed velocities so that they are in range [6..127].
@@ -323,14 +335,16 @@ ResSynth.host = (function(document)
             if(inputDevice !== null)
             {
                 inputDevice.removeEventListener("midimessage", handleInputMessage, false);
-                inputDevice.close();
+                let promise = inputDevice.close();
+                waitOnPromise(promise);
             }
 
             inputDevice = inputDeviceSelect.options[inputDeviceSelect.selectedIndex].inputDevice;
             if(inputDevice)
             {
                 inputDevice.addEventListener("midimessage", handleInputMessage, false);
-                inputDevice.open();
+                let promise = inputDevice.open();
+                waitOnPromise(promise);
             }
             else
             {
@@ -434,8 +448,17 @@ ResSynth.host = (function(document)
             {
                 let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
 
-                keyOrnamentsStringInput.value = keyOrnamentsString;
-                onKeyOrnamentsStringInputChanged();
+
+                if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
+                {
+                    keyOrnamentsStringInput.value = "no ornaments have been defined (see docs)";
+                    keyOrnamentsStringInput.disabled = true;
+                }
+                else
+                {
+                    keyOrnamentsStringInput.value = keyOrnamentsString;
+                    onKeyOrnamentsStringInputChanged();
+                }                
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -660,6 +683,7 @@ ResSynth.host = (function(document)
                 settingsNameCell = getElem("settingsNameCell");
 
             triggerKeyInput.value = hostChannelSettings.triggerKey;
+
             onTriggerKeyInputChanged();
 
             if(nextSettingsIndex >= settingsSelect.length)
@@ -1230,7 +1254,8 @@ ResSynth.host = (function(document)
             function ornamentOutOfRange(keyOrnaments)
             {
                 let error = false,
-                    nOrnaments = ResSynth.ornamentDefs.length;
+                    ornamentDefs = ResSynth.ornamentDefs,
+                    nOrnaments = (ornamentDefs === undefined) ? 0 : ornamentDefs.length;
 
                 for(let i = 0; i < keyOrnaments.length; i++)
                 {
@@ -1382,17 +1407,24 @@ ResSynth.host = (function(document)
                         let mixtures = synth.mixtures,
                             options = [];
 
-                        let option = new Option("mixtureOption");
-
                         console.assert(mixtures.length < 127);
 
-                        for(var mixtureIndex = 0; mixtureIndex < mixtures.length; mixtureIndex++)
+                        if(mixtures.length === 0)
                         {
                             let option = new Option("mixtureOption");
-
-                            option.innerHTML = mixtures[mixtureIndex].name;
-
+                            option.innerHTML = "no mixtures defined";
                             options.push(option);
+                        }
+                        else
+                        {
+                            for(var mixtureIndex = 0; mixtureIndex < mixtures.length; mixtureIndex++)
+                            {
+                                let option = new Option("mixtureOption");
+
+                                option.innerHTML = mixtures[mixtureIndex].name;
+
+                                options.push(option);
+                            }
                         }
 
                         return options;
@@ -1425,7 +1457,18 @@ ResSynth.host = (function(document)
                                 tuningOptionsArray.push(tuningOption);
                             }
 
-                            tuningGroupOption.innerHTML = tuningGroup.name;
+                            if(tuningGroup.name === undefined) // missing tuningDefs.js file
+                            {
+                                let tuningGroupSelect = getElem("tuningGroupSelect");
+
+                                tuningGroupOption.innerHTML = "no tuning groups defined";                                
+                                tuningGroupSelect.disabled = true;                                
+                            }
+                            else
+                            {
+                                tuningGroupOption.innerHTML = tuningGroup.name;
+                            }
+                            
                             tuningGroupOption.tuningGroup = tuningGroup;
                             tuningGroupOption.tuningOptionsArray = tuningOptionsArray; // used to set the tuningSelect
 
@@ -1932,7 +1975,15 @@ ResSynth.host = (function(document)
                         velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
                         defaultSettingsPreset = synth.settingsPresets[0];
 
-                    keyOrnamentsStringInput.value = defaultSettingsPreset.keyOrnamentsString;
+                    if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
+                    {
+                        keyOrnamentsStringInput.disabled = true;
+                    }
+                    else
+                    {
+                        keyOrnamentsStringInput.value = defaultSettingsPreset.keyOrnamentsString;
+                    }
+                    
                     velocityPitchSensitivityNumberInput.value = defaultSettingsPreset.velocityPitchSensitivity;
                 }
                 function setSettingsSelect()
@@ -1976,7 +2027,7 @@ ResSynth.host = (function(document)
                     else
                     {
                         let option = new Option();
-                        option.innerHTML = "no recordings available (see docs)";
+                        option.innerHTML = "no recordings have been defined (see docs)";
                         recordingSelect.options.add(option);
                         recordingSelect.disabled = true;
                         playRecordingButton.disabled = true;

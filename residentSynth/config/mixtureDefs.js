@@ -21,7 +21,7 @@ ResSynth.mixtureDefs =
     [
         // The first mixture definition in the list must be defined exactly like this.
         {   // index 0
-            name: "none",
+            name: "no mixture",
             extraNotes: [],
             except: []
         },

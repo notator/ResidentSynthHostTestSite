@@ -669,31 +669,45 @@ ResSynth.residentSynth = (function(window)
         // Clone using {...settings} to create an object having mutable attributes. (Attributes can never be created or destroyed.)
         getSettingsPresets = function(resSynthSettingsPresets)
         {
-            for(var settingsIndex = 0; settingsIndex < resSynthSettingsPresets.length; settingsIndex++)
+            if(resSynthSettingsPresets === undefined)
             {
-                let sp = resSynthSettingsPresets[settingsIndex],
-                    settings = new ResSynth.settings.Settings(sp.name);
+                let defaultSettings1 = new ResSynth.settings.Settings("default settings 1"),
+                    defaultSettings2 = new ResSynth.settings.Settings("default settings 2");
 
-                settings.fontIndex = sp.fontIndex;
-                settings.presetIndex = sp.presetIndex;
-                settings.mixtureIndex = sp.mixtureIndex;
-                settings.tuningGroupIndex = sp.tuningGroupIndex;
-                settings.tuningIndex = sp.tuningIndex;
-                settings.semitonesOffset = sp.semitonesOffset;
-                settings.centsOffset = sp.centsOffset;
-                settings.pitchWheel = sp.pitchWheel;
-                settings.modWheel = sp.modWheel;
-                settings.volume = sp.volume;
-                settings.pan = sp.pan;
-                settings.reverberation = sp.reverberation;
-                settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
-                settings.triggerKey = sp.triggerKey;
-                settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
-                settings.keyOrnamentsString = sp.keyOrnamentsString;
+                Object.freeze(defaultSettings1); // attribute values are frozen
+                Object.freeze(defaultSettings2); // attribute values are frozen
 
-                Object.freeze(settings); // attribute values are frozen
+                settingsPresets.push(defaultSettings1); // push twice for host's select control (so that it works)
+                settingsPresets.push(defaultSettings2);
+            }
+            else
+            {
+                for(var settingsIndex = 0; settingsIndex < resSynthSettingsPresets.length; settingsIndex++)
+                {
+                    let sp = resSynthSettingsPresets[settingsIndex],
+                        settings = new ResSynth.settings.Settings(sp.name);
 
-                settingsPresets.push(settings);
+                    settings.fontIndex = sp.fontIndex;
+                    settings.presetIndex = sp.presetIndex;
+                    settings.mixtureIndex = sp.mixtureIndex;
+                    settings.tuningGroupIndex = sp.tuningGroupIndex;
+                    settings.tuningIndex = sp.tuningIndex;
+                    settings.semitonesOffset = sp.semitonesOffset;
+                    settings.centsOffset = sp.centsOffset;
+                    settings.pitchWheel = sp.pitchWheel;
+                    settings.modWheel = sp.modWheel;
+                    settings.volume = sp.volume;
+                    settings.pan = sp.pan;
+                    settings.reverberation = sp.reverberation;
+                    settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
+                    settings.triggerKey = sp.triggerKey;
+                    settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
+                    settings.keyOrnamentsString = sp.keyOrnamentsString;
+
+                    Object.freeze(settings); // attribute values are frozen
+
+                    settingsPresets.push(settings);
+                }
             }
 
             return settingsPresets;

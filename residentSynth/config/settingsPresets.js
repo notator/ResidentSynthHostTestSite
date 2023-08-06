@@ -30,7 +30,7 @@ console.log('load settingsPresets.js');
 ResSynth.settingsPresets =
     [
         {
-            "name": "settings 0: (=defaults)",
+            "name": "settings 0: (=defaults)", // this settings contains the default settings
             "fontIndex": 0,
             "presetIndex": 0,
             "mixtureIndex": 0,
