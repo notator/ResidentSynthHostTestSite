@@ -2222,8 +2222,6 @@ ResSynth.host = (function(document)
                     option = document.createElement("option");
                     if(midiAccess !== null)
                     {
-                        option.text = "choose a MIDI input device";
-                        iDevSelect.add(option, null);
                         midiAccess.inputs.forEach(function(port)
                         {
                             //console.log('input id:', port.id, ' input name:', port.name);
@@ -2236,20 +2234,13 @@ ResSynth.host = (function(document)
                     }
                     else
                     {
-                        option.text = "There are no MIDI input devices available";
+                        option.text = "No MIDI input devices";
                         iDevSelect.add(option, null);
                         iDevSelect.disabled = true;
                     }
 
-                    for(var i = iDevSelect.options.length - 1; i >= 0; --i)
-                    {
-                        iDevSelect.selectedIndex = i;
-                        if(iDevSelect[iDevSelect.selectedIndex].text === "E-MU Xboard49")
-                        {
-                            inputDevice = iDevSelect[iDevSelect.selectedIndex].inputDevice;
-                            break;
-                        }
-                    }
+                    iDevSelect.selectedIndex = iDevSelect.options.length - 1;
+                    inputDevice = iDevSelect[iDevSelect.selectedIndex].inputDevice;
                 }
 
                 function onSuccessCallback(midiAccess)
