@@ -186,18 +186,6 @@ ResSynth.host = (function(document)
         },
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
-            function waitOnPromise(promise)
-            {
-                if(promise !== undefined)
-                {
-                    promise.then(()=>{});
-                }
-                else
-                {
-                    setTimeout(()=>{}, 250);
-                }
-            }
-
             function handleInputMessage(e)
             {
                 // Rectify performed velocities so that they are in range [6..127].
@@ -335,21 +323,23 @@ ResSynth.host = (function(document)
             if(inputDevice !== null)
             {
                 inputDevice.removeEventListener("midimessage", handleInputMessage, false);
-                let promise = inputDevice.close();
-                waitOnPromise(promise);
+                inputDevice.close()
+                    .then((device) => {console.log("Closed " + device.name);})
+                    .catch((device) => {console.error("Error closing " + device.name);});
             }
 
             inputDevice = inputDeviceSelect.options[inputDeviceSelect.selectedIndex].inputDevice;
             if(inputDevice)
             {
                 inputDevice.addEventListener("midimessage", handleInputMessage, false);
-                let promise = inputDevice.open();
-                waitOnPromise(promise);
+                inputDevice.open()
+                    .then((device) => {console.log("Opened " + device.name);})
+                    .catch((device) => {console.error("Error opening " + device.name);});
             }
             else
             {
-                alert("Can't open input device.");
-                inputDeviceSelect.selectedIndex = 0;
+                alert("Error: the input device is not set in the device select control.");
+                inputDeviceSelect.disabled = true;
             }
         },
 
@@ -358,14 +348,7 @@ ResSynth.host = (function(document)
         {
             let inputDeviceSelect = getElem("inputDeviceSelect");
 
-            if(inputDeviceSelect.selectedIndex > 0)
-            {
-                setInputDeviceEventListener(inputDeviceSelect);
-            }
-            else
-            {
-                inputDevice = null;
-            }
+            setInputDeviceEventListener(inputDeviceSelect);
         },
 
         // exported
