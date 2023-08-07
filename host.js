@@ -2085,10 +2085,12 @@ ResSynth.host = (function(document)
             getElem("channelSelect").disabled = false;            
             getElem("continueAtStartButtonDiv").style.display = "none";
 
-            // Its important to call this function after user interaction with the GUI.
-            synth.open();
-
             setInputDeviceEventListener(getElem("inputDeviceSelect"));
+
+            // Its important to call this function after user interaction with the GUI.
+            synth.open()
+                .then(() => {console.log("Opened ResidentSynth");})
+                .catch(() => {console.error("Error opening ResidentSynth");});
 
             // This function initializes the synth with the (default) values of all the host's controls
             // by calling the corresponding functions in the synth's public interface.
