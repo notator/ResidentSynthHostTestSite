@@ -33,9 +33,9 @@ Changing the **channel** selector updates the whole GUI with the current setting
 This is the channel on which MIDI messages will be sent to the 16-channel _ResidentSynth_.
   
 Sounds:  
-![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Font.png "screenshot_Fonts")  
-WebAudioFonts can be configured in the _ResidentSynth_, and selected from the **WebAudioFont** selector.  
-The **preset** selector always contains the presets available in the currently selected WebAudioFont.  
+![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
+Banks can be configured in the _ResidentSynth_, and selected from the **bank** selector.  
+The **preset** selector always contains the presets available in the currently selected bank.  
 Mixtures can also be configured in the _ResidentSynth_. They are selected from the **mixture** selector.  
 
 Tuning:  
