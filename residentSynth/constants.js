@@ -184,10 +184,10 @@ ResSynth.constants = (function()
 		controlDefaultValue = function(control)
 		{
 			switch(control)
-			{
+			
+				case CONTROL.BANK:
 				case CONTROL.MODWHEEL:
 				case CONTROL.REVERBERATION:
-				case CONTROL.SOUND_FONT_INDEX:
 				case CONTROL.MIXTURE_INDEX:
 				case CONTROL.TUNING_GROUP_INDEX:
 				case CONTROL.TUNING_INDEX:
@@ -264,7 +264,7 @@ ResSynth.constants = (function()
 	//Object.defineProperty(COMMAND, "SYSEX", { value: 0xF0, writable: false });
 
 	// CONTROL
-	// unused: Object.defineProperty(CONTROL, "BANK", {value: 0, writable: false}); // To avoid confusion, the ResidentSynth uses the SOUND_FONT_INDEX alias.
+	Object.defineProperty(CONTROL, "BANK", {value: 0, writable: false});
 	Object.defineProperty(CONTROL, "MODWHEEL", {value: 1, writable: false});
 	Object.defineProperty(CONTROL, "VOLUME", {value: 7, writable: false});
 	Object.defineProperty(CONTROL, "PAN", {value: 10, writable: false});
@@ -274,7 +274,6 @@ ResSynth.constants = (function()
 	//Object.defineProperty(CONTROL, "ALL_NOTES_OFF", {value: 123, writable: false});
 	// Custom
 	Object.defineProperty(CONTROL, "REVERBERATION", {value: 91, writable: false}); // MIDI Effects_level
-	Object.defineProperty(CONTROL, "SOUND_FONT_INDEX", {value: 0, writable: false}); // Alias for BANK. (BANK is not used by the ResidentSynth)
 	Object.defineProperty(CONTROL, "PITCH_WHEEL_SENSITIVITY", {value: 16, writable: false}); // MIDI General_purpose_slider_1. (value is semitones)	
 	Object.defineProperty(CONTROL, "MIXTURE_INDEX", {value: 17, writable: false}); // MIDI General_purpose_slider_2 (value is the index of the mixture)
 	Object.defineProperty(CONTROL, "TUNING_GROUP_INDEX", {value: 18, writable: false}); // MIDI General_purpose_slider_3 (value is the index of the tuning group)

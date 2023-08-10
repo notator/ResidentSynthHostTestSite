@@ -4,9 +4,7 @@
 *
 *  Code licensed under MIT
 *
-*  This file contains the implementation of the WebMIDISynthHost's GUI. 
-*  The WebMIDISynthHost can host one or more WebMIDISynths and use one
-*  or more SoundFonts.
+*  This file contains the implementation of the ResidentSynthHost's GUI. 
 */
 
 ResSynth.host = (function(document)
@@ -372,8 +370,8 @@ ResSynth.host = (function(document)
         // exported
         webAudioFontWebsiteButtonClick = function()
         {
-            let webAudioFontSelect = getElem("webAudioFontSelect"),
-                selectedOption = webAudioFontSelect[webAudioFontSelect.selectedIndex];
+            let bankSelect = getElem("bankSelect"),
+                selectedOption = bankSelect[bankSelect.selectedIndex];
 
             openInNewTab(selectedOption.url);
         },
@@ -381,14 +379,14 @@ ResSynth.host = (function(document)
         // exported
         onChannelSelectChanged = function()
         {
-            function setAndSendFontDivControls(hostChannelSettings)
+            function setAndSendWebAudioFontDivControls(hostChannelSettings)
             {
-                let fontSelect = getElem("webAudioFontSelect");
+                let bankSelect = getElem("bankSelect");
 
-                fontSelect.selectedIndex = hostChannelSettings.fontIndex; // index in webAudioFontSelect
+                bankSelect.selectedIndex = hostChannelSettings.bankIndex; // index in bankSelect
 
                 // set the soundFont in the synth, and the presetSelect then call onPresetSelectChanged() (which calls onMixtureSelectChanged())
-                onWebAudioFontSelectChanged();
+                onBankSelectChanged();
             }
 
             function setAndSendTuningDivControls(hostChannelSettings)
@@ -452,7 +450,7 @@ ResSynth.host = (function(document)
 
             currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
-            setAndSendFontDivControls(hostChannelSettings);
+            setAndSendWebAudioFontDivControls(hostChannelSettings);
             setAndSendTuningDivControls(hostChannelSettings);
 
             setTriggersDivControls(hostChannelSettings); // uses currentChannel
@@ -477,31 +475,31 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onWebAudioFontSelectChanged = function()
+        onBankSelectChanged = function()
         {
-            function getFontIndexMsg(channel, fontIndex)
+            function getBankIndexMsg(channel, bankIndex)
             {
-                return new Uint8Array([ResSynth.constants.COMMAND.CONTROL_CHANGE + channel, ResSynth.constants.CONTROL.SOUND_FONT_INDEX, fontIndex]);
+                return new Uint8Array([ResSynth.constants.COMMAND.CONTROL_CHANGE + channel, ResSynth.constants.CONTROL.BANK, bankIndex]);
             }
 
-            let webAudioFontSelect = getElem("webAudioFontSelect"),
+            let bankSelect = getElem("bankSelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 presetSelect = getElem("presetSelect"),
-                selectedSoundFontOption = webAudioFontSelect[webAudioFontSelect.selectedIndex],
-                soundFont = selectedSoundFontOption.soundFont,
-                presetOptionsArray = selectedSoundFontOption.presetOptionsArray,
-                fontIndexMsg = getFontIndexMsg(channel, webAudioFontSelect.selectedIndex);
+                selectedBankOption = bankSelect[bankSelect.selectedIndex],
+                soundFont = selectedBankOption.soundFont,
+                presetOptionsArray = selectedBankOption.presetOptionsArray,
+                bankIndexMsg = getBankIndexMsg(channel, bankSelect.selectedIndex);
 
-            synth.send(fontIndexMsg);
+            synth.send(bankIndexMsg);
 
             setOptions(presetSelect, presetOptionsArray);
 
             presetSelect.selectedIndex = hostChannelSettings.presetIndex;
             onPresetSelectChanged();
 
-            hostChannelSettings.fontIndex = webAudioFontSelect.selectedIndex;
+            hostChannelSettings.bankIndex = bankSelect.selectedIndex;
 
             setExportState(hostChannelSettings);
         },
@@ -556,7 +554,7 @@ ResSynth.host = (function(document)
             setExportState(hostChannelSettings);
         },
 
-        // exported (c.f. onWebAudioFontSelectChanged() )
+        // exported (c.f. onBankSelectChanged() )
         onTuningGroupSelectChanged = function()
         {
             let channelSelect = getElem("channelSelect"),
@@ -732,14 +730,14 @@ ResSynth.host = (function(document)
                 {
                     let CMD = ResSynth.constants.COMMAND,
                         CTL = ResSynth.constants.CONTROL,
-                        webAudioFontSelect = getElem("webAudioFontSelect"),
+                        bankSelect = getElem("bankSelect"),
                         semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
                         centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
-                        soundFont = webAudioFontSelect.options[settings.fontIndex].soundFont;
+                        soundFont = bankSelect.options[settings.bankIndex].soundFont;
 
-                    // settings.fontIndex
-                    let fontIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SOUND_FONT_INDEX, settings.fontIndex]);
-                    synth.send(fontIndexMsg);
+                    // settings.bankIndex
+                    let bankIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.BANK, settings.bankIndex]);
+                    synth.send(bankIndexMsg);
                     // settings.presetIndex
                     let presetMsg = new Uint8Array([CMD.PRESET + channel, settings.presetIndex]);
                     synth.send(presetMsg);
@@ -1332,17 +1330,17 @@ ResSynth.host = (function(document)
         {
             function setPage2Display(synth)
             {
-                function setWebAudioFontSelect(webAudioFontSelect)
+                function setBankSelect(bankSelect)
                 {
-                    function getWebAudioFontOptions(webAudioFonts)
+                    function getBankOptions(banks)
                     {
                         let options = [];
 
-                        for(var fontIndex = 0; fontIndex < webAudioFonts.length; fontIndex++)
+                        for(var bankIndex = 0; bankIndex < banks.length; bankIndex++)
                         {
-                            let option = new Option("webAudioFontOption"),
-                                webAudioFont = webAudioFonts[fontIndex],
-                                presets = webAudioFont.presets,
+                            let option = new Option("bankOption"),
+                                bank = banks[bankIndex],
+                                presets = bank.presets,
                                 presetOptionsArray = [];
 
                                 for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
@@ -1358,8 +1356,8 @@ ResSynth.host = (function(document)
                                 }
 
 
-                            option.innerHTML = webAudioFont.name;
-                            option.soundFont = webAudioFont;
+                            option.innerHTML = bank.name;
+                            option.soundFont = bank;
                             option.presetOptionsArray = presetOptionsArray; // used to set the presetSelect
                             option.url = "https://github.com/surikov/webaudiofont";
 
@@ -1369,16 +1367,16 @@ ResSynth.host = (function(document)
                         return options;
                     }
 
-                    let webAudioFontOptions = getWebAudioFontOptions(synth.webAudioFonts);
+                    let bankOptions = getBankOptions(synth.banks);
 
-                    setOptions(webAudioFontSelect, webAudioFontOptions);
+                    setOptions(bankSelect, bankOptions);
 
-                    webAudioFontSelect.selectedIndex = 0;
+                    bankSelect.selectedIndex = 0;
                 }
 
-                function setPresetSelect(presetSelect, webAudioFontSelect)
+                function setPresetSelect(presetSelect, bankSelect)
                 {
-                    setOptions(presetSelect, webAudioFontSelect[webAudioFontSelect.selectedIndex].presetOptionsArray);
+                    setOptions(presetSelect, bankSelect[bankSelect.selectedIndex].presetOptionsArray);
 
                     presetSelect.selectedIndex = 0;
                 }
@@ -2051,15 +2049,15 @@ ResSynth.host = (function(document)
                 }
 
                 let
-                    webAudioFontSelect = getElem("webAudioFontSelect"),
+                    bankSelect = getElem("bankSelect"),
                     presetSelect = getElem("presetSelect"),
                     mixtureSelect = getElem("mixtureSelect"),
                     tuningGroupSelect = getElem("tuningGroupSelect");
 
                 console.assert(synth.name === "ResidentSynth", "Error: this app only uses the ResidentSynth");
 
-                setWebAudioFontSelect(webAudioFontSelect);
-                setPresetSelect(presetSelect, webAudioFontSelect);
+                setBankSelect(bankSelect);
+                setPresetSelect(presetSelect, bankSelect);
                 setMixtureSelect(mixtureSelect);                
 
                 setTuningGroupSelect(tuningGroupSelect);
@@ -2355,7 +2353,7 @@ ResSynth.host = (function(document)
             webAudioFontWebsiteButtonClick: webAudioFontWebsiteButtonClick,
 
             onChannelSelectChanged: onChannelSelectChanged,
-            onWebAudioFontSelectChanged: onWebAudioFontSelectChanged,
+            onBankSelectChanged: onBankSelectChanged,
             onPresetSelectChanged: onPresetSelectChanged,
             onMixtureSelectChanged: onMixtureSelectChanged,
             onTuningGroupSelectChanged: onTuningGroupSelectChanged,

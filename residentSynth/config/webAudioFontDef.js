@@ -1,6 +1,6 @@
-console.log('load webAudioFontDefs.js');
+console.log('load webAudioFontDef.js');
 
-// The following presets are installed in the webAudioFontDefs below.
+// The following presets are installed in the webAudioFontDef below.
 // This object should be adjusted accordingly when different instruments are installed.
 ResSynth.installedPresetIndex =
 {
@@ -37,10 +37,10 @@ ResSynth.installedPresetIndex =
     PERCUSSION_DRUMS: 127
 };
 
-// Each webAudioFontDef has an array containing the instrument presets.
-// The MIDI setPreset message will set the preset using the index in the presets array.
-// The MIDI setBank message will never be used.
-ResSynth.webAudioFontDefs =
+// Each webAudioFontDef has an array of banks containing the instrument presets.
+// The MIDI BANK control message sets the current bank.
+// The MIDI PRESET command message will set the preset using the index in the bank's presets array.
+ResSynth.webAudioFontDef =
     [
         {
             name: "Ensemble 1 (FluidR3 selection)",

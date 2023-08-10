@@ -11,7 +11,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "horn mixture etc.",
-                            "fontIndex": 2,
+                            "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
                             "tuningGroupIndex": 2,
@@ -59,7 +59,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "horn mixture etc.",
-                            "fontIndex": 2,
+                            "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
                             "tuningGroupIndex": 2,
@@ -101,7 +101,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "preset 1 Tuba",
-                            "fontIndex": 0,
+                            "bankIndex": 0,
                             "presetIndex": 1,
                             "mixtureIndex": 0,
                             "tuningGroupIndex": 0,
@@ -139,7 +139,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "horn mixture etc.",
-                            "fontIndex": 2,
+                            "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
                             "tuningGroupIndex": 2,
@@ -191,7 +191,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "preset 1 Tuba",
-                            "fontIndex": 0,
+                            "bankIndex": 0,
                             "presetIndex": 1,
                             "mixtureIndex": 0,
                             "tuningGroupIndex": 0,
@@ -229,7 +229,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "settings 0: (=defaults)",
-                            "fontIndex": 0,
+                            "bankIndex": 0,
                             "presetIndex": 0,
                             "mixtureIndex": 0,
                             "tuningGroupIndex": 0,
@@ -285,7 +285,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "horn mixture etc.",
-                            "fontIndex": 2,
+                            "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
                             "tuningGroupIndex": 2,
@@ -442,7 +442,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "horn mixture etc.",
-                            "fontIndex": 2,
+                            "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
                             "tuningGroupIndex": 2,
@@ -689,7 +689,7 @@ ResSynth.recordings =
                         "settings":
                         {
                             "name": "settings 0: (=defaults)",
-                            "fontIndex": 0,
+                            "bankIndex": 0,
                             "presetIndex": 0,
                             "mixtureIndex": 0,
                             "tuningGroupIndex": 0,
@@ -729,7 +729,7 @@ ResSynth.recordings =
                     "channel": 0,
                     "settings": {
                         "name": "horn mixture etc.",
-                        "fontIndex": 2,
+                        "bankIndex": 2,
                         "presetIndex": 0,
                         "mixtureIndex": 4,
                         "tuningGroupIndex": 2,
@@ -769,7 +769,7 @@ ResSynth.recordings =
                     "channel": 1,
                     "settings": {
                         "name": "preset 1 Tuba",
-                        "fontIndex": 0,
+                        "bankIndex": 0,
                         "presetIndex": 1,
                         "mixtureIndex": 0,
                         "tuningGroupIndex": 0,
@@ -799,7 +799,7 @@ ResSynth.recordings =
                     "channel": 3,
                     "settings": {
                         "name": "settings 0: (=defaults)",
-                        "fontIndex": 0,
+                        "bankIndex": 0,
                         "presetIndex": 0,
                         "mixtureIndex": 0,
                         "tuningGroupIndex": 0,
@@ -838,7 +838,7 @@ ResSynth.recordings =
                     "channel": 0,
                     "settings": {
                         "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
-                        "fontIndex": 3,
+                        "bankIndex": 3,
                         "presetIndex": 0,
                         "mixtureIndex": 0,
                         "tuningGroupIndex": 3,

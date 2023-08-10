@@ -19,7 +19,7 @@ ResSynth.residentSynth = (function(window)
     "use strict";
     let
         audioContext,
-        channelPresets = [], // set in updateSoundFontIndex
+        channelPresets = [], // set in updateBankIndex
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
@@ -32,10 +32,10 @@ ResSynth.residentSynth = (function(window)
             await audioContext.setSinkId(deviceId);
         },
 
-        // Called by the constructor, which sets this.webAudioFonts to the return value of this function.
-        // Creates all the WebAudioFonts defined in "config/webAudioFontDefs.js",
+        // Called by the constructor, which sets this.webAudioFont to the return value of this function.
+        // Creates the WebAudioFont defined in "config/webAudioFontDef.js",
         // adjusting (=decoding) all the required WebAudioFontPresets.
-        getWebAudioFonts = function(audioContext)
+        getWebAudioFont = function(audioContext)
         {
             function adjustAllPresetVariables()
             {
@@ -142,10 +142,10 @@ ResSynth.residentSynth = (function(window)
                     });
                 }
 
-                let webAudioFontDefs = ResSynth.webAudioFontDefs;
-                for(let i = 0; i < webAudioFontDefs.length; i++)
+                let webAudioFontDef = ResSynth.webAudioFontDef;
+                for(let i = 0; i < webAudioFontDef.length; i++)
                 {
-                    let presets = webAudioFontDefs[i].presets;
+                    let presets = webAudioFontDef[i].presets;
 
                     for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
                     {
@@ -202,7 +202,7 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            function getFinalizedFontPresets(fontPresetNames, percussionPresets)
+            function getFinalizedPresets(fontPresetNames, percussionPresets)
             {
                 function getPresetOptionName(presetName, originalPresetIndex, isPercussion)
                 {
@@ -551,7 +551,7 @@ ResSynth.residentSynth = (function(window)
             }
 
             // See: https://stackoverflow.com/questions/758688/sleep-in-javascript-delay-between-actions
-            function sleepUntilAllFontsAreReady(webAudioFonts)
+            function sleepUntilAllBanksAreReady(webAudioFonts)
             {
                 function sleep(ms)
                 {
@@ -578,29 +578,29 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            let webAudioFontDefs = ResSynth.webAudioFontDefs, // defined in webAudioFonts/webAudioFonts.js
-                webAudioFonts = [],
+            let webAudioFontDef = ResSynth.webAudioFontDef, // defined in webAudioFontDef.js
+                banks = [],
                 percussionPresets = getPercussionPresets(); // undefined if there are no percussion presets
 
             adjustAllPresetVariables();
 
-            for(let fontIndex = 0; fontIndex < webAudioFontDefs.length; ++fontIndex)
+            for(let bankIndex = 0; bankIndex < webAudioFontDef.length; ++bankIndex)
             {
-                let webAudioFontDef = webAudioFontDefs[fontIndex],
-                    name = webAudioFontDef.name,
-                    fontPresets = getFinalizedFontPresets(webAudioFontDef.presets, percussionPresets),
-                    webAudioFont = new ResSynth.webAudioFont.WebAudioFont(name, fontPresets);
+                let bankDef = bankDef[bankIndex],
+                    name = bankDef.name,
+                    presets = getFinalizedPresets(bankDef.presets, percussionPresets),
+                    bank = new ResSynth.bank.Bank(name, presets);
 
-                // The webAudioFont's zone.file attributes need not have been completely adjusted (=unpacked) when
+                // The bank's zone.file attributes need not have been completely adjusted (=unpacked) when
                 // this function is called since neither the zone.file nor the binary zone.buffer attributes are accessed.
-                let adjustedWebAudioFont = adjustForResidentSynth(webAudioFont);
+                let adjustedBank = adjustForResidentSynth(bank);
 
-                webAudioFonts.push(adjustedWebAudioFont);
+                banks.push(adjustedBank);
             }
 
-            sleepUntilAllFontsAreReady(webAudioFonts);
+            sleepUntilAllBanksAreReady(banks);
 
-            return webAudioFonts;
+            return banks;
         },
 
         getMixtures = function()
@@ -687,7 +687,7 @@ ResSynth.residentSynth = (function(window)
                     let sp = resSynthSettingsPresets[settingsIndex],
                         settings = new ResSynth.settings.Settings(sp.name);
 
-                    settings.fontIndex = sp.fontIndex;
+                    settings.bankIndex = sp.bankIndex;
                     settings.presetIndex = sp.presetIndex;
                     settings.mixtureIndex = sp.mixtureIndex;
                     settings.tuningGroupIndex = sp.tuningGroupIndex;
@@ -819,11 +819,11 @@ ResSynth.residentSynth = (function(window)
         /* Control Functions */
 
         // also sets channelPresets[channel] and channelControl.presetIndex to 0.
-        updateSoundFontIndex = function(channel, fontIndex)
+        updateBankIndex = function(channel, bankIndex)
         {
-            channelPresets[channel] = channelPresets.allWebAudioFonts[fontIndex].presets; // global
+            channelPresets[channel] = channelPresets.webAudioFont[bankIndex].presets; // global
 
-            channelControls[channel].fontIndex = fontIndex;
+            channelControls[channel].bankIndex = bankIndex;
             channelControls[channel].presetIndex = 0;
         },
         updateMixtureIndex = function(channel, mixtureIndex)
@@ -1223,7 +1223,7 @@ ResSynth.residentSynth = (function(window)
 
         setFontAndTuningDefaults = function(channel)
         {
-            updateSoundFontIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
+            updateBankIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
             updateMixtureIndex(channel, 0);
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
             updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's keyPitch value in NoteOn. 
@@ -1267,9 +1267,7 @@ ResSynth.residentSynth = (function(window)
         controls =
             [
                 // standard 3-byte controllers.
-                // CTL.BANK is never used: Each ResSynth.webAudioFont definition contains a simple
-                // array of presets, not contained in banks, so SOUND_FONT_INDEX and PRESET are
-                // used instead of BANK and PRESET.
+                CTL.BANK,
                 CTL.MODWHEEL,
                 CTL.VOLUME,
                 CTL.PAN,
@@ -1279,7 +1277,6 @@ ResSynth.residentSynth = (function(window)
 
                 // custom controls (see constants.js)
                 CTL.REVERBERATION,
-                CTL.SOUND_FONT_INDEX,
                 CTL.PITCH_WHEEL_SENSITIVITY,
                 CTL.MIXTURE_INDEX, 
                 CTL.TUNING_GROUP_INDEX,
@@ -1298,6 +1295,11 @@ ResSynth.residentSynth = (function(window)
                 return new ResidentSynth();
             }
 
+            let AudioContextFunc = (window.AudioContext || window.webkitAudioContext);
+
+            audioContext = new AudioContextFunc();
+            channelPresets.webAudioFont = getWebAudioFont(audioContext);
+
             // WebMIDIAPI §4.6 -- MIDIPort interface
             // See https://github.com/notator/WebMIDISynthHost/issues/23
             // and https://github.com/notator/WebMIDISynthHost/issues/24
@@ -1305,15 +1307,10 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "manufacturer", {value: "james ingram (with thanks to sergey surikov)", writable: false});
             Object.defineProperty(this, "name", {value: "ResidentSynth", writable: false});
             Object.defineProperty(this, "type", {value: "output", writable: false});
-            Object.defineProperty(this, "version", {value: "1", writable: false});
-            Object.defineProperty(this, "ondisconnect", {value: null, writable: false}); // Do we need this at all? Is it correct to set it to null?
-
-            /*** Is this necessary? See https://github.com/WebAudio/web-midi-api/issues/110 ***/
-            /*** See also: disconnect() function below ***/
-            Object.defineProperty(this, "removable", {value: true, writable: false});
+            Object.defineProperty(this, "version", {value: "2", writable: false});
 
             /*** Extensions for software synths ***/
-            // The synth author's webpage hosting the synth. 
+            // The synth author's web page hosting the synth. 
             Object.defineProperty(this, "url", {value: "https://github.com/notator/ResidentSynthHostTestSite", writable: false});
             // The commands supported by this synth (see above).
             Object.defineProperty(this, "commands", {value: commands, writable: false});
@@ -1323,32 +1320,10 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "isMultiChannel", {value: true, writable: false});
             // If isPolyphonic is false or undefined, the synth can only play one note at a time
             Object.defineProperty(this, "isPolyphonic", {value: true, writable: false});
-            //
-            // supportsGeneralMIDI is set to false here, because
-            // 1. the BANKS command is not supported
-            // 2. some MIDI controls have been overridden for non-standard purposes (see constants.js)
-            //
-            // If supportsGeneralMIDI is defined, and is true, then
-            // 1. both COMMAND.PRESET and CONTROL.BANK MUST be defined.
-            // 2. the presets can be usefully named using GM preset names.
-            //    (GM preset names are returned by ResSynth.constants.generalMIDIPresetName(originalPresetIndex). )
-            // 3. in a percussion font, notes can be usefully named using the GM percussion names.
-            //    (GM percussion names are returned by ResSynth.constants.generalMIDIPercussionName(noteIndex). )
-            // 4. the synth MAY define the function:
-            //        void setSoundFont(soundFont) // ji: I've defined this as a non-standard MIDI control (like TUNING_GROUP)
-            //    It is possible for a synth to support GM without using soundfonts.
-            // 5. Clients should be sure that a preset is available before setting it.
-            //    Whichever way it is set, the banks variable will contain all available banks and presets.
-            Object.defineProperty(this, "supportsGeneralMIDI", {value: false, writable: false}); // see comment above
 
             /**********************************************************************************************/
-            // attributes specific to this ResidentSynth
-            let AudioContextFunc = (window.AudioContext || window.webkitAudioContext);
-
-            audioContext = new AudioContextFunc();
-
-            channelPresets.allWebAudioFonts = getWebAudioFonts(audioContext);
-            Object.defineProperty(this, "webAudioFonts", {value: channelPresets.allWebAudioFonts, writable: false});
+            // attributes specific to this installation of the ResidentSynth
+            Object.defineProperty(this, "webAudioFont", {value: channelPresets.webAudioFont, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
@@ -1470,7 +1445,7 @@ ResSynth.residentSynth = (function(window)
             {
                 let settings = settingsPresets[settingsIndex];
 
-                setSoundFontIndex(channel, settings.fontIndex);
+                updateBankIndex(channel, settings.bankIndex);
                 channelControls[channel].presetIndex = settings.presetIndex;
                 updateMixtureIndex(channel, settings.mixtureIndex);
                 updateTuningGroupIndex(channel, settings.tuningGroupIndex);
@@ -1488,6 +1463,9 @@ ResSynth.residentSynth = (function(window)
 
             switch(control)
             {
+                case CTL.BANK:
+                    updateBankIndex(channel, value);
+                    break;
                 case CTL.MODWHEEL:
                     updateModWheel(channel, value);
                     break;
@@ -1502,9 +1480,6 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.REVERBERATION:
                     updateReverberation(channel, value);
-                    break;
-                case CTL.SOUND_FONT_INDEX:
-                    updateSoundFontIndex(channel, value);
                     break;
                 case CTL.PITCH_WHEEL_SENSITIVITY:
                     updatePitchWheelSensitivity(channel, value);

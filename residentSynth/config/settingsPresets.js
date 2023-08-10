@@ -4,7 +4,7 @@ console.log('load settingsPresets.js');
 // The full set of preset attributes is as follows:
 //		.name // string
 // selects: // The values are the indexes in the select.
-//		.fontIndex // integer
+//		.bankIndex // integer
 //		.presetIndex // integer
 //      .mixtureIndex // integer
 //		.tuningGroupIndex // integer
@@ -31,7 +31,7 @@ ResSynth.settingsPresets =
     [
         {
             "name": "settings 0: (=defaults)", // this settings contains the default settings
-            "fontIndex": 0,
+            "bankIndex": 0,
             "presetIndex": 0,
             "mixtureIndex": 0,
             "tuningGroupIndex": 0,
@@ -50,7 +50,7 @@ ResSynth.settingsPresets =
         },
         {
             "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
-            "fontIndex": 3,
+            "bankIndex": 3,
             "presetIndex": 0,
             "mixtureIndex": 0,
             "tuningGroupIndex": 3,
@@ -69,7 +69,7 @@ ResSynth.settingsPresets =
         },
         {
             "name": "settings 2: Harp (Fluid), semitonesOffset=0.5",
-            "fontIndex": 1,
+            "bankIndex": 1,
             "presetIndex": 0,
             "mixtureIndex": 0,
             "tuningGroupIndex": 0,
@@ -88,7 +88,7 @@ ResSynth.settingsPresets =
         },
         {
             "name": "settings 3: Vibraphone, semitonesOffset=-0.5, pan=20",
-            "fontIndex": 3,
+            "bankIndex": 3,
             "presetIndex": 3,
             "mixtureIndex": 0,
             "tuningGroupIndex": 0,

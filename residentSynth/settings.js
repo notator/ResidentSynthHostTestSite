@@ -24,7 +24,7 @@ ResSynth.settings = (function()
         }
 
         this.name = name;
-        this.fontIndex = 0;
+        this.bankIndex = 0;
         this.presetIndex = 0;
         this.mixtureIndex = 0;
         this.tuningGroupIndex = 0;
@@ -55,7 +55,7 @@ ResSynth.settings = (function()
     {
         let rval = true;
 
-        if(this.fontIndex !== otherSettings.fontIndex
+        if(this.bankIndex !== otherSettings.bankIndex
         || this.presetIndex !== otherSettings.presetIndex
         || this.mixtureIndex !== otherSettings.mixtureIndex
         || this.tuningGroupIndex !== otherSettings.tuningGroupIndex

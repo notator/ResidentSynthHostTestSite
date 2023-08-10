@@ -12,17 +12,17 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-ResSynth.webAudioFont = (function()
+ResSynth.bank = (function()
 {
     "use strict";
 
     let
         getCorrectedPresets = function(fontPresets)
         {
-            // This function just corrrects errors in the WebAudioFont preset files.
+            // This function just corrrects errors in the Bank preset files.
             function correctWebAudioPresetErrors(originalPresetIndex, zones)
             {
-                function removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones)
+                function removeRedundantBankGeneralUserGSGrandPianoZones(zones)
                 {
                     let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 88 && z.keyRangeHigh === 90)),
                         corrected = false;
@@ -40,10 +40,10 @@ ResSynth.webAudioFont = (function()
                     }
                     if(corrected)
                     {
-                        // console.warn("WebAudioFont: corrected GeneralUserGS GrandPiano zones.");
+                        // console.warn("Bank: corrected GeneralUserGS GrandPiano zones.");
                     }
                 }
-                function removeRedundantWebAudioFontGeneralUserGSMusicBoxZones(zones)
+                function removeRedundantBankGeneralUserGSMusicBoxZones(zones)
                 {
                     let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 0 && z.keyRangeHigh === 80)),
                         corrected = false;
@@ -61,7 +61,7 @@ ResSynth.webAudioFont = (function()
                     }
                     if(corrected)
                     {
-                        // console.warn("WebAudioFont: corrected GeneralUserGS MusicBox zones.");
+                        // console.warn("Bank: corrected GeneralUserGS MusicBox zones.");
                     }
                 }
                 function resetHighFluidPadZone(zones, padNumber)
@@ -70,7 +70,7 @@ ResSynth.webAudioFont = (function()
                     {
                         zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
                         zones[1].keyRangeHigh = 127;
-                        // console.warn("WebAudioFont: corrected Fluid Pad " + padNumber + " (top zone).");
+                        // console.warn("Bank: corrected Fluid Pad " + padNumber + " (top zone).");
                     }
                 }
                 function correctFluidPad5Zones(zones)
@@ -81,17 +81,17 @@ ResSynth.webAudioFont = (function()
                         zones.splice(1, 1);
                         zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
                         zones[1].keyRangeHigh = 127;
-                        // console.warn("WebAudioFont: corrected Fluid Pad 5 zones.");
+                        // console.warn("Bank: corrected Fluid Pad 5 zones.");
                     }
                 }
 
                 switch(originalPresetIndex)
                 {
                     case 0:
-                        removeRedundantWebAudioFontGeneralUserGSGrandPianoZones(zones);
+                        removeRedundantBankGeneralUserGSGrandPianoZones(zones);
                         break;
                     case 10:
-                        removeRedundantWebAudioFontGeneralUserGSMusicBoxZones(zones);
+                        removeRedundantBankGeneralUserGSMusicBoxZones(zones);
                         break;
                     case 89:
                         resetHighFluidPadZone(zones, 2);
@@ -166,16 +166,15 @@ ResSynth.webAudioFont = (function()
             return true;
         },
 
-        // This constructor checks for (and if necessary corrects) errors in the WebAudioFont preset files,
-        // and then returns a WebAudioFont containing presets whose format and attributes are the same as
+        // This constructor checks for (and if necessary corrects) errors in the bank's preset files,
+        // and then returns a bank containing presets whose format and attributes are the same as
         // those returned by Surikov's decodeAfterLoading() function (e.g. zone.ahdsr).
         // Enhancements are done later (in the ResidentSynth code).
-        // Note that each WebAudioFont has a simple array of presets that are never enclosed in banks. 
-        WebAudioFont = function(name, fontPresets)
+        Bank = function(name, fontPresets)
         {
-            if(!(this instanceof WebAudioFont))
+            if(!(this instanceof Bank))
             {
-                return new WebAudioFont(name, fontPresets);
+                return new Bank(name, fontPresets);
             }
 
             Object.defineProperty(this, "name", {value: name, writable: false});
@@ -185,7 +184,7 @@ ResSynth.webAudioFont = (function()
 
         API =
         {
-            WebAudioFont: WebAudioFont // constructor
+            Bank: Bank // constructor
         };
     // end var
 
