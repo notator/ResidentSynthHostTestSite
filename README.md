@@ -4,7 +4,8 @@ This repository contains two major branches:
 &nbsp;&nbsp;&nbsp;&nbsp;**main**: the current stable version, which can be used [here](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html).  
 &nbsp;&nbsp;&nbsp;&nbsp;**testSite**: the unstable development version, which can be tested [here](https://james-ingram-act-two.de/open-source/ResidentSynthHostTestSite/host.html).  
 Software synthesizers like the _ResidentSynth_ can be included in any web application as a substitute 
-for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
+for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).  
+This synthesizer is intended to be installed on a website that knows in advance which presets it needs under particular circumstances. Loading time can therefore be minimized by not installing redundant presets.  It must, however, contain at least one bank containing at least one preset. 
  
 
 Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.  
@@ -125,6 +126,7 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 
 ##### Standard Controls
 * <em>Implemented</em>:<br />
+    BANK (CC 0, 0x0)  
 	MODWHEEL (CC 1, 0x1)  
 	VOLUME (CC 7, 0x7)  
 	PAN (CC 10, 0xA)  
@@ -133,13 +135,12 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 	ALL_CONTROLLERS_OFF (CC 121, 0x79)
 
 * <em>NB: Not Used</em>:<br />
-   BANK (CC 0, 0x0) (See SOUND_FONT_INDEX)  
+     
    ALL_NOTES_OFF (CC 123, 0x7B)
 
 ##### Non-standard Controls
 * <em>Implemented</em> (See documentation below):<br />
-	REVERBERATION (CC 91, 0x5B)  
-	SOUND_FONT_INDEX (CC 0, 0x0)  
+	REVERBERATION (CC 91, 0x5B)    
 	PITCH_WHEEL_SENSITIVITY (CC 16, 0x10)  
 	MIXTURE_INDEX (CC 17, 0x11)  
 	TUNING_GROUP_INDEX (CC 18, 0x12)  
@@ -164,21 +165,20 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 The _ResidentSynth_ can be configured by editing the files in the
 [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/TestSite/residentSynth/config).  
 This currently contains:  
-&nbsp;&nbsp;&nbsp;&nbsp;[webAudioFontFiles](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config/webAudioFontFiles) (a folder containing clones of Surikov's preset files)  
-&nbsp;&nbsp;&nbsp;&nbsp;[webAudioFontDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/webAudioFontDefs.js) (required)  
+&nbsp;&nbsp;&nbsp;&nbsp;[presets](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config/presets) (a folder containing clones of Surikov's preset files)  
+&nbsp;&nbsp;&nbsp;&nbsp;[webAudioFontDef.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/webAudioFontDef.js) (required)  
 &nbsp;&nbsp;&nbsp;&nbsp;[mixtureDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/mixtureDefs.js) (optional)  
 &nbsp;&nbsp;&nbsp;&nbsp;[ornamentDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/ornamentDefs.js) (optional)  
 &nbsp;&nbsp;&nbsp;&nbsp;[settingsPresets.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/settingsPresets.js) (optional)  
 &nbsp;&nbsp;&nbsp;&nbsp;[tuningDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/tuningDefs.js) (optional)  
   
-More complete instructions as to how to edit the definitions are given in the respective files, but 
-here's an overview:
-##### WebAudioFonts and Presets
+More complete instructions as to how to edit the definitions are given in the respective files, but here's an overview:
+##### WebAudioFontDef, Banks and Presets
 The preset definitions used here can be found in
 [Surikov's catalog](https://github.com/surikov/webaudiofont#catalog-of-instruments).  
-To make a preset available, put a clone of its definition in the webAudioFontFiles folder, and configure one or more
-soundFont/preset addresses for it in webAudioFontDefs.js.  
-Presets can be activated using SOUND_FONT_INDEX control and PRESET command messages. Note that the BANK control is not used.
+To make a preset available, put a clone of its definition in the presets folder, and configure one or more bank/preset addresses for it in webAudioFontDef.js.  
+Presets can then be activated using the standard BANK control and PRESET command messages.  
+The webAudioFont must contain between 1 and 127 banks, each of which contains between 1 and 127 presets. 
 ##### Mixtures
 A _mixture_, defined in mixtureDefs.js, is a chord that plays when a single NOTE_ON message is sent to the synth.
 Mixtures are like freely configurable [Organ stops](https://en.wikipedia.org/wiki/Mixture_(organ_stop)).  
