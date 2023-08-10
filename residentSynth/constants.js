@@ -161,6 +161,8 @@ ResSynth.constants = (function()
 		{
 			switch(control)
 			{
+				case CONTROL.BANK:
+					return ("bank");
 				case CONTROL.MODWHEEL:
 					return ("modWheel");
 				case CONTROL.VOLUME:
@@ -184,7 +186,7 @@ ResSynth.constants = (function()
 		controlDefaultValue = function(control)
 		{
 			switch(control)
-			
+			{
 				case CONTROL.BANK:
 				case CONTROL.MODWHEEL:
 				case CONTROL.REVERBERATION:

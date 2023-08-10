@@ -586,7 +586,7 @@ ResSynth.residentSynth = (function(window)
 
             for(let bankIndex = 0; bankIndex < webAudioFontDef.length; ++bankIndex)
             {
-                let bankDef = bankDef[bankIndex],
+                let bankDef = webAudioFontDef[bankIndex],
                     name = bankDef.name,
                     presets = getFinalizedPresets(bankDef.presets, percussionPresets),
                     bank = new ResSynth.bank.Bank(name, presets);

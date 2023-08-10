@@ -1367,7 +1367,7 @@ ResSynth.host = (function(document)
                         return options;
                     }
 
-                    let bankOptions = getBankOptions(synth.banks);
+                    let bankOptions = getBankOptions(synth.webAudioFont);
 
                     setOptions(bankSelect, bankOptions);
 
