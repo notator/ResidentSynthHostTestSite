@@ -137,16 +137,16 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 
 ##### Non-standard Controls
 * <em>Implemented</em> (See documentation below):<br />
-	REVERBERATION (CC 91, 0x5B)    
-	PITCH_WHEEL_SENSITIVITY (CC 16, 0x10)  
-	MIXTURE_INDEX (CC 17, 0x11)  
-	TUNING_GROUP_INDEX (CC 18, 0x12)  
-	TUNING_INDEX (CC 19, 0x13)  
-	SEMITONES_OFFSET (CC 80, 0x50)  
-	CENTS_OFFSET (CC 81, 0x51)  
-	SET_SETTINGS (CC 82, 0x52)  
-	VELOCITY_PITCH_SENSITIVITY (CC 83, 0x53)  
-	SET_ORNAMENT (CC 75, 0x4B)
+	<a href="#nonstandardcontrols">REVERBERATION</a> (CC 91, 0x5B)    
+	<a href="#nonstandardcontrols">PITCH_WHEEL_SENSITIVITY</a> (CC 16, 0x10)  
+	<a href="#mixtures">MIXTURE_INDEX</a> (CC 17, 0x11)  
+	<a href="#tunings">TUNING_GROUP_INDEX</a> (CC 18, 0x12)  
+	<a href="#tunings">TUNING_INDEX</a> (CC 19, 0x13)  
+	<a href="#pitchoffsets">SEMITONES_OFFSET</a> (CC 80, 0x50)  
+	<a href="#pitchoffsets">CENTS_OFFSET</a> (CC 81, 0x51)  
+	<a href="#settingspresets">SET_SETTINGS</a> (CC 82, 0x52)  
+	<a href="#vpsensitivity">VELOCITY_PITCH_SENSITIVITY</a> (CC 83, 0x53)  
+	<a href="#ornaments">SET_ORNAMENT</a> (CC 75, 0x4B)
 	
 #### To use the _ResidentSynth_ in other web applications:
 
@@ -175,28 +175,12 @@ The preset definitions used here can be found in
 [Surikov's catalog](https://github.com/surikov/webaudiofont#catalog-of-instruments).  
 To make a preset available, put a clone of its definition in the presets folder, and configure one or more bank/preset addresses for it in webAudioFontDef.js.  
 Presets can then be activated using the standard BANK control and PRESET command messages.  
-The WebAudioFont must contain between 1 and 127 banks, each of which contains between 1 and 127 presets. 
+The WebAudioFont must contain between 1 and 127 banks, each of which contains between 1 and 127 presets.   
+<a id="mixtures"/>
 ##### Mixtures
 A _mixture_, defined in mixtureDefs.js, is a chord that plays when a single NOTE_ON message is sent to the synth.
 Mixtures are like freely configurable [Organ stops](https://en.wikipedia.org/wiki/Mixture_(organ_stop)).  
-Mixtures are set using their index as the value in a MIXTURE_INDEX control message. By convention, index 0 is always defined to mean "no mixture".
-##### Ornaments
-An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON message.
-There are two types of ornament: _non-repeating_ and _repeating_:  
-When a _non-repeating_ ornament completes, its final note is sustained until the performed NOTE_ON's corresponding NOTE_OFF arrives. If the NOTE_OFF arrives before the ornament has completed, the ornament is simply cut short.   
-The notes of a _repeating_ ornament are repeated continuously until the performed NOTE_ON's corresponding NOTE_OFF arrives, at which point the ornament stops.  
-Ornaments are implemented in the _ResidentSynth_ using a non-standard SET_ORNAMENT control message that applies _only_ to the single, following NOTE_ON:      
-To add an ornament to a NOTE_ON, send a SET_ORNAMENT control message (with the index of the required ornament) 
-immediately before sending the NOTE_ON itself. After executing the ornament, the NOTE_ON command automatically resets the synth's state to "no ornament". The SET_ORNAMENT control message has to be sent again if required.
-##### Recordings
-The _ResidentSynth_ has no special functions related to recordings.  
-The _ResidentSynthHost_ can record and save sequences of MIDI messages sent to the _ResidentSynth_.
-The recordings are saved as JSON files in the user's _Downloads_ folder, from where they can be copied into the [recordings.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/recordings.js) file (in the application's root folder).  
-If a recording is present in the recordings.js file when the _ResidentSynthHost_ starts up, it will appear in its recordings selector and can be played back.  
-
-##### Settings Presets
-Each settings preset, defined in settingsPresets.js, is a complete set of settings for a single channel. The creation of such presets is described in the above _ResidentSynthHost_ documentation. They can, of course also be edited manually.  
-To set a settings preset in a MIDI channel, send it a SET_SETTINGS message with a value giving the required settings index in the settingsPresets.js file.
+Mixtures are set using their index as the value in a MIXTURE_INDEX (CC 17) control message. By convention, index 0 is always defined to mean "no mixture".
 ##### Tunings
 A _tuning_ associates each of the 127 MIDI keys with a pitch value (expressed as cents above MIDI C0).  
 The following types of tuning can be created by the synth using the (configurable) definitions provided in tuningDefs.js: 
@@ -205,7 +189,33 @@ The following types of tuning can be created by the synth using the (configurabl
 - warped octaves : tunings containing internally warped octaves
 - free keyboard : warped tunings in which the only restriction is that pitches ascend from left to right of the keyboard
 
-To set a channel to a particular tuning in a channel, send the tuning group index in a SET_TUNING_GROUP message, and the tuning index (in the group) in a SET_TUNING message. This provides the tuning's address in tuningDefs.js.
+To set a channel to a particular tuning in a channel, send the tuning group index in a TUNING_GROUP_INDEX (CC18) message, and the tuning index (in the group) in a TUNING_INDEX (CC 19) message. This provides the tuning's address in tuningDefs.js.  
+<a id="pitchoffsets"/>
+##### Pitch Offsets
+The pitch set by the tuning can be additionally altered using the SEMITONES_OFFSET (CC 80) and CENTS_OFFSET (CC 81) messages: The `value` sent with either of these messages is converted to the semitones or cents offset using the following formula:  
+&nbsp;&nbsp;&nbsp;&nbsp;`semitonesOffset = Math.round((value / 1.27) - 50);`  
+So the effective range of these messages is -50..+50 semitones or cents. A `value` of 64 means "no offset".  
+<a id="nonstandardcontrols"/>
+##### Non-standard controls (sliders)
+The REVERBERATION (CC 91) message takes a `value` in range 0..127, meaning zero to maximum reverberation.  
+The PITCH_WHEEL_SENSITIVITY (CC 16) `value` is in range 0..127, and determines the maximum deviation produced by the PITCHWHEEL (CMD 224). 
+<a id="ornaments"/>##### Ornaments
+An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON message.
+There are two types of ornament: _non-repeating_ and _repeating_:  
+When a _non-repeating_ ornament completes, its final note is sustained until the performed NOTE_ON's corresponding NOTE_OFF arrives. If the NOTE_OFF arrives before the ornament has completed, the ornament is simply cut short.   
+The notes of a _repeating_ ornament are repeated continuously until the performed NOTE_ON's corresponding NOTE_OFF arrives, at which point the ornament stops.  
+Ornaments are implemented in the _ResidentSynth_ using a non-standard SET_ORNAMENT (CC 75) control message that applies _only_ to the single, following NOTE_ON:      
+To add an ornament to a NOTE_ON, send a SET_ORNAMENT control message (with the index of the required ornament) immediately before sending the NOTE_ON itself. After executing the ornament, the NOTE_ON command automatically resets the synth's state to "no ornament". The SET_ORNAMENT control message has to be sent again if required.
+<a id="vpsensitivity"/>
+##### Velocity Pitch Sensitivity
+The VELOCITY_PITCH_SENSITIVITY (CC 83) message takes a `value` in range 0..127. This `value`
+raises an individual note's output pitch depending on its velocity. If `value` is 0, the velocity has no effect on the pitch. If `value` is 127, the velocity has some maximum effect, depending on the current tuning.
+In equal temperament tuning, with VELOCITY_PITCH_SENSITIVITY set to 127, a velocity of 127 will raise the pitch by one semitone.
+<a id="settingspresets"/>
+##### Settings Presets
+Each settings preset, defined in settingsPresets.js, is a complete set of settings for a single channel. The creation of such presets is described in the above _ResidentSynthHost_ documentation. They can, of course also be edited manually.  
+To set a settings preset in a MIDI channel, send it a SET_SETTINGS (CC 82) message with a value giving the required settings index in the settingsPresets.js file.
+
 
 James Ingram  
 August 2023  
