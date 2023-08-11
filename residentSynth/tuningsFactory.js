@@ -480,69 +480,7 @@ ResSynth.tuningsFactory = (function()
     TuningsFactory.prototype.finalizeTuning = function(tuning)
     {
         return finalizeTuning(tuning);
-    },
-
-    TuningsFactory.prototype.getSysExTuningChangeMsg = function(channel, tuning)
-    {
-        // Returns an array of the same length as the 'tuning' argument (which is an array of 128 midiCent values),
-        // but containing objects having the following fields:
-        // .midiCents : the original tuning value (not actually needed for the sysEx message)
-        // .basePitch : the portion of the midiCents value before the decimal point
-        // .data1 and data2 : the portion of the midiCents value after the decimal point, encoded as a 14bit composite value.
-        // In compliance with the official MIDI tuning standard, the .basePitch, .data1 and .data2 will be sent to the synth
-        // using a sysex command, and recomposed to the.midiCents value by code in the synth. 
-        function getValuesForSysExMessage(tuning)
-        {
-            let sysExValues = [];
-
-            for(var i = 0; i < tuning.length; i++)
-            {
-                let midiCents = Math.round(tuning[i] * 100) / 100,
-                    basePitch = Math.floor(midiCents),
-                    cents = midiCents - basePitch,
-                    centsMult = cents * 16384,
-                    sysExVal = {};
-
-                sysExVal.midiCents = midiCents; // actually not needed for sysEx message
-                sysExVal.basePitch = basePitch;
-                sysExVal.data1 = (centsMult >> 7) & 0x7f;
-                sysExVal.data2 = centsMult & 0x7f;
-
-                sysExValues.push(sysExVal);
-            }
-
-            return sysExValues;
-        }
-
-        let constants = ResSynth.constants,
-            CMD = constants.COMMAND,
-            SYSEX = constants.SYSEX,
-            sysExValues = getValuesForSysExMessage(tuning),
-            msgLength = 9 + (4 * sysExValues.length),
-            sysExMsg = new Uint8Array(msgLength),
-            i = 0;
-
-        sysExMsg[i++] = CMD.SYSEX;
-        sysExMsg[i++] = SYSEX.NON_REAL_TIME;
-        sysExMsg[i++] = SYSEX.RESEARCH_DEVICE_ID;
-        sysExMsg[i++] = SYSEX.MIDI_TUNING;
-        sysExMsg[i++] = SYSEX.MIDI_TUNING_NOTE_CHANGES_NON_REAL_TIME_BANK;
-        sysExMsg[i++] = 0; // unused tuning bank (there is currently only one tuning per channel)
-        sysExMsg[i++] = channel; // each channel has its own tuning
-        sysExMsg[i++] = sysExValues.length;
-        for(let j = 0; j < sysExValues.length; ++j)
-        {
-            sysExMsg[i++] = j;
-            sysExMsg[i++] = sysExValues[j].basePitch;
-            sysExMsg[i++] = sysExValues[j].data1;
-            sysExMsg[i++] = sysExValues[j].data2;
-        }
-        sysExMsg[msgLength - 1] = SYSEX.END_OF_MESSAGE;
-
-        console.assert(i === msgLength - 1);
-
-        return sysExMsg;
-    };
+    }
 
 	return API;
 

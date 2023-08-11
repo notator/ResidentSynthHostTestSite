@@ -19,7 +19,6 @@ ResSynth.constants = (function()
 	var
 		COMMAND = {},
 		CONTROL = {},
-		SYSEX = {},
 		MISC = {},
 
 		// These GM_PRESET_NAMES are written here exactly as defined at MIDI.org: 
@@ -245,7 +244,6 @@ ResSynth.constants = (function()
 		{
 			COMMAND: COMMAND,
 			CONTROL: CONTROL,
-			SYSEX: SYSEX,
 			MISC: MISC,
 			commandName: commandName,
 			commandDefaultValue: commandDefaultValue,
@@ -285,12 +283,7 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "SET_SETTINGS", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is trigger key)
 	Object.defineProperty(CONTROL, "VELOCITY_PITCH_SENSITIVITY", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is semitones / 127)
 	Object.defineProperty(CONTROL, "SET_ORNAMENT", {value: 75, writable: false}); // MIDI Sound Control 6. (value is ornament index)
-
 	// use MIDI Sound Control 7, 8, 9, 10 (CC 76, 77, 78, 79) for future controls
-	//Object.defineProperty(CONTROL, "START_RECORDING", {value: 76, writable: false}); // MIDI Sound Control 7. (channel is used, value is ignored)
-	//Object.defineProperty(CONTROL, "STOP_AND_SAVE_RECORDING", {value: 77, writable: false}); // MIDI Sound Control 8. (channel and value are ignored)
-	//Object.defineProperty(CONTROL, "START_PLAYBACK", {value: 78, writable: false}); // MIDI Sound Control 9. (channel is ignored, value is recording index)
-	//Object.defineProperty(CONTROL, "STOP_PLAYBACK", {value: 79, writable: false}); // MIDI Sound Control 10. (channel and value are ignored)
 
 	// MISC
 	Object.defineProperty(MISC, "MIDI_0_FREQUENCY", {value: 8.1758, writable: false}); // Hertz

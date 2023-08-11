@@ -46,10 +46,11 @@ The two **offset** numerical inputs determine the tuning offset in semitones and
 
 Commands and Controls:  
 ![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
-Except for reverberation and pitchWheelSensitivity, these are standard MIDI commands and controls.  
+Except for **reverberation** and **pitchWheelSensitivity**, these are standard MIDI commands and controls.  
 Reverberation and pitchWheelSensitivity use non-standard MIDI control messages (CC 91 and CC17 respectively).  
 The top six controls can be changed either by dragging the sliders, or entering values in the numeric input fields. They also react to incoming MIDI messages: On my MIDI input device, they can also be set using the appropriate hardware wheels and knobs.  
-The **AllControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
+The **allSoundOff** button silences the _ResidentSynth_.  
+The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
 
 Individual Note Controls:  
 ![screenshot_Notes](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Notes.png "screenshot_Notes")  
@@ -134,8 +135,7 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 	ALL_SOUND_OFF (CC 120, 0x78)  
 	ALL_CONTROLLERS_OFF (CC 121, 0x79)
 
-* <em>NB: Not Used</em>:<br />
-     
+* <em>NB: Not Used</em>:<br /> 
    ALL_NOTES_OFF (CC 123, 0x7B)
 
 ##### Non-standard Controls
