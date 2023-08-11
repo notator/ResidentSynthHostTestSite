@@ -1885,8 +1885,9 @@ ResSynth.host = (function(document)
                                 controlInfos.push(panData);
                                 controlInfos.push(reverberationData);
                                 controlInfos.push(pitchWheelSensitivityData);
-                                controlInfos.push(allControllersOff);
                                 controlInfos.push(allSoundOff);
+                                controlInfos.push(allControllersOff);
+
 
                                 return controlInfos;
                             }
