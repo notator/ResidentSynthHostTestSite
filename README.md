@@ -89,23 +89,28 @@ Web MIDI support from the browser since it implements the
 Web MIDI [_MIDIOutput_ interface](https://www.w3.org/TR/webmidi/#midioutput-interface) itself.  
 In addition to implementing the most common MIDI messages, the _ResidentSynth_ uses some 
 MIDI Controller messages for non-standard purposes. These are documented below.  
-#### Acknowledgements
-This synthesizer uses clones of freeware wavetables (=presets, instruments) found on 
-[Sergey Surikov's WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organized into 
-a custom WebAudioFont that can have 1-127 banks, each of which can contain 1-127 presets.  
-For illustration and test purposes, the _ResidentSynthHost_ is configured to contain multiple banks and a large number of presets. Other installations would typically use less.  
-On loading, the presets are automatically adjusted as follows:
-- envelopes are tweaked
-- where possible and meaningful, zones are extended to cover the full range of MIDI keys
-- any errors in the wavetables are silently corrected
 
-The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ and _Resident**Sf2**Synth_. These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ 
-([repository](https://github.com/notator/WebMIDISynthHost) and 
-[application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)). The inherited code owes a lot to 
-[Sergey Surikov's WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). 
-Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets 
-very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his
-`WebAudioFontReverberator`. 
+#### To use the _ResidentSynth_ in other web applications:
+
+1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
+2. adjust the files in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
+3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
+4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
+5. call `synth.open();`<br /> In order to comply with a web standard, this has to be done after a user interaction with the GUI.
+6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
+
+#### Configuration
+The _ResidentSynth_ can be configured by editing the files in its
+'config' folder.  
+This currently contains:  
+&nbsp;&nbsp;&nbsp;&nbsp;presets (a folder containing clones of Surikov's preset files)  
+&nbsp;&nbsp;&nbsp;&nbsp;webAudioFontDef.js (required)  
+&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;ornamentDefs.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;settingsPresets.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js (optional)  
+  
+More complete instructions as to how to edit these files are given in the files themselves.
 
 #### MIDI Messages
 See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/TestSite/residentSynth/constants.js).
@@ -148,28 +153,6 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 	<a href="#vpsensitivity">VELOCITY_PITCH_SENSITIVITY</a> (CC 83, 0x53)  
 	<a href="#ornaments">SET_ORNAMENT</a> (CC 75, 0x4B)
 	
-#### To use the _ResidentSynth_ in other web applications:
-
-1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
-2. adjust the files in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
-3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
-4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
-5. call `synth.open();`<br /> In order to comply with a web standard, this has to be done after a user interaction with the GUI.
-6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
-
-
-#### Configuration
-The _ResidentSynth_ can be configured by editing the files in its
-'config' folder.  
-This currently contains:  
-&nbsp;&nbsp;&nbsp;&nbsp;presets (a folder containing clones of Surikov's preset files)  
-&nbsp;&nbsp;&nbsp;&nbsp;webAudioFontDef.js (required)  
-&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js (optional)  
-&nbsp;&nbsp;&nbsp;&nbsp;ornamentDefs.js (optional)  
-&nbsp;&nbsp;&nbsp;&nbsp;settingsPresets.js (optional)  
-&nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js (optional)  
-  
-More complete instructions as to how to edit these files are given in the files themselves, but here's an overview:
 ##### WebAudioFontDef, Banks and Presets
 The preset definitions used here can be found in
 [Surikov's catalog](https://github.com/surikov/webaudiofont#catalog-of-instruments).  
@@ -216,6 +199,24 @@ In equal temperament tuning, with VELOCITY_PITCH_SENSITIVITY set to 127, a veloc
 ##### Settings Presets
 Each settings preset, defined in settingsPresets.js, is a complete set of settings for a single channel. The creation of such presets is described in the above _ResidentSynthHost_ documentation. They can, of course also be edited manually.  
 To set a settings preset in a MIDI channel, send it a SET_SETTINGS (CC 82) message with a value giving the required settings index in the settingsPresets.js file.
+
+#### Acknowledgements
+This synthesizer uses clones of freeware wavetables (=presets, instruments) found on 
+[Sergey Surikov's WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organized into 
+a custom WebAudioFont that can have 1-127 banks, each of which can contain 1-127 presets.  
+For illustration and test purposes, the _ResidentSynthHost_ is configured to contain multiple banks and a large number of presets. Other installations would typically use less.  
+On loading, the presets are automatically adjusted as follows:
+- envelopes are tweaked
+- where possible and meaningful, zones are extended to cover the full range of MIDI keys
+- any errors in the wavetables are silently corrected
+
+The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ and _Resident**Sf2**Synth_. These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ 
+([repository](https://github.com/notator/WebMIDISynthHost) and 
+[application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)). The inherited code owes a lot to 
+[Sergey Surikov's WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). 
+Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets 
+very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his
+`WebAudioFontReverberator`. 
 
 
 James Ingram  
