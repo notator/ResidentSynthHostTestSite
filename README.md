@@ -196,7 +196,7 @@ In equal temperament tuning, with VELOCITY_PITCH_SENSITIVITY set to 127, a veloc
 <a id="settingspresets"/>
 ##### Settings Presets
 Each settings preset, defined in settingsPresets.js, is a complete set of settings for a single channel. The creation of such presets is described in the above _ResidentSynthHost_ documentation. They can, of course also be edited manually.  
-To set a settings preset in a MIDI channel, send it a SET_SETTINGS (CC 82) message with a value giving the required settings index in the settingsPresets.js file.
+To set a settings preset in a MIDI channel, send the synth a SET_SETTINGS (CC 82) message with a value giving the required settings index in the settingsPresets.js file.
 
 #### Acknowledgements
 This synthesizer uses clones of freeware wavetables (=presets, instruments) found on 
