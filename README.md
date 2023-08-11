@@ -199,7 +199,8 @@ So the effective range of these messages is -50..+50 semitones or cents. A `valu
 ##### Non-standard controls (sliders)
 The REVERBERATION (CC 91) message takes a `value` in range 0..127, meaning zero to maximum reverberation.  
 The PITCH_WHEEL_SENSITIVITY (CC 16) `value` is in range 0..127, and determines the maximum deviation produced by the PITCHWHEEL (CMD 224). 
-<a id="ornaments"/>##### Ornaments
+<a id="ornaments"/>
+##### Ornaments
 An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON message.
 There are two types of ornament: _non-repeating_ and _repeating_:  
 When a _non-repeating_ ornament completes, its final note is sustained until the performed NOTE_ON's corresponding NOTE_OFF arrives. If the NOTE_OFF arrives before the ornament has completed, the ornament is simply cut short.   
