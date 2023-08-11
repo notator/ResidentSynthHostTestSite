@@ -84,7 +84,7 @@ They can also be useful while debugging, since both hands can be kept free while
 
 ### ResidentSynth 
 The _ResidentSynth_ is a 16-channel MIDI Output device, written entirely in Javascript,
-that can be installed and used on any website. It uses Web Audio API, but does _not_ require
+that can be installed and used on any website. It uses the Web Audio API, but does _not_ require
 Web MIDI support from the browser since it implements the 
 Web MIDI [_MIDIOutput_ interface](https://www.w3.org/TR/webmidi/#midioutput-interface) itself.  
 In addition to implementing the most common MIDI messages, the _ResidentSynth_ uses some 
@@ -92,10 +92,9 @@ MIDI Controller messages for non-standard purposes. These are documented below.
 #### Acknowledgements
 This synthesizer uses clones of freeware wavetables (=presets, instruments) found on 
 [Sergey Surikov's WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organized into 
-custom sound fonts.  
-For illustration and test purposes, the _ResidentSynthHost_ installs a deliberately large number of presets,
-organising them into several different fonts. Other installations would typically use less.  
-On loading, these presets are automatically adjusted as follows:
+a custom WebAudioFont that can have 1-127 banks, each of which can contain 1-127 presets.  
+For illustration and test purposes, the _ResidentSynthHost_ is configured to contain multiple banks and a large number of presets. Other installations would typically use less.  
+On loading, the presets are automatically adjusted as follows:
 - envelopes are tweaked
 - where possible and meaningful, zones are extended to cover the full range of MIDI keys
 - any errors in the wavetables are silently corrected
@@ -149,7 +148,7 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 	VELOCITY_PITCH_SENSITIVITY (CC 83, 0x53)  
 	SET_ORNAMENT (CC 75, 0x4B)
 	
-#### Using the _ResidentSynth_ in other web applications:
+#### To use the _ResidentSynth_ in other web applications:
 
 1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
 2. adjust the files in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
@@ -160,23 +159,23 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 
 
 #### Configuration
-The _ResidentSynth_ can be configured by editing the files in the
-[config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/TestSite/residentSynth/config).  
+The _ResidentSynth_ can be configured by editing the files in its
+'config' folder.  
 This currently contains:  
-&nbsp;&nbsp;&nbsp;&nbsp;[presets](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config/presets) (a folder containing clones of Surikov's preset files)  
-&nbsp;&nbsp;&nbsp;&nbsp;[webAudioFontDef.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/webAudioFontDef.js) (required)  
-&nbsp;&nbsp;&nbsp;&nbsp;[mixtureDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/mixtureDefs.js) (optional)  
-&nbsp;&nbsp;&nbsp;&nbsp;[ornamentDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/ornamentDefs.js) (optional)  
-&nbsp;&nbsp;&nbsp;&nbsp;[settingsPresets.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/settingsPresets.js) (optional)  
-&nbsp;&nbsp;&nbsp;&nbsp;[tuningDefs.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/residentSynth/config/tuningDefs.js) (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;presets (a folder containing clones of Surikov's preset files)  
+&nbsp;&nbsp;&nbsp;&nbsp;webAudioFontDef.js (required)  
+&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;ornamentDefs.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;settingsPresets.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js (optional)  
   
-More complete instructions as to how to edit the definitions are given in the respective files, but here's an overview:
+More complete instructions as to how to edit these files are given in the files themselves, but here's an overview:
 ##### WebAudioFontDef, Banks and Presets
 The preset definitions used here can be found in
 [Surikov's catalog](https://github.com/surikov/webaudiofont#catalog-of-instruments).  
 To make a preset available, put a clone of its definition in the presets folder, and configure one or more bank/preset addresses for it in webAudioFontDef.js.  
 Presets can then be activated using the standard BANK control and PRESET command messages.  
-The webAudioFont must contain between 1 and 127 banks, each of which contains between 1 and 127 presets. 
+The WebAudioFont must contain between 1 and 127 banks, each of which contains between 1 and 127 presets. 
 ##### Mixtures
 A _mixture_, defined in mixtureDefs.js, is a chord that plays when a single NOTE_ON message is sent to the synth.
 Mixtures are like freely configurable [Organ stops](https://en.wikipedia.org/wiki/Mixture_(organ_stop)).  
@@ -203,7 +202,7 @@ A _tuning_ associates each of the 127 MIDI keys with a pitch value (expressed as
 The following types of tuning can be created by the synth using the (configurable) definitions provided in tuningDefs.js: 
 - constant factor : e.g. Equal temperament can be created using the 12th root of 2.
 - Partch : tunings (on different root pitches) like Harry Partch's
-- warped octaves : Tunings containing internally warped octaves
+- warped octaves : tunings containing internally warped octaves
 - free keyboard : warped tunings in which the only restriction is that pitches ascend from left to right of the keyboard
 
 To set a channel to a particular tuning in a channel, send the tuning group index in a SET_TUNING_GROUP message, and the tuning index (in the group) in a SET_TUNING message. This provides the tuning's address in tuningDefs.js.
