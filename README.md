@@ -47,7 +47,7 @@ The two **offset** numerical inputs determine the tuning offset in semitones and
 Commands and Controls:  
 ![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
 Except for **reverberation** and **pitchWheelSensitivity**, these are standard MIDI commands and controls.  
-Reverberation and pitchWheelSensitivity use non-standard MIDI control messages (CC 91 and CC17 respectively).  
+Reverberation and pitchWheelSensitivity use non-standard MIDI control messages (CC 91 and CC 16 respectively).  
 The top six controls can be changed either by dragging the sliders, or entering values in the numeric input fields. They also react to incoming MIDI messages: On my MIDI input device, they can also be set using the appropriate hardware wheels and knobs.  
 The **allSoundOff** button silences the _ResidentSynth_.  
 The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
@@ -99,12 +99,9 @@ On loading, these presets are automatically adjusted as follows:
 - where possible and meaningful, zones are extended to cover the full range of MIDI keys
 - any errors in the wavetables are silently corrected
 
-The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ 
-and _Resident**Sf2**Synth_.  
-These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ 
+The _ResidentSynth_ inherits code from, and supercedes, my two previous synthesizers: the _Resident**WAF**Synth_ and _Resident**Sf2**Synth_. These are no longer being developed, but can still be used in the archived _WebMIDISynthHost_ 
 ([repository](https://github.com/notator/WebMIDISynthHost) and 
-[application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)).  
-The inherited code owes a lot to 
+[application](https://james-ingram-act-two.de/open-source/WebMIDISynthHost/host.html)). The inherited code owes a lot to 
 [Sergey Surikov's WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js). 
 Not only is the code for loading and adjusting [WebAudioFont](https://github.com/surikov/webaudiofont) presets 
 very similar to his `WebAudioFontLoader`, but the reverberation control is practically a clone of his
@@ -154,7 +151,7 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 #### Using the _ResidentSynth_ in other web applications:
 
 1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
-2. adjust the files in the in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
+2. adjust the files in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
 3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
 4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
 5. call `synth.open();`<br /> In order to comply with a web standard, this has to be done after a user interaction with the GUI.
@@ -184,7 +181,7 @@ A _mixture_, defined in mixtureDefs.js, is a chord that plays when a single NOTE
 Mixtures are like freely configurable [Organ stops](https://en.wikipedia.org/wiki/Mixture_(organ_stop)).  
 Mixtures are set using their index as the value in a MIXTURE_INDEX control message. By convention, index 0 is always defined to mean "no mixture".
 ##### Ornaments
-An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON.
+An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON message.
 There are two types of ornament: _non-repeating_ and _repeating_:  
 When a _non-repeating_ ornament completes, its final note is sustained until the performed NOTE_ON's corresponding NOTE_OFF arrives. If the NOTE_OFF arrives before the ornament has completed, the ornament is simply cut short.   
 The notes of a _repeating_ ornament are repeated continuously until the performed NOTE_ON's corresponding NOTE_OFF arrives, at which point the ornament stops.  
