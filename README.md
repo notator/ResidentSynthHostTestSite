@@ -10,7 +10,7 @@ The _ResidentSynth_ is intended to be configured for, and installed with, a web 
 
 Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.  
 Issues relating to either of them should be raised here.  
-**Note that this page contains separate documentation for the _ResidentSynthHost_ and the _ResidentSynth_.** 
+**Note that this page contains separate documentation for the _ResidentSynthHost_ and the <a href="#synthdoc">_ResidentSynth_.</a>** 
 
 ---
 
@@ -80,8 +80,9 @@ These controls can be used when no other MIDI Input device is attached to the co
 They can also be useful while debugging, since both hands can be kept free while holding a note.
 
 ---
+<a id="synthdoc" />
 
-### ResidentSynth
+### ResidentSynth 
 The _ResidentSynth_ is a 16-channel MIDI Output device, written entirely in Javascript,
 that can be installed and used on any website. It uses Web Audio API, but does _not_ require
 Web MIDI support from the browser since it implements the 
