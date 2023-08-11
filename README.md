@@ -92,9 +92,9 @@ MIDI Controller messages for non-standard purposes. These are documented below.
 
 #### To use the _ResidentSynth_ in other web applications:
 
-1. copy the [residentSynth](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth) folder to the application site
-2. adjust the files in the [config folder](https://github.com/notator/ResidentSynthHostTestSite/tree/testSite/residentSynth/config) as required (see below).
-3. load the appropriate files in the application's main html file (see, for example, the files included at the end of [host.html](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/host.html)).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
+1. copy the 'residentSynth' folder to the application site
+2. adjust the files in the contained 'config' folder as required (see below).
+3. load the appropriate files in the application's main .html file (see, for example, the files included at the end of host.html).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
 4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
 5. call `synth.open();`<br /> In order to comply with a web standard, this has to be done after a user interaction with the GUI.
 6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
@@ -113,7 +113,8 @@ This currently contains:
 More complete instructions as to how to edit these files are given in the files themselves.
 
 #### MIDI Messages
-See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/TestSite/residentSynth/constants.js).
+See the file residentSynth/constants.js
+
 ##### Commands
 * <em>Implemented</em>:<br />
    NOTE_OFF (128, 0x80)  
@@ -137,11 +138,8 @@ See [constants.js](https://github.com/notator/ResidentSynthHostTestSite/blob/Tes
 	ALL_SOUND_OFF (CC 120, 0x78)  
 	ALL_CONTROLLERS_OFF (CC 121, 0x79)
 
-* <em>NB: Not Used</em>:<br /> 
-   ALL_NOTES_OFF (CC 123, 0x7B)
-
 ##### Non-standard Controls
-* <em>Implemented</em> (See documentation below):<br />
+* (See documentation below):<br />
 	<a href="#nonstandardcontrols">REVERBERATION</a> (CC 91, 0x5B)    
 	<a href="#nonstandardcontrols">PITCH_WHEEL_SENSITIVITY</a> (CC 16, 0x10)  
 	<a href="#mixtures">MIXTURE_INDEX</a> (CC 17, 0x11)  
@@ -163,7 +161,7 @@ The WebAudioFont must contain between 1 and 127 banks, each of which contains be
 ##### Mixtures
 A _mixture_, defined in mixtureDefs.js, is a chord that plays when a single NOTE_ON message is sent to the synth.
 Mixtures are like freely configurable [Organ stops](https://en.wikipedia.org/wiki/Mixture_(organ_stop)).  
-Mixtures are set using their index as the value in a MIXTURE_INDEX (CC 17) control message. By convention, index 0 is always defined to mean "no mixture".
+Mixtures are set using their index in the file as the value in a MIXTURE_INDEX (CC 17) control message. By convention, index 0 is always defined to mean "no mixture".
 ##### Tunings
 A _tuning_ associates each of the 127 MIDI keys with a pitch value (expressed as cents above MIDI C0).  
 The following types of tuning can be created by the synth using the (configurable) definitions provided in tuningDefs.js: 
