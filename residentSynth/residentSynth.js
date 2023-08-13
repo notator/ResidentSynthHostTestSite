@@ -966,7 +966,11 @@ ResSynth.residentSynth = (function(window)
             }
             setTimeout(reconnectChannelInput(), stopTime - now);
         },
-        noteOn = function(channel, key, velocity)
+         wait = function(milliseconds)
+        {
+            return new Promise(resolve => setTimeout(resolve, milliseconds));
+        },
+        noteOn = async function(channel, key, velocity)
         {
             // returns a new midiAttributes object
             function getMidiAttributes(preset, keyKey, keyPitch, velocity)
@@ -1154,6 +1158,7 @@ ResSynth.residentSynth = (function(window)
             }
 
             let chanControls = channelControls[channel],
+                ornamentObjects = chanControls.ornamentObjects,
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,  
                 midi = {};
@@ -1175,7 +1180,14 @@ ResSynth.residentSynth = (function(window)
 
             midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, velocity);
 
-            if(chanControls.ornamentIndex < 0) // -1 is "no ornament"
+            if(ornamentObjects.length > 0)
+            {
+                let oKey = ornamentObjects.findIndex(e => e != undefined);
+                await noteOff(channel, oKey);
+
+                doNoteOn(midi);
+            }
+            else if(chanControls.ornamentIndex < 0) // -1 is "no ornament"
             {
                 doNoteOn(midi);
             }
@@ -1187,14 +1199,9 @@ ResSynth.residentSynth = (function(window)
         },
         noteOff = async function(channel, key)
         {
-            function wait(milliseconds)
-            {
-                return new Promise(resolve => setTimeout(resolve, milliseconds));
-            }
-
-            let channelControl = channelControls[channel],
-                currentNoteOns = channelControl.currentNoteOns,
-                ornamentObject = channelControl.ornamentObjects[key],
+            let chanControls = channelControls[channel],
+                currentNoteOns = chanControls.currentNoteOns,
+                ornamentObject = chanControls.ornamentObjects[key],
                 stopTime = 0;
 
             if(ornamentObject !== undefined)
@@ -1202,9 +1209,9 @@ ResSynth.residentSynth = (function(window)
                 ornamentObject.cancel = true;
                 while(!ornamentObject.complete)
                 {
-                    await wait(10);
+                    await wait(5);
                 }
-                channelControl.ornamentObjects[key] = undefined;
+                chanControls.ornamentObjects.length = 0;
             }
 
             for(var index = currentNoteOns.length - 1; index >= 0; index--)
