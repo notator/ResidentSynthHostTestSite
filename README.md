@@ -183,7 +183,7 @@ The PITCH_WHEEL_SENSITIVITY (CC 16) `value` is in range 0..127, and determines t
 <a id="ornaments"/>
 ##### Ornaments
 An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON message.  
-Note that these ornaments are homophonic: A running ornament turns off, and is turned off by, any concurrent notes in the same channel.  
+Note that, while ornaments can use mixtures, they are homophonic: An ornament turns notes off that are currently sounding in the channel, and are cut short by incoming NOTE_ONs in the same channel.  
 There are two types of ornament: _non-repeating_ and _repeating_:  
 When a _non-repeating_ ornament completes, its final note is sustained until the performed NOTE_ON's corresponding NOTE_OFF arrives. If the NOTE_OFF arrives before the ornament has completed, the ornament is simply cut short.   
 The notes of a _repeating_ ornament are repeated continuously until the performed NOTE_ON's corresponding NOTE_OFF arrives, at which point the ornament stops.  
