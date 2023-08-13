@@ -54,7 +54,7 @@ The **allControllersOff** button silences the _ResidentSynth_, and sets the six 
 
 Individual Note Controls:  
 ![screenshot_Notes](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Notes.png "screenshot_Notes")  
-Ornaments can be configured in the _ResidentSynth_, and are described more fully in its _Ornaments_ documentation below.    
+Ornaments can be configured in the _ResidentSynth_, and are described more fully in its <a href="#ornaments">_Ornaments_</a> documentation below.    
 The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
 The **velocityPitchSensitivity** input is a floating point value between 0 and 1. This value
 raises an individual note's output pitch depending on its velocity. If this value is 0, the velocity has no effect
@@ -182,7 +182,8 @@ The REVERBERATION (CC 91) message takes a `value` in range 0..127, meaning zero 
 The PITCH_WHEEL_SENSITIVITY (CC 16) `value` is in range 0..127, and determines the maximum deviation produced by the PITCHWHEEL (CMD 224). 
 <a id="ornaments"/>
 ##### Ornaments
-An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON message.
+An _ornament_ is a series of consecutive notes sent automatically when the synthesizer receives a NOTE_ON message.  
+Note that these ornaments are homophonic: A running ornament turns off, and is turned off by, any concurrent notes in the same channel.  
 There are two types of ornament: _non-repeating_ and _repeating_:  
 When a _non-repeating_ ornament completes, its final note is sustained until the performed NOTE_ON's corresponding NOTE_OFF arrives. If the NOTE_OFF arrives before the ornament has completed, the ornament is simply cut short.   
 The notes of a _repeating_ ornament are repeated continuously until the performed NOTE_ON's corresponding NOTE_OFF arrives, at which point the ornament stops.  
