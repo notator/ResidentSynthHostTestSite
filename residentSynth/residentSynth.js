@@ -1060,7 +1060,7 @@ ResSynth.residentSynth = (function(window)
             }
 
             // Uses chanControls.ornamentIndex, chanControls.mixtureIndex, chanControls.cancelOrnament.
-            function doOrnamentedNote(firstMidi, channelControls)
+            function doOrnamentedNote(midi, chanControls)
             {
                 function doOrnamentNoteOffs(currentNoteOns)
                 {
@@ -1088,26 +1088,20 @@ ResSynth.residentSynth = (function(window)
                         }
                     }
 
-                    let ornamentDef = ResSynth.ornamentDefs[channelControls.ornamentIndex],
+                    let ornamentDef = ResSynth.ornamentDefs[chanControls.ornamentIndex],
                         noteInfos = ornamentDef.notes,
                         doRepeats = (ornamentDef.repeats === "yes") ? true : false,
-                        preset = firstMidi.preset;
+                        preset = midi.preset;
 
                     do
                     {
                         for(var i = 0; i < noteInfos.length; i++)
                         {
-                            // [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
-                            // [2, 0, 125],
-                            // [0, 0, 125],
-                            // [-1, 0, 125],
-                            // [0, 0, 0]
-
                             let oNoteInfo = noteInfos[i],
                                 final = (i === noteInfos.length - 1),
-                                keyKey = midiVal(firstMidi.keyKey + oNoteInfo[0]),
-                                keyPitch = firstMidi.keyPitch - channelControls.tuning[firstMidi.keyKey] + channelControls.tuning[keyKey],
-                                velocity = midiVal(firstMidi.velocity + oNoteInfo[1]),
+                                keyKey = midiVal(midi.keyKey + oNoteInfo[0]),
+                                keyPitch = midi.keyPitch - chanControls.tuning[midi.keyKey] + chanControls.tuning[keyKey],
+                                velocity = midiVal(midi.velocity + oNoteInfo[1]),
                                 oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
                                 delay;
 
@@ -1117,7 +1111,7 @@ ResSynth.residentSynth = (function(window)
                             {
                                 if(final == false)
                                 {
-                                    doOrnamentNoteOffs(channelControls.currentNoteOns);
+                                    doOrnamentNoteOffs(chanControls.currentNoteOns);
                                 }
                                 break;
                             }
@@ -1128,7 +1122,7 @@ ResSynth.residentSynth = (function(window)
                             {
                                 if(final == false)
                                 {
-                                    doOrnamentNoteOffs(channelControls.currentNoteOns);
+                                    doOrnamentNoteOffs(chanControls.currentNoteOns);
                                 }
                                 break;
                             }
@@ -1137,28 +1131,31 @@ ResSynth.residentSynth = (function(window)
 
                             if(final == false)
                             {
-                                doOrnamentNoteOffs(channelControls.currentNoteOns);
+                                doOrnamentNoteOffs(chanControls.currentNoteOns);
                             }
                         }
                     } while((ornamentObject.cancel === false) && (doRepeats === true));
 
                     if(doRepeats)
                     {
-                        doOrnamentNoteOffs(channelControls.currentNoteOns);
+                        doOrnamentNoteOffs(chanControls.currentNoteOns);
                     }
 
                     ornamentObject.complete = true;
                 }
 
                 let ornamentObject = {};
-                channelControls.ornamentObjects[firstMidi.keyKey] = ornamentObject;
+                ornamentObject.key = midi.keyKey;
                 ornamentObject.cancel = false;
                 ornamentObject.complete = false;
+
+                chanControls.ornamentObject = ornamentObject;
+
                 playOrnament(ornamentObject); // async
             }
 
             let chanControls = channelControls[channel],
-                ornamentObjects = chanControls.ornamentObjects,
+                ornamentObject = chanControls.ornamentObject,
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,  
                 midi = {};
@@ -1180,10 +1177,9 @@ ResSynth.residentSynth = (function(window)
 
             midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, velocity);
 
-            if(ornamentObjects.length > 0)
+            if(ornamentObject !== undefined)
             {
-                let oKey = ornamentObjects.findIndex(e => e != undefined);
-                await noteOff(channel, oKey);
+                await noteOff(channel, ornamentObject.key);
 
                 doNoteOn(midi);
             }
@@ -1201,17 +1197,18 @@ ResSynth.residentSynth = (function(window)
         {
             let chanControls = channelControls[channel],
                 currentNoteOns = chanControls.currentNoteOns,
-                ornamentObject = chanControls.ornamentObjects[key],
+                ornamentObject = chanControls.ornamentObject,
                 stopTime = 0;
 
-            if(ornamentObject !== undefined)
+            if(ornamentObject !== undefined && ornamentObject.key === key)
             {
                 ornamentObject.cancel = true;
                 while(!ornamentObject.complete)
                 {
                     await wait(5);
                 }
-                chanControls.ornamentObjects.length = 0;
+                chanControls.ornamentIndex = -1;
+                chanControls.ornamentObject = undefined;
             }
 
             for(var index = currentNoteOns.length - 1; index >= 0; index--)
@@ -1391,9 +1388,8 @@ ResSynth.residentSynth = (function(window)
             setControllerDefaults(channel);
 
             channelControls[channel].currentNoteOns = [];
-            channelControls[channel].ornamentObjects = [];
-        }
-  
+            channelControls[channel].ornamentObject = undefined;
+        }  
     };
 
     // WebMIDIAPI §6.2 -- MIDIPort interface
