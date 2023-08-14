@@ -939,9 +939,16 @@ ResSynth.residentSynth = (function(window)
         {
             channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones -- host currently limits data2 / 127 to range 0..0.6
         },
-        updateOrnamentIndex = function(channel, ornamentIndex)
+        setOrnamentInfo = function(channel, ornamentIndex)
         {
-            channelControls[channel].ornamentIndex = ornamentIndex; // -1 is no ornament (is reset after each ornament performance)
+            let ornamentInfo = {};
+
+            ornamentInfo.index = ornamentIndex;
+            ornamentInfo.key = undefined;
+            ornamentInfo.cancel = false;
+            ornamentInfo.complete = false;
+
+            channelControls[channel].ornamentInfoQueue.push(ornamentInfo);
         },
         allSoundOff = function(channel)
         {
@@ -1059,9 +1066,23 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            // Uses chanControls.ornamentIndex, chanControls.mixtureIndex, chanControls.cancelOrnament.
-            function doOrnamentedNote(midi, chanControls)
+            async function playOrnamentAsync(ornamentInfo, chanControls)
             {
+                function midiVal(value)
+                {
+                    value = (value < 0) ? 0 : value;
+                    value = (value > 127) ? 127 : value;
+                    return value;
+                }
+
+                function wait(delay, cancel)
+                {
+                    if(!cancel)
+                    {
+                        return new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+
                 function doOrnamentNoteOffs(currentNoteOns)
                 {
                     for(var i = 0; i < currentNoteOns.length; i++)
@@ -1071,91 +1092,65 @@ ResSynth.residentSynth = (function(window)
                     currentNoteOns.length = 0;
                 }
 
-                async function playOrnament(ornamentObject)
+                let ornamentDef = ResSynth.ornamentDefs[ornamentInfo.index],
+                    noteInfos = ornamentDef.notes,
+                    doRepeats = (ornamentDef.repeats === "yes") ? true : false,
+                    preset = midi.preset;
+
+                do
                 {
-                    function midiVal(value)
+                    for(var i = 0; i < noteInfos.length; i++)
                     {
-                        value = (value < 0) ? 0 : value;
-                        value = (value > 127) ? 127 : value;
-                        return value;
-                    }
+                        let oNoteInfo = noteInfos[i],
+                            final = (i === noteInfos.length - 1),
+                            keyKey = midiVal(midi.keyKey + oNoteInfo[0]),
+                            keyPitch = midi.keyPitch - chanControls.tuning[midi.keyKey] + chanControls.tuning[keyKey],
+                            velocity = midiVal(midi.velocity + oNoteInfo[1]),
+                            oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
+                            delay;
 
-                    function wait(delay, cancel)
-                    {
-                        if(!cancel)
+                        delay = oNoteInfo[2];
+
+                        if(ornamentInfo.cancel === true)
                         {
-                            return new Promise(resolve => setTimeout(resolve, delay));
-                        }
-                    }
-
-                    let ornamentDef = ResSynth.ornamentDefs[chanControls.ornamentIndex],
-                        noteInfos = ornamentDef.notes,
-                        doRepeats = (ornamentDef.repeats === "yes") ? true : false,
-                        preset = midi.preset;
-
-                    do
-                    {
-                        for(var i = 0; i < noteInfos.length; i++)
-                        {
-                            let oNoteInfo = noteInfos[i],
-                                final = (i === noteInfos.length - 1),
-                                keyKey = midiVal(midi.keyKey + oNoteInfo[0]),
-                                keyPitch = midi.keyPitch - chanControls.tuning[midi.keyKey] + chanControls.tuning[keyKey],
-                                velocity = midiVal(midi.velocity + oNoteInfo[1]),
-                                oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
-                                delay;
-
-                            delay = oNoteInfo[2];
-
-                            if(ornamentObject.cancel === true)
-                            {
-                                if(final == false)
-                                {
-                                    doOrnamentNoteOffs(chanControls.currentNoteOns);
-                                }
-                                break;
-                            }
-
-                            doNoteOn(oMidi); // this does the mixture, if there is one.
-
-                            if(ornamentObject.cancel === true)
-                            {
-                                if(final == false)
-                                {
-                                    doOrnamentNoteOffs(chanControls.currentNoteOns);
-                                }
-                                break;
-                            }
-
-                            await wait(delay, ornamentObject.cancel);
-
                             if(final == false)
                             {
                                 doOrnamentNoteOffs(chanControls.currentNoteOns);
                             }
+                            break;
                         }
-                    } while((ornamentObject.cancel === false) && (doRepeats === true));
 
-                    if(doRepeats)
-                    {
-                        doOrnamentNoteOffs(chanControls.currentNoteOns);
+                        doNoteOn(oMidi); // this does the mixture, if there is one.
+
+                        if(ornamentInfo.cancel === true)
+                        {
+                            if(final == false)
+                            {
+                                doOrnamentNoteOffs(chanControls.currentNoteOns);
+                            }
+                            break;
+                        }
+
+                        await wait(delay, ornamentInfo.cancel);
+
+                        if(final == false)
+                        {
+                            doOrnamentNoteOffs(chanControls.currentNoteOns);
+                        }
                     }
+                } while((ornamentInfo.cancel === false) && (doRepeats === true));
 
-                    ornamentObject.complete = true;
+                if(doRepeats)
+                {
+                    doOrnamentNoteOffs(chanControls.currentNoteOns);
                 }
 
-                let ornamentObject = {};
-                ornamentObject.key = midi.keyKey;
-                ornamentObject.cancel = false;
-                ornamentObject.complete = false;
-
-                chanControls.ornamentObject = ornamentObject;
-
-                playOrnament(ornamentObject); // async
+                ornamentInfo.complete = true;
             }
 
             let chanControls = channelControls[channel],
-                ornamentObject = chanControls.ornamentObject,
+                ornamentInfoQueue = chanControls.ornamentInfoQueue,
+                ornamentInfo = (ornamentInfoQueue.length > 0) ? ornamentInfoQueue[0] : undefined,
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,  
                 midi = {};
@@ -1177,38 +1172,41 @@ ResSynth.residentSynth = (function(window)
 
             midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, velocity);
 
-            if(ornamentObject !== undefined)
+            if(ornamentInfo !== undefined)
             {
-                await noteOff(channel, ornamentObject.key);
+                if(ornamentInfo.key !== undefined)
+                {
+                    await noteOff(channel, ornamentInfo.key);
 
-                doNoteOn(midi);
-            }
-            else if(chanControls.ornamentIndex < 0) // -1 is "no ornament"
-            {
-                doNoteOn(midi);
+                    noteOn(channel, key, velocity);
+                }
+                else
+                {
+                    ornamentInfo.key = key;
+                    playOrnamentAsync(ornamentInfo, chanControls);
+                }
             }
             else
             {
-                doOrnamentedNote(midi, chanControls);
-                chanControls.ornamentIndex = -1;
+                doNoteOn(midi);
             }
         },
         noteOff = async function(channel, key)
         {
             let chanControls = channelControls[channel],
                 currentNoteOns = chanControls.currentNoteOns,
-                ornamentObject = chanControls.ornamentObject,
+                ornamentInfoQueue = chanControls.ornamentInfoQueue,
+                ornamentInfo = (ornamentInfoQueue.length > 0) ? ornamentInfoQueue[0] : undefined,
                 stopTime = 0;
 
-            if(ornamentObject !== undefined && ornamentObject.key === key)
+            if(ornamentInfo !== undefined && ornamentInfo.key === key)
             {
-                ornamentObject.cancel = true;
-                while(!ornamentObject.complete)
+                ornamentInfo.cancel = true;
+                while(!ornamentInfo.complete)
                 {
                     await wait(5);
                 }
-                chanControls.ornamentIndex = -1;
-                chanControls.ornamentObject = undefined;
+                ornamentInfoQueue.splice(0, 1);
             }
 
             for(var index = currentNoteOns.length - 1; index >= 0; index--)
@@ -1234,7 +1232,6 @@ ResSynth.residentSynth = (function(window)
             updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's keyPitch value in NoteOn. 
 
             updateVelocityPitchSensitivity(channel, 0);
-            updateOrnamentIndex(channel, -1);
         },
         setControllerDefaults = function(channel)
         {
@@ -1380,15 +1377,16 @@ ResSynth.residentSynth = (function(window)
 
         for(var channel = 0; channel < 16; channel++)
         {
-            channelAudioNodes.push(audioNodesConfig(audioContext, channelAudioNodes.finalGainNode));
+            channelAudioNodes.push(audioNodesConfig(audioContext, channelAudioNodes.finalGainNode));  
 
             let controlState = {};
             channelControls.push(controlState);
-            setFontAndTuningDefaults(channel);
-            setControllerDefaults(channel);
 
+            channelControls[channel].ornamentInfoQueue = [];
             channelControls[channel].currentNoteOns = [];
-            channelControls[channel].ornamentObject = undefined;
+
+            setFontAndTuningDefaults(channel);
+            setControllerDefaults(channel);            
         }  
     };
 
@@ -1506,7 +1504,7 @@ ResSynth.residentSynth = (function(window)
                     updateVelocityPitchSensitivity(channel, value);
                     break;
                 case CTL.SET_ORNAMENT:
-                    updateOrnamentIndex(channel, value);
+                    setOrnamentInfo(channel, value);
                     break;
                 case CTL.ALL_CONTROLLERS_OFF:
                     allSoundOff(channel);
