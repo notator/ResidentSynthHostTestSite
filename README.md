@@ -30,7 +30,7 @@ Top Level:
 Available MIDI input devices can be selected from the **Input Device** selector.  
 Similarly, available audio outputs can be selected from the **Audio Output** selector.  
 Changing the **channel** selector updates the whole GUI with the current settings for that channel.  
-This is the channel on which MIDI messages will be sent to the 16-channel _ResidentSynth_.
+MIDI messages will be sent from the attached MIDI Input device to the 16-channel _ResidentSynth_ on a channel that is controlled by the keyboard **split**-string. See <a href="#keyboardSplit">below</a>
   
 Sounds:  
 ![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
@@ -52,8 +52,16 @@ The top six controls can be changed either by dragging the sliders, or entering 
 The **allSoundOff** button silences the _ResidentSynth_.  
 The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
 
-Individual Note Controls:  
-![screenshot_Notes](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Keyboard.png "screenshot_Notes")  
+Keyboard Controls:  
+![screenshot_Keyboard](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Keyboard.png "screenshot_Keyboard")  
+<a id="keyboardSplit"/>The **split** string input field can be used to assign a channel to each key on the input keyboard. The split-string can have up to 127 `<key>:<channel>;` substrings, separated by optional whitespace. The final ";" is optional.  
+Each `<key>` is a number in range 0..127. `<key>` values must be in ascending order, and may not repeat.  
+Each `<channel>` is a number in range 0..15. These values can be in any order, and can repeat within the split-string.
+The default (empty) split-string is equivalent to the string "0:0", meaning that all keys send messages on channel 0.  
+The split-string is parsed from left to right.
+All keys greater than or equal to the `<key>` substring send on the substring's channel unless overridden by a substring further to the right.
+Valid split-strings are "", "42:1;", "40:1; 50:2;", "40:1; 50:2; 60:1; 72:5" etc.
+
 Ornaments can be configured in the _ResidentSynth_, and are described more fully in its <a href="#ornaments">_Ornaments_</a> documentation below.    
 The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
 The **velocityPitchSensitivity** input is a floating point value between 0 and 1. This value
