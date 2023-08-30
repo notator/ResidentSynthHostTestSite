@@ -46,6 +46,7 @@ ResSynth.settingsPresets =
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
+            "keyboardSplitString": "",
             "keyOrnamentsString": ""
         },
         {
@@ -65,6 +66,7 @@ ResSynth.settingsPresets =
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
+            "keyboardSplitString": "60:1; 72:2",
             "keyOrnamentsString": "64:0"
         },
         {
@@ -84,6 +86,7 @@ ResSynth.settingsPresets =
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
+            "keyboardSplitString": "",
             "keyOrnamentsString": "64:0; 66:1"
         },
         {
@@ -103,6 +106,7 @@ ResSynth.settingsPresets =
             "pitchWheelSensitivity": 2,
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
+            "keyboardSplitString": "",
             "keyOrnamentsString": "64:0; 66:1; 68:2"
         }
         // etc. more settings definitions can be added here.

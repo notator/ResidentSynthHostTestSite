@@ -54,7 +54,6 @@
                 <input class="largeButton" type="button" value="continue" onclick="ResSynth.host.onContinueAtStartClicked()" />
             </div>
         </div>
-
         <div id="webAudioFontDiv" style="display:none">
             <hr />
             <table>
@@ -103,9 +102,9 @@
                     </td>
                     <td id="tuningSelectCell">
                         <!--
-                            <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
-                            sendAgainButton
-                        -->
+                        <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
+                        sendAgainButton
+                    -->
                     </td>
                     <td>
                         <!--<select id="a4FrequencySelect" class="a4FrequencySelect" onchange="ResSynth.host.onA4FrequencySelectChanged()" />-->
@@ -121,16 +120,29 @@
             <span class="boldSubtitle">commands and controls:</span>
             <table id="commandsAndControlsTable" class="midiMessagesTable"></table>
         </div>
-        <div id="notesDiv" style="display:none;">
+        <div id="keyboardDiv" style="display:none;">
             <hr />
             <table width="660px">
                 <colgroup>
-                    <col width="460" />
+                    <col width="83" />
+                    <col width="377" />
                     <col width="200" />
                 </colgroup>
                 <tr>
+                    <td align="right">
+                        <span class="boldSubtitle">keyboard: </span><span>split</span>
+                    </td>
                     <td>
-                        <span class="boldSubtitle">notes: </span><span>ornaments</span>
+                        <input type="text" id="keyboardSplitStringInput" class="keyboardSplitStringInput"
+                               oninput="ResSynth.host.onKeyboardSplitStringInputChanged()"
+                               onblur="ResSynth.host.onKeyboardSplitStringInputBlurred()" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        <span>ornaments</span>
+                    </td>
+                    <td>
                         <input type="text" id="keyOrnamentsStringInput" class="keyOrnamentsStringInput"
                                oninput="ResSynth.host.onKeyOrnamentsStringInputChanged()"
                                onblur="ResSynth.host.onKeyOrnamentsStringInputBlurred()">

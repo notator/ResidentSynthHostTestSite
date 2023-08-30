@@ -22,30 +22,30 @@ All the major browsers now do this.
   
 
 
-![screenshot](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost.png "screenshot")  
+![screenshot](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost.png "screenshot")  
 
 The GUI is divided into horizontal areas that group similar concepts:  
 Top Level:  
-![screenshot_Top](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_0_Top.png "screenshot_Top")  
+![screenshot_Top](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_0_Top.png "screenshot_Top")  
 Available MIDI input devices can be selected from the **Input Device** selector.  
 Similarly, available audio outputs can be selected from the **Audio Output** selector.  
 Changing the **channel** selector updates the whole GUI with the current settings for that channel.  
 MIDI messages will be sent from the attached MIDI Input device to the 16-channel _ResidentSynth_ on a channel that is controlled by the keyboard **split**-string. See <a href="#keyboardSplit">below</a>
   
 Sounds:  
-![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
+![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
 Banks can be configured in the _ResidentSynth_, and selected from the **bank** selector.  
 The **preset** selector always contains the presets available in the currently selected bank.  
 Mixtures can also be configured in the _ResidentSynth_. They are selected from the **mixture** selector.  
 
 Tuning:  
-![screenshot_Tuning](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_2_Tuning.png "screenshot_Tuning")  
+![screenshot_Tuning](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_2_Tuning.png "screenshot_Tuning")  
 Tuning groups can be configured in the _ResidentSynth_, and selected from the **tuning group** selector.  
 The **tuning** selector always contains the tunings available in the current tuning group.  
 The two **offset** numerical inputs determine the tuning offset in semitones and cents respectively. The semitones input takes integer values in the range -36 to +36. The cents input takes values in the range -50 to +50.  
 
 Commands and Controls:  
-![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
+![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
 Except for **reverberation** and **pitchWheelSensitivity**, these are standard MIDI commands and controls.  
 Reverberation and pitchWheelSensitivity use non-standard MIDI control messages (CC 91 and CC 16 respectively).  
 The top six controls can be changed either by dragging the sliders, or entering values in the numeric input fields. They also react to incoming MIDI messages: On my MIDI input device, they can also be set using the appropriate hardware wheels and knobs.  
@@ -55,13 +55,13 @@ The **allControllersOff** button silences the _ResidentSynth_, and sets the six 
 <a id="keyboardSplit"/>
 
 Keyboard Controls:  
-![screenshot_Keyboard](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_4_Keyboard.png "screenshot_Keyboard")  
+![screenshot_Keyboard](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Keyboard.png "screenshot_Keyboard")  
 The **split** string input field can be used to assign a channel to each key on the input keyboard. The split-string can have up to 127 `<key>:<channel>;` substrings, separated by optional whitespace. The final ";" is optional.  
 Each `<key>` is a number in range 0..127. `<key>` values must be in ascending order, and may not repeat.  
 Each `<channel>` is a number in range 0..15. These values can be in any order, and can repeat within the split-string.
 The default (empty) split-string is equivalent to the string "0:0", meaning that all keys send messages on channel 0.  
 The split-string is parsed from left to right.
-All keys greater than or equal to the `<key>` substring send on the substring's channel unless overridden by a substring further to the right.
+All keys greater than or equal to the `<key>` substring send on the substring's `<channel>` unless overridden by a substring further to the right.
 Valid split-strings are "", "42:1;", "40:1; 50:2;", "40:1; 50:2; 60:1; 72:5" etc.
 
 Ornaments can be configured in the _ResidentSynth_, and are described more fully in its <a href="#ornaments">_Ornaments_</a> documentation below.    
@@ -72,20 +72,20 @@ on the pitch. If this value is 1, the velocity has some maximum effect, dependin
 In equal temperament tuning, with velocityPitchSensitivity set to 1, a velocity of 127 will raise the pitch by one semitone.  
 
 Preset Settings:  
-![screenshot_Settings](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
+![screenshot_Settings](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
 Preset settings can be configured in the _ResidentSynth_, and selected from the **preset settings** selector. These settings are channel-independent. Selecting one only sets the settings for the current channel.  
 If any individual control setting is subsequently changed in the GUI, the **export modified settings** button is activated, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported settings can then be copied to the _ResidentSynth_'s `settingsPresets.js` configuration file, and loaded into the **preset settings** selector when the app restarts.  
 The **trigger key** is a note number whose NOTE_ON will trigger the following settings in the list in the **preset settings** selector, rather than play a note. The trigger key can be any number from 0 to 127.  
 
 Recordings:  
-![screenshot_Recording](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
-The _ResidentSynthHost_ can record and save the MIDI messages it sends to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s [recordings.js](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/recordings.js) file (in the application's root folder). The _ResidentSynthHost_ loads such recordings into its **recordings** selector on startup. The recordings.js file may be missing or empty. 
+![screenshot_Recording](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
+The _ResidentSynthHost_ can record and save the MIDI messages it sends to the _ResidentSynth_. Such recordings are saved to the user's _Downloads_ folder, and can be copied from there to the _ResidentSynthHost_'s [recordings.js](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/recordings.js) file (in the application's root folder). The _ResidentSynthHost_ loads such recordings into its **recordings** selector on startup. The recordings.js file may be missing or empty. 
 Clicking the **play recording** button plays the selected recording. (The button changes into a **cancel playback** button).  
 The **start recording channel** button initiates recording of the current channel. (Its text includes the current channel index.) While recording, this button becomes a **stop recording channel** button, which, when clicked, saves the recording to the user's _Downloads_ folder.  
 Note that while only one channel at a time can be recorded, it _is_ possible to simultaneously play back a recording of one or more other channels. These channels will then be included in the output recording. In other words, overdubbing is possible.
 
 Simple Input:  
-![screenshot_SimpleInput](https://github.com/notator/ResidentSynthHostTestSite/blob/keyboardSplit/images/ResidentSynthHost_7_SimpleInput.png "screenshot_SimpleInput")  
+![screenshot_SimpleInput](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_7_SimpleInput.png "screenshot_SimpleInput")  
 These controls can be used when no other MIDI Input device is attached to the computer.  
 They can also be useful while debugging, since both hands can be kept free while holding a note.
 

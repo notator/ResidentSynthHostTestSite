@@ -168,6 +168,14 @@ hr
 	margin-right: 4px;
 }
 
+.keyboardSplitStringInput
+{
+	font-size: 11px;
+	width: 345px;
+	margin-left: 0;
+	margin-right: 0;
+}
+
 .keyOrnamentsStringInput
 {
 	font-size: 11px;
