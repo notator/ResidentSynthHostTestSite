@@ -5,7 +5,7 @@ This repository contains two major branches:
 &nbsp;&nbsp;&nbsp;&nbsp;**testSite**: the unstable development version, which can be tested [here](https://james-ingram-act-two.de/open-source/ResidentSynthHostTestSite/host.html).  
 
 Software synthesizers like the _ResidentSynth_ can be used by any web application as a substitute 
-for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformer), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).  
+for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformerTestSite), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).  
 The _ResidentSynth_ is intended to be configured for, and installed with, a web application that knows in advance which presets it needs. Loading time can therefore be minimized by not installing redundant presets. The synth uses a configurable [WebAudioFont](https://github.com/surikov/webaudiofont) that has at least one bank containing at least one preset. There can be up to 127 banks, each of which can contain up to 127 presets.  
 
 Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.  
