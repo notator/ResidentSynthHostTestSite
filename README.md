@@ -52,9 +52,11 @@ The top six controls can be changed either by dragging the sliders, or entering 
 The **allSoundOff** button silences the _ResidentSynth_.  
 The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
 
+<a id="keyboardSplit"/>
+
 Keyboard Controls:  
 ![screenshot_Keyboard](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Keyboard.png "screenshot_Keyboard")  
-<a id="keyboardSplit"/>The **split** string input field can be used to assign a channel to each key on the input keyboard. The split-string can have up to 127 `<key>:<channel>;` substrings, separated by optional whitespace. The final ";" is optional.  
+The **split** string input field can be used to assign a channel to each key on the input keyboard. The split-string can have up to 127 `<key>:<channel>;` substrings, separated by optional whitespace. The final ";" is optional.  
 Each `<key>` is a number in range 0..127. `<key>` values must be in ascending order, and may not repeat.  
 Each `<channel>` is a number in range 0..15. These values can be in any order, and can repeat within the split-string.
 The default (empty) split-string is equivalent to the string "0:0", meaning that all keys send messages on channel 0.  
