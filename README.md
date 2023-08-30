@@ -53,7 +53,7 @@ The **allSoundOff** button silences the _ResidentSynth_.
 The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
 
 Individual Note Controls:  
-![screenshot_Notes](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Notes.png "screenshot_Notes")  
+![screenshot_Notes](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Keyboard.png "screenshot_Notes")  
 Ornaments can be configured in the _ResidentSynth_, and are described more fully in its <a href="#ornaments">_Ornaments_</a> documentation below.    
 The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
 The **velocityPitchSensitivity** input is a floating point value between 0 and 1. This value
