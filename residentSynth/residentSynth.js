@@ -22,7 +22,7 @@ ResSynth.residentSynth = (function(window)
         channelPresets = [], // set in updateBankIndex
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
-        mixtures = [], // initialized by getMixtures()
+        keyboardSplitDefs = [], // initialized by getMixtures()
         tuningGroups = [],
         settingsPresets = [],
 
@@ -657,11 +657,113 @@ ResSynth.residentSynth = (function(window)
 
             if(ResSynth.mixtureDefs !== undefined)
             {
-                mixtures = ResSynth.mixtureDefs;
-                checkMixturesInputFile(mixtures);
+                keyboardSplitDefs = ResSynth.mixtureDefs;
+                checkMixturesInputFile(keyboardSplitDefs);
             }
 
-            return mixtures;
+            return keyboardSplitDefs;
+        },
+
+        getChannelPerKeyArrays = function()
+        {
+            // See comment in keyboardSplitDefs.js. Further checking is done in getChannelPerKeyArray().
+            // Returns true if no errors are found in the keyboardSplitDefs, otherwise false.
+            function checkKeyboardSplitDefs(keyboardSplitDefs)
+            {
+                // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
+                // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
+                const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
+
+                let error = false;
+                if(keyboardSplitDefs.length > 128)
+                {
+                    error = true;
+                }
+                else
+                {
+                    for(let i = 0; i < keyboardSplitDefs.length; i++) 
+                    {
+                        let keyboardSplitString = keyboardSplitDefs[i];
+
+                        error = (longInputStringRegex.test(keyboardSplitString) === false);
+
+                        if(error)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                return (error === false);
+            }
+
+            // If keyboardSplitDef.length > 0, returns an array of 128 channel indices, one per key index.
+            // Otherwise returns an empty array (the residentSynth will use the incoming message's channel).
+            // Throws an exception if keys are not unique and in ascending order, or a channel or key is out of range.
+            function getChannelPerKeyArray(keyboardSplitDefs, defIndex)
+            {
+                const arraySize = 128;
+                let keyboardSplitDef = keyboardSplitDefs[defIndex],
+                    previousKey = -1,
+                    channelPerKeyArray = []; // default is residentSynth uses the incoming message's channel. 
+
+                if(keyboardSplitDef.length > 0)
+                {
+                    channelPerKeyArray = Array(arraySize); // default is all keys send on channel 0.
+
+                    let components = keyboardSplitDef.split(";");
+                    for(let i = 0; i < components.length; i++)
+                    {
+                        let component = components[i].trim(),
+                            keyValueArray = component.split(":"),
+                            key = parseInt(keyValueArray[0]),
+                            channel = parseInt(keyValueArray[1]);
+
+                        if(key <= previousKey || channel < 0 || channel > 15 || key < 0 || key > 127)
+                        {
+                            let errorString = `Error in keyboardSplitDefs.js\ndefinition index: ${defIndex}\ndefinition: ${keyboardSplitDef},\ncomponent index: ${i}\ncomponent: ${component}`;
+                            alert(errorString);
+                            throw (errorString);
+                        }
+
+                        previousKey = key;
+
+                        for(let j = key; j < arraySize; j++)
+                        {
+                            channelPerKeyArray[j] = channel;
+                        }
+                    }
+                }
+
+                return channelPerKeyArray;
+            }
+
+            let keyboardSplitDefs = ResSynth.keyboardSplitDefs,
+                channelPerKeyArrays = [];
+
+            if(keyboardSplitDefs === undefined || checkKeyboardSplitDefs(keyboardSplitDefs) === false)
+            {
+                channelPerKeyArrays.push([]);
+            }
+            else
+            {
+                for(var i = 0; i < keyboardSplitDefs.length; i++)
+                {
+                    try
+                    {
+                        let channelPerKeyArray = getChannelPerKeyArray(keyboardSplitDefs, i);
+                        channelPerKeyArrays.push(channelPerKeyArray);
+                    }
+                    catch(msg)
+                    {
+                        channelPerKeyArrays.length = 0;
+                        channelPerKeyArrays.push([]);
+                        console.assert(false, msg);
+                    }
+                }
+            }
+
+            return channelPerKeyArrays;
         },
 
         // returns an array of Settings objects containing the values set in the settingsPresets.js file.
@@ -1024,7 +1126,7 @@ ResSynth.residentSynth = (function(window)
 
                 function doMixture(midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
                 {
-                    let mixture = mixtures[mixtureIndex],
+                    let mixture = keyboardSplitDefs[mixtureIndex],
                         extraNotes = mixture.extraNotes,
                         except = mixture.except,
                         keyMixtureIndex = except.find(x => x[0] === key),
@@ -1032,7 +1134,7 @@ ResSynth.residentSynth = (function(window)
 
                     if(keyMixtureIndex !== undefined)
                     {
-                        extraNotes = mixtures[keyMixtureIndex[1]].extraNotes;
+                        extraNotes = keyboardSplitDefs[keyMixtureIndex[1]].extraNotes;
                     }
 
                     for(let i = 0; i < extraNotes.length; i++)
@@ -1327,6 +1429,7 @@ ResSynth.residentSynth = (function(window)
             // attributes specific to this installation of the ResidentSynth
             Object.defineProperty(this, "webAudioFont", {value: channelPresets.webAudioFont, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
+            Object.defineProperty(this, "channelPerKeyArrays", {value: getChannelPerKeyArrays(), writable: false});
             Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
             getTuningGroups(this.tuningsFactory);
