@@ -702,7 +702,7 @@ ResSynth.residentSynth = (function(window)
                     settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
                     settings.triggerKey = sp.triggerKey;
                     settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
-                    settings.keyboardSplitString = sp.keyboardSplitString;
+                    settings.keyboardSplitIndex = sp.keyboardSplitIndex;
                     settings.keyOrnamentsString = sp.keyOrnamentsString;
 
                     Object.freeze(settings); // attribute values are frozen

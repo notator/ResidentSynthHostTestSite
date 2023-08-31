@@ -39,7 +39,7 @@ ResSynth.settings = (function()
         this.pitchWheelSensitivity = 2;
         this.triggerKey = 36;
         this.velocityPitchSensitivity = 0;
-        this.keyboardSplitString = "",
+        this.keyboardSplitIndex = 0,
         this.keyOrnamentsString = "";
 
         Object.preventExtensions(this); // disallow new attribute creation 
@@ -71,7 +71,7 @@ ResSynth.settings = (function()
         || this.pitchWheelSensitivity !== otherSettings.pitchWheelSensitivity
         || this.triggerKey !== otherSettings.triggerKey
         || this.velocityPitchSensitivity !== otherSettings.velocityPitchSensitivity
-        || this.keyboardSplitString !== otherSettings.keyboardSplitString
+        || this.keyboardSplitIndex !== otherSettings.keyboardSplitIndex
         || this.keyOrnamentsString !== otherSettings.keyOrnamentsString)
         {
             rval = false;
