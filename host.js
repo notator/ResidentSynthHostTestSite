@@ -430,10 +430,17 @@ ResSynth.host = (function(document)
                 onVelocityPitchSensitivityNumberInputChanged();
             }
 
+            function setKeyboardSplitString(keyboardSplitString)
+            {
+                let keyboardSplitStringInput = getElem("keyboardSplitStringInput");
+
+                keyboardSplitStringInput.value = keyboardSplitString;
+                onKeyboardSplitStringInputChanged();
+            }
+
             function setKeyOrnamentsString(keyOrnamentsString)
             {
                 let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
-
 
                 if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
                 {
@@ -444,7 +451,7 @@ ResSynth.host = (function(document)
                 {
                     keyOrnamentsStringInput.value = keyOrnamentsString;
                     onKeyOrnamentsStringInputChanged();
-                }                
+                }
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -464,6 +471,7 @@ ResSynth.host = (function(document)
 
             setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
 
+            setKeyboardSplitString(hostChannelSettings.keyboardSplitString);
             setKeyOrnamentsString(hostChannelSettings.keyOrnamentsString);
 
             setExportState(hostChannelSettings);
@@ -1233,7 +1241,7 @@ ResSynth.host = (function(document)
                 return keyChannels;
             }
 
-            const keyboardSplitStringInput = getElem("keyboardSplitStringInput"),
+            let keyboardSplitStringInput = getElem("keyboardSplitStringInput"),
                 keyboardSplitString = normalizedLongInputString(keyboardSplitStringInput.value),
                 error = (longInputStringRegex.test(keyboardSplitString) === false);  // longInputStringRegex is global
 
