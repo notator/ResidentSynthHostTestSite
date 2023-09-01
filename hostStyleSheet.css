@@ -108,6 +108,14 @@ hr
 	margin: 0 0 auto auto;
 }
 
+.keyboardSplitSelect
+{
+	font-size: 11px;
+	width: 345px;
+	height: 18px;
+	margin-left: 0;
+}
+
 .settingsSelect
 {
 	font-size: 11px;
@@ -166,14 +174,6 @@ hr
 	width: 41px;
 	margin-left: 0;
 	margin-right: 4px;
-}
-
-.keyboardSplitStringInput
-{
-	font-size: 11px;
-	width: 345px;
-	margin-left: 0;
-	margin-right: 0;
 }
 
 .keyOrnamentsStringInput

@@ -283,7 +283,8 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "SET_SETTINGS", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is trigger key)
 	Object.defineProperty(CONTROL, "VELOCITY_PITCH_SENSITIVITY", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is semitones / 127)
 	Object.defineProperty(CONTROL, "SET_ORNAMENT", {value: 75, writable: false}); // MIDI Sound Control 6. (value is ornament index)
-	// use MIDI Sound Control 7, 8, 9, 10 (CC 76, 77, 78, 79) for future controls
+	Object.defineProperty(CONTROL, "SET_KEYBOARD_SPLIT_INDEX", {value: 76, writable: false}); // MIDI Sound Control 7. (value is ornament index)
+	// use MIDI Sound Control 8, 9, 10 (CC 77, 78, 79) for future controls
 
 	// MISC
 	Object.defineProperty(MISC, "MIDI_0_FREQUENCY", {value: 8.1758, writable: false}); // Hertz

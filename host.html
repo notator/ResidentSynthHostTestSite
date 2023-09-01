@@ -133,9 +133,7 @@
                         <span class="boldSubtitle">keyboard: </span><span>split</span>
                     </td>
                     <td>
-                        <input type="text" id="keyboardSplitStringInput" class="keyboardSplitStringInput"
-                               oninput="ResSynth.host.onKeyboardSplitStringInputChanged()"
-                               onblur="ResSynth.host.onKeyboardSplitStringInputBlurred()" />
+                        <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
                     </td>
                 </tr>
                 <tr>

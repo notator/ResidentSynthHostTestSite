@@ -22,7 +22,9 @@ ResSynth.residentSynth = (function(window)
         channelPresets = [], // set in updateBankIndex
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
-        keyboardSplitDefs = [], // initialized by getMixtures()
+        mixtures = [], // initialized by getMixtures()
+        channelPerKeyArrays = [], // initialized by getChannelPerKeyArrays()
+        channelPerKeyArray = [],
         tuningGroups = [],
         settingsPresets = [],
 
@@ -657,11 +659,11 @@ ResSynth.residentSynth = (function(window)
 
             if(ResSynth.mixtureDefs !== undefined)
             {
-                keyboardSplitDefs = ResSynth.mixtureDefs;
-                checkMixturesInputFile(keyboardSplitDefs);
+                mixtures = ResSynth.mixtureDefs;
+                checkMixturesInputFile(mixtures);
             }
 
-            return keyboardSplitDefs;
+            return mixtures;
         },
 
         getChannelPerKeyArrays = function()
@@ -752,8 +754,7 @@ ResSynth.residentSynth = (function(window)
                 return channelPerKeyArray;
             }
 
-            let keyboardSplitDefs = ResSynth.keyboardSplitDefs,
-                channelPerKeyArrays = [];
+            let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
 
             if(keyboardSplitDefs === undefined)
             {
@@ -1069,6 +1070,10 @@ ResSynth.residentSynth = (function(window)
             ornamentInfo.complete = false;
 
             channelControls[channel].ornamentInfoQueue.push(ornamentInfo);
+        },
+        setKeyboardSplit = function(keyboardSplitIndex)
+        {
+            channelPerKeyArray = channelPerKeyArrays[keyboardSplitIndex];
         },
         allSoundOff = function(channel)
         {
@@ -1406,7 +1411,8 @@ ResSynth.residentSynth = (function(window)
                 CTL.CENTS_OFFSET,
                 CTL.SET_SETTINGS,
                 CTL.VELOCITY_PITCH_SENSITIVITY,
-                CTL.SET_ORNAMENT
+                CTL.SET_ORNAMENT,
+                CTL.SET_KEYBOARD_SPLIT_INDEX
             ],
 
         ResidentSynth = function()
@@ -1627,6 +1633,9 @@ ResSynth.residentSynth = (function(window)
                 case CTL.SET_ORNAMENT:
                     setOrnamentInfo(channel, value);
                     break;
+                case CTL.SET_KEYBOARD_SPLIT_INDEX:
+                    setKeyboardSplit(value); 
+                    break;                    
                 case CTL.ALL_CONTROLLERS_OFF:
                     allSoundOff(channel);
                     setControllerDefaults(channel);

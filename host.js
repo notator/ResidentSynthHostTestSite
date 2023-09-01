@@ -11,10 +11,6 @@ ResSynth.host = (function(document)
 {
     "use strict";
 
-    // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
-    // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
-    const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
-
     var
         synth = null,
         inputDevice = null,
@@ -430,14 +426,6 @@ ResSynth.host = (function(document)
                 onVelocityPitchSensitivityNumberInputChanged();
             }
 
-            function setKeyboardSplitString(keyboardSplitString)
-            {
-                let keyboardSplitStringInput = getElem("keyboardSplitStringInput");
-
-                keyboardSplitStringInput.value = keyboardSplitString;
-                onKeyboardSplitStringInputChanged();
-            }
-
             function setKeyOrnamentsString(keyOrnamentsString)
             {
                 let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
@@ -471,7 +459,6 @@ ResSynth.host = (function(document)
 
             setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
 
-            setKeyboardSplitString(hostChannelSettings.keyboardSplitString);
             setKeyOrnamentsString(hostChannelSettings.keyOrnamentsString);
 
             setExportState(hostChannelSettings);
@@ -1190,97 +1177,19 @@ ResSynth.host = (function(document)
             return str;
         },
 
-        // Validation: A valid value for the keyboardSplitString contains up to 16 (including zero)
-        // <key:channel> sequences, separated by a ; and an optional space.
-        // Each key is a number in range 0..127. Key values must be in ascending order, and may not repeat.
-        // Each channel is a number in range 0..15. These values can be in any order, and repeat in the string.
-        // The ':' and ';' characters must be present
-        // The default (empty) string is equivalent to the string "0:0", meaning that all keys send messages on channel 0.
-        // The keyboardSplitString is parsed from left to right.
-        // All keys greater than or equal to the key component of a <key:channel> substring send on the
-        // substring's channel unless overridden by a substring further to the right.
-        // Valid keyboardSplitStrings are "", "42:1;", "40:1; 50:2;", "40:1; 50:2; 60:1; 72:5" etc.
-        // Note that a final ";" and " " can, but need not be, present.
-        // It is an error if:
-        // 1) the regex for the fails,
-        // 2) there are duplicate keys, or
-        // 3) a channel is out of range 0..15.
-        onKeyboardSplitStringInputChanged = function()
+        onKeyboardSplitSelectChanged = function()
         {
-            // returns an array of 128 channel indices, one per key index.
-            // returns null if keys are not unique and in ascending order, or a channel or key is out of range.
-            function getKeyChannels(normalizedDisplayStr)
-            {
-                const arraySize = 128;
-                let previousKey = -1,
-                    keyChannels = Array(arraySize).fill(0); // default is all keys send on channel 0.
+            const constants = ResSynth.constants;
+            let channelSelect = getElem("channelSelect"),
+                channel = channelSelect.selectedIndex,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
+                keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
+                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_SPLIT_INDEX, keyboardSplitIndex]);
 
-                if(normalizedDisplayStr.length > 0)
-                {
-                    let components = normalizedDisplayStr.split(";");
-                    for(let i = 0; i < components.length; i++)
-                    {
-                        let component = components[i].trim(),
-                            keyValueArray = component.split(":"),
-                            key = parseInt(keyValueArray[0]),
-                            channel = parseInt(keyValueArray[1]);
+            hostChannelSettings.keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex;
+            setExportState(hostChannelSettings);            
 
-                        if(key <= previousKey || channel < 0 || channel > 15 || key < 0 || key > 127)
-                        {
-                            return null;
-                        }
-
-                        previousKey = key;
-
-                        for(let j = key; j < arraySize; j++)
-                        {
-                            keyChannels[j] = channel;
-                        }
-                    }
-                }
-                return keyChannels;
-            }
-
-            let keyboardSplitStringInput = getElem("keyboardSplitStringInput"),
-                keyboardSplitString = normalizedLongInputString(keyboardSplitStringInput.value),
-                error = (longInputStringRegex.test(keyboardSplitString) === false);  // longInputStringRegex is global
-
-            if(!error)
-            {
-                keyboardSplitStringInput.style.backgroundColor = "white";
-
-                // keyChannels is global
-                keyChannels = getKeyChannels(keyboardSplitString);
-
-                if(keyChannels === null)
-                {
-                    error = true;
-                }
-                else
-                {
-                    let channelSelect = getElem("channelSelect"),
-                        channel = channelSelect.selectedIndex,
-                        hostChannelSettings = channelSelect.options[channel].hostSettings;
-
-                    hostChannelSettings.keyboardSplitString = keyboardSplitString;
-                    setExportState(hostChannelSettings);
-                }
-            }
-
-            if(error)
-            {
-                keyboardSplitStringInput.style.backgroundColor = "#FDD"; // color used by onKeyOrnamentsStringInputBlurred() to signify an error.
-            }
-        },
-
-        onKeyboardSplitStringInputBlurred = function()
-        {
-            const keyboardSplitStringInput = getElem("keyboardSplitStringInput");
-
-            if(keyboardSplitStringInput.style.backgroundColor !== "#FDD") // "#FDD" indicates an error, see above
-            {
-                keyboardSplitStringInput.value = normalizedLongInputString(keyboardSplitStringInput.value);
-            }            
+            synth.send(setKeyboardSplitIndexMsg);
         },
 
         // Validation: A valid value for the stringInput contains zero or more
@@ -1356,6 +1265,11 @@ ResSynth.host = (function(document)
 
                 return error;
             }
+
+            // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
+            // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
+            const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
+
 
             let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
                 keyOrnamentsString = normalizedLongInputString(keyOrnamentsStringInput.value),
@@ -2056,13 +1970,46 @@ ResSynth.host = (function(document)
 
                 function setKeyboardDiv()
                 {
-                    let keyboardSplitStringInput = getElem("keyboardSplitStringInput"),
-                        keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
+                    function setKeyboardSplitSelect()
+                    {
+                        let keyboardSplitSelect = getElem("keyboardSplitSelect"),
+                            keyboardSplitDefs = ResSynth.keyboardSplitDefs;
+
+                        if(keyboardSplitDefs === undefined) // no keyboardSplitDefs.js file
+                        {
+                            let option = new Option();
+
+                            option.innerHTML = "no splits have been defined. (messages will be sent on the current channel)";
+                            keyboardSplitSelect.options.add(option);
+                            keyboardSplitSelect.disabled = true;
+                        }
+                        else
+                        {
+                            for(let i = 0; i < keyboardSplitDefs.length; i++)
+                            {
+                                let keyboardSplitDef = keyboardSplitDefs[i],
+                                    option = new Option();
+
+                                if(keyboardSplitDef.length === 0)
+                                {
+                                    option.innerHTML = "no split (messages will be sent on the current channel)";
+                                }
+                                else
+                                {
+                                    option.innerHTML = keyboardSplitDef;
+                                }                               
+
+                                keyboardSplitSelect.options.add(option);
+                            }
+                        }
+                        keyboardSplitSelect.selectedIndex = 0;
+                    }
+
+                    let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
                         velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
                         defaultSettingsPreset = synth.settingsPresets[0];
 
-                    keyboardSplitStringInput.value = defaultSettingsPreset.keyboardSplitString;
-
+                    setKeyboardSplitSelect();
 
                     if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
                     {
@@ -2082,7 +2029,7 @@ ResSynth.host = (function(document)
 
                     console.assert(settingsPresets.length < 127);
 
-                    for(var settingsIndex = 0; settingsIndex < settingsPresets.length; settingsIndex++)
+                    for(let settingsIndex = 0; settingsIndex < settingsPresets.length; settingsIndex++)
                     {
                         let settingsPreset = settingsPresets[settingsIndex],
                             option = new Option();
@@ -2478,8 +2425,7 @@ ResSynth.host = (function(document)
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
-            onKeyboardSplitStringInputChanged: onKeyboardSplitStringInputChanged,
-            onKeyboardSplitStringInputBlurred: onKeyboardSplitStringInputBlurred,
+            onKeyboardSplitSelectChanged: onKeyboardSplitSelectChanged,
             onKeyOrnamentsStringInputChanged: onKeyOrnamentsStringInputChanged,
             onKeyOrnamentsStringInputBlurred: onKeyOrnamentsStringInputBlurred,
             onVelocityPitchSensitivityNumberInputChanged: onVelocityPitchSensitivityNumberInputChanged,
