@@ -667,17 +667,16 @@ ResSynth.residentSynth = (function(window)
         getChannelPerKeyArrays = function()
         {
             // See comment in keyboardSplitDefs.js. Further checking is done in getChannelPerKeyArray().
-            // Returns true if no errors are found in the keyboardSplitDefs, otherwise false.
+            // Throws an exception if an error is found in the keyboardSplitDefs.
             function checkKeyboardSplitDefs(keyboardSplitDefs)
             {
                 // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
                 // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
                 const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
 
-                let error = false;
                 if(keyboardSplitDefs.length > 128)
                 {
-                    error = true;
+                    throw `There may not be more than 128 definition strings in the array.`;
                 }
                 else
                 {
@@ -685,53 +684,68 @@ ResSynth.residentSynth = (function(window)
                     {
                         let keyboardSplitString = keyboardSplitDefs[i];
 
-                        error = (longInputStringRegex.test(keyboardSplitString) === false);
-
-                        if(error)
+                        if(longInputStringRegex.test(keyboardSplitString) === false)
                         {
-                            break;
-                        }
+                            throw `Illegal keyboardSplitString: ${keyboardSplitString}\nDefinition index: ${i}`;
+                        }                      
                     }
                 }
-
-                return (error === false);
             }
 
-            // If keyboardSplitDef.length > 0, returns an array of 128 channel indices, one per key index.
+            // If keyboardSplitDefs[defIndex].length > 0, returns an array of 128 channel indices, one per key index.
             // Otherwise returns an empty array (the residentSynth will use the incoming message's channel).
             // Throws an exception if keys are not unique and in ascending order, or a channel or key is out of range.
+            // 01.09.2023: Interestingly, this function was partly optimized in a dialog with ChatGPT.
+            // ChatGPT uses some constructs that I should adopt: (const etc.)
             function getChannelPerKeyArray(keyboardSplitDefs, defIndex)
             {
-                const arraySize = 128;
-                let keyboardSplitDef = keyboardSplitDefs[defIndex],
-                    previousKey = -1,
-                    channelPerKeyArray = []; // default is residentSynth uses the incoming message's channel. 
-
-                if(keyboardSplitDef.length > 0)
+                function getKeyChannelPairs(keyboardSplitString)
                 {
-                    channelPerKeyArray = Array(arraySize); // default is all keys send on channel 0.
+                    console.assert(keyboardSplitString.length > 0);
 
-                    let components = keyboardSplitDef.split(";");
-                    for(let i = 0; i < components.length; i++)
+                    const keyChannelPairs = [],
+                        components = keyboardSplitString.split(";");
+
+                    let previousKey = -1;
+                    for(const component of components)
                     {
-                        let component = components[i].trim(),
-                            keyValueArray = component.split(":"),
-                            key = parseInt(keyValueArray[0]),
-                            channel = parseInt(keyValueArray[1]);
+                        const [keyStr, channelStr] = component.trim().split(":");
+                        const key = parseInt(keyStr);
+                        const channel = parseInt(channelStr);
 
                         if(key <= previousKey || channel < 0 || channel > 15 || key < 0 || key > 127)
                         {
-                            let errorString = `Error in keyboardSplitDefs.js\ndefinition index: ${defIndex}\ndefinition: ${keyboardSplitDef},\ncomponent index: ${i}\ncomponent: ${component}`;
+                            const errorString = `Illegal keyboardSplitString: ${keyboardSplitString}\nDefinition index: ${defIndex}\nComponent: ${component}`;
                             alert(errorString);
-                            throw (errorString);
+                            throw errorString;
                         }
 
                         previousKey = key;
+                        keyChannelPairs.push({key, channel});
+                    }
 
-                        for(let j = key; j < arraySize; j++)
-                        {
-                            channelPerKeyArray[j] = channel;
-                        }
+                    return keyChannelPairs;
+                }
+
+                const keyboardSplitDef = keyboardSplitDefs[defIndex];
+
+                if(keyboardSplitDef.length == 0)
+                {
+                    return []; // the residentSynth will use the incoming message's channel
+                }
+                
+                const arraySize = 128,
+                    keyChannelPairs = getKeyChannelPairs(keyboardSplitDef),
+                    channelPerKeyArray = (keyChannelPairs.length > 0) ? Array(arraySize).fill(0) : [];
+
+                for(let i = 0; i < keyChannelPairs.length; i++)
+                {
+                    const {key, channel} = keyChannelPairs[i];
+                    let nextKey = (i < keyChannelPairs.length - 1) ? keyChannelPairs[i + 1].key : arraySize;
+
+                    for(let j = key; j < nextKey; j++)
+                    {
+                        channelPerKeyArray[j] = channel;
                     }
                 }
 
@@ -741,25 +755,28 @@ ResSynth.residentSynth = (function(window)
             let keyboardSplitDefs = ResSynth.keyboardSplitDefs,
                 channelPerKeyArrays = [];
 
-            if(keyboardSplitDefs === undefined || checkKeyboardSplitDefs(keyboardSplitDefs) === false)
+            if(keyboardSplitDefs === undefined)
             {
-                channelPerKeyArrays.push([]);
+                channelPerKeyArrays.push([]); // an empty array means use the incoming message channel
             }
             else
             {
-                for(var i = 0; i < keyboardSplitDefs.length; i++)
+                try
                 {
-                    try
+                    checkKeyboardSplitDefs(keyboardSplitDefs);
+
+                    for(var i = 0; i < keyboardSplitDefs.length; i++)
                     {
-                        let channelPerKeyArray = getChannelPerKeyArray(keyboardSplitDefs, i);
+                        let channelPerKeyArray = getChannelPerKeyArray(keyboardSplitDefs, i);  // can return an empty array (meaning use the incoming message channel)
                         channelPerKeyArrays.push(channelPerKeyArray);
                     }
-                    catch(msg)
-                    {
-                        channelPerKeyArrays.length = 0;
-                        channelPerKeyArrays.push([]);
-                        console.assert(false, msg);
-                    }
+                }
+                catch(msg)
+                {
+                    msg = "Error in keyboardSplitDefs.js\n" + msg;
+                    channelPerKeyArrays.length = 0;
+                    channelPerKeyArrays.push([]);
+                    console.assert(false, msg);
                 }
             }
 
