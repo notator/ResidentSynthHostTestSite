@@ -1789,20 +1789,6 @@ ResSynth.host = (function(document)
                                     sendLongControl(ccIndex, value);
                                 }
 
-                                function onPitchWheelSensitivityControlChanged(event)
-                                {
-                                    var target = (event === undefined) ? this : event.currentTarget,
-                                        value = target.valueAsNumber,
-                                        CONST = ResSynth.constants,
-                                        pitchWheelSensitivityMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.PITCH_WHEEL_SENSITIVITY, value]);;
-
-                                    target.twinInputElem.value = value;
-
-                                    setHostSettingsFromLongControl(target.parentElement, value);
-
-                                    synth.send(pitchWheelSensitivityMsg);
-                                }
-
                                 function onSendControlAgainButtonClick(event)
                                 {
                                     var numberInputElem = event.currentTarget.numberInputElem,

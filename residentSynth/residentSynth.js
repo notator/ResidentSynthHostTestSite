@@ -666,7 +666,7 @@ ResSynth.residentSynth = (function(window)
             return mixtures;
         },
 
-        getChannelPerKeyArrays = function()
+        setPrivateChannelPerKeyArrays = function()
         {
             // See comment in keyboardSplitDefs.js. Further checking is done in getChannelPerKeyArray().
             // Throws an exception if an error is found in the keyboardSplitDefs.
@@ -780,8 +780,6 @@ ResSynth.residentSynth = (function(window)
                     console.assert(false, msg);
                 }
             }
-
-            return channelPerKeyArrays;
         },
 
         // returns an array of Settings objects containing the values set in the settingsPresets.js file.
@@ -834,9 +832,10 @@ ResSynth.residentSynth = (function(window)
             return settingsPresets;
         },
 
-        getTuningGroups = function(tuningsFactory)
+        getTuningGroups = function()
         {
-            let tuningGroupDefs = ResSynth.tuningDefs,
+            let tuningsFactory = new ResSynth.tuningsFactory.TuningsFactory(),
+                tuningGroupDefs = ResSynth.tuningDefs,
                 wmtg = ResSynth.tuningConstructors;
 
             if(tuningGroupDefs === undefined || tuningGroupDefs.length === 0)
@@ -934,6 +933,8 @@ ResSynth.residentSynth = (function(window)
                     tuningGroups.push(tuningGroup);
                 }
             }
+
+            return tuningGroups;
         },
 
         /*****************************************/
@@ -1452,11 +1453,10 @@ ResSynth.residentSynth = (function(window)
             // attributes specific to this installation of the ResidentSynth
             Object.defineProperty(this, "webAudioFont", {value: channelPresets.webAudioFont, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
-            Object.defineProperty(this, "channelPerKeyArrays", {value: getChannelPerKeyArrays(), writable: false});
-            Object.defineProperty(this, "tuningsFactory", {value: new ResSynth.tuningsFactory.TuningsFactory(), writable: false});
+            Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(), writable: false});
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
-            getTuningGroups(this.tuningsFactory);
-            Object.defineProperty(this, "tuningGroups", {value: tuningGroups, writable: false});
+
+            setPrivateChannelPerKeyArrays();
         },
 
         API =
