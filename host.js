@@ -418,28 +418,43 @@ ResSynth.host = (function(document)
                 pitchWheelSensitivityLC.setValue(hostChannelSettings.pitchWheelSensitivity);
             }
 
-            function setAndSendVelocityPitchSensitivity(velocityPitchSensitivity)
+            function setAndSendKeyboardDivControls(hostChannelSettings)
             {
-                let velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput");
-
-                velocityPitchSensitivityNumberInput.value = velocityPitchSensitivity;
-                onVelocityPitchSensitivityNumberInputChanged();
-            }
-
-            function setKeyOrnamentsString(keyOrnamentsString)
-            {
-                let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
-
-                if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
+                function setAndSendKeyboardSplitIndex(keyboardSplitIndex)
                 {
-                    keyOrnamentsStringInput.value = "no ornaments have been defined (see docs)";
-                    keyOrnamentsStringInput.disabled = true;
+                    let keyboardSplitSelect = getElem("keyboardSplitSelect");
+
+                    keyboardSplitSelect.selectedIndex = keyboardSplitIndex;
+                    onKeyboardSplitSelectChanged();
                 }
-                else
+
+                function setAndSendKeyOrnamentsString(keyOrnamentsString)
                 {
-                    keyOrnamentsStringInput.value = keyOrnamentsString;
-                    onKeyOrnamentsStringInputChanged();
+                    let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
+
+                    if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
+                    {
+                        keyOrnamentsStringInput.value = "no ornaments have been defined (see docs)";
+                        keyOrnamentsStringInput.disabled = true;
+                    }
+                    else
+                    {
+                        keyOrnamentsStringInput.value = keyOrnamentsString;
+                        onKeyOrnamentsStringInputChanged();
+                    }
                 }
+
+                function setAndSendVelocityPitchSensitivity(velocityPitchSensitivity)
+                {
+                    let velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput");
+
+                    velocityPitchSensitivityNumberInput.value = velocityPitchSensitivity;
+                    onVelocityPitchSensitivityNumberInputChanged();
+                }
+
+                setAndSendKeyboardSplitIndex(hostChannelSettings.keyboardSplitIndex);
+                setAndSendKeyOrnamentsString(hostChannelSettings.keyOrnamentsString);
+                setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -457,21 +472,12 @@ ResSynth.host = (function(document)
 
             setAndSendLongControls(hostChannelSettings);
 
-            setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
-
-            setKeyOrnamentsString(hostChannelSettings.keyOrnamentsString);
+            setAndSendKeyboardDivControls(hostChannelSettings);
 
             setExportState(hostChannelSettings);
 
             startRecordingButton.value = "start recording channel " + channel.toString();
             stopRecordingButton.value = "stop recording channel " + channel.toString();
-
-            // test code for setSettingsMsg (its effect has already been achieved by the above code)
-            //let settingsIndex = getElem("settingsSelect").selectedIndex,
-            //    CONST = ResSynth.constants,
-            //    setSettingsMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SET_SETTINGS, settingsIndex]);
-
-            //synth.send(setSettingsMsg);
         },
 
         // exported
