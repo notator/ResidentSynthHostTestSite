@@ -1812,32 +1812,17 @@ ResSynth.host = (function(document)
                                     sendLongControl(ccIndex, value);
                                 }
 
-                                function onPitchWheelSensitivityControlChangedAgain(event)
-                                {
-                                    var numberInputElem = event.currentTarget.numberInputElem,
-                                        value = numberInputElem.valueAsNumber;
-
-                                    synth.updatePitchWheelSensitivity(currentChannel, value);
-                                }
-
                                 let longInputControlTD = getBasicLongInputControl(tr, name, defaultValue, ccString);
 
-                                if(ccIndex !== undefined)
-                                {
-                                    longInputControlTD.ccIndex = ccIndex;
-                                    longInputControlTD.rangeInputElem.ccIndex = ccIndex;
-                                    longInputControlTD.numberInputElem.ccIndex = ccIndex;
+                                console.assert(ccIndex !== undefined);
 
-                                    longInputControlTD.rangeInputElem.onchange = onControlInputChanged;
-                                    longInputControlTD.numberInputElem.onchange = onControlInputChanged;
-                                    longInputControlTD.buttonInputElem.onclick = onSendControlAgainButtonClick;
-                                }
-                                else
-                                {
-                                    longInputControlTD.rangeInputElem.onchange = onPitchWheelSensitivityControlChanged;
-                                    longInputControlTD.numberInputElem.onchange = onPitchWheelSensitivityControlChanged;
-                                    longInputControlTD.buttonInputElem.onclick = onPitchWheelSensitivityControlChangedAgain;
-                                }
+                                longInputControlTD.ccIndex = ccIndex;
+                                longInputControlTD.rangeInputElem.ccIndex = ccIndex;
+                                longInputControlTD.numberInputElem.ccIndex = ccIndex;
+
+                                longInputControlTD.rangeInputElem.onchange = onControlInputChanged;
+                                longInputControlTD.numberInputElem.onchange = onControlInputChanged;
+                                longInputControlTD.buttonInputElem.onclick = onSendControlAgainButtonClick;
 
                                 allLongInputControls.push(longInputControlTD);
                             }
