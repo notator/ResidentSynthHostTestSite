@@ -428,19 +428,19 @@ ResSynth.host = (function(document)
                     onKeyboardSplitSelectChanged();
                 }
 
-                function setAndSendKeyOrnamentsString(keyOrnamentsString)
+                function setAndSendKeyOrnamentsString(keyOrnamentsIndex)
                 {
-                    let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
+                    let keyOrnamentsSelect = getElem("keyOrnamentsSelect");
 
                     if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
                     {
-                        keyOrnamentsStringInput.value = "no ornaments have been defined (see docs)";
-                        keyOrnamentsStringInput.disabled = true;
+                        keyOrnamentsSelect.value = "no ornaments have been defined (see docs)";
+                        keyOrnamentsSelect.disabled = true;
                     }
                     else
                     {
-                        keyOrnamentsStringInput.value = keyOrnamentsString;
-                        onKeyOrnamentsStringInputChanged();
+                        keyOrnamentsSelect.value = keyOrnamentsIndex;
+                        onKeyOrnamentsSelectChanged();
                     }
                 }
 
@@ -453,7 +453,7 @@ ResSynth.host = (function(document)
                 }
 
                 setAndSendKeyboardSplitIndex(hostChannelSettings.keyboardSplitIndex);
-                setAndSendKeyOrnamentsString(hostChannelSettings.keyOrnamentsString);
+                setAndSendKeyOrnamentsString(hostChannelSettings.keyOrnamentsIndex);
                 setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
             }
 
@@ -785,7 +785,7 @@ ResSynth.host = (function(document)
                     // settings.velocityPitchSensitivity
                     let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, settings.velocityPitchSensitivity * 127]);
                     synth.send(vpsMsg);
-                    // no need to set settings.keyOrnamentsString in synth here.
+                    // no need to set settings.keyOrnamentsIndex in synth here.
                 }
 
                 for(var i = 0; i < playbackChannels.length; i++)
@@ -1210,7 +1210,7 @@ ResSynth.host = (function(document)
         // 2) there are duplicate keys, or
         // 3) an ornamentIndex is out of range of the available ornaments
         //    stored in the synth.
-        onKeyOrnamentsStringInputChanged = function()
+        onKeyOrnamentsSelectChanged = function()
         {
             function getKeyOrnaments(normalizedDisplayStr)
             {
@@ -1277,16 +1277,16 @@ ResSynth.host = (function(document)
             const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
 
 
-            let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
-                keyOrnamentsString = normalizedLongInputString(keyOrnamentsStringInput.value),
-                error = (longInputStringRegex.test(keyOrnamentsString) === false); // longInputStringRegex is global
+            let keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
+                keyOrnamentsIndex = normalizedLongInputString(keyOrnamentsSelect.value),
+                error = (longInputStringRegex.test(keyOrnamentsIndex) === false); // longInputStringRegex is global
 
             if(!error)
             {
-                keyOrnamentsStringInput.style.backgroundColor = "white";
+                keyOrnamentsSelect.style.backgroundColor = "white";
 
                 // keyOrnaments is global
-                keyOrnaments = getKeyOrnaments(keyOrnamentsString);
+                keyOrnaments = getKeyOrnaments(keyOrnamentsIndex);
 
                 if(duplicateKeys(keyOrnaments) || ornamentOutOfRange(keyOrnaments))
                 {
@@ -1298,26 +1298,11 @@ ResSynth.host = (function(document)
                         channel = channelSelect.selectedIndex,
                         hostChannelSettings = channelSelect.options[channel].hostSettings;
 
-                    hostChannelSettings.keyOrnamentsString = keyOrnamentsString;
+                    hostChannelSettings.keyOrnamentsIndex = keyOrnamentsIndex;
                     setExportState(hostChannelSettings);
                 }
             }
 
-            if(error)
-            {
-                keyOrnamentsStringInput.style.backgroundColor = "#FDD"; // color used by onKeyOrnamentsStringInputBlurred() to signify an error.
-                keyOrnaments = [];
-            }
-        },
-
-        onKeyOrnamentsStringInputBlurred = function()
-        {
-            const keyOrnamentsStringInput = getElem("keyOrnamentsStringInput");
-
-            if(keyOrnamentsStringInput.style.backgroundColor !== "#FDD") // "#FDD" indicates an error, see above
-            {
-                keyOrnamentsStringInput.value = normalizedLongInputString(keyOrnamentsStringInput.value);
-            }            
         },
 
         // exported
@@ -1982,22 +1967,33 @@ ResSynth.host = (function(document)
                         keyboardSplitSelect.selectedIndex = 0;
                     }
 
-                    let keyOrnamentsStringInput = getElem("keyOrnamentsStringInput"),
-                        velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
-                        defaultSettingsPreset = synth.settingsPresets[0];
+                    function setKeyOrnamentsSelect()
+                    {
+                        let keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
+                            keyOrnamentDefs = ResSynth.keyOrnamentDefs; // TODO!
+
+                        if(keyOrnamentDefs === undefined) // no keyOrnamentDefs.js file
+                        {
+                            let option = new Option();
+
+                            option.innerHTML = "TODO: define keyOrnamentDef strings (multi-key, see old code in onKeyOrnamentsSelectChanged())";
+                            keyOrnamentsSelect.options.add(option);
+                            keyOrnamentsSelect.selectedIndex = 0;
+                            //keyOrnamentsSelect.disabled = true;                            
+                        }
+                    }
+
+                    function setVelocityPitchSensitivityNumberInput()
+                    {
+                        let velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
+                            defaultSettingsPreset = synth.settingsPresets[0];
+
+                        velocityPitchSensitivityNumberInput.value = defaultSettingsPreset.velocityPitchSensitivity;                         
+                    }
 
                     setKeyboardSplitSelect();
-
-                    if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
-                    {
-                        keyOrnamentsStringInput.disabled = true;
-                    }
-                    else
-                    {
-                        keyOrnamentsStringInput.value = defaultSettingsPreset.keyOrnamentsString;
-                    }
-                    
-                    velocityPitchSensitivityNumberInput.value = defaultSettingsPreset.velocityPitchSensitivity;
+                    setKeyOrnamentsSelect();
+                    setVelocityPitchSensitivityNumberInput();
                 }
                 function setSettingsSelect()
                 {
@@ -2403,8 +2399,7 @@ ResSynth.host = (function(document)
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
             onKeyboardSplitSelectChanged: onKeyboardSplitSelectChanged,
-            onKeyOrnamentsStringInputChanged: onKeyOrnamentsStringInputChanged,
-            onKeyOrnamentsStringInputBlurred: onKeyOrnamentsStringInputBlurred,
+            onKeyOrnamentsSelectChanged: onKeyOrnamentsSelectChanged,
             onVelocityPitchSensitivityNumberInputChanged: onVelocityPitchSensitivityNumberInputChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,

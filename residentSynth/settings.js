@@ -40,7 +40,7 @@ ResSynth.settings = (function()
         this.triggerKey = 36;
         this.velocityPitchSensitivity = 0;
         this.keyboardSplitIndex = 0,
-        this.keyOrnamentsString = "";
+        this.keyOrnamentsIndex = 0;
 
         Object.preventExtensions(this); // disallow new attribute creation 
     },
@@ -72,7 +72,7 @@ ResSynth.settings = (function()
         || this.triggerKey !== otherSettings.triggerKey
         || this.velocityPitchSensitivity !== otherSettings.velocityPitchSensitivity
         || this.keyboardSplitIndex !== otherSettings.keyboardSplitIndex
-        || this.keyOrnamentsString !== otherSettings.keyOrnamentsString)
+        || this.keyOrnamentsIndex !== otherSettings.keyOrnamentsIndex)
         {
             rval = false;
         }

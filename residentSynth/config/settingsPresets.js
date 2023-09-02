@@ -9,10 +9,12 @@ console.log('load settingsPresets.js');
 //      .mixtureIndex // integer
 //		.tuningGroupIndex // integer
 //		.tuningIndex // integer
-// integerInputs: // The values are the numbers in the input elements.
+// integerInputs: // The values are numbers in input elements or selectedIndex values.
 //      .semitonesOffset // -36..+36
 //      .centsOffset // -50..+50
 //		.triggerKey // 0..127 (Not used by the ResidentSynth)
+//      .keyboardSplitIndex // 0..n, where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
+//      .keyOrnamentsIndex // 0..n, where n is the number of (multi-key) ornamentDefs defined in ornamentDefs.js
 // sliders:
 //      .pitchWheel // 0..127 (default 64) (The value is used for both MSB and LSB)
 //		.modWheel // 0..127
@@ -22,8 +24,6 @@ console.log('load settingsPresets.js');
 //		.pitchWheelSensitivity// 0..127
 // floatInputs:
 //      .velocityPitchSensitivity // 0.0..1.0
-// string:
-//      .keyOrnamentsString // e.g "64:0 43:1 78:0" (Not used by the ResidentSynth)
 //
 // An ALL_CONTROLLERS_OFF message is sent before applying any settingsPreset.
 
@@ -47,7 +47,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex" : 0,
-            "keyOrnamentsString": ""
+            "keyOrnamentsIndex": ""
         },
         {
             "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
@@ -67,7 +67,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex": 1,
-            "keyOrnamentsString": "64:0"
+            "keyOrnamentsIndex": "64:0"
         },
         {
             "name": "settings 2: Harp (Fluid), semitonesOffset=0.5",
@@ -87,7 +87,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex": 2,
-            "keyOrnamentsString": "64:0; 66:1"
+            "keyOrnamentsIndex": "64:0; 66:1"
         },
         {
             "name": "settings 3: Vibraphone, semitonesOffset=-0.5, pan=20",
@@ -107,7 +107,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex": 3,
-            "keyOrnamentsString": "64:0; 66:1; 68:2"
+            "keyOrnamentsIndex": "64:0; 66:1; 68:2"
         }
         // etc. more settings definitions can be added here.
     ];

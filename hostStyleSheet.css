@@ -116,6 +116,14 @@ hr
 	margin-left: 0;
 }
 
+.keyOrnamentsSelect
+{
+	font-size: 11px;
+	width: 345px;
+	height: 18px;
+	margin-left: 0;
+}
+
 .settingsSelect
 {
 	font-size: 11px;
@@ -174,14 +182,6 @@ hr
 	width: 41px;
 	margin-left: 0;
 	margin-right: 4px;
-}
-
-.keyOrnamentsStringInput
-{
-	font-size: 11px;
-	width: 345px;
-	margin-left: 0;
-	margin-right: 0;
 }
 
 .sendAgainButton

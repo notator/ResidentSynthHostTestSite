@@ -821,7 +821,7 @@ ResSynth.residentSynth = (function(window)
                     settings.triggerKey = sp.triggerKey;
                     settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
                     settings.keyboardSplitIndex = sp.keyboardSplitIndex;
-                    settings.keyOrnamentsString = sp.keyOrnamentsString;
+                    settings.keyOrnamentsIndex = sp.keyOrnamentsIndex;
 
                     Object.freeze(settings); // attribute values are frozen
 
@@ -1574,7 +1574,7 @@ ResSynth.residentSynth = (function(window)
             // Note that the ResidentSynthHost does not call this function (i.e. send SET_SETTINGS messages)
             // because it needs to update the ResidentSynth's settings incrementally.
             // This function is provided for use in other applications, such as the AssistantPerformer.
-            // Note also that the settings.triggerKey and settings.keyOrnamentsString attributes are
+            // Note also that the settings.triggerKey and settings.keyOrnamentsIndex attributes are
             // ignored here because they only apply to the ResidentSynthHost.
             // Other applications use SET_SETTINGS and SET_ORNAMENT messages instead.
             function setSettings(channel, settingsIndex)

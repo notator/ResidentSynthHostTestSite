@@ -141,9 +141,7 @@
                         <span>ornaments</span>
                     </td>
                     <td>
-                        <input type="text" id="keyOrnamentsStringInput" class="keyOrnamentsStringInput"
-                               oninput="ResSynth.host.onKeyOrnamentsStringInputChanged()"
-                               onblur="ResSynth.host.onKeyOrnamentsStringInputBlurred()">
+                        <select id="keyOrnamentsSelect" class="keyOrnamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
                     </td>
                     <td align="right">
                         <span>velocityPitchSensitivity</span>
