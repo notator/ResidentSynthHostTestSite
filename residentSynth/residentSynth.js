@@ -1076,34 +1076,40 @@ ResSynth.residentSynth = (function(window)
         {
             channelPerKeyArray = channelPerKeyArrays[keyboardSplitIndex];
         },
-        allSoundOff = function(channel)
+
+        // Must turn off notes in all channels, since the keyboard can be split,
+        // so we don't know which channels may be sounding.
+        allSoundOff = function()
         {
-            function reconnectChannelInput()
+            function reconnectChannelInput(chanAudioNodes)
             {
-                // chanAudioNodes and audioContext are inherited
+                // audioContext is inherited
                 chanAudioNodes.inputNode = audioContext.createStereoPanner();
                 chanAudioNodes.panNode = chanAudioNodes.inputNode;
                 chanAudioNodes.inputNode.connect(chanAudioNodes.reverberator.input);
             }
 
-            var currentNoteOns = channelControls[channel].currentNoteOns,
-                chanAudioNodes = channelAudioNodes[channel],
-                inputNode = chanAudioNodes.inputNode,
-                now = 0, stopTime = 0;
-
-            inputNode.disconnect();
-            while(currentNoteOns.length > 0)
+            for(let channel = 0; channel < 16; channel++)
             {
-                now = audioContext.currentTime;
-                stopTime = noteOff(channel, currentNoteOns[0].keyKey);
-            }
-            setTimeout(reconnectChannelInput(), stopTime - now);
+                let currentNoteOns = channelControls[channel].currentNoteOns,
+                    chanAudioNodes = channelAudioNodes[channel],
+                    inputNode = chanAudioNodes.inputNode,
+                    now = 0, stopTime = 0;
+
+                inputNode.disconnect();
+                while(currentNoteOns.length > 0)
+                {
+                    now = audioContext.currentTime;
+                    stopTime = noteOff(channel, currentNoteOns[0].keyKey);
+                }
+                setTimeout(reconnectChannelInput(chanAudioNodes), stopTime - now);
+            }            
         },
-         wait = function(milliseconds)
+        wait = function(milliseconds)
         {
             return new Promise(resolve => setTimeout(resolve, milliseconds));
         },
-        noteOn = async function(channel, key, velocity)
+        noteOn = async function(inChannel, key, velocity)
         {
             // returns a new midiAttributes object
             function getMidiAttributes(preset, keyKey, keyPitch, velocity)
@@ -1149,7 +1155,7 @@ ResSynth.residentSynth = (function(window)
 
                 function doMixture(midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
                 {
-                    let mixture = keyboardSplitDefs[mixtureIndex],
+                    let mixture = mixtures[mixtureIndex],
                         extraNotes = mixture.extraNotes,
                         except = mixture.except,
                         keyMixtureIndex = except.find(x => x[0] === key),
@@ -1274,7 +1280,8 @@ ResSynth.residentSynth = (function(window)
                 ornamentInfo.complete = true;
             }
 
-            let chanControls = channelControls[channel],
+            let channel = (channelPerKeyArray.length > 0) ? channelPerKeyArray[key] : inChannel,
+                chanControls = channelControls[channel],
                 ornamentInfoQueue = chanControls.ornamentInfoQueue,
                 ornamentInfo = (ornamentInfoQueue.length > 0) ? ornamentInfoQueue[0] : undefined,
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
@@ -1317,9 +1324,10 @@ ResSynth.residentSynth = (function(window)
                 doNoteOn(midi);
             }
         },
-        noteOff = async function(channel, key)
+        noteOff = async function(inChannel, key)
         {
-            let chanControls = channelControls[channel],
+            let channel = (channelPerKeyArray.length > 0) ? channelPerKeyArray[key] : inChannel,
+                chanControls = channelControls[channel],
                 currentNoteOns = chanControls.currentNoteOns,
                 ornamentInfoQueue = chanControls.ornamentInfoQueue,
                 ornamentInfo = (ornamentInfoQueue.length > 0) ? ornamentInfoQueue[0] : undefined,
@@ -1637,11 +1645,11 @@ ResSynth.residentSynth = (function(window)
                     setKeyboardSplit(value); 
                     break;                    
                 case CTL.ALL_CONTROLLERS_OFF:
-                    allSoundOff(channel);
-                    setControllerDefaults(channel);
+                    allSoundOff();  // all channels (split means we don't know which channels are sounding)
+                    setControllerDefaults(channel); // only the current channel
                     break;
                 case CTL.ALL_SOUND_OFF:
-                    allSoundOff(channel);
+                    allSoundOff(); // all channels (split means we don't know which channels are sounding)
                     break;
                 default:
                     console.warn(`Controller ${control.toString(10)} (0x${control.toString(16)}) is not supported.`);
