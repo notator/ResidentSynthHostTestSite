@@ -124,8 +124,8 @@
             <hr />
             <table width="660px">
                 <colgroup>
-                    <col width="83" />
-                    <col width="377" />
+                    <col width="93" />
+                    <col width="372" />
                     <col width="200" />
                 </colgroup>
                 <tr>
@@ -135,6 +135,10 @@
                     <td>
                         <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
                     </td>
+                    <td align="right">
+                        <span>velocityPitchSensitivity</span>
+                        <input id="velocityPitchSensitivityNumberInput" type="number" class="velocityPitchSensitivityNumber" value="0" step="0.1" min="0" max="1" onchange="ResSynth.host.onVelocityPitchSensitivityNumberInputChanged()" />
+                    </td>
                 </tr>
                 <tr>
                     <td align="right">
@@ -143,10 +147,7 @@
                     <td>
                         <select id="keyOrnamentsSelect" class="keyOrnamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
                     </td>
-                    <td align="right">
-                        <span>velocityPitchSensitivity</span>
-                        <input id="velocityPitchSensitivityNumberInput" type="number" class="velocityPitchSensitivityNumber" value="0" step="0.1" min="0" max="1" onchange="ResSynth.host.onVelocityPitchSensitivityNumberInputChanged()" />
-                    </td>
+                    <td></td>
                 </tr>
             </table>
         </div>
@@ -154,12 +155,16 @@
             <hr />
             <table width="660px">
                 <colgroup>
-                    <col width="530" />
+                    <col width="93" />
+                    <col width="442" />
                     <col width="130" />
                 </colgroup>
                 <tr>
-                    <td>
+                    <td align="right">
                         <span id="settingsTitle" class="boldSubtitle">preset settings: </span>
+                    </td>
+                    <td>
+                        
                         <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
                     </td>
                     <td align="right">

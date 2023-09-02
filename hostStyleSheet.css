@@ -108,14 +108,14 @@ hr
 	margin: 0 0 auto auto;
 }
 
-.keyboardSplitSelect
+.keyboardSplitSelect, .keyOrnamentsSelect, .settingsSelect
 {
 	font-size: 11px;
-	width: 345px;
+	width: 385px;
 	height: 18px;
 	margin-left: 0;
 }
-
+/***
 .keyOrnamentsSelect
 {
 	font-size: 11px;
@@ -131,6 +131,7 @@ hr
 	height: 18px;
 	margin-left: 0;
 }
+***/
 
 .exportSettingsButton
 {
