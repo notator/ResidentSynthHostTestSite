@@ -14,7 +14,7 @@ console.log('load settingsPresets.js');
 //      .centsOffset // -50..+50
 //		.triggerKey // 0..127 (Not used by the ResidentSynth)
 //      .keyboardSplitIndex // 0..n, where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
-//      .keyOrnamentsIndex // 0..n, where n is the number of (multi-key) ornamentDefs defined in ornamentDefs.js
+//      .keyboardOrnamentsArrayIndex // 0..n, where n is the number of ornamentPerKeysStrings defined in ornamentDefs.js
 // sliders:
 //      .pitchWheel // 0..127 (default 64) (The value is used for both MSB and LSB)
 //		.modWheel // 0..127
@@ -47,7 +47,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex" : 0,
-            "keyOrnamentsIndex": ""
+            "keyboardOrnamentsArrayIndex": 0 // was ""
         },
         {
             "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
@@ -67,7 +67,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex": 1,
-            "keyOrnamentsIndex": "64:0"
+            "keyboardOrnamentsArrayIndex": 1 // was "64:0"
         },
         {
             "name": "settings 2: Harp (Fluid), semitonesOffset=0.5",
@@ -87,7 +87,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex": 2,
-            "keyOrnamentsIndex": "64:0; 66:1"
+            "keyboardOrnamentsArrayIndex": 2 // was "64:0; 66:1"
         },
         {
             "name": "settings 3: Vibraphone, semitonesOffset=-0.5, pan=20",
@@ -107,7 +107,7 @@ ResSynth.settingsPresets =
             "triggerKey": 36,
             "velocityPitchSensitivity": 0,
             "keyboardSplitIndex": 3,
-            "keyOrnamentsIndex": "64:0; 66:1; 68:2"
+            "keyboardOrnamentsArrayIndex": 3 // was "64:0; 66:1; 68:2"
         }
         // etc. more settings definitions can be added here.
     ];

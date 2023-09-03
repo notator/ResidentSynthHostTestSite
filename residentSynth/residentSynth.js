@@ -23,8 +23,8 @@ ResSynth.residentSynth = (function(window)
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
-        channelPerKeyArrays = [], // initialized by getChannelPerKeyArrays()
-        channelPerKeyArray = [],
+        channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays()
+        ornamentPerKeyArrays = [], // initialized by setPrivateOrnamentPerKeyArrays()
         tuningGroups = [],
         settingsPresets = [],
 
@@ -665,35 +665,54 @@ ResSynth.residentSynth = (function(window)
 
             return mixtures;
         },
-
-        setPrivateChannelPerKeyArrays = function()
+        // See comments in keyboardSplitDefs.js and ornamentDefs.js.
+        // Further checking is done in setPrivateChannelPerKeyArrays() and setPrivateOrnamentPerKeyArrays().
+        // Throws an exception if an error is found in the keyboardSplitDefs.
+        checkKeyValuesStrings = function(keyValuesStringsArray)
         {
-            // See comment in keyboardSplitDefs.js. Further checking is done in getChannelPerKeyArray().
-            // Throws an exception if an error is found in the keyboardSplitDefs.
-            function checkKeyboardSplitDefs(keyboardSplitDefs)
+            // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
+            // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
+            const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
+
+            if(keyValuesStringsArray.length > 128)
             {
-                // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
-                // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
-                const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
+                throw `There may not be more than 128 definition strings in the array.`;
+            }
+            else
+            {
+                for(let i = 0; i < keyValuesStringsArray.length; i++) 
+                {
+                    let keyValuesString = keyValuesStringsArray[i];
 
-                if(keyboardSplitDefs.length > 128)
-                {
-                    throw `There may not be more than 128 definition strings in the array.`;
-                }
-                else
-                {
-                    for(let i = 0; i < keyboardSplitDefs.length; i++) 
+                    if(longInputStringRegex.test(keyValuesString) === false)
                     {
-                        let keyboardSplitString = keyboardSplitDefs[i];
-
-                        if(longInputStringRegex.test(keyboardSplitString) === false)
-                        {
-                            throw `Illegal keyboardSplitString: ${keyboardSplitString}\nDefinition index: ${i}`;
-                        }                      
+                        throw `Illegal keyboardSplitString: ${keyValuesString}\nDefinition index: ${i}`;
                     }
                 }
             }
+        },
 
+        getKeyValuePairs = function(keyValuesString)
+        {
+            console.assert(keyValuesString.length > 0);
+
+            const keyValuePairs = [],
+                components = keyValuesString.split(";");
+
+            for(const component of components)
+            {
+                const [keyStr, valueStr] = component.trim().split(":");
+                const key = parseInt(keyStr);
+                const value = parseInt(valueStr);
+
+                keyValuePairs.push({key, value});
+            }
+
+            return keyValuePairs;
+        },
+
+        setPrivateChannelPerKeyArrays = function()
+        {
             // If keyboardSplitDefs[defIndex].length > 0, returns an array of 128 channel indices, one per key index.
             // Otherwise returns an empty array (the residentSynth will use the incoming message's channel).
             // Throws an exception if keys are not unique and in ascending order, or a channel or key is out of range.
@@ -701,32 +720,21 @@ ResSynth.residentSynth = (function(window)
             // ChatGPT uses some constructs that I should adopt: (const etc.)
             function getChannelPerKeyArray(keyboardSplitDefs, defIndex)
             {
-                function getKeyChannelPairs(keyboardSplitString)
+                function check(keyChannelPairs, keyValuesString) 
                 {
-                    console.assert(keyboardSplitString.length > 0);
-
-                    const keyChannelPairs = [],
-                        components = keyboardSplitString.split(";");
-
-                    let previousKey = -1;
-                    for(const component of components)
+                    for(let i = 0, previousKey = -1; i < keyChannelPairs.length; i++)
                     {
-                        const [keyStr, channelStr] = component.trim().split(":");
-                        const key = parseInt(keyStr);
-                        const channel = parseInt(channelStr);
+                        let {key, channel} = keyChannelPairs[i];
 
                         if(key <= previousKey || channel < 0 || channel > 15 || key < 0 || key > 127)
                         {
-                            const errorString = `Illegal keyboardSplitString: ${keyboardSplitString}\nDefinition index: ${defIndex}\nComponent: ${component}`;
+                            const errorString = `Illegal keyboardSplitString: ${keyValuesString}\n<key:channel> component index: ${i}`;
                             alert(errorString);
                             throw errorString;
                         }
 
                         previousKey = key;
-                        keyChannelPairs.push({key, channel});
                     }
-
-                    return keyChannelPairs;
                 }
 
                 const keyboardSplitDef = keyboardSplitDefs[defIndex];
@@ -737,12 +745,13 @@ ResSynth.residentSynth = (function(window)
                 }
                 
                 const arraySize = 128,
-                    keyChannelPairs = getKeyChannelPairs(keyboardSplitDef),
+                    keyChannelPairs = getKeyValuePairs(keyboardSplitDef),
                     channelPerKeyArray = (keyChannelPairs.length > 0) ? Array(arraySize).fill(0) : [];
+
+                check(keyChannelPairs, keyValuesString);
 
                 for(let i = 0; i < keyChannelPairs.length; i++)
                 {
-                    const {key, channel} = keyChannelPairs[i];
                     let nextKey = (i < keyChannelPairs.length - 1) ? keyChannelPairs[i + 1].key : arraySize;
 
                     for(let j = key; j < nextKey; j++)
@@ -764,7 +773,7 @@ ResSynth.residentSynth = (function(window)
             {
                 try
                 {
-                    checkKeyboardSplitDefs(keyboardSplitDefs);
+                    checkKeyValuesStrings(keyboardSplitDefs);
 
                     for(var i = 0; i < keyboardSplitDefs.length; i++)
                     {
@@ -777,6 +786,98 @@ ResSynth.residentSynth = (function(window)
                     msg = "Error in keyboardSplitDefs.js\n" + msg;
                     channelPerKeyArrays.length = 0;
                     channelPerKeyArrays.push([]);
+                    console.assert(false, msg);
+                }
+            }
+        },
+
+        // Each ornamentPerKeyArray is initialized to contain ornamentInfo objects at index = key,
+        // It may have undefined elements, and its length can be anything in range 0..128.
+        // The ornamentInfo objects have the following attributes:
+        //   ornamentInfo.index = ornamentIndex;
+        //   ornamentInfo.cancel = false;
+        //   ornamentInfo.complete = false;
+        setPrivateOrnamentPerKeyArrays = function()
+        {
+            // If ornamentPerKeysStrings[defIndex].length > 0, returns an array of 128 channel indices, one per key index.
+            // Otherwise returns an empty array (the residentSynth will use the incoming message's channel).
+            // Throws an exception if keys are not unique and in ascending order, or a channel or key is out of range.
+            // 01.09.2023: Interestingly, this function was partly optimized in a dialog with ChatGPT.
+            // ChatGPT uses some constructs that I should adopt: (const etc.)
+            function getOrnamentPerKeyArray(ornamentPerKeysStrings, defIndex)
+            {
+                check(keyOrnamentIndexPairs, ornamentPerKeysString, ornamentDefs)
+                {
+                    for(let i = 0, previousKey = -1; i < keyOrnamentIndexPairs.length; i++)
+                    {
+                        let {key, ornamentIndex} = keyOrnamentIndexPairs[i];
+
+                        if(key <= previousKey || ornamentIndex < 0 || ornamentIndex >= ornamentDefs.length || key < 0 || key > 127)
+                        {
+                            const errorString = `Illegal ornamentPerKeysString: ${ornamentPerKeysString}\n<key:ornament> component index: ${i}`;
+                            alert(errorString);
+                            throw errorString;
+                        }
+                        previousKey = key;
+                    }
+                }
+
+                const ornamentDefs = ResSynth.ornamentDefs,
+                    ornamentPerKeysString = ornamentPerKeysStrings[defIndex];
+
+                if(ornamentPerKeysString.length == 0)
+                {
+                    return []; // no ornaments
+                }
+
+                const arraySize = 128,
+                    keyOrnamentIndexPairs = getKeyValuePairs(ornamentPerKeysString),
+                    ornamentPerKeyArray = [];
+
+                check(keyOrnamentIndexPairs, ornamentPerKeysString, ornamentDefs);
+                
+                for(let i = 0; i < keyOrnamentIndexPairs.length; i++)
+                {
+                    let kOIndexPair = keyOrnamentIndexPairs[i],
+                        key = kOIndexPair.key,
+                        ornamentIndex = kOIndexPair.value,
+                        nextKey = (i < keyOrnamentIndexPairs.length - 1) ? keyOrnamentIndexPairs[i + 1].key : arraySize,
+                        ornamentInfo = {};
+
+                    ornamentInfo.index = ornamentIndex;
+                    //ornamentInfo.key = key;
+                    ornamentInfo.cancel = false;
+                    ornamentInfo.complete = false;
+
+                    ornamentPerKeyArray[key] = ornamentInfo; // array has undefined elements, and length may be in range 1..128
+                }
+
+                return ornamentPerKeyArray;
+            }
+
+            let ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings;
+
+            if(ornamentPerKeysStrings === undefined || ornamentDefs === undefined)
+            {
+                ornamentPerKeyArrays.push([]); // an empty array means there are no ornaments defined.
+            }
+            else
+            {
+                try
+                {
+                    checkKeyValuesStrings(ornamentPerKeysStrings);
+
+                    for(var i = 0; i < ornamentPerKeysStrings.length; i++)
+                    {
+                        let ornamentPerKeyArray = getOrnamentPerKeyArray(ornamentPerKeysStrings, i);  // can return an empty array
+                        ornamentPerKeyArrays.push(ornamentPerKeyArray);
+                    }
+                }
+                catch(msg)
+                {
+                    msg = "Error in ornamentPerKeysStrings.js\n" + msg;
+                    ornamentPerKeyArrays.length = 0;
+                    ornamentPerKeyArrays.push([]);
                     console.assert(false, msg);
                 }
             }
@@ -821,7 +922,7 @@ ResSynth.residentSynth = (function(window)
                     settings.triggerKey = sp.triggerKey;
                     settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
                     settings.keyboardSplitIndex = sp.keyboardSplitIndex;
-                    settings.keyOrnamentsIndex = sp.keyOrnamentsIndex;
+                    settings.keyboardOrnamentsArrayIndex = sp.keyboardOrnamentsArrayIndex;
 
                     Object.freeze(settings); // attribute values are frozen
 
@@ -1061,22 +1162,21 @@ ResSynth.residentSynth = (function(window)
         {
             channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones -- host currently limits data2 / 127 to range 0..0.6
         },
-        setOrnamentInfo = function(channel, ornamentIndex)
+        updateKeyboardSplit = function(channel, keyboardSplitIndex)
         {
-            let ornamentInfo = {};
-
-            ornamentInfo.index = ornamentIndex;
-            ornamentInfo.key = undefined;
-            ornamentInfo.cancel = false;
-            ornamentInfo.complete = false;
-
-            channelControls[channel].ornamentInfoQueue.push(ornamentInfo);
+            channelControls[channel].channelPerKeyArray = channelPerKeyArrays[keyboardSplitIndex];
         },
-        setKeyboardSplit = function(keyboardSplitIndex)
+        updateOrnamentPerKeyArray = function(channel, ornamentPerKeyArrayIndex)
         {
-            channelPerKeyArray = channelPerKeyArrays[keyboardSplitIndex];
-        },
+            // ornamentPerKeyArray contains ornamentInfo objects at index = key:
+            //let ornamentInfo = {};
+            //ornamentInfo.index = ornamentIndex;
+            //ornamentInfo.key = undefined;
+            //ornamentInfo.cancel = false;
+            //ornamentInfo.complete = false;
 
+            channelControls[channel].ornamentPerKeyArray = ornamentPerKeyArrays[ornamentPerKeyArrayIndex];
+        },
         // Must turn off notes in all channels, since the keyboard can be split,
         // so we don't know which channels may be sounding.
         allSoundOff = function()
@@ -1280,10 +1380,12 @@ ResSynth.residentSynth = (function(window)
                 ornamentInfo.complete = true;
             }
 
-            let channel = (channelPerKeyArray.length > 0) ? channelPerKeyArray[key] : inChannel,
+            let channelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
+                channel = (channelPerKeyArray.length > 0) ? channelPerKeyArray[key] : inChannel, // channelPerKeyArray.length is either 0 or 128
                 chanControls = channelControls[channel],
-                ornamentInfoQueue = chanControls.ornamentInfoQueue,
-                ornamentInfo = (ornamentInfoQueue.length > 0) ? ornamentInfoQueue[0] : undefined,
+                //ornamentPerKeyArray = chanControls.ornamentPerKeyArray,
+                //ornamentInfo = (ornamentPerKeyArray.length > 0) ? ornamentPerKeyArray[key] : undefined,
+                ornamentInfo = chanControls.ornamentPerKeyArray[key], // undefined if ornamentPerKeyArray.length === 0 or ornamentPerKeyArray[key] does not exist.
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,  
                 midi = {};
@@ -1420,8 +1522,8 @@ ResSynth.residentSynth = (function(window)
                 CTL.CENTS_OFFSET,
                 CTL.SET_SETTINGS,
                 CTL.VELOCITY_PITCH_SENSITIVITY,
-                CTL.SET_ORNAMENT,
-                CTL.SET_KEYBOARD_SPLIT_INDEX
+                CTL.KEYBOARD_ORNAMENTS_ARRAY_INDEX,
+                CTL.KEYBOARD_SPLIT_ARRAY_INDEX
             ],
 
         ResidentSynth = function()
@@ -1465,6 +1567,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
 
             setPrivateChannelPerKeyArrays();
+            setPrivateOrnamentPerKeyArrays();
         },
 
         API =
@@ -1517,8 +1620,10 @@ ResSynth.residentSynth = (function(window)
             let controlState = {};
             channelControls.push(controlState);
 
-            channelControls[channel].ornamentInfoQueue = [];
             channelControls[channel].currentNoteOns = [];
+
+            channelControls[channel].channelPerKeyArray = [];
+            channelControls[channel].ornamentPerKeyArray = [];
 
             setFontAndTuningDefaults(channel);
             setControllerDefaults(channel);            
@@ -1574,9 +1679,6 @@ ResSynth.residentSynth = (function(window)
             // Note that the ResidentSynthHost does not call this function (i.e. send SET_SETTINGS messages)
             // because it needs to update the ResidentSynth's settings incrementally.
             // This function is provided for use in other applications, such as the AssistantPerformer.
-            // Note also that the settings.triggerKey and settings.keyOrnamentsIndex attributes are
-            // ignored here because they only apply to the ResidentSynthHost.
-            // Other applications use SET_SETTINGS and SET_ORNAMENT messages instead.
             function setSettings(channel, settingsIndex)
             {
                 let settings = settingsPresets[settingsIndex];
@@ -1594,7 +1696,10 @@ ResSynth.residentSynth = (function(window)
                 updatePan(channel, settings.pan);
                 updateReverberation(channel, settings.reverberation);
                 updatePitchWheelSensitivity(channel, settings.pitchWheelSensitivity);
+                updateTriggerKey(channel, settings.triggerkey);
                 updateVelocityPitchSensitivity(channel, settings.velocityPitchSensitivity);
+                updateKeyboardSplit(channel, settings.keyboardSplitIndex);
+                updateOrnamentPerKeyArray(channel, settings.keyboardOrnamentsArrayIndex);
             }
 
             switch(control)
@@ -1638,11 +1743,11 @@ ResSynth.residentSynth = (function(window)
                 case CTL.VELOCITY_PITCH_SENSITIVITY:
                     updateVelocityPitchSensitivity(channel, value);
                     break;
-                case CTL.SET_ORNAMENT:
-                    setOrnamentInfo(channel, value);
+                case CTL.KEYBOARD_ORNAMENTS_ARRAY_INDEX:
+                    updateOrnamentPerKeyArray(channel, value);
                     break;
-                case CTL.SET_KEYBOARD_SPLIT_INDEX:
-                    setKeyboardSplit(value); 
+                case CTL.KEYBOARD_SPLIT_ARRAY_INDEX:
+                    updateKeyboardSplit(channel, value); 
                     break;                    
                 case CTL.ALL_CONTROLLERS_OFF:
                     allSoundOff();  // all channels (split means we don't know which channels are sounding)

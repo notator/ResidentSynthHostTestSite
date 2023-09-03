@@ -428,20 +428,12 @@ ResSynth.host = (function(document)
                     onKeyboardSplitSelectChanged();
                 }
 
-                function setAndSendKeyOrnamentsString(keyOrnamentsIndex)
+                function setAndSendKeyOrnamentsString(keyboardOrnamentsArrayIndex)
                 {
                     let keyOrnamentsSelect = getElem("keyOrnamentsSelect");
 
-                    if(ResSynth.ornamentDefs == undefined) // missing ornamentsDef.js file
-                    {
-                        keyOrnamentsSelect.value = "no ornaments have been defined (see docs)";
-                        keyOrnamentsSelect.disabled = true;
-                    }
-                    else
-                    {
-                        keyOrnamentsSelect.value = keyOrnamentsIndex;
-                        onKeyOrnamentsSelectChanged();
-                    }
+                    keyboardSplitSelect.selectedIndex = keyboardOrnamentsArrayIndex;
+                    onKeyOrnamentsSelectChanged();
                 }
 
                 function setAndSendVelocityPitchSensitivity(velocityPitchSensitivity)
@@ -453,7 +445,7 @@ ResSynth.host = (function(document)
                 }
 
                 setAndSendKeyboardSplitIndex(hostChannelSettings.keyboardSplitIndex);
-                setAndSendKeyOrnamentsString(hostChannelSettings.keyOrnamentsIndex);
+                setAndSendKeyOrnamentsString(hostChannelSettings.keyboardOrnamentsArrayIndex);
                 setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
             }
 
@@ -785,7 +777,12 @@ ResSynth.host = (function(document)
                     // settings.velocityPitchSensitivity
                     let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, settings.velocityPitchSensitivity * 127]);
                     synth.send(vpsMsg);
-                    // no need to set settings.keyOrnamentsIndex in synth here.
+                    // settings.keyboardSplitIndex
+                    let ksiMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.KEYBOARD_SPLIT_ARRAY_INDEX, settings.keyboardSplitIndex]);
+                    synth.send(ksiMsg);
+                    // settings.keyboardOrnamentsArrayIndex
+                    let koaMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.KEYBOARD_ORNAMENTS_ARRAY_INDEX, settings.keyboardOrnamentsArrayIndex]);
+                    synth.send(koaMsg);                    
                 }
 
                 for(var i = 0; i < playbackChannels.length; i++)
@@ -1190,119 +1187,28 @@ ResSynth.host = (function(document)
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
-                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_SPLIT_INDEX, keyboardSplitIndex]);
+                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.KEYBOARD_SPLIT_ARRAY_INDEX, keyboardSplitIndex]);
 
-            hostChannelSettings.keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex;
+            hostChannelSettings.keyboardSplitIndex = keyboardSplitIndex;
             setExportState(hostChannelSettings);            
 
             synth.send(setKeyboardSplitIndexMsg);
         },
 
-        // Validation: A valid value for the stringInput contains zero or more
-        // key:ornamentIndex sequences, separated by a ; and an optional space.
-        // Each key and ornamentIndex is a number in range 0..127.
-        // The ':' and ';' characters must be present.
-        // Valid examples are "", "64:0;", "78:1; 50:34;", "78:1; 50:34" etc.
-        // Note that a final ";" and " " can, but need not be, present, and
-        // that the keys do not have to be in any particular order.
-        // It is an error if:
-        // 1) the regex for the above fails,
-        // 2) there are duplicate keys, or
-        // 3) an ornamentIndex is out of range of the available ornaments
-        //    stored in the synth.
         onKeyOrnamentsSelectChanged = function()
         {
-            function getKeyOrnaments(normalizedDisplayStr)
-            {
-                let keyOrnaments = [];
+            const constants = ResSynth.constants;
+            let channelSelect = getElem("channelSelect"),
+                channel = channelSelect.selectedIndex,
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
+                keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
+                keyboardOrnamentsArrayIndex = keyOrnamentsSelect.selectedIndex,
+                keyboardOrnamentsArrayIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.KEYBOARD_ORNAMENTS_ARRAY_INDEX, keyboardOrnamentsArrayIndex]);
 
-                if(normalizedDisplayStr.length > 0)
-                {
-                    let components = normalizedDisplayStr.split(";");
-                    for(let i = 0; i < components.length; i++)
-                    {
-                        let component = components[i].trim(),
-                            keyValueArray = component.split(":"),
-                            keyOrnament = {};
+            hostChannelSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
+            setExportState(hostChannelSettings);
 
-                        keyOrnament.key = parseInt(keyValueArray[0]);
-                        keyOrnament.ornament = parseInt(keyValueArray[1]);
-
-                        keyOrnaments.push(keyOrnament);
-                    }
-                }
-
-                return keyOrnaments;
-            }
-
-            function duplicateKeys(keyOrnaments)
-            {
-                let error = false;
-                for(let i = 0; i < keyOrnaments.length; i++)
-                {
-                    let key = keyOrnaments[i].key,
-                        lastIndex = keyOrnaments.findLastIndex(x => x.key === key);
-
-                    if(lastIndex !== i)
-                    {
-                        alert("Duplicate key " + key.toString());
-                        error = true;
-                        break;
-                    }
-                }
-                return error;
-            }
-            function ornamentOutOfRange(keyOrnaments)
-            {
-                let error = false,
-                    ornamentDefs = ResSynth.ornamentDefs,
-                    nOrnaments = (ornamentDefs === undefined) ? 0 : ornamentDefs.length;
-
-                for(let i = 0; i < keyOrnaments.length; i++)
-                {
-                    if(keyOrnaments[i].ornament >= nOrnaments)
-                    {
-                        alert("Ornament index out of range.\n" +
-                            "(There are " + nOrnaments.toString() + " ornament definitions.)");
-                        error = true;
-                        break;
-                    }
-                }
-
-                return error;
-            }
-
-            // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
-            // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
-            const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
-
-
-            let keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
-                keyOrnamentsIndex = normalizedLongInputString(keyOrnamentsSelect.value),
-                error = (longInputStringRegex.test(keyOrnamentsIndex) === false); // longInputStringRegex is global
-
-            if(!error)
-            {
-                keyOrnamentsSelect.style.backgroundColor = "white";
-
-                // keyOrnaments is global
-                keyOrnaments = getKeyOrnaments(keyOrnamentsIndex);
-
-                if(duplicateKeys(keyOrnaments) || ornamentOutOfRange(keyOrnaments))
-                {
-                    error = true;
-                }
-                else
-                {
-                    let channelSelect = getElem("channelSelect"),
-                        channel = channelSelect.selectedIndex,
-                        hostChannelSettings = channelSelect.options[channel].hostSettings;
-
-                    hostChannelSettings.keyOrnamentsIndex = keyOrnamentsIndex;
-                    setExportState(hostChannelSettings);
-                }
-            }
-
+            synth.send(keyboardOrnamentsArrayIndexMsg);
         },
 
         // exported
@@ -1943,6 +1849,7 @@ ResSynth.host = (function(document)
 
                             option.innerHTML = "no splits have been defined. (messages will be sent on the current channel)";
                             keyboardSplitSelect.options.add(option);
+                            keyboardSplitSelect.selectedIndex = 0;
                             keyboardSplitSelect.disabled = true;
                         }
                         else
@@ -1970,17 +1877,37 @@ ResSynth.host = (function(document)
                     function setKeyOrnamentsSelect()
                     {
                         let keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
-                            keyOrnamentDefs = ResSynth.keyOrnamentDefs; // TODO!
+                            ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings;
 
-                        if(keyOrnamentDefs === undefined) // no keyOrnamentDefs.js file
+                        if(ornamentPerKeysStrings === undefined) // no ornamentDefs.js file
                         {
                             let option = new Option();
 
-                            option.innerHTML = "TODO: define keyOrnamentDef strings (multi-key, see old code in onKeyOrnamentsSelectChanged())";
+                            option.innerHTML = "no ornaments";
                             keyOrnamentsSelect.options.add(option);
                             keyOrnamentsSelect.selectedIndex = 0;
-                            //keyOrnamentsSelect.disabled = true;                            
+                            keyOrnamentsSelect.disabled = true;                            
                         }
+                        else
+                        {
+                            for(let i = 0; i < ornamentPerKeysStrings.length; i++)
+                            {
+                                let ornamentPerKeysString = ornamentPerKeysStrings[i],
+                                    option = new Option();
+
+                                if(ornamentPerKeysString.length === 0)
+                                {
+                                    option.innerHTML = "no ornaments";
+                                }
+                                else
+                                {
+                                    option.innerHTML = ornamentPerKeysString;
+                                }
+
+                                keyOrnamentsSelect.options.add(option);
+                            }
+                        }
+                        keyOrnamentsSelect.selectedIndex = 0;
                     }
 
                     function setVelocityPitchSensitivityNumberInput()
