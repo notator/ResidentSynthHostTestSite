@@ -800,6 +800,7 @@ ResSynth.residentSynth = (function(window)
         // It may have undefined elements, and its length can be anything in range 0..128.
         // The ornamentInfo objects have the following attributes:
         //   ornamentInfo.index = ornamentIndex;
+        //   ornamentInfo.key = undefined;
         //   ornamentInfo.cancel = false;
         //   ornamentInfo.complete = false;
         setPrivateOrnamentPerKeyArrays = function()
@@ -851,7 +852,7 @@ ResSynth.residentSynth = (function(window)
                         ornamentInfo = {};
 
                     ornamentInfo.index = ornamentIndex;
-                    //ornamentInfo.key = key;
+                    ornamentInfo.key = undefined; // when set, stops the ornament
                     ornamentInfo.cancel = false;
                     ornamentInfo.complete = false;
 
@@ -1392,7 +1393,8 @@ ResSynth.residentSynth = (function(window)
                 chanControls = channelControls[channel],
                 //ornamentPerKeyArray = chanControls.ornamentPerKeyArray,
                 //ornamentInfo = (ornamentPerKeyArray.length > 0) ? ornamentPerKeyArray[key] : undefined,
-                ornamentInfo = chanControls.ornamentPerKeyArray[key], // undefined if ornamentPerKeyArray.length === 0 or ornamentPerKeyArray[key] does not exist.
+                originalOrnamentInfo = chanControls.ornamentPerKeyArray[key], // undefined if ornamentPerKeyArray.length === 0 or ornamentPerKeyArray[key] does not exist.
+                ornamentInfo = {...originalOrnamentInfo}, // clone (with key === undefined)
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,  
                 midi = {};
