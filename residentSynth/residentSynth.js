@@ -852,7 +852,7 @@ ResSynth.residentSynth = (function(window)
                         ornamentInfo = {};
 
                     ornamentInfo.index = ornamentIndex;
-                    ornamentInfo.key = undefined; // when set, stops the ornament
+                    ornamentInfo.key = undefined; // for the first note in the ornament
                     ornamentInfo.cancel = false;
                     ornamentInfo.complete = false;
 
@@ -1388,13 +1388,11 @@ ResSynth.residentSynth = (function(window)
                 ornamentInfo.complete = true;
             }
 
-            let channelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
-                channel = (channelPerKeyArray.length > 0) ? channelPerKeyArray[key] : inChannel, // channelPerKeyArray.length is either 0 or 128
+            let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
+                channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[key] : inChannel,
                 chanControls = channelControls[channel],
-                //ornamentPerKeyArray = chanControls.ornamentPerKeyArray,
-                //ornamentInfo = (ornamentPerKeyArray.length > 0) ? ornamentPerKeyArray[key] : undefined,
                 originalOrnamentInfo = chanControls.ornamentPerKeyArray[key], // undefined if ornamentPerKeyArray.length === 0 or ornamentPerKeyArray[key] does not exist.
-                ornamentInfo = {...originalOrnamentInfo}, // clone (with key === undefined)
+                ornamentInfo = {...originalOrnamentInfo}, // clone
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,  
                 midi = {};
@@ -1416,7 +1414,11 @@ ResSynth.residentSynth = (function(window)
 
             midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, velocity);
 
-            if(ornamentInfo !== undefined)
+            if(originalOrnamentInfo === undefined)
+            {
+                doNoteOn(midi);
+            }
+            else
             {
                 if(ornamentInfo.key !== undefined)
                 {
@@ -1427,21 +1429,18 @@ ResSynth.residentSynth = (function(window)
                 else
                 {
                     ornamentInfo.key = key;
+                    chanControls.ornamentInfo = ornamentInfo;
                     playOrnamentAsync(ornamentInfo, chanControls);
                 }
-            }
-            else
-            {
-                doNoteOn(midi);
             }
         },
         noteOff = async function(inChannel, key)
         {
-            let channel = (channelPerKeyArray.length > 0) ? channelPerKeyArray[key] : inChannel,
+            let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
+                channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[key] : inChannel,
                 chanControls = channelControls[channel],
                 currentNoteOns = chanControls.currentNoteOns,
-                ornamentInfoQueue = chanControls.ornamentInfoQueue,
-                ornamentInfo = (ornamentInfoQueue.length > 0) ? ornamentInfoQueue[0] : undefined,
+                ornamentInfo = chanControls.ornamentInfo,
                 stopTime = 0;
 
             if(ornamentInfo !== undefined && ornamentInfo.key === key)
@@ -1451,7 +1450,7 @@ ResSynth.residentSynth = (function(window)
                 {
                     await wait(5);
                 }
-                ornamentInfoQueue.splice(0, 1);
+                chanControls.ornamentInfo = undefined;
             }
 
             for(var index = currentNoteOns.length - 1; index >= 0; index--)
