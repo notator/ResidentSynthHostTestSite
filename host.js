@@ -1883,7 +1883,7 @@ ResSynth.host = (function(document)
                         {
                             let option = new Option();
 
-                            option.innerHTML = "no ornaments";
+                            option.innerHTML = "no ornaments have been defined";
                             keyOrnamentsSelect.options.add(option);
                             keyOrnamentsSelect.selectedIndex = 0;
                             keyOrnamentsSelect.disabled = true;                            
@@ -1897,7 +1897,7 @@ ResSynth.host = (function(document)
 
                                 if(ornamentPerKeysString.length === 0)
                                 {
-                                    option.innerHTML = "no ornaments";
+                                    option.innerHTML = "none";
                                 }
                                 else
                                 {

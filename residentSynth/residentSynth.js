@@ -23,8 +23,8 @@ ResSynth.residentSynth = (function(window)
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
-        channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays()
-        ornamentPerKeyArrays = [], // initialized by setPrivateOrnamentPerKeyArrays()
+        channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays(). This array has elements in range 0..15. Its length can be either 0 or 128.
+        ornamentPerKeyArrays = [], // initialized by setPrivateOrnamentPerKeyArrays(). This array may have undefined elements, and its length may be anything in range 0..128.
         tuningGroups = [],
         settingsPresets = [],
 
@@ -724,7 +724,9 @@ ResSynth.residentSynth = (function(window)
                 {
                     for(let i = 0, previousKey = -1; i < keyChannelPairs.length; i++)
                     {
-                        let {key, channel} = keyChannelPairs[i];
+                        let kvp = keyChannelPairs[i],
+                            key = kvp.key,
+                            channel = kvp.value;
 
                         if(key <= previousKey || channel < 0 || channel > 15 || key < 0 || key > 127)
                         {
@@ -748,11 +750,14 @@ ResSynth.residentSynth = (function(window)
                     keyChannelPairs = getKeyValuePairs(keyboardSplitDef),
                     channelPerKeyArray = (keyChannelPairs.length > 0) ? Array(arraySize).fill(0) : [];
 
-                check(keyChannelPairs, keyValuesString);
+                check(keyChannelPairs, keyboardSplitDef);
 
                 for(let i = 0; i < keyChannelPairs.length; i++)
                 {
-                    let nextKey = (i < keyChannelPairs.length - 1) ? keyChannelPairs[i + 1].key : arraySize;
+                    let kvp = keyChannelPairs[i],
+                        key = kvp.key,
+                        channel = kvp.value,
+                        nextKey = (i < keyChannelPairs.length - 1) ? keyChannelPairs[i + 1].key : arraySize;
 
                     for(let j = key; j < nextKey; j++)
                     {
@@ -806,15 +811,17 @@ ResSynth.residentSynth = (function(window)
             // ChatGPT uses some constructs that I should adopt: (const etc.)
             function getOrnamentPerKeyArray(ornamentPerKeysStrings, defIndex)
             {
-                check(keyOrnamentIndexPairs, ornamentPerKeysString, ornamentDefs)
+                function check(keyOrnamentIndexPairs, ornamentPerKeysString, ornamentDefs)
                 {
                     for(let i = 0, previousKey = -1; i < keyOrnamentIndexPairs.length; i++)
                     {
-                        let {key, ornamentIndex} = keyOrnamentIndexPairs[i];
+                        let kop = keyOrnamentIndexPairs[i],
+                            key = kop.key,
+                            ornamentIndex = kop.value;                            ;
 
                         if(key <= previousKey || ornamentIndex < 0 || ornamentIndex >= ornamentDefs.length || key < 0 || key > 127)
                         {
-                            const errorString = `Illegal ornamentPerKeysString: ${ornamentPerKeysString}\n<key:ornament> component index: ${i}`;
+                            const errorString = `Illegal ornamentPerKeysString: ${ornamentPerKeysString}\n<key:ornamentIndex> component index: ${i}`;
                             alert(errorString);
                             throw errorString;
                         }
@@ -841,7 +848,6 @@ ResSynth.residentSynth = (function(window)
                     let kOIndexPair = keyOrnamentIndexPairs[i],
                         key = kOIndexPair.key,
                         ornamentIndex = kOIndexPair.value,
-                        nextKey = (i < keyOrnamentIndexPairs.length - 1) ? keyOrnamentIndexPairs[i + 1].key : arraySize,
                         ornamentInfo = {};
 
                     ornamentInfo.index = ornamentIndex;
@@ -849,13 +855,14 @@ ResSynth.residentSynth = (function(window)
                     ornamentInfo.cancel = false;
                     ornamentInfo.complete = false;
 
-                    ornamentPerKeyArray[key] = ornamentInfo; // array has undefined elements, and length may be in range 1..128
+                    ornamentPerKeyArray[key] = ornamentInfo;
                 }
 
-                return ornamentPerKeyArray;
+                return ornamentPerKeyArray; // array has undefined elements, and length may be anything in range 0..128
             }
 
-            let ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings;
+            let ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings,
+                ornamentDefs = ResSynth.ornamentDefs;
 
             if(ornamentPerKeysStrings === undefined || ornamentDefs === undefined)
             {
@@ -869,7 +876,7 @@ ResSynth.residentSynth = (function(window)
 
                     for(var i = 0; i < ornamentPerKeysStrings.length; i++)
                     {
-                        let ornamentPerKeyArray = getOrnamentPerKeyArray(ornamentPerKeysStrings, i);  // can return an empty array
+                        let ornamentPerKeyArray = getOrnamentPerKeyArray(ornamentPerKeysStrings, i, ornamentDefs);  // can return an empty array
                         ornamentPerKeyArrays.push(ornamentPerKeyArray);
                     }
                 }
