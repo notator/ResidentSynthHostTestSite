@@ -1213,12 +1213,68 @@ ResSynth.residentSynth = (function(window)
                 setTimeout(reconnectChannelInput(chanAudioNodes), stopTime - now);
             }            
         },
-        wait = function(milliseconds)
+
+        currentOrnamentInfos = [],
+        clearContext = function(currentOrnamentInfos, currentNoteOns, key)
         {
-            return new Promise(resolve => setTimeout(resolve, milliseconds));
+            function clearCurrentOrnaments(currentOrnamentInfos)
+            {
+                for(let i = 0; i < currentOrnamentInfos.length; i++)
+                {
+                    currentOrnamentInfos[i].cancel = true;
+                }
+
+                let allOrnamentsComplete = true;
+                do
+                {
+                    for(let i = 0; i < currentOrnamentInfos.length; i++)
+                    {
+                        if(currentOrnamentInfos[i].complete === false)
+                        {
+                            allOrnamentsComplete = false;
+                            break;
+                        }
+                    }
+                } while(allOrnamentsComplete === false)
+
+                currentOrnamentInfos.length = 0;
+            }
+
+            function clearCurrentKey(currentNoteOns, key)
+            {
+                //let note = currentNoteOns.find(note => note.keyPitch === key);
+                //while(note !== undefined)
+                //{
+                //    note.noteOff();
+                //    note = currentNoteOns.find(note => note.keyPitch === key);
+                //}
+
+                let stopTime = 0;
+
+                for(var index = currentNoteOns.length - 1; index >= 0; index--)
+                {
+                    if(currentNoteOns[index].keyKey === key)
+                    {
+                        stopTime = currentNoteOns[index].noteOff();
+                        currentNoteOns.splice(index, 1);
+                    }
+                }
+                return stopTime;
+            }
+
+            clearCurrentOrnaments(currentOrnamentInfos);
+            let stopTime = clearCurrentKey(currentNoteOns, key);
+
+            return stopTime;
         },
+
         noteOn = async function(inChannel, key, velocity)
         {
+            function wait(milliseconds)
+            {
+                return new Promise(resolve => setTimeout(resolve, milliseconds));
+            }
+
             // returns a new midiAttributes object
             function getMidiAttributes(preset, keyKey, keyPitch, velocity)
             {
@@ -1317,10 +1373,12 @@ ResSynth.residentSynth = (function(window)
 
                 function wait(delay, cancel)
                 {
-                    if(!cancel)
+                    if(cancel)
                     {
-                        return new Promise(resolve => setTimeout(resolve, delay));
+                        delay = 0;
                     }
+
+                    return new Promise(resolve => setTimeout(resolve, delay));
                 }
 
                 function doOrnamentNoteOffs(currentNoteOns)
@@ -1347,9 +1405,7 @@ ResSynth.residentSynth = (function(window)
                             keyPitch = midi.keyPitch - chanControls.tuning[midi.keyKey] + chanControls.tuning[keyKey],
                             velocity = midiVal(midi.velocity + oNoteInfo[1]),
                             oMidi = getMidiAttributes(preset, keyKey, keyPitch, velocity),
-                            delay;
-
-                        delay = oNoteInfo[2];
+                            delay = oNoteInfo[2];
 
                         if(ornamentInfo.cancel === true)
                         {
@@ -1371,7 +1427,10 @@ ResSynth.residentSynth = (function(window)
                             break;
                         }
 
-                        await wait(delay, ornamentInfo.cancel);
+                        //wait(delay, ornamentInfo.cancel);
+                        //wait(delay, ornamentInfo.cancel).then(() => {console.log(`execution continues: i = ${i}`);});
+                        await wait(delay, ornamentInfo.cancel).then(() => {console.log(`execution continues: i = ${i}`);});
+                        //await wait(delay, ornamentInfo.cancel);
 
                         if(final == false)
                         {
@@ -1397,18 +1456,20 @@ ResSynth.residentSynth = (function(window)
                 preset,  
                 midi = {};
 
+            clearContext(currentOrnamentInfos, chanControls.currentNoteOns, key);
+
             preset = channelPresets[channel][chanControls.presetIndex];
 
             console.assert(preset !== undefined);
 
             if(velocity === 0)
             {
-                let currentNoteOns = chanControls.currentNoteOns;
-                let note = currentNoteOns.find(note => note.keyPitch === key);
-                if(note !== undefined)
-                {
-                    note.noteOff();
-                }
+                //let currentNoteOns = chanControls.currentNoteOns;
+                //let note = currentNoteOns.find(note => note.keyPitch === key);
+                //if(note !== undefined)
+                //{
+                //    note.noteOff();
+                //}
                 return;
             }
 
@@ -1422,7 +1483,7 @@ ResSynth.residentSynth = (function(window)
             {
                 if(ornamentInfo.key !== undefined)
                 {
-                    await noteOff(channel, ornamentInfo.key);
+                    //noteOff(channel, ornamentInfo.key);
 
                     noteOn(channel, key, velocity);
                 }
@@ -1430,37 +1491,20 @@ ResSynth.residentSynth = (function(window)
                 {
                     ornamentInfo.key = key;
                     chanControls.ornamentInfo = ornamentInfo;
-                    playOrnamentAsync(ornamentInfo, chanControls);
+                    currentOrnamentInfos.push(ornamentInfo);
+                    await playOrnamentAsync(ornamentInfo, chanControls);
                 }
             }
         },
-        noteOff = async function(inChannel, key)
+
+        noteOff = function(inChannel, key)
         {
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
                 channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[key] : inChannel,
                 chanControls = channelControls[channel],
-                currentNoteOns = chanControls.currentNoteOns,
-                ornamentInfo = chanControls.ornamentInfo,
                 stopTime = 0;
 
-            if(ornamentInfo !== undefined && ornamentInfo.key === key)
-            {
-                ornamentInfo.cancel = true;
-                while(!ornamentInfo.complete)
-                {
-                    await wait(5);
-                }
-                chanControls.ornamentInfo = undefined;
-            }
-
-            for(var index = currentNoteOns.length - 1; index >= 0; index--)
-            {
-                if(currentNoteOns[index].keyKey === key)
-                {
-                    stopTime = currentNoteOns[index].noteOff();
-                    currentNoteOns.splice(index, 1);
-                }
-            }
+            stopTime = clearContext(currentOrnamentInfos, chanControls.currentNoteOns, key);
 
             return stopTime;
         },
