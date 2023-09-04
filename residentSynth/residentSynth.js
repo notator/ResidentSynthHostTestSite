@@ -1210,63 +1210,63 @@ ResSynth.residentSynth = (function(window)
                     now = audioContext.currentTime;
                     stopTime = noteOff(channel, currentNoteOns[0].keyKey);
                 }
-                setTimeout(reconnectChannelInput(chanAudioNodes), stopTime - now);
+                setTimeout(function() {reconnectChannelInput(chanAudioNodes)}, stopTime - now);
             }            
         },
 
-        currentOrnamentInfos = [],
-        clearContext = function(currentOrnamentInfos, currentNoteOns, key)
-        {
-            function clearCurrentOrnaments(currentOrnamentInfos)
-            {
-                for(let i = 0; i < currentOrnamentInfos.length; i++)
-                {
-                    currentOrnamentInfos[i].cancel = true;
-                }
+        //currentOrnamentInfos = [],
+        //clearContext = function(currentOrnamentInfos, currentNoteOns, key)
+        //{
+        //    function clearCurrentOrnaments(currentOrnamentInfos)
+        //    {
+        //        for(let i = 0; i < currentOrnamentInfos.length; i++)
+        //        {
+        //            currentOrnamentInfos[i].cancel = true;
+        //        }
 
-                let allOrnamentsComplete = true;
-                do
-                {
-                    for(let i = 0; i < currentOrnamentInfos.length; i++)
-                    {
-                        if(currentOrnamentInfos[i].complete === false)
-                        {
-                            allOrnamentsComplete = false;
-                            break;
-                        }
-                    }
-                } while(allOrnamentsComplete === false)
+        //        let allOrnamentsComplete = true;
+        //        do
+        //        {
+        //            for(let i = 0; i < currentOrnamentInfos.length; i++)
+        //            {
+        //                if(currentOrnamentInfos[i].complete === false)
+        //                {
+        //                    allOrnamentsComplete = false;
+        //                    break;
+        //                }
+        //            }
+        //        } while(allOrnamentsComplete === false)
 
-                currentOrnamentInfos.length = 0;
-            }
+        //        currentOrnamentInfos.length = 0;
+        //    }
 
-            function clearCurrentKey(currentNoteOns, key)
-            {
-                //let note = currentNoteOns.find(note => note.keyPitch === key);
-                //while(note !== undefined)
-                //{
-                //    note.noteOff();
-                //    note = currentNoteOns.find(note => note.keyPitch === key);
-                //}
+        //    function clearCurrentKey(currentNoteOns, key)
+        //    {
+        //        //let note = currentNoteOns.find(note => note.keyPitch === key);
+        //        //while(note !== undefined)
+        //        //{
+        //        //    note.noteOff();
+        //        //    note = currentNoteOns.find(note => note.keyPitch === key);
+        //        //}
 
-                let stopTime = 0;
+        //        let stopTime = 0;
 
-                for(var index = currentNoteOns.length - 1; index >= 0; index--)
-                {
-                    if(currentNoteOns[index].keyKey === key)
-                    {
-                        stopTime = currentNoteOns[index].noteOff();
-                        currentNoteOns.splice(index, 1);
-                    }
-                }
-                return stopTime;
-            }
+        //        for(var index = currentNoteOns.length - 1; index >= 0; index--)
+        //        {
+        //            if(currentNoteOns[index].keyKey === key)
+        //            {
+        //                stopTime = currentNoteOns[index].noteOff();
+        //                currentNoteOns.splice(index, 1);
+        //            }
+        //        }
+        //        return stopTime;
+        //    }
 
-            clearCurrentOrnaments(currentOrnamentInfos);
-            let stopTime = clearCurrentKey(currentNoteOns, key);
+        //    clearCurrentOrnaments(currentOrnamentInfos);
+        //    let stopTime = clearCurrentKey(currentNoteOns, key);
 
-            return stopTime;
-        },
+        //    return stopTime;
+        //},
 
         noteOn = async function(inChannel, key, velocity)
         {
@@ -1373,12 +1373,10 @@ ResSynth.residentSynth = (function(window)
 
                 function wait(delay, cancel)
                 {
-                    if(cancel)
+                    if(!cancel)
                     {
-                        delay = 0;
+                        return new Promise(resolve => setTimeout(resolve, delay));
                     }
-
-                    return new Promise(resolve => setTimeout(resolve, delay));
                 }
 
                 function doOrnamentNoteOffs(currentNoteOns)
@@ -1427,10 +1425,7 @@ ResSynth.residentSynth = (function(window)
                             break;
                         }
 
-                        //wait(delay, ornamentInfo.cancel);
-                        //wait(delay, ornamentInfo.cancel).then(() => {console.log(`execution continues: i = ${i}`);});
-                        await wait(delay, ornamentInfo.cancel).then(() => {console.log(`execution continues: i = ${i}`);});
-                        //await wait(delay, ornamentInfo.cancel);
+                        await wait(delay, ornamentInfo.cancel);
 
                         if(final == false)
                         {
@@ -1451,12 +1446,12 @@ ResSynth.residentSynth = (function(window)
                 channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[key] : inChannel,
                 chanControls = channelControls[channel],
                 originalOrnamentInfo = chanControls.ornamentPerKeyArray[key], // undefined if ornamentPerKeyArray.length === 0 or ornamentPerKeyArray[key] does not exist.
-                ornamentInfo = {...originalOrnamentInfo}, // clone
+                ornamentInfo = (originalOrnamentInfo === undefined) ? undefined : {...originalOrnamentInfo}, // clone
                 semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
                 preset,  
                 midi = {};
 
-            clearContext(currentOrnamentInfos, chanControls.currentNoteOns, key);
+            //clearContext(currentOrnamentInfos, chanControls.currentNoteOns, key);
 
             preset = channelPresets[channel][chanControls.presetIndex];
 
@@ -1464,47 +1459,67 @@ ResSynth.residentSynth = (function(window)
 
             if(velocity === 0)
             {
-                //let currentNoteOns = chanControls.currentNoteOns;
-                //let note = currentNoteOns.find(note => note.keyPitch === key);
-                //if(note !== undefined)
-                //{
-                //    note.noteOff();
-                //}
+                let currentNoteOns = chanControls.currentNoteOns;
+                let note = currentNoteOns.find(note => note.keyPitch === key);
+                if(note !== undefined)
+                {
+                    note.noteOff();
+                }
                 return;
             }
 
             midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, velocity);
 
-            if(originalOrnamentInfo === undefined)
-            {
-                doNoteOn(midi);
-            }
-            else
+            if(ornamentInfo !== undefined)
             {
                 if(ornamentInfo.key !== undefined)
                 {
-                    //noteOff(channel, ornamentInfo.key);
+                    await noteOff(channel, ornamentInfo.key);
 
                     noteOn(channel, key, velocity);
                 }
                 else
                 {
                     ornamentInfo.key = key;
-                    chanControls.ornamentInfo = ornamentInfo;
-                    currentOrnamentInfos.push(ornamentInfo);
-                    await playOrnamentAsync(ornamentInfo, chanControls);
+                    chanControls.ornamentPerKeyArray[key] = ornamentInfo;
+                    playOrnamentAsync(ornamentInfo, chanControls);
+                    // ? await playOrnamentAsync(ornamentInfo, chanControls);
                 }
+            }
+            else
+            {
+                doNoteOn(midi);
             }
         },
 
-        noteOff = function(inChannel, key)
+        noteOff = async function(inChannel, key)
         {
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
                 channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[key] : inChannel,
                 chanControls = channelControls[channel],
+                currentNoteOns = chanControls.currentNoteOns,
+                ornamentPerKeyArray = chanControls.ornamentPerKeyArray,
+                ornamentInfo = (ornamentPerKeyArray.length > 0) ? ornamentPerKeyArray[key] : undefined,
                 stopTime = 0;
 
-            stopTime = clearContext(currentOrnamentInfos, chanControls.currentNoteOns, key);
+            if(ornamentInfo !== undefined && ornamentInfo.key === key)
+            {
+                ornamentInfo.cancel = true;
+                while(!ornamentInfo.complete)
+                {
+                    await wait(5);
+                }
+                //chanControls.ornamentPerKeyArray = ornamentPerKeyArray.splice(key, 1);
+            }
+
+            for(var index = currentNoteOns.length - 1; index >= 0; index--)
+            {
+                if(currentNoteOns[index].keyKey === key)
+                {
+                    stopTime = currentNoteOns[index].noteOff();
+                    currentNoteOns.splice(index, 1);
+                }
+            }
 
             return stopTime;
         },
