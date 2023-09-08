@@ -2,82 +2,113 @@ console.log('load ornamentDefs.js');
 
 // This file can be omitted by applications that don't use ornaments.
 // There can be up to 128 ornamentPerKeysStrings in the ornamentPerKeysStrings array, each of which
-// contains zero or more "<key>:<ornamentIndex>;" strings separated by whitespace.
+// contains zero or more "<key>:<ornamentName>;" strings separated by whitespace.
 // An empty ornamentPerKeyString means that there are no ornaments defined. This is the default when this file does not exist.
-// Otherwise, each ornamentPerKeyString contains up to 127 "<key>:<ornamentIndex>;" sub-strings separated by whitespace.
+// Otherwise, each ornamentPerKeyString contains up to 127 "<key>:<ornamentName>;" sub-strings separated by whitespace.
 // The following restrictions are checked when this file is loaded into the ResidentSynth using setPrivateOrnamentPerKeyArrays():
 // There are less than 128 ornamentPerKeysStrings defined in this file.
 // Each <key> is a number in range 0..127. Key values must be in ascending order, and may not repeat.
-// Each <ornamentIndex> is a number in range 0..n-1, where n is the number of ornaments defined below in ResSynth.ornamentDefs.
-// The < ornamentIndex > values can be in any order, and may repeat in the string.
+// Each <ornamentName> is a the <name> attribute of an ornamentDef defined below in ResSynth.ornamentDefs.
+// The <ornamentName> values can be in any order, and may repeat in the string.
 // The ':' and ';' characters must be present, except at the very end of each ornamentPerKeyString.
-// With 5 ornaments defined, valid ornamentPerKeyString strings are "", "42:1;", "40:1; 50:2;", "40:1; 50:2; 60:1; 72:4" etc.
+// The following ornamentPerKeysStrings provide examples of valid strings.
 // In the ResidentSynthHost, these strings are used to populate a select control.
 ResSynth.ornamentPerKeysStrings =
-[
-    "",
-    "64:0",
-    "64:0; 66:1",
-    "64:0; 66:1; 68:2"
-]
+    [
+        "",
+        "64:turn1",
+        "64:turn2; 66:tr1",
+        "64:rpt1; 66:tr3; 68:trem1"
+    ]
 
-// There can be 1..127 ornament definitions in the ornamentDefs, each of which has name, notes and repeats attributes.
-// Each note definition (except the first) corresponds to a NoteOn that is immediately preceded by the previous note's noteOff.
+// There can be 1..127 ornament definitions in the ornamentDefs, each of which has name, chords and repeats attributes.
+// Each chord definition is an array:
+//      [0] is its msDuration(between its noteOns and corresponding noteOffs)
+//      [1] is an array of <keyIncrement,velocityIncrement> pairs describing the notes in the chord,
 // The repeats attribute is a boolean value that can be either "yes" or "no".
-// If the repeats attribute is "no", the msDuration of the final note is ignored. It is held until the trigger note's noteOff is received.
-// If the repeats attribute is "yes", the notes are played in a continuous cycle until the trigger note's noteOff is received.
+// If the repeats attribute is "no", the msDuration of the final chord is ignored. It is held until the trigger note's noteOff is received.
+// If the repeats attribute is "yes", the chords are played in a continuous cycle until the trigger note's noteOff is received.
 ResSynth.ornamentDefs =
     [
-        {   // index 0
-            name: "head1",
-            notes:
+        {
+            name: "turn1",
+            chords:
                 [
-                    [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
-                    [2, 0, 125],
-                    [0, 0, 125],
-                    [-1, 0, 125],
-                    [0, 0, 0] // final noteOn is same pitch+velocity as original note, 500ms later.
-                ],
-                repeats: "no"
-        },
-        {   // index 1
-            name: "head2",
-            notes:
-                [
-                    [0, 0, 500], // keyIncrement, velocityIncrement, msDuration
-                    [4, 10, 125],
-                    [0, 0, 400],
-                    [-2, 20, 125],
-                    [0, 0, 0] // final noteOn is same pitch+velocity as original note, 1150ms (=500+125+400+400)ms later.
+                    [125, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[2, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[-1, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    // final noteOn is same pitch+velocity as original note, 500ms later.
+                    [0, [[0, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                 ],
             repeats: "no"
         },
-    {   // index 2
-            name: "repeat1",
-            notes:
+        {
+            name: "turn2",
+            chords:
                 [
-                    [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
-                    [2, 0, 125],
-                    [0, 0, 125],
-                    [-1, 0, 125]
+                    [500, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[4, 10]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [400, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[-2, 20]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    // final noteOn is same pitch+velocity as original note, 500ms later.
+                    [0, [[0, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                ],
+            repeats: "no"
+        },
+        {
+            name: "rpt1",
+            chords:
+                [
+                    [125, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[2, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[-1, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                 ],
             repeats: "yes"
         },
-    {   // index 3
-            name: "trill_1",
-            notes:
+        {
+            name: "tr1",
+            chords:
                 [
-                    [0, 0, 125], // keyIncrement, velocityIncrement, msDuration
-                    [2, 0, 125]
+                    [125, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[1, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                 ],
             repeats: "yes"
         },
-    {   // index 4
-            name: "trill_2 (fast)",
-            notes:
+        {
+            name: "tr2",
+            chords:
                 [
-                    [0, 0, 25], // keyIncrement, velocityIncrement, msDuration
-                    [11, 0, 25]
+                    [125, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[2, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                ],
+            repeats: "yes"
+        },
+        {
+            name: "tr3", // fast, wide
+            chords:
+                [
+                    [25, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [25, [[11, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                ],
+            repeats: "yes"
+        },
+        {
+            name: "trem1",
+            chords:
+                [
+                    [110, [[0, 0], [4, 0], [7, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [110, [[9, 0], [13, 0], [16, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                ],
+            repeats: "yes"
+        },
+        {
+            name: "trem2",
+            chords:
+                [
+                    [110, [[0, 0], [3, 0], [7, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [110, [[-7, 0], [-1, 0], [6, 0], [13, 0], [17, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                 ],
             repeats: "yes"
         }
