@@ -25,6 +25,8 @@ ResSynth.ornamentPerKeysStrings =
 // Each chord definition is an array:
 //      [0] is its msDuration(between its noteOns and corresponding noteOffs)
 //      [1] is an array of <keyIncrement,velocityIncrement> pairs describing the notes in the chord,
+// msDuration must be > 0.
+// keyIncrement and velocityIncrement must each be in range -127..127.
 // The repeats attribute is a boolean value that can be either "yes" or "no".
 // If the repeats attribute is "no", the msDuration of the final chord is ignored. It is held until the trigger note's noteOff is received.
 // If the repeats attribute is "yes", the chords are played in a continuous cycle until the trigger note's noteOff is received.
