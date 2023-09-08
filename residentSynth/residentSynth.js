@@ -24,7 +24,7 @@ ResSynth.residentSynth = (function(window)
         channelControls = [], // initialized in synth.open
         mixtures = [], // initialized by getMixtures()
         channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays(). This array has elements in range 0..15. Its length can be either 0 or 128.
-        ornamentPerKeyArrays = [], // initialized by setPrivateOrnamentPerKeyArrays(). This array may have undefined elements, and its length may be anything in range 0..128.
+        keyOrnamentsArrays = [], // initialized by setPrivateOrnamentPerKeyArrays(). This array may have undefined elements, and its length may be anything in range 0..128.
         tuningGroups = [],
         settingsPresets = [],
 
@@ -676,7 +676,7 @@ ResSynth.residentSynth = (function(window)
 
             if(keyValuesStringsArray.length > 128)
             {
-                throw `There may not be more than 128 definition strings in the array.`;
+                throw `keyboardSplitDefs.js: There may not be more than 128 keyboardSplit definition strings in the array.`;
             }
             else
             {
@@ -690,25 +690,6 @@ ResSynth.residentSynth = (function(window)
                     }
                 }
             }
-        },
-
-        getKeyValuePairs = function(keyValuesString)
-        {
-            console.assert(keyValuesString.length > 0);
-
-            const keyValuePairs = [],
-                components = keyValuesString.split(";");
-
-            for(const component of components)
-            {
-                const [keyStr, valueStr] = component.trim().split(":");
-                const key = parseInt(keyStr);
-                const value = parseInt(valueStr);
-
-                keyValuePairs.push({key, value});
-            }
-
-            return keyValuePairs;
         },
 
         setPrivateChannelPerKeyArrays = function()
@@ -747,7 +728,7 @@ ResSynth.residentSynth = (function(window)
                 }
                 
                 const arraySize = 128,
-                    keyChannelPairs = getKeyValuePairs(keyboardSplitDef),
+                    keyChannelPairs = getKeyIntValuePairs(keyboardSplitDef),
                     channelPerKeyArray = (keyChannelPairs.length > 0) ? Array(arraySize).fill(0) : [];
 
                 check(keyChannelPairs, keyboardSplitDef);
@@ -766,6 +747,25 @@ ResSynth.residentSynth = (function(window)
                 }
 
                 return channelPerKeyArray;
+            }
+
+            function getKeyIntValuePairs(keyValuesString)
+            {
+                console.assert(keyValuesString.length > 0);
+
+                const keyValuePairs = [],
+                    components = keyValuesString.split(";");
+
+                for(const component of components)
+                {
+                    const [keyStr, valueStr] = component.trim().split(":");
+                    const key = parseInt(keyStr);
+                    const value = parseInt(valueStr);
+
+                    keyValuePairs.push({key, value});
+                }
+
+                return keyValuePairs;
             }
 
             let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
@@ -796,96 +796,171 @@ ResSynth.residentSynth = (function(window)
             }
         },
 
-        // Each ornamentPerKeyArray is initialized to contain ornamentInfo objects at index = key,
-        // It may have undefined elements, and its length can be anything in range 0..128.
-        // The ornamentInfo objects have the following attributes:
-        //   ornamentInfo.index = ornamentIndex;
-        //   ornamentInfo.key = undefined;
+        // The private (readonly) keyOrnamentsArrays array is initialized, from ResSynth.ornamentPerKeysStrings,
+        // to contain (readonly) keyOrnaments arrays.
+        // Each keyOrnaments array contains (readonly) <key, ornament> objects, one object per substring in each
+        // ornamentPerKeys string.
+        // Each keyOrnament object has (readonly) attributes .key and .ornamentInfo.
+        // The ornamentInfo objects have the following (readonly) attributes:
+        //   ornamentInfo.chords
+        //   ornamentInfo.repeat
+        // The ornamentInfo.chords have attributes that correspond to the chords in the ornamentPerKeys definitions,
+        // except that the noteOn/noteOff key values are converted to their (readonly) runtime values: (key = key + keyIncrement).
+        // Note that the velocityIncrement values are also readonly, but that runtime velocities need to be calculated at runtime.
+        //
+        // The volatile runtime attributes (.cancel and .complete) are addressed later.
         //   ornamentInfo.cancel = false;
         //   ornamentInfo.complete = false;
-        setPrivateOrnamentPerKeyArrays = function()
+        setPrivateKeyOrnamentsArrays = function()
         {
-            // If ornamentPerKeysStrings[defIndex].length > 0, returns an array of 128 channel indices, one per key index.
-            // Otherwise returns an empty array (the residentSynth will use the incoming message's channel).
-            // Throws an exception if keys are not unique and in ascending order, or a channel or key is out of range.
-            // 01.09.2023: Interestingly, this function was partly optimized in a dialog with ChatGPT.
-            // ChatGPT uses some constructs that I should adopt: (const etc.)
-            function getOrnamentPerKeyArray(ornamentPerKeysStrings, defIndex)
+            // throws exception on error
+            function getKeyOrnamentsArray(ornamentPerKeysString, ornamentDefs)
             {
-                function check(keyOrnamentIndexPairs, ornamentPerKeysString, ornamentDefs)
+                // throws exception on error
+                function getKeyOrnament(keyStr, ornamentName, ornamentDefs)
                 {
-                    for(let i = 0, previousKey = -1; i < keyOrnamentIndexPairs.length; i++)
+                    function getOrnamentChords(inKey, chordDefs)
                     {
-                        let kop = keyOrnamentIndexPairs[i],
-                            key = kop.key,
-                            ornamentIndex = kop.value;                            ;
+                        let ornamentChords = [];
 
-                        if(key <= previousKey || ornamentIndex < 0 || ornamentIndex >= ornamentDefs.length || key < 0 || key > 127)
+                        for(let i = 0; i < chordDefs.length; i++)
                         {
-                            const errorString = `Illegal ornamentPerKeysString: ${ornamentPerKeysString}\n<key:ornamentIndex> component index: ${i}`;
-                            alert(errorString);
-                            throw errorString;
+                            let chordDef = chordDefs[i],
+                                msDuration = parseInt(chordDef[0]),
+                                chordNotesDef = chordDef[1],
+                                chord = {};
+
+                            if(Number.isNaN(msDuration) || msDuration <= 0)
+                            {
+                                throw `illegal msDuration (${msDuration}) in chordDef ${chordDef}`;
+                            }
+
+                            chord.msDuration = msDuration;
+                            chord.notes = [];                            
+
+                            for(let j = 0; j < chordNotesDef.length; j++)
+                            {
+                                let noteDef = chordNotesDef[j],
+                                    keyIncr = parseInt(noteDef[0]),
+                                    velocityIncr = parseInt(noteDef[1]),
+                                    note = {};
+
+                                if(Number.isNaN(keyIncr) || keyIncr < -127 || keyIncr > 127)
+                                {
+                                    throw `illegal key increment (${keyIncr}) in noteDef ${noteDef}`;
+                                }
+                                if(Number.isNaN(velocityIncr) || velocityIncr < -127 || velocityIncr > 127)
+                                {
+                                    throw `illegal velocity increment (${velocityIncr}) in noteDef ${noteDef}`;
+                                }
+
+                                let outKey = inKey + keyIncr;
+                                outKey = (outKey < 0) ? 0 : outKey;
+                                outKey = (outKey > 127) ? 127 : outKey;
+
+                                note.outKey = outKey;
+                                note.velocityIncr = velocityIncr; // velocityIncrement (check runtimeVelocity at runtime)
+
+                                chord.notes.push(note);
+                            }
+
+                            ornamentChords.push(chord);
                         }
-                        previousKey = key;
+                        return ornamentChords;
+                    }
+
+                    let inKey = parseInt(keyStr),
+                        ornament = {},
+                        ornamentDef = ornamentDefs.find(x => x.name === ornamentName);
+
+                    if(Number.isNaN(inKey) || inKey < 0 || inKey > 127)
+                    {
+                        throw `illegal key (${keyStr}) in ornamentDefs`;
+                    }
+                    if(ornamentDef === undefined)
+                    {
+                        throw `ornament name ${ornamentName} not found in ornamentDefs`;
+                    }
+
+                    ornament.name = ornamentName;
+                    ornament.chords = getOrnamentChords(inKey, ornamentDef.chords);
+                    ornament.repeat = (ornamentDef.repeat === true) ? true : false;
+
+                    return {inKey, ornament};
+                }
+
+                // throws exception on error
+                function checkKeys(keyOrnaments)
+                {
+                    let usedKeys = [];
+
+                    usedKeys.push(keyOrnaments[0].inKey);
+
+                    // Key values must be in ascending order, and may not repeat.
+                    for(var i = 1; i < keyOrnaments.length; i++)
+                    {
+                        let key0 = keyOrnaments[i - 1].inKey,
+                            key1 = keyOrnaments[i].inKey;
+
+                        if(key0 >= key1)
+                        {
+                            throw `illegal key (${key0} >= ${key1}) in keyOrnaments`;
+                        }
+                        if(usedKeys.find(x => x === key1) !== undefined)
+                        {
+                            throw `illegal duplicate key (${key1}) in keyOrnaments`;
+                        }
+                        usedKeys.push(key1);
                     }
                 }
 
-                const ornamentDefs = ResSynth.ornamentDefs,
-                    ornamentPerKeysString = ornamentPerKeysStrings[defIndex];
+                let keyOrnaments = [];
 
-                if(ornamentPerKeysString.length == 0)
+                if(ornamentPerKeysString.length > 0)
                 {
-                    return []; // no ornaments
+                    const components = ornamentPerKeysString.split(";");
+
+                    for(const component of components)
+                    {
+                        const [keyStr, ornamentName] = component.trim().split(":"),
+                            keyOrnament = getKeyOrnament(keyStr, ornamentName, ornamentDefs);
+
+                        keyOrnaments.push(keyOrnament);
+                    }
                 }
 
-                const arraySize = 128,
-                    keyOrnamentIndexPairs = getKeyValuePairs(ornamentPerKeysString),
-                    ornamentPerKeyArray = [];
-
-                check(keyOrnamentIndexPairs, ornamentPerKeysString, ornamentDefs);
-                
-                for(let i = 0; i < keyOrnamentIndexPairs.length; i++)
+                if(keyOrnaments.length > 0)
                 {
-                    let kOIndexPair = keyOrnamentIndexPairs[i],
-                        key = kOIndexPair.key,
-                        ornamentIndex = kOIndexPair.value,
-                        ornamentInfo = {};
-
-                    ornamentInfo.index = ornamentIndex;
-                    ornamentInfo.key = undefined; // for the first note in the ornament
-                    ornamentInfo.cancel = false;
-                    ornamentInfo.complete = false;
-
-                    ornamentPerKeyArray[key] = ornamentInfo;
+                    checkKeys(keyOrnaments);
                 }
 
-                return ornamentPerKeyArray; // array has undefined elements, and length may be anything in range 0..128
+                return keyOrnaments;
             }
 
-            let ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings,
+            const ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings,
                 ornamentDefs = ResSynth.ornamentDefs;
 
             if(ornamentPerKeysStrings === undefined || ornamentDefs === undefined)
             {
-                ornamentPerKeyArrays.push([]); // an empty array means there are no ornaments defined.
+                keyOrnamentsArrays.push([]); // an empty array means there are no ornaments defined.
             }
             else
             {
                 try
                 {
-                    checkKeyValuesStrings(ornamentPerKeysStrings);
-
                     for(var i = 0; i < ornamentPerKeysStrings.length; i++)
                     {
-                        let ornamentPerKeyArray = getOrnamentPerKeyArray(ornamentPerKeysStrings, i, ornamentDefs);  // can return an empty array
-                        ornamentPerKeyArrays.push(ornamentPerKeyArray);
+                        const keyOrnamentsString = ornamentPerKeysStrings[i],
+                            keyOrnamentsArray = getKeyOrnamentsArray(keyOrnamentsString, ornamentDefs);
+
+                        keyOrnamentsArrays.push(keyOrnamentsArray); // global keyOrnamentsArrays
                     }
                 }
                 catch(msg)
                 {
                     msg = "Error in ornamentPerKeysStrings.js\n" + msg;
-                    ornamentPerKeyArrays.length = 0;
-                    ornamentPerKeyArrays.push([]);
+                    keyOrnamentsArrays.length = 0;
+                    keyOrnamentsArrays.push([]);
                     console.assert(false, msg);
                 }
             }
@@ -1183,7 +1258,7 @@ ResSynth.residentSynth = (function(window)
             //ornamentInfo.cancel = false;
             //ornamentInfo.complete = false;
 
-            channelControls[channel].ornamentPerKeyArray = ornamentPerKeyArrays[ornamentPerKeyArrayIndex];
+            channelControls[channel].ornamentPerKeyArray = keyOrnamentsArrays[ornamentPerKeyArrayIndex];
         },
         // Must turn off notes in all channels, since the keyboard can be split,
         // so we don't know which channels may be sounding.
@@ -1634,7 +1709,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
 
             setPrivateChannelPerKeyArrays();
-            setPrivateOrnamentPerKeyArrays();
+            setPrivateKeyOrnamentsArrays();
         },
 
         API =

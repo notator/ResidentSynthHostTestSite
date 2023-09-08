@@ -25,7 +25,7 @@ ResSynth.ornamentPerKeysStrings =
 // Each chord definition is an array:
 //      [0] is its msDuration(between its noteOns and corresponding noteOffs)
 //      [1] is an array of <keyIncrement,velocityIncrement> pairs describing the notes in the chord,
-// msDuration must be > 0.
+// msDuration must always be > 0 (even when it is on the final chord of a non-repeating ornament, and will be ignored).
 // keyIncrement and velocityIncrement must each be in range -127..127.
 // The repeats attribute is a boolean value that can be either "yes" or "no".
 // If the repeats attribute is "no", the msDuration of the final chord is ignored. It is held until the trigger note's noteOff is received.
@@ -41,7 +41,7 @@ ResSynth.ornamentDefs =
                     [125, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                     [125, [[-1, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                     // final noteOn is same pitch+velocity as original note, 500ms later.
-                    [0, [[0, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[0, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                 ],
             repeats: "no"
         },
@@ -54,7 +54,7 @@ ResSynth.ornamentDefs =
                     [400, [[0, 0]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                     [125, [[-2, 20]]], // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                     // final noteOn is same pitch+velocity as original note, 500ms later.
-                    [0, [[0, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
+                    [125, [[0, 0]]] // msDuration, [|:[keyIncrement, velocityIncrement]:|]
                 ],
             repeats: "no"
         },
