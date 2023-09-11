@@ -819,54 +819,47 @@ ResSynth.residentSynth = (function(window)
                 // throws exception on error
                 function getKeyOrnament(keyStr, ornamentName, ornamentDefs)
                 {
-                    function getOrnamentChords(inKey, chordDefs)
+                    function getOrnamentMsgs(inKey, msgDefs)
                     {
-                        let ornamentChords = [];
+                        let ornamentMsgs = [];
 
-                        for(let i = 0; i < chordDefs.length; i++)
+                        for(let i = 0; i < msgDefs.length; i++)
                         {
-                            let chordDef = chordDefs[i],
-                                msDuration = parseInt(chordDef[0]),
-                                chordNotesDef = chordDef[1],
-                                chord = {};
+                            let msg = {},
+                                msgDef = msgDefs[i];
 
-                            if(Number.isNaN(msDuration) || msDuration <= 0)
+                            if(msgDef.delay !== undefined)
                             {
-                                throw `illegal msDuration (${msDuration}) in chordDef ${chordDef}`;
+                                msg.type = "delay";
+                                msg.delay = parseInt(msgDef.delay);
                             }
-
-                            chord.msDuration = msDuration;
-                            chord.notes = [];                            
-
-                            for(let j = 0; j < chordNotesDef.length; j++)
+                            else if(msgDef.ctl !== undefined)
                             {
-                                let noteDef = chordNotesDef[j],
-                                    keyIncr = parseInt(noteDef[0]),
-                                    velocityIncr = parseInt(noteDef[1]),
-                                    note = {};
-
-                                if(Number.isNaN(keyIncr) || keyIncr < -127 || keyIncr > 127)
-                                {
-                                    throw `illegal key increment (${keyIncr}) in noteDef ${noteDef}`;
-                                }
-                                if(Number.isNaN(velocityIncr) || velocityIncr < -127 || velocityIncr > 127)
-                                {
-                                    throw `illegal velocity increment (${velocityIncr}) in noteDef ${noteDef}`;
-                                }
-
-                                let outKey = inKey + keyIncr;
-                                outKey = (outKey < 0) ? 0 : outKey;
-                                outKey = (outKey > 127) ? 127 : outKey;
-
-                                note.outKey = outKey;
-                                note.velocityIncr = velocityIncr; // velocityIncrement (check runtimeVelocity at runtime)
-
-                                chord.notes.push(note);
+                                msg.type = "control";
+                                msg.control = msgDef.ctl[0];
+                                msg.value = msgDef.ctl[1];
                             }
+                            else if(msgDef.cmd !== undefined)
+                            {
+                                msg.type = "command";
+                                msg.command = msgDef.cmd[0];
+                                msg.value = msgDef.cmd[1];
+                            }
+                            else if(msgDef.noteOn !== undefined)
+                            {
+                                msg.type = "noteOn";
+                                msg.key = inKey + msgDef.noteOn[0];
+                                msg.velocityIncr = msgDef.noteOn[1];
+                            }
+                            else if(msgDef.noteOff !== undefined)
+                            {
+                                msg.type = "noteOff";
+                                msg.key = inKey + msgDef.noteOff;
+                            } 
 
-                            ornamentChords.push(chord);
+                            ornamentMsgs.push(msg);
                         }
-                        return ornamentChords;
+                        return ornamentMsgs;
                     }
 
                     let inKey = parseInt(keyStr),
@@ -883,7 +876,7 @@ ResSynth.residentSynth = (function(window)
                     }
 
                     ornament.name = ornamentName;
-                    ornament.chords = getOrnamentChords(inKey, ornamentDef.chords);
+                    ornament.msgs = getOrnamentMsgs(inKey, ornamentDef.msgs);
                     ornament.repeat = (ornamentDef.repeat === true) ? true : false;
 
                     return {inKey, ornament};
