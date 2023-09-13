@@ -1513,29 +1513,28 @@ ResSynth.residentSynth = (function(window)
             }
         },
 
-        noteOff = async function(inChannel, key)
+        noteOff = async function(inChannel, inKey)
         {
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
-                channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[key] : inChannel,
+                channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[inKey] : inChannel,
                 chanControls = channelControls[channel],
                 currentNoteOns = chanControls.currentNoteOns,
                 inKeyOrnamentDefs = chanControls.inKeyOrnamentDefs,
-                ornamentInfo = (inKeyOrnamentDefs.length > 0) ? inKeyOrnamentDefs[key] : undefined,
+                ornamentInfo = (inKeyOrnamentDefs.length > 0) ? inKeyOrnamentDefs[inKey] : undefined,
                 stopTime = 0;
 
-            if(ornamentInfo !== undefined && ornamentInfo.key === key)
+            if(ornamentInfo !== undefined && ornamentInfo.inKey === inKey)
             {
                 ornamentInfo.cancel = true;
                 while(!ornamentInfo.complete)
                 {
                     await wait(5);
                 }
-                //chanControls.inKeyOrnamentDefs = inKeyOrnamentDefs.splice(key, 1);
             }
 
             for(var index = currentNoteOns.length - 1; index >= 0; index--)
             {
-                if(currentNoteOns[index].keyKey === key)
+                if(currentNoteOns[index].inKey === inKey)
                 {
                     stopTime = currentNoteOns[index].noteOff();
                     currentNoteOns.splice(index, 1);
