@@ -39,7 +39,7 @@ ResSynth.settings = (function()
         this.pitchWheelSensitivity = 2;
         this.triggerKey = 36;
         this.velocityPitchSensitivity = 0;
-        this.keyboardSplitIndex = 0,
+        this.keyboardSplitIndex = 0;
         this.keyboardOrnamentsArrayIndex = 0;
 
         Object.preventExtensions(this); // disallow new attribute creation 
