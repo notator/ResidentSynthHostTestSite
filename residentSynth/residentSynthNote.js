@@ -30,9 +30,9 @@ ResSynth.residentSynthNote = (function()
 			this.channelInputNode = channelInputNode;
 			this.zone = zone;
 
-			this.keyKey = midi.keyKey; // the noteOff key that stops this note.
-			this.keyPitch = midi.keyPitch;
-			this.velocityFactor = midi.velocity / 127;
+			this.inKey = midi.inKey; // the noteOff key that stops this note.
+			this.keyCentsPitch = midi.keyCentsPitch;
+			this.velocityFactor = midi.inVelocity / 127;
 
 			this.pitchWheel14Bit = channelControls.pitchWheel14Bit; // a value in range [-8192..+8191]
 			this.pitchWheelSensitivity = channelControls.pitchWheelSensitivity;
@@ -108,7 +108,7 @@ ResSynth.residentSynthNote = (function()
 		this.noteOffReleaseDuration = zone.vEnvData.noteOffReleaseDuration; 
 		setNoteEnvelope(noteGainNode.gain, now, this.velocityFactor, zone.vEnvData);
 
-		this.bufferSourceNode = getBufferSourceNode(audioContext, this.keyPitch, zone);
+		this.bufferSourceNode = getBufferSourceNode(audioContext, this.keyCentsPitch, zone);
 		this.updatePitchWheel(this.pitchWheel14Bit);
 		this.bufferSourceNode.onended = function()
 		{
@@ -167,7 +167,7 @@ ResSynth.residentSynthNote = (function()
 	ResidentSynthNote.prototype.updateModWheel = function(modNode, modGainNode, value)
 	{
 		let modVal = value / 127,
-			modulationFrequency = Math.pow(this.keyPitch, 1 + modVal) + modVal,
+			modulationFrequency = Math.pow(this.keyCentsPitch, 1 + modVal) + modVal,
 			modGain = modVal;
 
 		modNode.frequency.setValueAtTime(modulationFrequency, this.audioContext.currentTime);

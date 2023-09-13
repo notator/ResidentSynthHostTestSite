@@ -1283,7 +1283,7 @@ ResSynth.residentSynth = (function(window)
             }            
         },
 
-        noteOn = async function(inChannel, key, inVelocity)
+        noteOn = async function(inChannel, inKey, inVelocity)
         {
             function wait(milliseconds)
             {
@@ -1291,23 +1291,25 @@ ResSynth.residentSynth = (function(window)
             }
 
             // returns a new midiAttributes object
-            function getMidiAttributes(preset, keyKey, keyPitch, velocity)
+            function getMidiAttributes(chanPresets, chanControls, inKey, inVelocity)
             {
-                let midi = {};
+                let midi = {}; 
 
-                midi.preset = preset;
-                midi.keyKey = keyKey; // the note stops when the keyKey's noteOff arrives
-                midi.keyPitch = keyPitch;
-                midi.velocity = velocity;
+                midi.preset = chanPresets[chanControls.presetIndex];
+                midi.inKey = inKey;  // the note stops when the inKey's noteOff arrives                
+                midi.inVelocity = inVelocity;
+                // keyCentsPitch is the pitch described as a key.cents value in equal temperament.
+                midi.keyCentsPitch = chanControls.tuning[inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100); 
 
-                let noteOn = chanControls.currentNoteOns.find(x => (x.keyPitch % 12) === (midi.keyPitch % 12));
+                // velocityPitchValue14Bit is always the same for all octaves of the same absolute pitch
+                let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (midi.inKey % 12));
                 if(noteOn !== undefined)
                 {
                     midi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
                 }
                 else
                 {
-                    midi.velocityPitchValue14Bit = (((velocity & 0x7f) << 7) | (velocity & 0x7f)) - 8192;
+                    midi.velocityPitchValue14Bit = (((inVelocity & 0x7f) << 7) | (inVelocity & 0x7f)) - 8192;
                 }
 
                 return midi;
@@ -1319,7 +1321,7 @@ ResSynth.residentSynth = (function(window)
                 {
                     let zone, note,
                         preset = midi.preset,
-                        keyPitchBase = Math.floor(midi.keyPitch);
+                        keyPitchBase = Math.floor(midi.keyCentsPitch);
 
                     zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
                     if(!zone)
@@ -1337,7 +1339,7 @@ ResSynth.residentSynth = (function(window)
                     let mixture = mixtures[mixtureIndex],
                         extraNotes = mixture.extraNotes,
                         except = mixture.except,
-                        keyMixtureIndex = except.find(x => x[0] === key),
+                        keyMixtureIndex = except.find(x => x[0] === inKey),
                         keyKeys = [];
 
                     if(keyMixtureIndex !== undefined)
@@ -1348,7 +1350,7 @@ ResSynth.residentSynth = (function(window)
                     for(let i = 0; i < extraNotes.length; i++)
                     {
                         let keyVel = extraNotes[i],
-                            newKey = key + keyVel[0],
+                            newKey = inKey + keyVel[0],
                             newVelocity = Math.floor(inVelocity * keyVel[1]);
 
                         newKey = (newKey > 127) ? 127 : newKey;
@@ -1357,8 +1359,8 @@ ResSynth.residentSynth = (function(window)
                         newVelocity = (newVelocity < 1) ? 1 : newVelocity;
 
                         // midi.preset is unchanged
-                        midi.keyKey = key; // the key that turns this note off (unchanged in mix)
-                        midi.keyPitch = chanControls.tuning[newKey] + semitonesOffset;
+                        midi.keyKey = inKey; // the key that turns this note off (unchanged in mix)
+                        midi.keyCentsPitch = chanControls.tuning[newKey] + semitonesOffset;
                         midi.velocity = newVelocity;
 
                         keyKeys.push(midi.keyKey);
@@ -1421,7 +1423,7 @@ ResSynth.residentSynth = (function(window)
 
                             oMidi.preset = inMidi.preset;
                             oMidi.keyKey = msg[1];
-                            oMidi.keyPitch = chanControls.tuning[oMidi.keyKey];
+                            oMidi.tuning = chanControls.tuning[oMidi.keyKey];
                             oMidi.velocity = midiVal(inMidi.velocity + msg[2]);
 
                             let noteOn = chanControls.currentNoteOns.find(x => (x.keyKey % 12) === (midi.keyKey % 12));
@@ -1476,40 +1478,34 @@ ResSynth.residentSynth = (function(window)
             }
 
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
-                channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[key] : inChannel,
+                channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[inKey] : inChannel,
                 chanControls = channelControls[channel],
-                originalOrnamentInfo = chanControls.inKeyOrnamentDefs.find(x => x.key === key),
-                ornamentInfo = (originalOrnamentInfo === undefined) ? undefined : {...originalOrnamentInfo}, // clone
-                semitonesOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100),
-                preset,  
+                chanPresets = channelPresets[channel],
+                inKeyOrnamentDef = chanControls.inKeyOrnamentDefs.find(x => x.inKey === inKey),
+                ornamentDef = (inKeyOrnamentDef === undefined) ? undefined : inKeyOrnamentDef.ornamentDef,
                 midi = {};
-
-            //clearContext(currentOrnamentInfos, chanControls.currentNoteOns, key);
-
-            preset = channelPresets[channel][chanControls.presetIndex];
-
-            console.assert(preset !== undefined);
 
             if(inVelocity === 0)
             {
-                let currentNoteOns = chanControls.currentNoteOns;
-                let note = currentNoteOns.find(note => note.keyPitch === key);
+                let currentNoteOns = chanControls.currentNoteOns,
+                    note = currentNoteOns.find(note => note.inKey === inKey);
+
                 if(note !== undefined)
                 {
                     note.noteOff();
                 }
+
                 return;
             }
 
-            midi = getMidiAttributes(preset, key, chanControls.tuning[key] + semitonesOffset, inVelocity);
+            midi = getMidiAttributes(chanPresets, chanControls, inKey, inVelocity);
 
-            if(ornamentInfo !== undefined)
+            if(ornamentDef !== undefined)
             {
-                console.assert(ornamentInfo.key === key);
-                console.assert(ornamentInfo.ornament !== undefined);
-                ornamentInfo.complete = false;
-                ornamentInfo.cancel = false;
-                playOrnamentAsync(midi, ornamentInfo);
+                console.assert(inKeyOrnamentDef.inKey === midi.inKey);
+                ornamentDef.complete = false;
+                ornamentDef.cancel = false;
+                playOrnamentAsync(midi, ornamentDef);
             }
             else
             {
@@ -1556,8 +1552,8 @@ ResSynth.residentSynth = (function(window)
             updateBankIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
             updateMixtureIndex(channel, 0);
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
-            updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's keyPitch value in NoteOn. 
-            updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's keyPitch value in NoteOn. 
+            updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's tuning value in NoteOn. 
+            updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's tuning value in NoteOn. 
 
             updateVelocityPitchSensitivity(channel, 0);
         },
