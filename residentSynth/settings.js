@@ -16,13 +16,15 @@ ResSynth.settings = (function()
 {
     "use strict";
 
-    let Settings = function(name)
+    // can be called without chanControls (= residentSynth.channelControls[channel])
+    let Settings = function(name, chanControls)
     {
         if(!(this instanceof Settings))
         {
-            return new Settings(name);
+            return new Settings(name, chanControls);
         }
 
+        // defaults
         this.name = name;
         this.bankIndex = 0;
         this.presetIndex = 0;
@@ -41,6 +43,33 @@ ResSynth.settings = (function()
         this.velocityPitchSensitivity = 0;
         this.keyboardSplitIndex = 0;
         this.keyboardOrnamentsArrayIndex = 0;
+
+        if(chanControls !== undefined)       
+        {
+            //this.bankIndex = chanControls.bankIndex;
+
+            this.presetIndex = chanControls.presetIndex;
+
+            //this.mixtureIndex = chanControls.mixtureIndex;
+            //this.tuningGroupIndex = chanControls.tuningGroupIndex;
+            //this.tuningIndex = chanControls.tuningIndex;
+            //this.semitonesOffset = chanControls.semitonesOffset;
+            //this.centsOffset = chanControls.centsOffset;
+
+            this.pitchWheel = chanControls.pitchWheelData1, chanControls.pitchWheelData2; // send this as data1 and data2 to the synth
+
+
+        //this.modWheel = chanControls.modWheel;
+        //this.volume = chanControls.volume;
+        //this.pan =  chanControls.pan;
+        //this.reverberation = chanControls.reverberation;
+        //this.pitchWheelSensitivity = chanControls.pitchWheelSensitivity;
+        //////////////////this.triggerKey = chanControls.triggerKey; // not yet in chanControls.
+        //this.velocityPitchSensitivity = chanControls.velocityPitchSensitivity;
+        ///////////////////this.keyboardSplitIndex = chanControls.keyboardSplitIndex; // not yet in chanControls.
+        ///////////////////this.keyboardOrnamentsArrayIndex = chanControls.keyboardOrnamentsArrayIndex; // not yet in chanControls.
+
+        }
 
         Object.preventExtensions(this); // disallow new attribute creation 
     },

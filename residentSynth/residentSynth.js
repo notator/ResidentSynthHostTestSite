@@ -1295,13 +1295,13 @@ ResSynth.residentSynth = (function(window)
             // returns a new midiAttributes object
             function getMidiAttributes(chanPresets, chanControls, inKey, inVelocity)
             {
-                let midi = {}; 
+                let midi = {};
 
                 midi.preset = chanPresets[chanControls.presetIndex];
                 midi.inKey = inKey;  // the note stops when the inKey's noteOff arrives                
                 midi.inVelocity = inVelocity;
                 // keyCentsPitch is the pitch described as a key.cents value in equal temperament.
-                midi.keyCentsPitch = chanControls.tuning[inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100); 
+                midi.keyCentsPitch = chanControls.tuning[inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100);
 
                 // velocityPitchValue14Bit is always the same for all octaves of the same absolute pitch
                 let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (midi.inKey % 12));
@@ -1381,7 +1381,7 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            async function playOrnamentAsync(inMidi, ornamentInfo)
+            async function playOrnamentAsync(inMidi, ornamentDef)
             {
                 function doOrnamentNoteOffs(ornamentNoteOnKeys)
                 {
@@ -1413,56 +1413,72 @@ ResSynth.residentSynth = (function(window)
                         }
                     }
 
-                    if(Number.isInteger(msg))
+                    switch(msg.type)
                     {
-                        await wait(msg, cancel);
-                    }
-                    else
-                    {
-                        if(msg[0] - channel === 144) // NOTE_ON
+                        case "delay":
+                        {
+                            await wait(msg.delay, cancel);
+                            break;
+                        }
+                        case "noteOn":
                         {
                             let oMidi = {};
 
                             oMidi.preset = inMidi.preset;
-                            oMidi.keyKey = msg[1];
-                            oMidi.tuning = chanControls.tuning[oMidi.keyKey];
-                            oMidi.velocity = midiVal(inMidi.velocity + msg[2]);
+                            oMidi.inKey = msg.key;
+                            oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100);
+                            oMidi.inVelocity = midiVal(inMidi.inVelocity + msg.velocityIncr);
 
-                            let noteOn = chanControls.currentNoteOns.find(x => (x.keyKey % 12) === (midi.keyKey % 12));
+                            let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
                             if(noteOn !== undefined)
                             {
                                 oMidi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
                             }
                             else
                             {
-                                oMidi.velocityPitchValue14Bit = (((oMidi.velocity & 0x7f) << 7) | (oMidi.velocity & 0x7f)) - 8192;
+                                oMidi.velocityPitchValue14Bit = (((oMidi.inVelocity & 0x7f) << 7) | (oMidi.inVelocity & 0x7f)) - 8192;
                             }
 
-                            ornamentNoteOnKeys.push(oMidi.keyKey);
+                            ornamentNoteOnKeys.push(oMidi.inKey);
 
                             doNoteOn(oMidi);
+
+                            break;
                         }
-                        else if(msg[0] - channel === 128) // NOTE_OFF
+                        case "noteOff":
                         {
-                            let note = chanControls.currentNoteOns.find(x => x.key === msg[1]);
+                            let note = chanControls.currentNoteOns.find(x => x.inKey === msg.key);
                             if(note !== undefined)
                             {
                                 const index = ornamentNoteOnKeys.indexOf(note);
-                                ornamentNoteOnKeys = ornamentNoteOnKeys.splice(index, 1).
+                                ornamentNoteOnKeys = ornamentNoteOnKeys.splice(index, 1);
 
                                 note.noteOff();
+
+                                break;                                       
                             }
-                        }
-                        else
-                        {
-                            this.send(msg);
-                        }
+                            }
+                        case "command":
+                            {
+                                const CMD = ResSynth.constants.COMMAND
+                                const message = new Uint8Array[CMD + channel, msg.commandIndex, msg.value];
+                                this.send(message);
+                                break;
+                            }
+                        case "control":
+                            {
+                                const message = new Uint8Array[CTL + channel, msg.controlIndex, msg.value];
+                                this.send(message);
+                                break;
+                            }
+
                     }
                 }
 
-                let ornamentMsgs = ornamentInfo.ornament.msgs,
-                    doRepeats = ornamentInfo.ornament.repeat
-                    ornamentNoteOnKeys = []; // keys that need to be sent a noteOff
+                let ornamentMsgs = ornamentDef.msgs,
+                    doRepeats = ornamentDef.repeat,
+                    ornamentNoteOnKeys = [], // keys that need to be sent a noteOff when the user sends a noteOff
+                    originalSettings = new ResSynth.settings.Settings("", chanControls);
 
                 do
                 {
@@ -1470,13 +1486,20 @@ ResSynth.residentSynth = (function(window)
                     {
                         let ornamentMsg = ornamentMsgs[i];
 
-                        await doMsgAsync(inMidi, ornamentMsg, ornamentNoteOnKeys, ornamentInfo.cancel); // if the message is delay, do the delay
+                        await doMsgAsync(inMidi, ornamentMsg, ornamentNoteOnKeys, ornamentDef.cancel);
                     }
-                } while((ornamentInfo.cancel === false) && (doRepeats === true));
+                } while((ornamentDef.cancel === false) && (doRepeats === true));
 
                 doOrnamentNoteOffs(ornamentNoteOnKeys);
 
-                ornamentInfo.complete = true;
+                let finalSettings = new ResSynth.settings.Settings("", chanControls)
+
+                if(finalSettings.isEqual(originalSettings) === false)
+                {
+                    setChannelControls(originalSettings, channel);
+                }
+
+                ornamentDef.complete = true;
             }
 
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
@@ -1890,6 +1913,43 @@ ResSynth.residentSynth = (function(window)
     ResidentSynth.prototype.disconnect = function()
     {
         throw "Not implemented error.";
+    };
+
+    ResidentSynth.prototype.setChannelControls = function(settings, channel) // settings is a Settings object
+    {
+        let chanControls = this.channelControls[channel];
+
+        // TODO for all the settings attributes:
+        //chanControls.name = settings.name;
+        //chanControls.bankIndex = settings.bankIndex;
+
+        //chanControls.presetIndex = settings.presetIndex;
+        if(chanControls.presetIndex !== settings.presetIndex)
+        {
+            chanControls.presetIndex = settings.presetIndex;
+        }
+
+        //chanControls.mixtureIndex = settings.mixtureIndex;
+        //chanControls.tuningGroupIndex = settings.tuningGroupIndex;
+        //chanControls.tuningIndex = settings.tuningIndex;
+        //chanControls.semitonesOffset = settings.semitonesOffset;
+        //chanControls.centsOffset = settings.centsOffset;
+
+        // chanControls.pitchWheel = settings.pitchWheel; // send this as  and data2 to the synth
+        if(chanControls.pitchWheel !== settings.pitchWheel)
+        {
+            updatePitchWheel(channel, settings.pitchWheel, settings.pitchWheel);
+        }
+
+        //chanControls.modWheel = settings.modWheel;
+        //chanControls.volume = settings.volume;
+        //chanControls.pan =  settings.pan;
+        //chanControls.reverberation = settings.reverberation;
+        //chanControls.pitchWheelSensitivity = settings.pitchWheelSensitivity;
+        //chanControls.triggerKey = settings.triggerKey;
+        //chanControls.velocityPitchSensitivity = settings.velocityPitchSensitivity;
+        //chanControls.keyboardSplitIndex = settings.keyboardSplitIndex;
+        //chanControls.keyboardOrnamentsArrayIndex = settings.keyboardOrnamentsArrayIndex;
     };
 
     return API;
