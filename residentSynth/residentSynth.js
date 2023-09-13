@@ -824,10 +824,10 @@ ResSynth.residentSynth = (function(window)
         setPrivateKeyOrnamentsArrays = function()
         {
             // throws exception on error
-            function getInKeyOrnamentsArray(ornamentPerKeysString, ornamentDefs)
+            function getInKeyOrnamentsArray(ornamentPerKeysString, fileOrnamentDefs)
             {
                 // throws exception on error
-                function getInKeyOrnamentDef(keyStr, ornamentName, ornamentDefs)
+                function getInKeyOrnamentDef(keyStr, ornamentName, fileOrnamentDefs)
                 {
                     function getOrnamentMsgDefs(inKey, msgDefs)
                     {
@@ -873,19 +873,21 @@ ResSynth.residentSynth = (function(window)
                     }
 
                     let inKey = parseInt(keyStr),
-                        ornamentDef = ornamentDefs.find(x => x.name === ornamentName);
+                        fileOrnamentDef = fileOrnamentDefs.find(x => x.name === ornamentName),
+                        ornamentDef = {};
 
                     if(Number.isNaN(inKey) || inKey < 0 || inKey > 127)
                     {
                         throw `illegal key (${keyStr}) in ornamentDefs`;
                     }
-                    if(ornamentDef === undefined)
+                    if(fileOrnamentDef === undefined)
                     {
                         throw `ornament name ${ornamentName} not found in ornamentDefs`;
                     }
 
-                    ornamentDef.msgs = getOrnamentMsgDefs(inKey, ornamentDef.msgs);
-                    ornamentDef.repeat = (ornamentDef.repeat === "yes") ? true : false;
+                    ornamentDef.name = fileOrnamentDef.name;
+                    ornamentDef.msgs = getOrnamentMsgDefs(inKey, fileOrnamentDef.msgs);
+                    ornamentDef.repeat = (fileOrnamentDef.repeat === "yes") ? true : false;
 
                     return {inKey, ornamentDef};
                 }
@@ -915,7 +917,7 @@ ResSynth.residentSynth = (function(window)
                     }
                 }
 
-                let inKeyOrnamentDefs = [];
+                let inKeyOrnamentsArray = [];
 
                 if(ornamentPerKeysString.length > 0)
                 {
@@ -924,24 +926,24 @@ ResSynth.residentSynth = (function(window)
                     for(const component of components)
                     {
                         const [keyStr, ornamentName] = component.trim().split(":"),
-                            inKeyOrnamentDef = getInKeyOrnamentDef(keyStr, ornamentName, ornamentDefs);
+                            inKeyOrnamentDef = getInKeyOrnamentDef(keyStr, ornamentName, fileOrnamentDefs);
 
-                        inKeyOrnamentDefs.push(inKeyOrnamentDef);
+                        inKeyOrnamentsArray.push(inKeyOrnamentDef);
                     }
                 }
 
-                if(inKeyOrnamentDefs.length > 0)
+                if(inKeyOrnamentsArray.length > 0)
                 {
-                    checkKeys(inKeyOrnamentDefs);
+                    checkKeys(inKeyOrnamentsArray);
                 }
 
-                return inKeyOrnamentDefs;
+                return inKeyOrnamentsArray;
             }
 
             const ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings,
-                ornamentDefs = ResSynth.ornamentDefs;
+                fileOrnamentDefs = ResSynth.ornamentDefs;
 
-            if(ornamentPerKeysStrings === undefined || ornamentDefs === undefined)
+            if(ornamentPerKeysStrings === undefined || fileOrnamentDefs === undefined)
             {
                 inKeyOrnamentDefsArrays.push([]); // an empty array means there are no ornaments defined.
             }
@@ -952,7 +954,7 @@ ResSynth.residentSynth = (function(window)
                     for(var i = 0; i < ornamentPerKeysStrings.length; i++)
                     {
                         const keyOrnamentsString = ornamentPerKeysStrings[i],
-                            inKeyOrnamentDefs = getInKeyOrnamentsArray(keyOrnamentsString, ornamentDefs);
+                            inKeyOrnamentDefs = getInKeyOrnamentsArray(keyOrnamentsString, fileOrnamentDefs);
 
                         inKeyOrnamentDefsArrays.push(inKeyOrnamentDefs); // global keyOrnamentsArrays
                     }
