@@ -778,10 +778,10 @@ ResSynth.host = (function(document)
                     let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, settings.velocityPitchSensitivity * 127]);
                     synth.send(vpsMsg);
                     // settings.keyboardSplitIndex
-                    let ksiMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.KEYBOARD_SPLIT_ARRAY_INDEX, settings.keyboardSplitIndex]);
+                    let ksiMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SET_KEYBOARD_SPLIT_ARRAY, settings.keyboardSplitIndex]);
                     synth.send(ksiMsg);
                     // settings.keyboardOrnamentsArrayIndex
-                    let koaMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.KEYBOARD_ORNAMENTS_ARRAY_INDEX, settings.keyboardOrnamentsArrayIndex]);
+                    let koaMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SET_KEYBOARD_ORNAMENT_DEFS, settings.keyboardOrnamentsArrayIndex]);
                     synth.send(koaMsg);                    
                 }
 
@@ -1187,7 +1187,7 @@ ResSynth.host = (function(document)
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
-                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.KEYBOARD_SPLIT_ARRAY_INDEX, keyboardSplitIndex]);
+                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_SPLIT_ARRAY, keyboardSplitIndex]);
 
             hostChannelSettings.keyboardSplitIndex = keyboardSplitIndex;
             setExportState(hostChannelSettings);            
@@ -1203,7 +1203,7 @@ ResSynth.host = (function(document)
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
                 keyboardOrnamentsArrayIndex = keyOrnamentsSelect.selectedIndex,
-                keyboardOrnamentsArrayIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.KEYBOARD_ORNAMENTS_ARRAY_INDEX, keyboardOrnamentsArrayIndex]);
+                keyboardOrnamentsArrayIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_ORNAMENT_DEFS, keyboardOrnamentsArrayIndex]);
 
             hostChannelSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
             setExportState(hostChannelSettings);
