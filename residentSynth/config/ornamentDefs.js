@@ -1,5 +1,7 @@
 console.log('load ornamentDefs.js');
 
+let ResSynth = ResSynth || {};
+
 // This file can be omitted by applications that don't use ornaments.
 // There can be up to 128 ornamentPerKeysStrings in the ornamentPerKeysStrings array, each of which
 // contains zero or more "<key>:<ornamentName>;" strings separated by whitespace.
@@ -24,8 +26,8 @@ ResSynth.ornamentPerKeysStrings =
 // There can be 1..127 ornament definitions in the ornamentDefs, each of which has name, msgs and repeat attributes.
 // Each msgs definition is an array containing objects having one each of the following attributes (defining their type):
 //      delay: milliseconds -- must always be > 0 (default is no delay between messages)
-//      noteOn: [keyIncrement, velocityIncrement]
-//      noteOff: keyIncrement
+//      chordOn: an array of [keyIncrement, velocityIncrement] arrays (one element per note in the chord)
+//      chordOff: an array of [keyIncrement] values matching the keyIncrements in the chordOn (one element per note in the chord)
 // delay must always be > 0 (default is no delay between messages)
 // keyIncrement and velocityIncrement must each be in range -127..127.
 // The repeat attribute is a boolean value that can be either "yes" or "no".
@@ -37,23 +39,23 @@ ResSynth.ornamentDefs =
             name: "turn1",
             msgs:
                 [
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [2, 0]},
+                    {chordOn: [[2, 0]]},
                     {delay: 125},
-                    {noteOff: 2},
+                    {chordOff: [2]},
 
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [-1, 0]},
+                    {chordOn: [[-1, 0]]},
                     {delay: 125},
-                    {noteOff: -1},
+                    {chordOff: [-1]},
 
-                    {noteOn: [0, 0]}
+                    {chordOn: [[0, 0]]}
                 ],
             repeat: "no"
         },
@@ -61,23 +63,23 @@ ResSynth.ornamentDefs =
             name: "turn2",
             msgs:
                 [
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [4, 10]},
+                    {chordOn: [[4, 10]]},
                     {delay: 125},
-                    {noteOff: 4},
+                    {chordOff: [4]},
 
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [-2, 20]},
+                    {chordOn: [[-2, 20]]},
                     {delay: 125},
-                    {noteOff: -2},
+                    {chordOff: [-2]},
 
-                    {noteOn: [0, 0]}
+                    {chordOn: [[0, 0]]}
                 ],
             repeat: "no"
         },
@@ -85,21 +87,21 @@ ResSynth.ornamentDefs =
             name: "rpt1",
             msgs:
                 [
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [2, 0]},
+                    {chordOn: [[2, 0]]},
                     {delay: 125},
-                    {noteOff: 2},
+                    {chordOff: [2]},
 
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [-1, 0]},
+                    {chordOn: [[-1, 0]]},
                     {delay: 125},
-                    {noteOff: -1}
+                    {chordOff: [-1]}
                 ],
             repeat: "yes"
         },
@@ -107,13 +109,13 @@ ResSynth.ornamentDefs =
             name: "tr1",
             msgs:
                 [
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [1, 0]},
+                    {chordOn: [[1, 0]]},
                     {delay: 125},
-                    {noteOff: 1}
+                    {chordOff: [1]}
                 ],
             repeat: "yes"
         },
@@ -121,13 +123,13 @@ ResSynth.ornamentDefs =
             name: "tr2",
             msgs:
                 [
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 125},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [2, 0]},
+                    {chordOn: [[2, 0]]},
                     {delay: 125},
-                    {noteOff: 2}
+                    {chordOff: [2]}
                 ],
             repeat: "yes"
         },
@@ -135,13 +137,13 @@ ResSynth.ornamentDefs =
             name: "tr3", // fast, wide
             msgs:
                 [
-                    {noteOn: [0, 0]},
+                    {chordOn: [[0, 0]]},
                     {delay: 25},
-                    {noteOff: 0},
+                    {chordOff: [0]},
 
-                    {noteOn: [11, 0]},
+                    {chordOn: [[11, 0]]},
                     {delay: 25},
-                    {noteOff: 11}
+                    {chordOff: [11]}
                 ],
             repeat: "yes"
         },
@@ -149,21 +151,13 @@ ResSynth.ornamentDefs =
             name: "trem1",
             msgs:
                 [
-                    {noteOn: [0, 0]},
-                    {noteOn: [4, 0]},
-                    {noteOn: [7, 0]},
+                    {chordOn: [[0, 0], [4, 0], [7, 0]]},
                     {delay: 110},
-                    {noteOff: 0},
-                    {noteOff: 4},
-                    {noteOff: 7},
+                    {chordOff: [0, 4, 7]},
 
-                    {noteOn: [9, 0]},
-                    {noteOn: [13, 0]},
-                    {noteOn: [16, 0]},
+                    {chordOn: [[9, 0], [13, 0], [16, 0]]},
                     {delay: 110},
-                    {noteOff: 9},
-                    {noteOff: 13},
-                    {noteOff: 16}
+                    {chordOff: [9, 13, 16]}
                 ],
             repeat: "yes"
         },
@@ -171,25 +165,13 @@ ResSynth.ornamentDefs =
             name: "trem2",
             msgs:
                 [
-                    {noteOn: [0, 0]},
-                    {noteOn: [3, 0]},
-                    {noteOn: [7, 0]},
+                    {chordOn: [[0, 0], [3, 0], [7, 0]]},
                     {delay: 110},
-                    {noteOff: 0},
-                    {noteOff: 3},
-                    {noteOff: 7},
+                    {chordOff: [0, 3, 7]},
 
-                    {noteOn: [-7, 0]},
-                    {noteOn: [-1, 0]},
-                    {noteOn: [6, 0]},
-                    {noteOn: [13, 0]},
-                    {noteOn: [17, 0]},
+                    {chordOn: [[-7, 0], [-1, 0], [6, 0], [13, 0], [17, 0]]},
                     {delay: 110},
-                    {noteOff: -7},
-                    {noteOff: -1},
-                    {noteOff: 6},
-                    {noteOff: 13},
-                    {noteOff: 17}
+                    {chordOff: [-7, -1, 6, 13, 17]}
                 ],
             repeat: "yes"
         }
