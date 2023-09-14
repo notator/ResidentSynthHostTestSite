@@ -843,16 +843,36 @@ ResSynth.residentSynth = (function(window)
                                 msg.type = "delay";
                                 msg.delay = parseInt(msgDef.delay);
                             }
-                            else if(msgDef.noteOn !== undefined)
+                            else if(msgDef.chordOn !== undefined)
                             {
-                                msg.type = "noteOn";
-                                msg.key = inKey + msgDef.noteOn[0];
-                                msg.velocityIncr = msgDef.noteOn[1];
+                                let chordOnDef = msgDef.chordOn;
+                                msg.type = "chordOn";
+
+                                msg.noteOns = [];
+                                for(let i = 0; i < chordOnDef.length; i++)
+                                {
+                                    let noteOnDef = chordOnDef[i],
+                                        noteOn = {};
+
+                                    noteOn.key = inKey + parseInt(noteOnDef[0]);
+                                    noteOn.velocityIncr = parseInt(noteOnDef[1]);
+
+                                    msg.noteOns.push(noteOn);
+                                }                                
                             }
-                            else if(msgDef.noteOff !== undefined)
+                            else if(msgDef.chordOff !== undefined)
                             {
-                                msg.type = "noteOff";
-                                msg.key = inKey + msgDef.noteOff;
+                                let chordOffDef = msgDef.chordOff;
+                                msg.type = "chordOff";
+                                msg.noteOffs = [];
+                                for(let i = 0; i < chordOffDef.length; i++)
+                                {
+                                    let noteOff = {};
+
+                                    noteOff.key = inKey + parseInt(chordOffDef[i]);
+
+                                    msg.noteOffs.push(noteOff);
+                                } 
                             } 
 
                             ornamentMsgs.push(msg);

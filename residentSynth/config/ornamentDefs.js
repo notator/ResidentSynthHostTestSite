@@ -1,7 +1,5 @@
 console.log('load ornamentDefs.js');
 
-let ResSynth = ResSynth || {};
-
 // This file can be omitted by applications that don't use ornaments.
 // There can be up to 128 ornamentPerKeysStrings in the ornamentPerKeysStrings array, each of which
 // contains zero or more "<key>:<ornamentName>;" strings separated by whitespace.
@@ -20,7 +18,7 @@ ResSynth.ornamentPerKeysStrings =
         "",
         "64:turn1",
         "64:turn2; 66:tr1",
-        "64:rpt1; 66:tr3; 68:trem1"
+        "64:rpt1; 66:tr3; 68:trem1; 70:trem2"
     ];
 
 // There can be 1..127 ornament definitions in the ornamentDefs, each of which has name, msgs and repeat attributes.
