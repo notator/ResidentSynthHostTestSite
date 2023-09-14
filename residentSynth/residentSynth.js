@@ -1477,8 +1477,7 @@ ResSynth.residentSynth = (function(window)
 
                 let ornamentMsgs = ornamentDef.msgs,
                     doRepeats = ornamentDef.repeat,
-                    ornamentNoteOnKeys = [], // keys that need to be sent a noteOff when the user sends a noteOff
-                    originalSettings = new ResSynth.settings.Settings("", chanControls);
+                    ornamentNoteOnKeys = []; // keys that need to be sent a noteOff when the user sends a noteOff
 
                 do
                 {
@@ -1491,13 +1490,6 @@ ResSynth.residentSynth = (function(window)
                 } while((ornamentDef.cancel === false) && (doRepeats === true));
 
                 doOrnamentNoteOffs(ornamentNoteOnKeys);
-
-                let finalSettings = new ResSynth.settings.Settings("", chanControls)
-
-                if(finalSettings.isEqual(originalSettings) === false)
-                {
-                    setChannelControls(originalSettings, channel);
-                }
 
                 ornamentDef.complete = true;
             }
@@ -1913,43 +1905,6 @@ ResSynth.residentSynth = (function(window)
     ResidentSynth.prototype.disconnect = function()
     {
         throw "Not implemented error.";
-    };
-
-    ResidentSynth.prototype.setChannelControls = function(settings, channel) // settings is a Settings object
-    {
-        let chanControls = this.channelControls[channel];
-
-        // TODO for all the settings attributes:
-        //chanControls.name = settings.name;
-        //chanControls.bankIndex = settings.bankIndex;
-
-        //chanControls.presetIndex = settings.presetIndex;
-        if(chanControls.presetIndex !== settings.presetIndex)
-        {
-            chanControls.presetIndex = settings.presetIndex;
-        }
-
-        //chanControls.mixtureIndex = settings.mixtureIndex;
-        //chanControls.tuningGroupIndex = settings.tuningGroupIndex;
-        //chanControls.tuningIndex = settings.tuningIndex;
-        //chanControls.semitonesOffset = settings.semitonesOffset;
-        //chanControls.centsOffset = settings.centsOffset;
-
-        // chanControls.pitchWheel = settings.pitchWheel; // send this as  and data2 to the synth
-        if(chanControls.pitchWheel !== settings.pitchWheel)
-        {
-            updatePitchWheel(channel, settings.pitchWheel, settings.pitchWheel);
-        }
-
-        //chanControls.modWheel = settings.modWheel;
-        //chanControls.volume = settings.volume;
-        //chanControls.pan =  settings.pan;
-        //chanControls.reverberation = settings.reverberation;
-        //chanControls.pitchWheelSensitivity = settings.pitchWheelSensitivity;
-        //chanControls.triggerKey = settings.triggerKey;
-        //chanControls.velocityPitchSensitivity = settings.velocityPitchSensitivity;
-        //chanControls.keyboardSplitIndex = settings.keyboardSplitIndex;
-        //chanControls.keyboardOrnamentsArrayIndex = settings.keyboardOrnamentsArrayIndex;
     };
 
     return API;
