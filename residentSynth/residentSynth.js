@@ -843,18 +843,6 @@ ResSynth.residentSynth = (function(window)
                                 msg.type = "delay";
                                 msg.delay = parseInt(msgDef.delay);
                             }
-                            else if(msgDef.ctl !== undefined)
-                            {
-                                msg.type = "control";
-                                msg.controlIndex = msgDef.ctl[0];
-                                msg.value = msgDef.ctl[1];
-                            }
-                            else if(msgDef.cmd !== undefined)
-                            {
-                                msg.type = "command";
-                                msg.commandIndex = msgDef.cmd[0];
-                                msg.value = msgDef.cmd[1];
-                            }
                             else if(msgDef.noteOn !== undefined)
                             {
                                 msg.type = "noteOn";
@@ -1389,7 +1377,7 @@ ResSynth.residentSynth = (function(window)
                     for(let i = 0; i < ornamentNoteOnKeys.length; i++)
                     {
                         let key = ornamentNoteOnKeys[i],
-                            note = channelNoteOns.find(note => note.key === key);
+                            note = channelNoteOns.find(note => note.inKey === key);
 
                         note.noteOff();
                     }
@@ -1457,21 +1445,7 @@ ResSynth.residentSynth = (function(window)
 
                                 break;                                       
                             }
-                            }
-                        case "command":
-                            {
-                                const CMD = ResSynth.constants.COMMAND
-                                const message = new Uint8Array[CMD + channel, msg.commandIndex, msg.value];
-                                this.send(message);
-                                break;
-                            }
-                        case "control":
-                            {
-                                const message = new Uint8Array[CTL + channel, msg.controlIndex, msg.value];
-                                this.send(message);
-                                break;
-                            }
-
+                        }
                     }
                 }
 

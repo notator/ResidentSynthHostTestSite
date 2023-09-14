@@ -1,8 +1,5 @@
 console.log('load ornamentDefs.js');
 
-let CMD = ResSynth.constants.COMMAND;
-let CTL = ResSynth.constants.CONTROL;
-
 // This file can be omitted by applications that don't use ornaments.
 // There can be up to 128 ornamentPerKeysStrings in the ornamentPerKeysStrings array, each of which
 // contains zero or more "<key>:<ornamentName>;" strings separated by whitespace.
@@ -21,14 +18,11 @@ ResSynth.ornamentPerKeysStrings =
         "",
         "64:turn1",
         "64:turn2; 66:tr1",
-        "64:rpt1; 66:tr3; 68:trem1",
-        "64:rpt1; 66:tr3; 68:trem1; 70:complex1"
+        "64:rpt1; 66:tr3; 68:trem1"
     ];
 
 // There can be 1..127 ornament definitions in the ornamentDefs, each of which has name, msgs and repeat attributes.
 // Each msgs definition is an array containing objects having one each of the following attributes (defining their type):
-//      cmd: [commandIndex, value]
-//      ctl: [controlIndex, value]
 //      delay: milliseconds -- must always be > 0 (default is no delay between messages)
 //      noteOn: [keyIncrement, velocityIncrement]
 //      noteOff: keyIncrement
@@ -198,32 +192,6 @@ ResSynth.ornamentDefs =
                     {noteOff: 17}
                 ],
             repeat: "yes"
-        },
-        {
-            name: "complex1",
-            msgs:
-            [
-                {cmd: [CMD.PRESET, 0]},
-                {ctl: [CTL.VOLUME, 10]},
-
-                {noteOn: [0, 0]},
-                {noteOn: [3, 0]},
-                {noteOn: [7, 0]},
-                {delay: 110},
-                {noteOff: 0},
-                {noteOff: 3},
-                {noteOff: 7},
-
-                {cmd: [CMD.PRESET, 8]},
-                {ctl: [CTL.VOLUME, 100]},
-
-                {noteOn: [-7, 0]},
-                {noteOn: [-1, 0]},
-                {noteOn: [6,  0]},
-                {noteOn: [13, 0]},
-                {noteOn: [17, 0]}
-            ],
-            repeat: "no"
         }
     ];
 
