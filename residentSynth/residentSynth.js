@@ -1373,13 +1373,14 @@ ResSynth.residentSynth = (function(window)
             {
                 function doOrnamentNoteOffs(ornamentNoteOnKeys)
                 {
-                    let channelNoteOns = chanControls.currentNoteOns; 
+                    let currentChanNoteOns = chanControls.currentNoteOns; 
                     for(let i = 0; i < ornamentNoteOnKeys.length; i++)
                     {
                         let key = ornamentNoteOnKeys[i],
-                            note = channelNoteOns.find(note => note.inKey === key);
+                            index = currentChanNoteOns.findIndex(note => note.inKey === key);
 
-                        note.noteOff();
+                        currentChanNoteOns[index].noteOff(); // ignore returned stopTime
+                        currentChanNoteOns.splice(index, 1);
                     }
                     ornamentNoteOnKeys.length = 0;
                 }
@@ -1435,13 +1436,18 @@ ResSynth.residentSynth = (function(window)
                         }
                         case "noteOff":
                         {
-                            let note = chanControls.currentNoteOns.find(x => x.inKey === msg.key);
-                            if(note !== undefined)
-                            {
-                                const index = ornamentNoteOnKeys.indexOf(note);
-                                ornamentNoteOnKeys = ornamentNoteOnKeys.splice(index, 1);
+                            let currentChanNoteOns = chanControls.currentNoteOns,
+                                note = currentChanNoteOns.find(x => x.inKey === msg.key);                                
 
-                                note.noteOff();
+                            note.noteOff();
+
+                            if(note !== undefined)
+                            { 
+                                let index = currentChanNoteOns.indexOf(note);
+                                currentChanNoteOns.splice(index, 1);
+
+                                index = ornamentNoteOnKeys.indexOf(note.inKey);
+                                ornamentNoteOnKeys.splice(index, 1);
 
                                 break;                                       
                             }
