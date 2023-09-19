@@ -1391,20 +1391,6 @@ ResSynth.residentSynth = (function(window)
 
             async function playOrnamentAsync(inMidi, ornamentDef)
             {
-                function doOrnamentNoteOffs(ornamentNoteOnKeys)
-                {
-                    let currentChanNoteOns = chanControls.currentNoteOns; 
-                    for(let i = 0; i < ornamentNoteOnKeys.length; i++)
-                    {
-                        let key = ornamentNoteOnKeys[i],
-                            index = currentChanNoteOns.findIndex(note => note.inKey === key);
-
-                        currentChanNoteOns[index].noteOff(); // ignore returned stopTime
-                        currentChanNoteOns.splice(index, 1);
-                    }
-                    ornamentNoteOnKeys.length = 0;
-                }
-
                 async function doMsgAsync(inMidi, msg, ornamentNoteOnKeys, cancel)
                 {
                     function midiVal(value)
@@ -1429,55 +1415,62 @@ ResSynth.residentSynth = (function(window)
                             await wait(msg.delay, cancel);
                             break;
                         }
-                        case "noteOn":
+                        case "chordOn":
                         {
-                            let oMidi = {};
+                            let noteOns = msg.noteOns;
 
-                            oMidi.preset = inMidi.preset;
-                            oMidi.inKey = msg.key;
-                            oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100);
-                            oMidi.inVelocity = midiVal(inMidi.inVelocity + msg.velocityIncr);
-
-                            let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
-                            if(noteOn !== undefined)
+                            for(let i = 0; i < noteOns.length; i++)
                             {
-                                oMidi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
+                                let noteOnMsg = noteOns[i],
+                                    oMidi = {};
+
+                                oMidi.preset = inMidi.preset;
+                                oMidi.inKey = noteOnMsg.key;
+                                oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100);
+                                oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
+
+                                let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
+                                if(noteOn !== undefined)
+                                {
+                                    oMidi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
+                                }
+                                else
+                                {
+                                    oMidi.velocityPitchValue14Bit = (((oMidi.inVelocity & 0x7f) << 7) | (oMidi.inVelocity & 0x7f)) - 8192;
+                                }
+
+                                ornamentNoteOnKeys.push(oMidi.inKey);
+
+                                doNoteOn(oMidi);
                             }
-                            else
-                            {
-                                oMidi.velocityPitchValue14Bit = (((oMidi.inVelocity & 0x7f) << 7) | (oMidi.inVelocity & 0x7f)) - 8192;
-                            }
-
-                            ornamentNoteOnKeys.push(oMidi.inKey);
-
-                            doNoteOn(oMidi);
-
                             break;
                         }
-                        case "noteOff":
+                        case "chordOff":
                         {
-                            let currentChanNoteOns = chanControls.currentNoteOns,
-                                note = currentChanNoteOns.find(x => x.inKey === msg.key);                                
+                            let noteOffs = msg.noteOffs;
+                            for(let i = 0; i < noteOffs.length; i++)
+                            {
+                                let currentChanNoteOns = chanControls.currentNoteOns,
+                                    note = currentChanNoteOns.find(x => x.inKey === noteOffs[i].key);                                
 
-                            note.noteOff();
+                                if(note !== undefined)
+                                {
+                                    note.noteOff();
 
-                            if(note !== undefined)
-                            { 
-                                let index = currentChanNoteOns.indexOf(note);
-                                currentChanNoteOns.splice(index, 1);
+                                    let index = currentChanNoteOns.indexOf(note);
+                                    currentChanNoteOns.splice(index, 1);
 
-                                index = ornamentNoteOnKeys.indexOf(note.inKey);
-                                ornamentNoteOnKeys.splice(index, 1);
-
-                                break;                                       
+                                    index = ornamentNoteOnKeys.indexOf(note.inKey);
+                                    ornamentNoteOnKeys.splice(index, 1);
+                                }
                             }
-                        }
+                            break;
+                        }                        
                     }
                 }
 
                 let ornamentMsgs = ornamentDef.msgs,
-                    doRepeats = ornamentDef.repeat,
-                    ornamentNoteOnKeys = []; // keys that need to be sent a noteOff when the user sends a noteOff
+                    doRepeats = ornamentDef.repeat; 
 
                 do
                 {
@@ -1485,11 +1478,14 @@ ResSynth.residentSynth = (function(window)
                     {
                         let ornamentMsg = ornamentMsgs[i];
 
-                        await doMsgAsync(inMidi, ornamentMsg, ornamentNoteOnKeys, ornamentDef.cancel);
+                        await doMsgAsync(inMidi, ornamentMsg, ornamentDef.ornamentNoteOnKeys, ornamentDef.cancel);
+
+                        if(ornamentDef.cancel === true)
+                        {
+                            break;
+                        }
                     }
                 } while((ornamentDef.cancel === false) && (doRepeats === true));
-
-                doOrnamentNoteOffs(ornamentNoteOnKeys);
 
                 ornamentDef.complete = true;
             }
@@ -1522,6 +1518,7 @@ ResSynth.residentSynth = (function(window)
                 console.assert(inKeyOrnamentDef.inKey === midi.inKey);
                 ornamentDef.complete = false;
                 ornamentDef.cancel = false;
+                ornamentDef.ornamentNoteOnKeys = [];
                 playOrnamentAsync(midi, ornamentDef);
             }
             else
@@ -1532,29 +1529,56 @@ ResSynth.residentSynth = (function(window)
 
         noteOff = async function(inChannel, inKey)
         {
+            function wait(milliseconds)
+            {
+                return new Promise(resolve => setTimeout(resolve, milliseconds));
+            }
+
+            function doOrnamentNoteOffs(chanControls, ornamentDef)
+            {
+                let ornamentNoteOnKeys = ornamentDef.ornamentNoteOnKeys,
+                    currentChanNoteOns = chanControls.currentNoteOns;
+
+                for(let i = 0; i < ornamentNoteOnKeys.length; i++)
+                {
+                    let key = ornamentNoteOnKeys[i],
+                        index = currentChanNoteOns.findIndex(note => note.inKey === key);
+
+                    currentChanNoteOns[index].noteOff(); // ignore returned stopTime
+                    currentChanNoteOns.splice(index, 1);
+                }
+                ornamentNoteOnKeys.length = 0;
+            }
+
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
                 channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[inKey] : inChannel,
                 chanControls = channelControls[channel],
                 currentNoteOns = chanControls.currentNoteOns,
                 inKeyOrnamentDefs = chanControls.inKeyOrnamentDefs,
-                ornamentInfo = (inKeyOrnamentDefs.length > 0) ? inKeyOrnamentDefs[inKey] : undefined,
+                inKeyOrnamentDef = inKeyOrnamentDefs.find(x => x.inKey === inKey),
+                ornamentDef = (inKeyOrnamentDef === undefined) ? undefined : inKeyOrnamentDef.ornamentDef,
+                ornamentNoteOnKeys = (ornamentDef === undefined) ? undefined : ornamentDef.ornamentNoteOnKeys,
                 stopTime = 0;
 
-            if(ornamentInfo !== undefined && ornamentInfo.inKey === inKey)
+            if(ornamentNoteOnKeys !== undefined && ornamentNoteOnKeys.length > 0)
             {
-                ornamentInfo.cancel = true;
-                while(!ornamentInfo.complete)
+                ornamentDef.cancel = true;
+                while(!ornamentDef.complete)
                 {
                     await wait(5);
                 }
-            }
 
-            for(var index = currentNoteOns.length - 1; index >= 0; index--)
+                doOrnamentNoteOffs(chanControls, ornamentDef);
+            }
+            else
             {
-                if(currentNoteOns[index].inKey === inKey)
+                for(var index = currentNoteOns.length - 1; index >= 0; index--)
                 {
-                    stopTime = currentNoteOns[index].noteOff();
-                    currentNoteOns.splice(index, 1);
+                    if(currentNoteOns[index].inKey === inKey)
+                    {
+                        stopTime = currentNoteOns[index].noteOff();
+                        currentNoteOns.splice(index, 1);
+                    }
                 }
             }
 
