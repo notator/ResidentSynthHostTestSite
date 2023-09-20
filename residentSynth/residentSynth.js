@@ -703,6 +703,13 @@ ResSynth.residentSynth = (function(window)
             {
                 function check(keyChannelPairs, keyValuesString) 
                 {
+                    if(keyChannelPairs[0].key !== 0)
+                    {
+                        const errorString = `Illegal keyboardSplitString: the first key in the string must be 0`;
+                        alert(errorString);
+                        throw errorString;
+                    }
+
                     for(let i = 0, previousKey = -1; i < keyChannelPairs.length; i++)
                     {
                         let kvp = keyChannelPairs[i],
