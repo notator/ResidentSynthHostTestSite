@@ -60,7 +60,7 @@ The top six controls can be changed either by dragging the sliders, or entering 
 The **allSoundOff** button silences the _ResidentSynth_.  
 The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
 
-Ornament Controls:  
+Ornaments Control:  
 ![screenshot_Keyboard](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Ornaments.png "screenshot_Keyboard")  
 Ornaments can be configured in the _ResidentSynth_, and are described more fully in its <a href="#ornaments">_Ornaments_</a> documentation below.    
 The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
