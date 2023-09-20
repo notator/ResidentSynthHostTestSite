@@ -1529,9 +1529,35 @@ ResSynth.residentSynth = (function(window)
 
         noteOff = async function(inChannel, inKey)
         {
-            function wait(milliseconds)
+            // Written with ChatGPT's help. See also the calling code.
+            // I've optimized the timeoutMs and maxTimeoutMs values experimentally.
+            function waitUntil(conditionFunction)
             {
-                return new Promise(resolve => setTimeout(resolve, milliseconds));
+                return new Promise((resolve, reject) =>
+                {
+                    const timeoutMs = 10,
+                        maxTimeoutMs = 500,                        
+                        startTime = Date.now();
+
+                    function checkCondition()
+                    {
+                        if(conditionFunction())
+                        {
+                            resolve(); // Condition is met, resolve the Promise
+                            //console.log(`waitUntil resolved after ${Date.now() - startTime}ms.`);
+                        }
+                        else if(Date.now() - startTime >= maxTimeoutMs)
+                        {
+                            reject(new Error('Timeout exceeded')); // Reject if timeout is exceeded
+                        }
+                        else
+                        {
+                            setTimeout(checkCondition, timeoutMs); // Check again after a short interval
+                        }
+                    }
+
+                    checkCondition(); // Start checking the condition
+                });
             }
 
             function doOrnamentNoteOffs(chanControls, ornamentDef)
@@ -1563,9 +1589,13 @@ ResSynth.residentSynth = (function(window)
             if(ornamentNoteOnKeys !== undefined && ornamentNoteOnKeys.length > 0)
             {
                 ornamentDef.cancel = true;
-                while(!ornamentDef.complete)
+                try
                 {
-                    await wait(5);
+                    await waitUntil(() => {return ornamentDef.complete});
+                }
+                catch(error)
+                {
+                    throw 'Condition not met:' + error.message;
                 }
 
                 doOrnamentNoteOffs(chanControls, ornamentDef);
