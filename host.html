@@ -18,27 +18,7 @@
 
                 <span class="boldSubtitle">Input Device:</span>
                 <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
-                <span>
-                    <span class="boldSubtitle">ResidentSynth</span> channel:
-                    <select id="channelSelect" class="valueSelector" onchange="ResSynth.host.onChannelSelectChanged()" disabled>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                        <option value="13">13</option>
-                        <option value="14">14</option>
-                        <option value="15">15</option>
-                    </select>&nbsp;&nbsp;
-                </span>
+
                 <span>
                     <span class="boldSubtitle">Audio Output:</span>
                     <select id="audioOutputSelect" class="outputDeviceSelect" onchange="ResSynth.host.onAudioOutputSelectChanged()"></select>
@@ -53,6 +33,43 @@
             <div id="continueAtStartButtonDiv" style="text-align:center; display:none;">
                 <input class="largeButton" type="button" value="continue" onclick="ResSynth.host.onContinueAtStartClicked()" />
             </div>
+        </div>
+        <div id="channelsDiv" style="display:none;">
+            <hr />
+            <table width="660px">
+                <colgroup>
+                    <col width="180" />
+                    <col width="480" />
+                </colgroup>
+                <tr>
+                    <td>
+                        <span class="boldSubtitle">edit channel</span>
+                        <select id="channelSelect" class="channelSelect" onchange="ResSynth.host.onChannelSelectChanged()">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                        </select>
+                        <span class="boldSubtitle">settings</span>
+                    </td>
+                    <td align="right">
+                        <span class="boldSubtitle">keyboard split: </span>
+                        <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
+                    </td>
+                </tr>
+            </table>
         </div>
         <div id="webAudioFontDiv" style="display:none">
             <hr />
@@ -102,9 +119,9 @@
                     </td>
                     <td id="tuningSelectCell">
                         <!--
-                            <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
-                            sendAgainButton
-                        -->
+                        <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
+                        sendAgainButton
+                    -->
                     </td>
                     <td>
                         <!--<select id="a4FrequencySelect" class="a4FrequencySelect" onchange="ResSynth.host.onA4FrequencySelectChanged()" />-->
@@ -133,11 +150,8 @@
                         <span class="boldSubtitle">keyboard: </span><span>split</span>
                     </td>
                     <td>
-                        <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
                     </td>
-                    <td align="right">
-                        <span>velocityPitchSensitivity</span>
-                        <input id="velocityPitchSensitivityNumberInput" type="number" class="velocityPitchSensitivityNumber" value="0" step="0.1" min="0" max="1" onchange="ResSynth.host.onVelocityPitchSensitivityNumberInputChanged()" />
+                    <td>
                     </td>
                 </tr>
                 <tr>
@@ -147,7 +161,10 @@
                     <td>
                         <select id="keyOrnamentsSelect" class="keyOrnamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
                     </td>
-                    <td></td>
+                    <td align="right">
+                        <span>velocityPitchSensitivity</span>
+                        <input id="velocityPitchSensitivityNumberInput" type="number" class="velocityPitchSensitivityNumber" value="0" step="0.1" min="0" max="1" onchange="ResSynth.host.onVelocityPitchSensitivityNumberInputChanged()" />
+                    </td>
                 </tr>
             </table>
         </div>
@@ -164,7 +181,7 @@
                         <span id="settingsTitle" class="boldSubtitle">preset settings: </span>
                     </td>
                     <td>
-                        
+
                         <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
                     </td>
                     <td align="right">

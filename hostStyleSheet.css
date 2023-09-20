@@ -147,12 +147,13 @@ hr
 	margin: 0 4px auto auto;
 }
 
-.valueSelector
+.channelSelect
 {
-    font-size: 11px; 
-    width: 45px;
-    margin-left: 0;
-	margin-right: 4px;
+	font-size: 11px;
+	width: 45px;
+	height: 18px;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .tuningNumber
