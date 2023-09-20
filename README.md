@@ -37,8 +37,8 @@ Each `<key>` is a number in range 0..127. The first `<key>` must be `0`. `<key>`
 Each `<channel>` is a number in range 0..15. These values can be in any order, and can repeat within the string.  
 The default (empty) string means that all keys send messages on the channel currently being edited.  
 The split defintion string is parsed from left to right.
-All keys greater than or equal to the `<key>` substring send on the substring's `<channel>` unless overridden by a substring further to the right.
-Valid split-strings are "", "0:0; 42:1;", "0:3; 40:1; 50:2;", "0:0; 40:1; 50:2; 60:0; 72:5" etc.
+All keys greater than or equal to the `<key>` substring send on the substring's `<channel>` unless overridden by a substring further to the right.  
+Valid split definition strings are `""`, `"0:0; 42:1;"`, `"0:3; 40:1; 50:2;"`, `"0:0; 40:1; 50:2; 60:0; 72:5"` etc.
 
 Sounds:  
 ![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
@@ -54,20 +54,17 @@ The two **offset** numerical inputs determine the tuning offset in semitones and
 
 Commands and Controls:  
 ![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
-Except for **reverberation** and **pitchWheelSensitivity**, these are standard MIDI commands and controls.  
-Reverberation and pitchWheelSensitivity use non-standard MIDI control messages (CC 91 and CC 16 respectively).  
-The top six controls can be changed either by dragging the sliders, or entering values in the numeric input fields. They also react to incoming MIDI messages: On my MIDI input device, they can also be set using the appropriate hardware wheels and knobs.  
+Except for **reverberation**, **pitchWheelSensitivity** and **velocityPitchSensitivity**, these are standard MIDI commands and controls.   
+The **velocityPitchSensitivity** control raises an individual note's output pitch depending on its velocity. If this value is 0, the velocity will have no effect on the pitch. If this value is 127, the associated pitch range will be maximized.  
+A velocity of 1 always has no effect on the pitch. In equal temperament tuning, with velocityPitchSensitivity set to 127, a velocity of 127 will raise the pitch by one semitone. 
+The top seven controls can be changed either by dragging the sliders, or entering values in the numeric input fields. They also react to incoming MIDI messages: On my MIDI input device, they can also be set using the appropriate hardware wheels and knobs.  
 The **allSoundOff** button silences the _ResidentSynth_.  
 The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
 
 Ornaments Control:  
 ![screenshot_Keyboard](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Ornaments.png "screenshot_Keyboard")  
 Ornaments can be configured in the _ResidentSynth_, and are described more fully in its <a href="#ornaments">_Ornaments_</a> documentation below.    
-The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".  
-The **velocityPitchSensitivity** input is a floating point value between 0 and 1. This value
-raises an individual note's output pitch depending on its velocity. If this value is 0, the velocity has no effect
-on the pitch. If this value is 1, the velocity has some maximum effect, depending on the current tuning.
-In equal temperament tuning, with velocityPitchSensitivity set to 1, a velocity of 127 will raise the pitch by one semitone.  
+The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".   
 
 Preset Settings:  
 ![screenshot_Settings](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
