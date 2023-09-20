@@ -1135,6 +1135,15 @@ ResSynth.residentSynth = (function(window)
         /*****************************************/
         /* Control Functions */
 
+        // All channels use the same channelPerKeyArray
+        updateKeyboardSplit = function(channel, keyboardSplitIndex)
+        {
+            for(let channel = 0; channel < 16; channel++)
+            {
+                channelControls[channel].channelPerKeyArray = channelPerKeyArrays[keyboardSplitIndex];
+            }
+        },
+
         // also sets channelPresets[channel] and channelControl.presetIndex to 0.
         updateBankIndex = function(channel, bankIndex)
         {
@@ -1256,10 +1265,7 @@ ResSynth.residentSynth = (function(window)
         {
             channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones
         },
-        updateKeyboardSplit = function(channel, keyboardSplitIndex)
-        {
-            channelControls[channel].channelPerKeyArray = channelPerKeyArrays[keyboardSplitIndex];
-        },
+
         updateInKeyOrnamentDefs = function(channel, inKeyOrnamentDefsIndex)
         {
             channelControls[channel].inKeyOrnamentDefs = inKeyOrnamentDefsArrays[inKeyOrnamentDefsIndex];

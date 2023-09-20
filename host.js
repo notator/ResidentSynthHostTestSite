@@ -380,18 +380,7 @@ ResSynth.host = (function(document)
         // exported
         onChannelSelectChanged = function()
         {
-            function setAndSendChannelsDivControls(hostChannelSettings)
-            {
-                function setAndSendKeyboardSplitIndex(keyboardSplitIndex)
-                {
-                    let keyboardSplitSelect = getElem("keyboardSplitSelect");
-
-                    keyboardSplitSelect.selectedIndex = keyboardSplitIndex;
-                    onKeyboardSplitSelectChanged();
-                }
-
-                setAndSendKeyboardSplitIndex(hostChannelSettings.keyboardSplitIndex);
-            }
+            
             function setAndSendWebAudioFontDivControls(hostChannelSettings)
             {
                 let bankSelect = getElem("bankSelect");
@@ -430,16 +419,12 @@ ResSynth.host = (function(document)
                 pitchWheelSensitivityLC.setValue(hostChannelSettings.pitchWheelSensitivity);
             }
 
-            function setAndSendKeyboardDivControls(hostChannelSettings)
+            function setAndSendOrnamentsDivControls(hostChannelSettings)
             {
-                function setAndSendKeyOrnamentsString(keyboardOrnamentsArrayIndex)
-                {
-                    let keyOrnamentsSelect = getElem("keyOrnamentsSelect");
+                let keyOrnamentsSelect = getElem("keyOrnamentsSelect");
 
-                    keyboardSplitSelect.selectedIndex = keyboardOrnamentsArrayIndex;
-                    onKeyOrnamentsSelectChanged();
-                }
-                setAndSendKeyOrnamentsString(hostChannelSettings.keyboardOrnamentsArrayIndex);
+                keyOrnamentsSelect.selectedIndex = hostChannelSettings.keyboardOrnamentsArrayIndex;
+                onKeyOrnamentsSelectChanged();
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -450,7 +435,6 @@ ResSynth.host = (function(document)
 
             currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
-            setAndSendChannelsDivControls(hostChannelSettings);
             setAndSendWebAudioFontDivControls(hostChannelSettings);
             setAndSendTuningDivControls(hostChannelSettings);
 
@@ -458,7 +442,7 @@ ResSynth.host = (function(document)
 
             setAndSendLongControls(hostChannelSettings);
 
-            setAndSendKeyboardDivControls(hostChannelSettings);
+            setAndSendOrnamentsDivControls(hostChannelSettings);
 
             setExportState(hostChannelSettings);
 
@@ -1179,9 +1163,15 @@ ResSynth.host = (function(document)
             const constants = ResSynth.constants;
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostChannelSettings = channelSelect.options[channel].hostSettings,
+                channelSelectOptions = channelSelect.options,
+                hostChannelSettings = channelSelectOptions[channel].hostSettings,
                 keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
                 setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_SPLIT_ARRAY, keyboardSplitIndex]);
+
+            for(let chan = 0; chan < channelSelectOptions.length; chan++)
+            {
+                channelSelectOptions[chan].hostSettings.keyboardSplitIndex = keyboardSplitIndex;
+            }
 
             hostChannelSettings.keyboardSplitIndex = keyboardSplitIndex;
             setExportState(hostChannelSettings);            
@@ -2280,6 +2270,8 @@ ResSynth.host = (function(document)
             webAudioFontWebsiteButtonClick: webAudioFontWebsiteButtonClick,
 
             onChannelSelectChanged: onChannelSelectChanged,
+            onKeyboardSplitSelectChanged: onKeyboardSplitSelectChanged,
+
             onBankSelectChanged: onBankSelectChanged,
             onPresetSelectChanged: onPresetSelectChanged,
             onMixtureSelectChanged: onMixtureSelectChanged,
@@ -2297,7 +2289,6 @@ ResSynth.host = (function(document)
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
-            onKeyboardSplitSelectChanged: onKeyboardSplitSelectChanged,
             onKeyOrnamentsSelectChanged: onKeyOrnamentsSelectChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,
