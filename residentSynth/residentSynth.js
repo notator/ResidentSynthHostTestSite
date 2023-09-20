@@ -1254,7 +1254,7 @@ ResSynth.residentSynth = (function(window)
 
         updateVelocityPitchSensitivity = function(channel, data2)
         {
-            channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones -- host currently limits data2 / 127 to range 0..0.6
+            channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones
         },
         updateKeyboardSplit = function(channel, keyboardSplitIndex)
         {
@@ -1624,8 +1624,6 @@ ResSynth.residentSynth = (function(window)
             updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
             updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's tuning value in NoteOn. 
             updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's tuning value in NoteOn. 
-
-            updateVelocityPitchSensitivity(channel, 0);
         },
         setControllerDefaults = function(channel)
         {
@@ -1639,6 +1637,7 @@ ResSynth.residentSynth = (function(window)
             updatePan(channel, controlDefaultValue(CTL.PAN));
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
             updatePitchWheelSensitivity(channel, controlDefaultValue(CTL.PITCH_WHEEL_SENSITIVITY));
+            updateVelocityPitchSensitivity(channel, controlDefaultValue(CTL.VELOCITY_PITCH_SENSITIVITY));
         },
 
         CMD = ResSynth.constants.COMMAND,

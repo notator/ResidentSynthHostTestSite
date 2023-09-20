@@ -172,6 +172,8 @@ ResSynth.constants = (function()
 					return ("reverberation");
 				case CONTROL.PITCH_WHEEL_SENSITIVITY:
 					return ("pitchWheelSensitivity");
+				case CONTROL.VELOCITY_PITCH_SENSITIVITY:
+					return ("velocityPitchSensitivity");
 				case CONTROL.ALL_SOUND_OFF:
 					return ("allSoundOff");
 				case CONTROL.ALL_CONTROLLERS_OFF:

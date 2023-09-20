@@ -380,6 +380,18 @@ ResSynth.host = (function(document)
         // exported
         onChannelSelectChanged = function()
         {
+            function setAndSendChannelsDivControls(hostChannelSettings)
+            {
+                function setAndSendKeyboardSplitIndex(keyboardSplitIndex)
+                {
+                    let keyboardSplitSelect = getElem("keyboardSplitSelect");
+
+                    keyboardSplitSelect.selectedIndex = keyboardSplitIndex;
+                    onKeyboardSplitSelectChanged();
+                }
+
+                setAndSendKeyboardSplitIndex(hostChannelSettings.keyboardSplitIndex);
+            }
             function setAndSendWebAudioFontDivControls(hostChannelSettings)
             {
                 let bankSelect = getElem("bankSelect");
@@ -420,14 +432,6 @@ ResSynth.host = (function(document)
 
             function setAndSendKeyboardDivControls(hostChannelSettings)
             {
-                function setAndSendKeyboardSplitIndex(keyboardSplitIndex)
-                {
-                    let keyboardSplitSelect = getElem("keyboardSplitSelect");
-
-                    keyboardSplitSelect.selectedIndex = keyboardSplitIndex;
-                    onKeyboardSplitSelectChanged();
-                }
-
                 function setAndSendKeyOrnamentsString(keyboardOrnamentsArrayIndex)
                 {
                     let keyOrnamentsSelect = getElem("keyOrnamentsSelect");
@@ -435,18 +439,7 @@ ResSynth.host = (function(document)
                     keyboardSplitSelect.selectedIndex = keyboardOrnamentsArrayIndex;
                     onKeyOrnamentsSelectChanged();
                 }
-
-                function setAndSendVelocityPitchSensitivity(velocityPitchSensitivity)
-                {
-                    let velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput");
-
-                    velocityPitchSensitivityNumberInput.value = velocityPitchSensitivity;
-                    onVelocityPitchSensitivityNumberInputChanged();
-                }
-
-                setAndSendKeyboardSplitIndex(hostChannelSettings.keyboardSplitIndex);
                 setAndSendKeyOrnamentsString(hostChannelSettings.keyboardOrnamentsArrayIndex);
-                setAndSendVelocityPitchSensitivity(hostChannelSettings.velocityPitchSensitivity);
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -457,6 +450,7 @@ ResSynth.host = (function(document)
 
             currentChannel = channel; // the global currentChannel is used by synth.send(...)
 
+            setAndSendChannelsDivControls(hostChannelSettings);
             setAndSendWebAudioFontDivControls(hostChannelSettings);
             setAndSendTuningDivControls(hostChannelSettings);
 
@@ -1212,34 +1206,6 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        // The value in the NumberInput is
-        // the number of semitones down for minimum velocity, and
-        // the number of semitones up for maximum velocity)
-        onVelocityPitchSensitivityNumberInputChanged = function()
-        {
-            let CONST = ResSynth.constants,
-                channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex,
-                hostChannelSettings = channelSelect.options[channel].hostSettings,
-                velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
-                semitonesVelocityPitchSensitivity = parseFloat(velocityPitchSensitivityNumberInput.value),
-                midiValue,
-                velocityPitchSensitivityMsg;
-
-            // host can actually limit the values to a smaller range (e.g. 0..0.6)
-            console.assert(semitonesVelocityPitchSensitivity >= 0 && semitonesVelocityPitchSensitivity <= 1);
-
-            midiValue = Math.round(semitonesVelocityPitchSensitivity * 127);
-            velocityPitchSensitivityMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.VELOCITY_PITCH_SENSITIVITY, midiValue]);
-
-            synth.send(velocityPitchSensitivityMsg);
-
-            hostChannelSettings.velocityPitchSensitivity = semitonesVelocityPitchSensitivity;
-
-            setExportState(hostChannelSettings);
-        },
-
-        // exported
         onContinueAtStartClicked = function()
         {
             function setPage2Display(synth)
@@ -1419,18 +1385,6 @@ ResSynth.host = (function(document)
                     tuningGroupSelect.selectedIndex = 0;
                 }
 
-                function setTuningSendAgainButton()
-                {
-                    let tuningSendAgainButtonCell = getElem("tuningSendAgainButtonCell"),
-                        input = document.createElement("input");
-
-                    input.type = "button";
-                    input.className = "sendAgainButton";
-                    input.value = "send again";
-                    input.onclick = onTuningSelectChanged;
-                    tuningSendAgainButtonCell.appendChild(input);
-                }
-
                 function setTuningSelect()
                 {
                     function appendTuningSelect(tuningSelectCell, tuningOptionsArray)
@@ -1494,6 +1448,9 @@ ResSynth.host = (function(document)
                                 break;
                             case "pitchWheelSensitivityLongControl":
                                 hostChannelSettings.pitchWheelSensitivity = value;
+                                break;
+                            case "velocityPitchSensitivityLongControl":
+                                hostChannelSettings.velocityPitchSensitivity = value;
                                 break;
                             default:
                                 console.assert(false, "Unknown long control");
@@ -1802,6 +1759,7 @@ ResSynth.host = (function(document)
                                     panData = getStandardControlInfo(constants, ctl.PAN),
                                     reverberationData = getStandardControlInfo(constants, ctl.REVERBERATION),
                                     pitchWheelSensitivityData = getStandardControlInfo(constants, ctl.PITCH_WHEEL_SENSITIVITY),
+                                    velocityPitchSensitivityData = getStandardControlInfo(constants, ctl.VELOCITY_PITCH_SENSITIVITY),
                                     allControllersOff = getStandardControlInfo(constants, ctl.ALL_CONTROLLERS_OFF),
                                     allSoundOff = getStandardControlInfo(constants, ctl.ALL_SOUND_OFF),
                                     controlInfos = [];
@@ -1811,9 +1769,9 @@ ResSynth.host = (function(document)
                                 controlInfos.push(panData);
                                 controlInfos.push(reverberationData);
                                 controlInfos.push(pitchWheelSensitivityData);
+                                controlInfos.push(velocityPitchSensitivityData);
                                 controlInfos.push(allSoundOff);
                                 controlInfos.push(allControllersOff);
-
 
                                 return controlInfos;
                             }
@@ -1915,16 +1873,8 @@ ResSynth.host = (function(document)
                         keyOrnamentsSelect.selectedIndex = 0;
                     }
 
-                    function setVelocityPitchSensitivityNumberInput()
-                    {
-                        let velocityPitchSensitivityNumberInput = getElem("velocityPitchSensitivityNumberInput"),
-                            defaultSettingsPreset = synth.settingsPresets[0];
-
-                        velocityPitchSensitivityNumberInput.value = defaultSettingsPreset.velocityPitchSensitivity;                         
-                    }
-
                     setKeyOrnamentsSelect();
-                    setVelocityPitchSensitivityNumberInput();
+
                 }
                 function setSettingsSelect()
                 {
@@ -1994,7 +1944,7 @@ ResSynth.host = (function(document)
                         webAudioFontDiv = getElem("webAudioFontDiv"),
                         tuningDiv = getElem("tuningDiv"),
                         commandsAndControlsDiv = getElem("commandsAndControlsDiv"),
-                        keyboardDiv = getElem("keyboardDiv"),
+                        ornamentsDiv = getElem("ornamentsDiv"),
                         triggersDiv = getElem("triggersDiv"),
                         recordingDiv = getElem("recordingDiv"),
                         simpleInputDiv = getElem("simpleInputDiv");
@@ -2003,7 +1953,7 @@ ResSynth.host = (function(document)
                     webAudioFontDiv.style.display = "block";
                     tuningDiv.style.display = "block";
                     commandsAndControlsDiv.style.display = "block";
-                    keyboardDiv.style.display = "block";
+                    ornamentsDiv.style.display = "block";
                     triggersDiv.style.display = "block";
                     recordingDiv.style.display = "block";
                     simpleInputDiv.style.display = "block";
@@ -2026,7 +1976,6 @@ ResSynth.host = (function(document)
                 setTuningGroupSelect(tuningGroupSelect);
                 setTuningSelect();
                 setSemitonesAndCentsControls();
-                setTuningSendAgainButton();
 
                 setCommandsAndControlsDivs();
                 setKeyboardDiv();
@@ -2287,15 +2236,31 @@ ResSynth.host = (function(document)
 
             function setInitialDivsDisplay()
             {
+                function hideAllPage2Divs()
+                {
+                    let channelsDiv = getElem("channelsDiv"),
+                        webAudioFontDiv = getElem("webAudioFontDiv"),
+                        tuningDiv = getElem("tuningDiv"),
+                        commandsAndControlsDiv = getElem("commandsAndControlsDiv"),
+                        ornamentsDiv = getElem("ornamentsDiv"),
+                        triggersDiv = getElem("triggersDiv"),
+                        recordingDiv = getElem("recordingDiv"),
+                        simpleInputDiv = getElem("simpleInputDiv");
+
+                    channelsDiv.style.display = "none";
+                    webAudioFontDiv.style.display = "none";
+                    tuningDiv.style.display = "none";
+                    commandsAndControlsDiv.style.display = "none";
+                    ornamentsDiv.style.display = "none";
+                    triggersDiv.style.display = "none";
+                    recordingDiv.style.display = "none";
+                    simpleInputDiv.style.display = "none";
+                }
+
                 getElem("loadingMsgDiv").style.display = "none";
                 getElem("continueAtStartButtonDiv").style.display = "block";
 
-                getElem("webAudioFontDiv").style.display = "none";
-                getElem("tuningDiv").style.display = "none";
-                getElem("commandsAndControlsDiv").style.display = "none";
-                getElem("triggersDiv").style.display = "none";
-
-                getElem("keyboardDiv").style.display = "none";
+                hideAllPage2Divs();
             }
 
             setupInputDevice();
@@ -2334,7 +2299,6 @@ ResSynth.host = (function(document)
 
             onKeyboardSplitSelectChanged: onKeyboardSplitSelectChanged,
             onKeyOrnamentsSelectChanged: onKeyOrnamentsSelectChanged,
-            onVelocityPitchSensitivityNumberInputChanged: onVelocityPitchSensitivityNumberInputChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,
             holdCheckboxClicked: holdCheckboxClicked,

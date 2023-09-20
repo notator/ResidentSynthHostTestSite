@@ -38,7 +38,7 @@ ResSynth.residentSynthNote = (function()
 			this.pitchWheelSensitivity = channelControls.pitchWheelSensitivity;
 
 			this.velocityPitchValue14Bit = midi.velocityPitchValue14Bit;
-			this.velocityPitchSensitivity = channelControls.velocityPitchSensitivity; // host sends range 0..0.6;
+			this.velocityPitchSensitivity = channelControls.velocityPitchSensitivity; // float value in range 0..1;
 
 			if(channelAudioNodes.modNode !== undefined)
 			{
