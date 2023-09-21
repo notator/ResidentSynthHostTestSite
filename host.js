@@ -666,6 +666,7 @@ ResSynth.host = (function(document)
         onExportSettingsButtonClicked = function()
         {
             let channelSelect = getElem("channelSelect"),
+                exportSettingsButton = getElem("exportSettingsButton"),
                 hostChannelSettings = channelSelect.options[currentChannel].hostSettings,
                 exportName = hostChannelSettings.name;
 
@@ -675,6 +676,8 @@ ResSynth.host = (function(document)
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+
+            exportSettingsButton.disabled = true;
         },
 
         // exported
