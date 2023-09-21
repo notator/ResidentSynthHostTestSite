@@ -175,6 +175,7 @@ ResSynth.host = (function(document)
                 settings = settingsSelect.options[settingsIndex].settings,
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
+                keyboardSplitSelect = getElem("keyboardSplitSelect"),
                 settingsClone = {...settings};
 
             // decided _not_ to silence the synth while resetting all the controls.
@@ -182,6 +183,9 @@ ResSynth.host = (function(document)
 
             channelSelect.options[channel].hostSettings = settingsClone;
             onChannelSelectChanged();
+
+            keyboardSplitSelect.selectedIndex = settingsClone.keyboardSplitIndex,
+            onKeyboardSplitSelectChanged();
         },
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
