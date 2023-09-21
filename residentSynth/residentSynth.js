@@ -26,7 +26,7 @@ ResSynth.residentSynth = (function(window)
         channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays(). This array has elements in range 0..15. Its length can be either 0 or 128.
         inKeyOrnamentDefsArrays = [], // initialized by setPrivateOrnamentPerKeyArrays(). This array may have undefined elements, and its length may be anything in range 0..128.
         tuningGroups = [],
-        settingsPresets = [],
+        synthSettings = [],
 
         // see: https://developer.chrome.com/blog/audiocontext-setsinkid/
         setAudioOutputDevice = async function(deviceId)
@@ -984,54 +984,77 @@ ResSynth.residentSynth = (function(window)
             }
         },
 
-        // returns an array of Settings objects containing the values set in the settingsPresets.js file.
-        // The values in the attributes of the returned Settings objects are immutable.
-        // Clone using {...settings} to create an object having mutable attributes. (Attributes can never be created or destroyed.)
-        getSettingsPresets = function(resSynthSettingsPresets)
+        // Sets and returns the internal, global synthSettings array. This will contain a default SynthSettings object followed by
+        // the values set in the synthSettings.js file.
+        // The values in the attributes of the returned channelSettings objects are immutable.
+        // Clone channelSettings using {...settings} to create an object having mutable attributes.
+        // (Attributes can never be created or destroyed.)
+        getSynthSettings = function(synthSettingsDefs)
         {
-            if(resSynthSettingsPresets === undefined)
+            function getDefaultSynthSettings()
             {
-                let defaultSettings1 = new ResSynth.settings.Settings("default settings 1"),
-                    defaultSettings2 = new ResSynth.settings.Settings("default settings 2");
+                let defaultSynthSettings = {};
 
-                Object.freeze(defaultSettings1); // attribute values are frozen
-                Object.freeze(defaultSettings2); // attribute values are frozen
+                defaultSynthSettings.name = "default settings";
+                defaultSynthSettings.channelSettings = [];
 
-                settingsPresets.push(defaultSettings1); // push twice for host's select control (so that it works)
-                settingsPresets.push(defaultSettings2);
-            }
-            else
-            {
-                for(var settingsIndex = 0; settingsIndex < resSynthSettingsPresets.length; settingsIndex++)
+                for(let channel = 0; channel < 16; channel++)
                 {
-                    let sp = resSynthSettingsPresets[settingsIndex],
-                        settings = new ResSynth.settings.Settings(sp.name);
+                    // The constructor sets .keyboardSplitIndex to its default (= 0);
+                    let defaultSettings = new ResSynth.settings.Settings("default channel settings");
+                    Object.freeze(defaultSettings); // attribute values are frozen
+                    defaultSynthSettings.channelSettings.push(defaultSettings);
+                }
 
-                    settings.bankIndex = sp.bankIndex;
-                    settings.presetIndex = sp.presetIndex;
-                    settings.mixtureIndex = sp.mixtureIndex;
-                    settings.tuningGroupIndex = sp.tuningGroupIndex;
-                    settings.tuningIndex = sp.tuningIndex;
-                    settings.semitonesOffset = sp.semitonesOffset;
-                    settings.centsOffset = sp.centsOffset;
-                    settings.pitchWheel = sp.pitchWheel;
-                    settings.modWheel = sp.modWheel;
-                    settings.volume = sp.volume;
-                    settings.pan = sp.pan;
-                    settings.reverberation = sp.reverberation;
-                    settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
-                    settings.triggerKey = sp.triggerKey;
-                    settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
-                    settings.keyboardSplitIndex = sp.keyboardSplitIndex;
-                    settings.keyboardOrnamentsArrayIndex = sp.keyboardOrnamentsArrayIndex;
+                return defaultSynthSettings;
+            }
 
-                    Object.freeze(settings); // attribute values are frozen
+            synthSettings.push(getDefaultSynthSettings()); // default at index 0
 
-                    settingsPresets.push(settings);
+            if(synthSettingsDefs !== undefined && synthSettingsDefs.length > 0)
+            {
+                for(var index = 0; index < synthSettingsDefs.length; index++)
+                {
+                    let newSynthSettings = getDefaultSynthSettings(), // will now be overridden
+                        synthSettingsDef = synthSettingsDefs[index],
+                        keyboardSplitIndex = synthSettingsDef.keyboardSplitIndex,
+                        channelSettingsDefs = synthSettingsDef.channelSettings;
+
+                    newSynthSettings.name = synthSettingsDef.name;
+
+                    for(var channel = 0; channel < channelSettingsDefs.length; channel++)
+                    {
+                        let sp = channelSettingsDefs[channel],
+                            settings = new ResSynth.settings.Settings(sp.name);
+
+                        settings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
+
+                        settings.bankIndex = sp.bankIndex;
+                        settings.presetIndex = sp.presetIndex;
+                        settings.mixtureIndex = sp.mixtureIndex;
+                        settings.tuningGroupIndex = sp.tuningGroupIndex;
+                        settings.tuningIndex = sp.tuningIndex;
+                        settings.semitonesOffset = sp.semitonesOffset;
+                        settings.centsOffset = sp.centsOffset;
+                        settings.pitchWheel = sp.pitchWheel;
+                        settings.modWheel = sp.modWheel;
+                        settings.volume = sp.volume;
+                        settings.pan = sp.pan;
+                        settings.reverberation = sp.reverberation;
+                        settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
+                        settings.triggerKey = sp.triggerKey;
+                        settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
+                        settings.keyboardOrnamentsArrayIndex = sp.keyboardOrnamentsArrayIndex;
+
+                        Object.freeze(settings); // attribute values are frozen
+
+                        newSynthSettings.channelSettings[channel] = settings; // override defaults
+                    }
+
+                    synthSettings.push(newSynthSettings);
                 }
             }
-
-            return settingsPresets;
+            return synthSettings;
         },
 
         getTuningGroups = function()
@@ -1734,7 +1757,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "webAudioFont", {value: channelPresets.webAudioFont, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(), writable: false});
-            Object.defineProperty(this, "settingsPresets", {value: getSettingsPresets(ResSynth.settingsPresets), writable: false});
+            Object.defineProperty(this, "synthSettings", {value: getSynthSettings(ResSynth.synthSettings), writable: false});
 
             setPrivateChannelPerKeyArrays();
             setPrivateKeyOrnamentsArrays();
@@ -1851,7 +1874,7 @@ ResSynth.residentSynth = (function(window)
             // This function is provided for use in other applications, such as the AssistantPerformer.
             function setSettings(channel, settingsIndex)
             {
-                let settings = settingsPresets[settingsIndex];
+                let settings = synthSettings[settingsIndex];
 
                 updateBankIndex(channel, settings.bankIndex);
                 channelControls[channel].presetIndex = settings.presetIndex;
