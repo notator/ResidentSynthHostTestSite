@@ -57,7 +57,7 @@ ResSynth.synthSettings =
     {
         // N.B. The .keyboardSplitIndex will be copied to each channel's settings internally.
         // It IS ALWAYS the same in all channelSettings in a synthSetting!
-        // The global setting will override any keyboardSplitIndex set here in the individual channelSettings.
+        // Any keyboardSplitIndex set here in the individual channelSettings will be ignored.
         "name": "settings 1 (keyboardSplitIndex 0)",
         "keyboardSplitIndex": 0,  // this is the default setting when this file does not exist or is empty.
         "channelSettings":
