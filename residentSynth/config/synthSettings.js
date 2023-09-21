@@ -35,7 +35,7 @@ console.log('load synthSettings.js');
 //      .keyboardSplitIndex // integer 0..n-1, where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
 //      .keyboardOrnamentsArrayIndex // integer 0..n-1, where n is the number of ornamentPerKeysStrings defined in ornamentDefs.js
 // integerInputs: // The values are numbers in input elements or selectedIndex values.
-//      .semitonesOffset // -36..+36
+//      .semitonesOffset // -50..+50
 //      .centsOffset // -50..+50
 //		.triggerKey // 0..127 (Not used by the ResidentSynth)
 // sliders:

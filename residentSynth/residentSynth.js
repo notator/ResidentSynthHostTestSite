@@ -1009,18 +1009,193 @@ ResSynth.residentSynth = (function(window)
                 return defaultSynthSettings;
             }
 
+            function checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsName)
+            {
+                let keyboardSplitDefs = ResSynth.keyboardSplitDefs,
+                    errorString = "";
+
+                if(keyboardSplitIndex < 0)
+                {
+                    errorString = `keyboardSplitIndex must be greater than 0`;
+                }
+                else if(keyboardSplitDefs === undefined)
+                {
+                    if(keyboardSplitIndex > 0)
+                    {
+                        errorString = `keyboardSplitIndex must be 0 if keyboardSplitDefs are undefined`;
+                    }
+                }
+                else if( keyboardSplitIndex >= keyboardSplitDefs.length)
+                {
+                    errorString = `keyboardSplitIndex must be less than keyboardSplitDefs length (${keyboardSplitDefs.length})`;
+                }
+
+                if(errorString.length > 0)
+                { 
+                    errorString = `Error in synthSettings (name:${synthSettingsName}):\n ` + errorString;
+                    alert(errorString);
+                    throw errorString;
+                }
+            }
+
+            function checkChannelSettings(channelSettings, synthSettingsName)
+            {
+                function midiRangeError(value)
+                {
+                    return (value < 0 || value > 127) ? true : false;
+                }
+
+                let webAudioFontDef = ResSynth.webAudioFontDef,
+                    mixtureDefs = ResSynth.mixtureDefs,
+                    tuningDefs = ResSynth.tuningDefs,
+                    ornamentDefs = ResSynth.ornamentDefs,
+                    bankIndex = channelSettings.bankIndex,
+                    presetIndex = channelSettings.presetIndex,
+                    mixtureIndex = channelSettings.mixtureIndex,
+                    tuningGroupIndex = channelSettings.tuningGroupIndex,
+                    tuningIndex = channelSettings.tuningIndex,
+                    semitonesOffset = channelSettings.semitonesOffset,
+                    centsOffset = channelSettings.centsOffset,
+                    pitchWheel = channelSettings.pitchWheel,
+                    modWheel = channelSettings.modWheel,
+                    volume = channelSettings.volume,
+                    pan = channelSettings.pan,
+                    reverberation = channelSettings.reverberation,
+                    pitchWheelSensitivity = channelSettings.pitchWheelSensitivity,
+                    triggerKey = channelSettings.triggerKey,
+                    velocityPitchSensitivity = channelSettings.velocityPitchSensitivity,
+                    keyboardOrnamentsArrayIndex = channelSettings.keyboardOrnamentsArrayIndex,
+                    errorString = "";
+
+                if(webAudioFontDef === undefined)
+                {
+                    errorString = `webAudioFont must be defined.`;
+                }
+                else if(bankIndex < 0 || bankIndex >= webAudioFontDef.length)
+                {
+                    errorString = `bankIndex out of range (0..${webAudioFontDef.length - 1}).`;
+                }
+                else if(presetIndex < 0 || presetIndex >= webAudioFontDef[bankIndex].presets.length)
+                {
+                    errorString = `preset out of range in webAudioFontDef bank (bankIndex=${bankIndex}, presetIndex=${presetIndex})`;
+                }
+                else if(mixtureIndex < 0)
+                {
+                    errorString = `mixtureIndex must be >= 0`;
+                }
+                else if(mixtureDefs === undefined)
+                {
+                    if(mixtureIndex > 0)
+                    {
+                        errorString = `mixtureIndex must be 0 if mixtureDefs are not defined.`;
+                    }
+                }
+                else if(mixtureIndex >= mixtureDefs.length)
+                {
+                    errorString = `mixtureIndex out of range (0..${mixtureDefs.length - 1}): (mixtureIndex=${mixtureIndex})`;
+                }
+                else if(tuningGroupIndex < 0)
+                {
+                    errorString = `tuningGroupIndex must be >= 0`;
+                }
+                else if(tuningDefs === undefined)
+                {
+                    if(tuningGroupIndex > 0)
+                    {
+                        errorString = `tuningGroupIndex must be 0 if tuningDefs are not defined.`;
+                    }
+                }
+                else if(tuningGroupIndex >= tuningDefs.length)
+                {
+                    errorString = `tuningGroupIndex out of range (0..${tuningDefs.length - 1}): (tuningGroupIndex=${tuningGroupIndex})`;
+                }
+                else if(tuningIndex < 0)
+                {
+                    errorString = `tuningIndex must be >= 0`;
+                }
+                else if(tuningIndex >= tuningDefs[tuningGroupIndex].tunings.length)
+                {
+                    errorString = `tuningIndex out of range (0..${tuningDefs[tuningGroupIndex].tunings.length - 1}): (tuningIndex=${tuningIndex})`;
+                }
+                else if(keyboardOrnamentsArrayIndex < 0)
+                {
+                    errorString = `keyboardOrnamentsArrayIndex must be >= 0`;
+                }
+                else if(ornamentDefs === undefined)
+                {
+                    if(keyboardOrnamentsArrayIndex > 0)
+                    {
+                        errorString = `keyboardOrnamentsArrayIndex must be 0 if ornamentDefs are not defined.`;
+                    }
+                }
+                else if(keyboardOrnamentsArrayIndex >= ornamentDefs.length)
+                {
+                    errorString = `keyboardOrnamentsArrayIndex out of range (0..${ornamentDefs.length - 1}): (keyboardOrnamentsArrayIndex=${keyboardOrnamentsArrayIndex})`;
+                }
+                else if(semitonesOffset < -50 || semitonesOffset > 50)
+                {
+                    errorString = `semitonesOffset out of range [-50..+50] (semitonesOffset=${semitonesOffset})`;
+                }
+                else if(centsOffset < -50 || centsOffset > 50)
+                {
+                    errorString = `centsOffset out of range [-50..+50] (centsOffset=${centsOffset})`;
+                }
+                else if(midiRangeError(pitchWheel))
+                {
+                    errorString = `pitchWheel out of range [0..127] (pitchWheel=${pitchWheel})`;
+                }
+                else if(midiRangeError(modWheel))
+                {
+                    errorString = `modWheel out of range [0..127] (modWheel=${modWheel})`;
+                }
+                else if(midiRangeError(volume))
+                {
+                    errorString = `volume out of range [0..127] (volume=${volume})`;
+                }
+                else if(midiRangeError(pan))
+                {
+                    errorString = `pan out of range [0..127] (pan=${pan})`;
+                }
+                else if(midiRangeError(reverberation))
+                {
+                    errorString = `reverberation out of range [0..127] (reverberation=${reverberation})`;
+                }
+                else if(midiRangeError(pitchWheelSensitivity))
+                {
+                    errorString = `pitchWheelSensitivity out of range [0..127] (pitchWheelSensitivity=${pitchWheelSensitivity})`;
+                }
+                else if(midiRangeError(triggerKey))
+                {
+                    errorString = `triggerKey out of range [0..127] (triggerKey=${triggerKey})`;
+                }
+                else if(midiRangeError(velocityPitchSensitivity))
+                {
+                    errorString = `velocityPitchSensitivity out of range [0..127] (velocityPitchSensitivity=${velocityPitchSensitivity})`;
+                }
+
+                if(errorString.length > 0)
+                {
+                    errorString = `Error in synthSettings(name: ${synthSettingsName}): \n ` + errorString;
+                    alert(errorString);
+                    throw errorString;
+                }
+            }
+
             synthSettings.push(getDefaultSynthSettings()); // default at index 0
 
             if(synthSettingsDefs !== undefined && synthSettingsDefs.length > 0)
             {
                 for(var index = 0; index < synthSettingsDefs.length; index++)
                 {
-                    let newSynthSettings = getDefaultSynthSettings(), // will now be overridden
+                    let newSynthSettings = {},
                         synthSettingsDef = synthSettingsDefs[index],
                         keyboardSplitIndex = synthSettingsDef.keyboardSplitIndex,
                         channelSettingsDefs = synthSettingsDef.channelSettings;
 
+                    checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsDef.name);
+
                     newSynthSettings.name = synthSettingsDef.name;
+                    newSynthSettings.channelSettings = [];
 
                     for(var channel = 0; channel < channelSettingsDefs.length; channel++)
                     {
@@ -1028,6 +1203,8 @@ ResSynth.residentSynth = (function(window)
                             settings = new ResSynth.settings.Settings(sp.name);
 
                         settings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
+
+                        checkChannelSettings(sp, synthSettingsDef.name);
 
                         settings.bankIndex = sp.bankIndex;
                         settings.presetIndex = sp.presetIndex;
@@ -1048,7 +1225,21 @@ ResSynth.residentSynth = (function(window)
 
                         Object.freeze(settings); // attribute values are frozen
 
-                        newSynthSettings.channelSettings[channel] = settings; // override defaults
+                        newSynthSettings.channelSettings.push(settings);
+                    }
+
+                    for(let channel = channelSettingsDefs.length; channel < 16; channel++)
+                    {
+                        // The constructor sets
+                        // .keyboardSplitIndex to its default (= 0)
+                        // .name to "default channel settings"
+                        let defaultSettings = new ResSynth.settings.Settings("default channel settings");
+
+                        // Override .keyboardSplitIndex:
+                        defaultSettings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
+
+                        Object.freeze(defaultSettings); // attribute values are frozen
+                        newSynthSettings.channelSettings.push(defaultSettings);
                     }
 
                     synthSettings.push(newSynthSettings);
