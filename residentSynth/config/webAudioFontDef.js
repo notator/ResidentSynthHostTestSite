@@ -37,7 +37,7 @@ ResSynth.installedPresetIndex =
     PERCUSSION_DRUMS: 127
 };
 
-// Each webAudioFontDef has an array of banks containing the instrument presets.
+// This webAudioFontDef contains an array of banks containing the instrument presets.
 // The MIDI BANK control message sets the current bank.
 // The MIDI PRESET command message will set the preset using the index in the bank's presets array.
 ResSynth.webAudioFontDef =
