@@ -17,15 +17,17 @@ console.log('load mixtureDefs.js');
 //   note is an integer in range 0..127 denoting the relevant note (value in MIDI message)
 //   mixtureIndex is an integer pointing at the mixture (extraNotes) to apply to this note.
 // A Mixture may not contain more than one except definition for a particular note.
+//
+// Even if this file is missing, the first mixture in the synth's internal mixtures array
+// (set using synth.getMixtures()) will always be a "no mixtures" entry having:
+//              {   // index 0
+//                  name: "no mixture",
+//                  extraNotes: [],
+//                  except: []
+//              } 
 ResSynth.mixtureDefs =
     [
-        // The first mixture definition in the list must be defined exactly like this.
-        {   // index 0
-            name: "no mixture",
-            extraNotes: [],
-            except: []
-        },
-        {   // index 1
+        {   // index 1 (index 0 is automatically "no mixtures" -- see above.)
             name: "just key 64",
             extraNotes: [],
             except:

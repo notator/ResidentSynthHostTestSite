@@ -663,6 +663,13 @@ ResSynth.residentSynth = (function(window)
                 checkMixturesInputFile(mixtures);
             }
 
+            let noMixture = {};
+            noMixture.name = "no mixture";
+            noMixture.extraNotes = [];
+            noMixture.except = [];
+
+            mixtures.unshift(noMixture);
+
             return mixtures;
         },
         // See comments in keyboardSplitDefs.js and ornamentDefs.js.
