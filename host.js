@@ -52,18 +52,18 @@ ResSynth.host = (function(document)
             }
         },
 
-        setExportState = function(hostChannelSettings)
+        setExportState = function(channel, hostChannelSettings)
         {
-            function getNameOfIdenticalPresetSettings(hostChannelSettings)
+            function getNameOfIdenticalPresetSettings(channel, hostChannelSettings)
             {
                 let presetName = undefined,
                     settingsSelectOptions = getElem("settingsSelect").options;
 
                 for(let i = 0; i < settingsSelectOptions.length; i++)
                 {
-                    let channelSettings = settingsSelectOptions[i].channelSettings;
+                    let channelSettings = settingsSelectOptions[i].synthSettings.channelSettings[channel];
 
-                    if(channelSettings.isEqual(hostChannelSettings))
+                    if(channelSettings.isEqual(hostChannelSettings) && channelSettings.keyboardSplitIndex === hostChannelSettings.keyboardSplitIndex)
                     {
                         presetName = channelSettings.name;
                         break;
@@ -73,7 +73,7 @@ ResSynth.host = (function(document)
             }
 
             let exportSettingsButton = getElem("exportSettingsButton"),
-                presetSettingsName = getNameOfIdenticalPresetSettings(hostChannelSettings);
+                presetSettingsName = getNameOfIdenticalPresetSettings(channel, hostChannelSettings);
 
             if(presetSettingsName !== undefined)
             {
@@ -185,7 +185,7 @@ ResSynth.host = (function(document)
             onChannelSelectChanged();
 
             keyboardSplitSelect.selectedIndex = settingsClone.keyboardSplitIndex,
-            onKeyboardSplitSelectChanged();
+                onKeyboardSplitSelectChanged();
         },
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
@@ -244,7 +244,7 @@ ResSynth.host = (function(document)
 
                     setTriggersDivControls(hostChannelSettings);
 
-                    setExportState(hostChannelSettings);
+                    setExportState(currentChannel, hostChannelSettings);
                 }
 
                 let data = e.data,
@@ -384,7 +384,7 @@ ResSynth.host = (function(document)
         // exported
         onChannelSelectChanged = function()
         {
-            
+
             function setAndSendWebAudioFontDivControls(hostChannelSettings)
             {
                 let bankSelect = getElem("bankSelect");
@@ -448,7 +448,7 @@ ResSynth.host = (function(document)
 
             setAndSendOrnamentsDivControls(hostChannelSettings);
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
 
             startRecordingButton.value = "start recording channel " + channel.toString();
             stopRecordingButton.value = "stop recording channel " + channel.toString();
@@ -481,7 +481,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.bankIndex = bankSelect.selectedIndex;
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
 
         // exported
@@ -507,7 +507,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.presetIndex = presetSelect.selectedIndex;
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
 
         // exported
@@ -531,7 +531,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.mixtureIndex = mixtureIndex;
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
 
         // exported (c.f. onBankSelectChanged() )
@@ -552,7 +552,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
 
         // exported
@@ -581,7 +581,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.tuningIndex = tuningIndex;
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
 
         // exported
@@ -607,7 +607,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.semitonesOffset = semitonesOffset;
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
         // exported
         onCentsOffsetNumberInputChanged = function()
@@ -632,7 +632,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.centsOffset = centsOffset;
 
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
 
         // Throws an exception either if nextSettingsIndex is out of range,
@@ -653,7 +653,7 @@ ResSynth.host = (function(document)
             }
             else
             {
-                settingsNameCell.innerHTML = "next settings: " + settingsSelect.options[nextSettingsIndex].settings.name;
+                settingsNameCell.innerHTML = "next settings: " + settingsSelect.options[nextSettingsIndex].synthSettings.name;
             }
         },
 
@@ -665,19 +665,92 @@ ResSynth.host = (function(document)
         //exported
         onExportSettingsButtonClicked = function()
         {
-            let channelSelect = getElem("channelSelect"),
-                exportSettingsButton = getElem("exportSettingsButton"),
-                hostChannelSettings = channelSelect.options[currentChannel].hostSettings,
-                exportName = hostChannelSettings.name;
+            function removeTrailingDefaultSettings(channelSettings)
+            {
+                let defaultSettings = new ResSynth.channelSettings.ChannelSettings();
+
+                for(let ch = 15; ch >= 0; ch--)
+                {
+                    if(defaultSettings.isEqual(channelSettings[ch]))
+                    {
+                        channelSettings.length -= 1;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            let channelOptions = getElem("channelSelect").options, 
+                settingsSelectSynthSettings = getElem("settingsSelect").options[settingsSelect.selectedIndex].synthSettings,
+                keyboardSplitChangedMsg = "",
+                modifiedChannelsString = "",
+                exportSettings = {};
+
+            
+
+            exportSettings.name = ""; // is set below
+            exportSettings.keyboardSplitIndex = channelOptions[0].hostSettings.keyboardSplitIndex;
+            exportSettings.channelSettings = [];
+
+            for(let ch = 0; ch < 16; ch++)
+            {
+                let exportChannelSettings = {},
+                    hostSettings = channelOptions[ch].hostSettings,                    
+                    settingsSelectChannelSettings = settingsSelectSynthSettings.channelSettings[ch];
+
+                exportChannelSettings.name = hostSettings.name;
+                exportChannelSettings.bankIndex = hostSettings.bankIndex;
+                exportChannelSettings.presetIndex = hostSettings.presetIndex;
+                exportChannelSettings.mixtureIndex = hostSettings.mixtureIndex;
+                exportChannelSettings.tuningGroupIndex = hostSettings.tuningGroupIndex;
+                exportChannelSettings.tuningIndex = hostSettings.tuningIndex;
+                exportChannelSettings.semitonesOffset = hostSettings.semitonesOffset;
+                exportChannelSettings.centsOffset = hostSettings.centsOffset;
+                exportChannelSettings.pitchWheel = hostSettings.pitchWheel;
+                exportChannelSettings.modWheel = hostSettings.modWheel;
+                exportChannelSettings.volume = hostSettings.volume;
+                exportChannelSettings.pan = hostSettings.pan;
+                exportChannelSettings.reverberation = hostSettings.reverberation;
+                exportChannelSettings.pitchWheelSensitivity = hostSettings.pitchWheelSensitivity;
+                exportChannelSettings.triggerKey = hostSettings.triggerKey;
+                exportChannelSettings.velocityPitchSensitivity = hostSettings.velocityPitchSensitivity;
+                //exportChannelSettings.keyboardSplitIndex = hostSettings.keyboardSplitIndex;
+                exportChannelSettings.keyboardOrnamentsArrayIndex = hostSettings.keyboardOrnamentsArrayIndex;
+
+                if(settingsSelectChannelSettings.isEqual(exportChannelSettings) === false)
+                {
+                    modifiedChannelsString = modifiedChannelsString.concat(`${ch}, `);
+                }
+
+                exportSettings.channelSettings.push(exportChannelSettings);
+            }
+
+            removeTrailingDefaultSettings(exportSettings.channelSettings);
+
+            if(modifiedChannelsString.length > 0)
+            {
+                modifiedChannelsString = modifiedChannelsString.slice(0, -2);
+            }
+            if(exportSettings.keyboardSplitIndex !== settingsSelectSynthSettings.channelSettings[0].keyboardSplitIndex)
+            {
+                keyboardSplitChangedMsg = "keyboard split and ";
+            }            
+
+            let msg = "(changed " + keyboardSplitChangedMsg + "channel(s) " + modifiedChannelsString + ")",
+                exportName = `${settingsSelectSynthSettings.name} ${msg}`;
+
+            exportSettings.name = exportName;            
 
             const a = document.createElement("a");
-            a.href = URL.createObjectURL(new Blob([JSON.stringify(hostChannelSettings, null, "\t")], {type: "text/plain"}));
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(exportSettings, null, "\t")], {type: "text/plain"}));
             a.setAttribute("download", exportName + ".json");
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
 
-            exportSettingsButton.disabled = true;
+            getElem("exportSettingsButton").disabled = true;
         },
 
         // exported
@@ -690,7 +763,7 @@ ResSynth.host = (function(document)
 
             triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
             hostChannelSettings.triggerKey = triggerKey;
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
         },
         // exported
         onPlayRecordingButtonClicked = async function()
@@ -1181,7 +1254,7 @@ ResSynth.host = (function(document)
             }
 
             hostChannelSettings.keyboardSplitIndex = keyboardSplitIndex;
-            setExportState(hostChannelSettings);            
+            setExportState(channel, hostChannelSettings);            
 
             synth.send(setKeyboardSplitIndexMsg);
         },
@@ -1197,7 +1270,7 @@ ResSynth.host = (function(document)
                 keyboardOrnamentsArrayIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_ORNAMENT_DEFS, keyboardOrnamentsArrayIndex]);
 
             hostChannelSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
-            setExportState(hostChannelSettings);
+            setExportState(channel, hostChannelSettings);
 
             synth.send(keyboardOrnamentsArrayIndexMsg);
         },
@@ -1419,8 +1492,8 @@ ResSynth.host = (function(document)
 
                 function setHostSettingsFromLongControl(longControl, value)
                 {
-                    let channelSelect = getElem("channelSelect"),
-                        hostChannelSettings = channelSelect.options[channelSelect.selectedIndex].hostSettings;
+                    let channel = getElem("channelSelect").selectedIndex,
+                        hostChannelSettings = channelSelect.options[channel].hostSettings;
 
                     if(hostChannelSettings !== undefined)
                     {
@@ -1454,7 +1527,7 @@ ResSynth.host = (function(document)
                                 break;
                         }
 
-                        setExportState(hostChannelSettings);
+                        setExportState(channel, hostChannelSettings);
                     }
                 }
 
@@ -1876,17 +1949,17 @@ ResSynth.host = (function(document)
                 function setSettingsSelect()
                 {
                     let settingsSelect = getElem("settingsSelect"),
-                        settingsPresets = synth.settingsPresets;
+                        synthSettings = synth.synthSettings;
 
-                    console.assert(settingsPresets.length < 127);
+                    console.assert(synthSettings.length < 127);
 
-                    for(let settingsIndex = 0; settingsIndex < settingsPresets.length; settingsIndex++)
+                    for(let settingsIndex = 0; settingsIndex < synthSettings.length; settingsIndex++)
                     {
-                        let settingsPreset = settingsPresets[settingsIndex],
+                        let synSettings = synthSettings[settingsIndex],
                             option = new Option();
 
-                        option.innerHTML = settingsPreset.name;
-                        option.settings = settingsPreset; // is frozen
+                        option.innerHTML = synSettings.name;
+                        option.synthSettings = synSettings;
 
                         settingsSelect.options.add(option);
                     }
@@ -1926,12 +1999,12 @@ ResSynth.host = (function(document)
                 function setDefaultHostSettingsForEachChannel()
                 {
                     let settingsSelect = getElem("settingsSelect"),
-                        defaultSettings = settingsSelect.options[0].channelSettings,
+                        defaultChannelSettings = settingsSelect.options[0].synthSettings.channelSettings,
                         channelOptions = getElem("channelSelect").options;
 
                     for(let channel = 0; channel < channelOptions.length; channel++)
                     {
-                        channelOptions[channel].hostSettings = {...defaultSettings}; // clone
+                        channelOptions[channel].hostSettings = {...defaultChannelSettings[channel]}; // clone
                     }
                 }
 

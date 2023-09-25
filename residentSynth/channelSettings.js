@@ -50,8 +50,9 @@ ResSynth.channelSettings = (function()
         ChannelSettings: ChannelSettings // constructor
     };
 
-    // Returns true if all attributes have the same values, otherwise false.
-    // Ignores the "name" attribute.
+    // Returns true if all attributes (except .name and .keyboardSplitIndex attributes)
+    // have the same values, otherwise false.
+    // Simply ignores the .name and .keyboardSplitIndex attributes.
     ChannelSettings.prototype.isEqual = function(otherSettings)
     {
         let rval = true;
@@ -71,7 +72,7 @@ ResSynth.channelSettings = (function()
         || this.pitchWheelSensitivity !== otherSettings.pitchWheelSensitivity
         || this.triggerKey !== otherSettings.triggerKey
         || this.velocityPitchSensitivity !== otherSettings.velocityPitchSensitivity
-        || this.keyboardSplitIndex !== otherSettings.keyboardSplitIndex
+        //|| this.keyboardSplitIndex !== otherSettings.keyboardSplitIndex
         || this.keyboardOrnamentsArrayIndex !== otherSettings.keyboardOrnamentsArrayIndex)
         {
             rval = false;
