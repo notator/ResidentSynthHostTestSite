@@ -12,15 +12,15 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
-ResSynth.settings = (function()
+ResSynth.channelSettings = (function()
 {
     "use strict";
 
-    let Settings = function(name)
+    let ChannelSettings = function(name)
     {
-        if(!(this instanceof Settings))
+        if(!(this instanceof ChannelSettings))
         {
-            return new Settings(name);
+            return new ChannelSettings(name);
         }
 
         this.name = name;
@@ -47,12 +47,12 @@ ResSynth.settings = (function()
 
     API =
     {
-        Settings: Settings // constructor
+        ChannelSettings: ChannelSettings // constructor
     };
 
     // Returns true if all attributes have the same values, otherwise false.
     // Ignores the "name" attribute.
-    Settings.prototype.isEqual = function(otherSettings)
+    ChannelSettings.prototype.isEqual = function(otherSettings)
     {
         let rval = true;
 

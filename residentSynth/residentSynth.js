@@ -987,7 +987,7 @@ ResSynth.residentSynth = (function(window)
         // Sets and returns the internal, global synthSettings array. This will contain a default SynthSettings object followed by
         // the values set in the synthSettings.js file.
         // The values in the attributes of the returned channelSettings objects are immutable.
-        // Clone channelSettings using {...settings} to create an object having mutable attributes.
+        // Clone channelSettings using {...channelSettings} to create an object having mutable attributes.
         // (Attributes can never be created or destroyed.)
         getSynthSettings = function(synthSettingsDefs)
         {
@@ -1001,7 +1001,7 @@ ResSynth.residentSynth = (function(window)
                 for(let channel = 0; channel < 16; channel++)
                 {
                     // The constructor sets .keyboardSplitIndex to its default (= 0);
-                    let defaultSettings = new ResSynth.settings.Settings("default channel settings");
+                    let defaultSettings = new ResSynth.channelSettings.ChannelSettings("default channel settings");
                     Object.freeze(defaultSettings); // attribute values are frozen
                     defaultSynthSettings.channelSettings.push(defaultSettings);
                 }
@@ -1200,32 +1200,32 @@ ResSynth.residentSynth = (function(window)
                     for(var channel = 0; channel < channelSettingsDefs.length; channel++)
                     {
                         let sp = channelSettingsDefs[channel],
-                            settings = new ResSynth.settings.Settings(sp.name);
+                            channelSettings = new ResSynth.channelSettings.ChannelSettings(sp.name);
 
-                        settings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
+                        channelSettings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
 
                         checkChannelSettings(sp, synthSettingsDef.name);
 
-                        settings.bankIndex = sp.bankIndex;
-                        settings.presetIndex = sp.presetIndex;
-                        settings.mixtureIndex = sp.mixtureIndex;
-                        settings.tuningGroupIndex = sp.tuningGroupIndex;
-                        settings.tuningIndex = sp.tuningIndex;
-                        settings.semitonesOffset = sp.semitonesOffset;
-                        settings.centsOffset = sp.centsOffset;
-                        settings.pitchWheel = sp.pitchWheel;
-                        settings.modWheel = sp.modWheel;
-                        settings.volume = sp.volume;
-                        settings.pan = sp.pan;
-                        settings.reverberation = sp.reverberation;
-                        settings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
-                        settings.triggerKey = sp.triggerKey;
-                        settings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
-                        settings.keyboardOrnamentsArrayIndex = sp.keyboardOrnamentsArrayIndex;
+                        channelSettings.bankIndex = sp.bankIndex;
+                        channelSettings.presetIndex = sp.presetIndex;
+                        channelSettings.mixtureIndex = sp.mixtureIndex;
+                        channelSettings.tuningGroupIndex = sp.tuningGroupIndex;
+                        channelSettings.tuningIndex = sp.tuningIndex;
+                        channelSettings.semitonesOffset = sp.semitonesOffset;
+                        channelSettings.centsOffset = sp.centsOffset;
+                        channelSettings.pitchWheel = sp.pitchWheel;
+                        channelSettings.modWheel = sp.modWheel;
+                        channelSettings.volume = sp.volume;
+                        channelSettings.pan = sp.pan;
+                        channelSettings.reverberation = sp.reverberation;
+                        channelSettings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
+                        channelSettings.triggerKey = sp.triggerKey;
+                        channelSettings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
+                        channelSettings.keyboardOrnamentsArrayIndex = sp.keyboardOrnamentsArrayIndex;
 
-                        Object.freeze(settings); // attribute values are frozen
+                        Object.freeze(channelSettings); // attribute values are frozen
 
-                        newSynthSettings.channelSettings.push(settings);
+                        newSynthSettings.channelSettings.push(channelSettings);
                     }
 
                     for(let channel = channelSettingsDefs.length; channel < 16; channel++)
@@ -1233,7 +1233,7 @@ ResSynth.residentSynth = (function(window)
                         // The constructor sets
                         // .keyboardSplitIndex to its default (= 0)
                         // .name to "default channel settings"
-                        let defaultSettings = new ResSynth.settings.Settings("default channel settings");
+                        let defaultSettings = new ResSynth.channelSettings.ChannelSettings("default channel settings");
 
                         // Override .keyboardSplitIndex:
                         defaultSettings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
@@ -1418,8 +1418,8 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            channelControls[channel].pitchWheelData1 = data1; // for restoring settings
-            channelControls[channel].pitchWheelData2 = data2; // for restoring settings
+            channelControls[channel].pitchWheelData1 = data1; // for restoring channelSettings
+            channelControls[channel].pitchWheelData2 = data2; // for restoring channelSettings
             channelControls[channel].pitchWheel14Bit = pitchWheel14Bit; // for new noteOns
         },
         // The value argument is in range [0..127], meaning not modulated to as modulated as possible.
@@ -2061,29 +2061,29 @@ ResSynth.residentSynth = (function(window)
             }
 
             // Note that the ResidentSynthHost does not call this function (i.e. send SET_SETTINGS messages)
-            // because it needs to update the ResidentSynth's settings incrementally.
+            // because it needs to update the ResidentSynth's channelSettings incrementally.
             // This function is provided for use in other applications, such as the AssistantPerformer.
             function setSettings(channel, settingsIndex)
             {
-                let settings = synthSettings[settingsIndex];
+                let channelSettings = synthSettings[settingsIndex];
 
-                updateBankIndex(channel, settings.bankIndex);
-                channelControls[channel].presetIndex = settings.presetIndex;
-                updateMixtureIndex(channel, settings.mixtureIndex);
-                updateTuningGroupIndex(channel, settings.tuningGroupIndex);
-                updateTuning(channel, settings.tuningIndex);
-                updateSemitonesOffset(channel, settings.semitonesOffset);
-                updateCentsOffset(channel, settings.centsOffset);
-                updatePitchWheel(channel, settings.pitchWheel, settings.pitchWheel);
-                updateModWheel(channel, settings.modWheel);
-                updateVolume(channel, settings.volume);
-                updatePan(channel, settings.pan);
-                updateReverberation(channel, settings.reverberation);
-                updatePitchWheelSensitivity(channel, settings.pitchWheelSensitivity);
-                updateTriggerKey(channel, settings.triggerkey);
-                updateVelocityPitchSensitivity(channel, settings.velocityPitchSensitivity);
-                updateKeyboardSplit(channel, settings.keyboardSplitIndex);
-                updateInKeyOrnamentDefs(channel, settings.keyboardOrnamentsArrayIndex);
+                updateBankIndex(channel, channelSettings.bankIndex);
+                channelControls[channel].presetIndex = channelSettings.presetIndex;
+                updateMixtureIndex(channel, channelSettings.mixtureIndex);
+                updateTuningGroupIndex(channel, channelSettings.tuningGroupIndex);
+                updateTuning(channel, channelSettings.tuningIndex);
+                updateSemitonesOffset(channel, channelSettings.semitonesOffset);
+                updateCentsOffset(channel, channelSettings.centsOffset);
+                updatePitchWheel(channel, channelSettings.pitchWheel, channelSettings.pitchWheel);
+                updateModWheel(channel, channelSettings.modWheel);
+                updateVolume(channel, channelSettings.volume);
+                updatePan(channel, channelSettings.pan);
+                updateReverberation(channel, channelSettings.reverberation);
+                updatePitchWheelSensitivity(channel, channelSettings.pitchWheelSensitivity);
+                updateTriggerKey(channel, channelSettings.triggerkey);
+                updateVelocityPitchSensitivity(channel, channelSettings.velocityPitchSensitivity);
+                updateKeyboardSplit(channel, channelSettings.keyboardSplitIndex);
+                updateInKeyOrnamentDefs(channel, channelSettings.keyboardOrnamentsArrayIndex);
             }
 
             switch(control)

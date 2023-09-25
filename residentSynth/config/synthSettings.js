@@ -55,7 +55,7 @@ ResSynth.synthSettings =
     // containing the default channelSetting in each channel, at index 0 of its list of alternate synthSettings.
     // The first synthSetting to be defined here will therefore be at index 1.
     {
-        // N.B. The .keyboardSplitIndex will be copied to each channel's settings internally.
+        // N.B. The .keyboardSplitIndex will be copied to each channel's channelSettings internally.
         // It IS ALWAYS the same in all channelSettings in a synthSetting!
         // Any keyboardSplitIndex set here in the individual channelSettings will be ignored.
         "name": "settings 1 (keyboardSplitIndex 0)",
@@ -165,7 +165,7 @@ ResSynth.synthSettings =
                     "keyboardOrnamentsArrayIndex": 1
                 },
                 {
-                    "name": "channel 1: (=defaults)", // this settings contains the default settings
+                    "name": "channel 1: (=defaults)", // this channelSettings contains the default channelSettings
                     "bankIndex": 0,
                     "presetIndex": 0,
                     "mixtureIndex": 0,
