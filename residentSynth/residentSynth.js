@@ -22,10 +22,11 @@ ResSynth.residentSynth = (function(window)
         channelPresets = [], // set in updateBankIndex
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
-        mixtures = [], // initialized by getMixtures()
+        mixtures = [], // set by getMixtures()
+        tuningGroups = [], // set by getTuningGroups()
         channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays(). This array has elements in range 0..15. Its length can be either 0 or 128.
-        inKeyOrnamentDefsArrays = [], // initialized by setPrivateOrnamentPerKeyArrays(). This array may have undefined elements, and its length may be anything in range 0..128.
-        tuningGroups = [],
+        inKeyOrnamentDefsArrays = [], // initialized by setPrivateOrnamentPerKeyArrays().
+
         synthSettings = [],
 
         // see: https://developer.chrome.com/blog/audiocontext-setsinkid/
@@ -657,7 +658,7 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            if(ResSynth.mixtureDefs !== undefined)
+            if(ResSynth.mixtureDefs !== undefined && ResSynth.mixtureDefs.length > 0)
             {
                 mixtures = ResSynth.mixtureDefs;
                 checkMixturesInputFile(mixtures);
@@ -672,6 +673,113 @@ ResSynth.residentSynth = (function(window)
 
             return mixtures;
         },
+
+        getTuningGroups = function()
+        {
+            let tuningsFactory = new ResSynth.tuningsFactory.TuningsFactory(),
+                tuningGroupDefs = ResSynth.tuningDefs,
+                wmtg = ResSynth.tuningConstructors;
+
+            if(tuningGroupDefs !== undefined || tuningGroupDefs.length > 0)
+            {
+                for(var i = 0; i < tuningGroupDefs.length; i++)
+                {
+                    let tuningGroupDef = tuningGroupDefs[i],
+                        tuningDefs = tuningGroupDef.tunings,
+                        tuningGroup = [];
+
+                    tuningGroup.name = tuningGroupDef.name;
+
+                    switch(tuningGroupDef.ctor)
+                    {
+                        case wmtg.FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        root = tuningDef.root,
+                                        factor = tuningDef.factor,
+                                        tuning = tuningsFactory.getTuningFromConstantFactor(root, factor);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        case wmtg.FUNCTION_GET_PARTCH_TUNING:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        root = tuningDef.root,
+                                        tuning = tuningsFactory.getPartchTuning(root);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        case wmtg.FUNCTION_GET_WARPED_OCTAVES_TUNING:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        keyValuesArray = tuningDef.keyValuesArray,
+                                        tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "octaves");
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        case wmtg.FUNCTION_GET_WARPED_GAMUT_TUNING:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        keyValuesArray = tuningDef.keyValuesArray,
+                                        tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "gamut");
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        case wmtg.FUNCTION_GET_BAROQUE_TUNING:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        offsets = tuningDef.offsets,
+                                        tuning = tuningsFactory.getBaroqueTuning(offsets);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        default:
+                            console.assert(false, "Unknown tuning type.");
+                    }
+
+                    tuningGroups.push(tuningGroup);
+                }
+            }
+
+            if(tuningGroups.length === 0)
+            {
+                // default tuning
+                let tuningGroup = [],
+                    tuning = tuningsFactory.getEqualTemperamentTuning();
+
+                tuning.name = "Equal Temperament";
+                tuningGroup.push(tuning);
+                tuningGroups.push(tuningGroup);
+            }
+
+            return tuningGroups;
+        },
+
         // See comments in keyboardSplitDefs.js and ornamentDefs.js.
         // Further checking is done in setPrivateChannelPerKeyArrays() and setPrivateOrnamentPerKeyArrays().
         // Throws an exception if an error is found in the keyboardSplitDefs.
@@ -1253,111 +1361,6 @@ ResSynth.residentSynth = (function(window)
                 }
             }
             return synthSettings;
-        },
-
-        getTuningGroups = function()
-        {
-            let tuningsFactory = new ResSynth.tuningsFactory.TuningsFactory(),
-                tuningGroupDefs = ResSynth.tuningDefs,
-                wmtg = ResSynth.tuningConstructors;
-
-            if(tuningGroupDefs === undefined || tuningGroupDefs.length === 0)
-            {
-                // default tuning
-                let tuningGroup = [],
-                    tuning = tuningsFactory.getEqualTemperamentTuning();
-
-                tuning.name = "Equal Temperament";
-                tuningGroup.push(tuning);
-                tuningGroups.push(tuningGroup);
-            }
-            else
-            {
-                for(var i = 0; i < tuningGroupDefs.length; i++)
-                {
-                    let tuningGroupDef = tuningGroupDefs[i],
-                        tuningDefs = tuningGroupDef.tunings,
-                        tuningGroup = [];
-
-                    tuningGroup.name = tuningGroupDef.name;
-
-                    switch(tuningGroupDef.ctor)
-                    {
-                        case wmtg.FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR:
-                            {
-                                for(let k = 0; k < tuningDefs.length; k++)
-                                {
-                                    let tuningDef = tuningDefs[k],
-                                        root = tuningDef.root,
-                                        factor = tuningDef.factor,
-                                        tuning = tuningsFactory.getTuningFromConstantFactor(root, factor);
-
-                                    tuning.name = tuningDef.name;
-                                    tuningGroup.push(tuning);
-                                }
-                                break;
-                            }
-                        case wmtg.FUNCTION_GET_PARTCH_TUNING:
-                            {
-                                for(let k = 0; k < tuningDefs.length; k++)
-                                {
-                                    let tuningDef = tuningDefs[k],
-                                        root = tuningDef.root,
-                                        tuning = tuningsFactory.getPartchTuning(root);
-
-                                    tuning.name = tuningDef.name;
-                                    tuningGroup.push(tuning);
-                                }
-                                break;
-                            }
-                        case wmtg.FUNCTION_GET_WARPED_OCTAVES_TUNING:
-                            {
-                                for(let k = 0; k < tuningDefs.length; k++)
-                                {
-                                    let tuningDef = tuningDefs[k],
-                                        keyValuesArray = tuningDef.keyValuesArray,
-                                        tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "octaves");
-
-                                    tuning.name = tuningDef.name;
-                                    tuningGroup.push(tuning);
-                                }
-                                break;
-                            }
-                        case wmtg.FUNCTION_GET_WARPED_GAMUT_TUNING:
-                            {
-                                for(let k = 0; k < tuningDefs.length; k++)
-                                {
-                                    let tuningDef = tuningDefs[k],
-                                        keyValuesArray = tuningDef.keyValuesArray,
-                                        tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "gamut");
-
-                                    tuning.name = tuningDef.name;
-                                    tuningGroup.push(tuning);
-                                }
-                                break;
-                            }
-                        case wmtg.FUNCTION_GET_BAROQUE_TUNING:
-                            {
-                                for(let k = 0; k < tuningDefs.length; k++)
-                                {
-                                    let tuningDef = tuningDefs[k],
-                                        offsets = tuningDef.offsets,
-                                        tuning = tuningsFactory.getBaroqueTuning(offsets);
-
-                                    tuning.name = tuningDef.name;
-                                    tuningGroup.push(tuning);
-                                }
-                                break;
-                            }
-                        default:
-                            console.assert(false, "Unknown tuning type.");
-                    }
-
-                    tuningGroups.push(tuningGroup);
-                }
-            }
-
-            return tuningGroups;
         },
 
         /*****************************************/
