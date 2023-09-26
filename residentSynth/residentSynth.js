@@ -1540,13 +1540,21 @@ ResSynth.residentSynth = (function(window)
             // returns a new midiAttributes object
             function getMidiAttributes(chanPresets, chanControls, inKey, inVelocity)
             {
-                let midi = {};
+                function midiLimit(value)
+                {
+                    value = (value > 127) ? 127 : value;
+                    value = (value < 0) ? 0 : value;
+
+                    return value;
+                }
+
+                let midi = {}; 
 
                 midi.preset = chanPresets[chanControls.presetIndex];
                 midi.inKey = inKey;  // the note stops when the inKey's noteOff arrives                
                 midi.inVelocity = inVelocity;
                 // keyCentsPitch is the pitch described as a key.cents value in equal temperament.
-                midi.keyCentsPitch = chanControls.tuning[inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100);
+                midi.keyCentsPitch = midiLimit(chanControls.tuning[inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100));
 
                 // velocityPitchValue14Bit is always the same for all octaves of the same absolute pitch
                 let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (midi.inKey % 12));
@@ -1573,7 +1581,7 @@ ResSynth.residentSynth = (function(window)
                     zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
                     if(!zone)
                     {
-                        console.throw("zone  not found");
+                        throw "zone  not found";
                     }
                     // note on
                     note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
@@ -2063,11 +2071,13 @@ ResSynth.residentSynth = (function(window)
 
         function handleControl(channel, control, value)
         {
-            // Converts the midiValue (in range 0..127) to an integer value in range -50..+50.
-            // Used by both setSemitonesOffset(...) and setCentsOffset(...).
+            // Converts the midiValue (in range 0..127) to an integer value in range -64..+63.
+            // This function is used by both setSemitonesOffset(...) and setCentsOffset(...).
+            // The semitonesOffset control is currently limited to values in range -64..+63,
+            // the centsOffset control is currently limited to values in range -50..+50 (i.e. midiValues in range 14..114)
             function getOffsetValue(midiValue)
             {
-                return Math.round((midiValue / 1.27) - 50);
+                return midiValue - 64;
             }
 
             // Note that the ResidentSynthHost does not call this function (i.e. send SET_SETTINGS messages)

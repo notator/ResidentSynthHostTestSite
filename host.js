@@ -596,10 +596,6 @@ ResSynth.host = (function(document)
                 midiValue,
                 semitonesOffsetMsg;
 
-            semitonesOffset = (semitonesOffset < -36) ? -36 : semitonesOffset;
-            semitonesOffset = (semitonesOffset > 36) ? 36 : semitonesOffset;
-            semitonesOffsetNumberInput.value = semitonesOffset;
-
             midiValue = semitonesOffsetNumberInput.midiValue(semitonesOffset);
             semitonesOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SEMITONES_OFFSET, midiValue]);
 
@@ -620,10 +616,6 @@ ResSynth.host = (function(document)
                 centsOffset = parseInt(centsOffsetNumberInput.value),
                 midiValue,
                 centsOffsetMsg;
-
-            centsOffset = (centsOffset < -50) ? -50 : centsOffset;
-            centsOffset = (centsOffset > 50) ? 50 : centsOffset;
-            centsOffsetNumberInput.value = centsOffset;
 
             midiValue = centsOffsetNumberInput.midiValue(centsOffset);
             centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, midiValue]);
@@ -1492,9 +1484,9 @@ ResSynth.host = (function(document)
 
                 function setSemitonesAndCentsControls()
                 {
-                    function getMidiValue(offsetValue)
+                    function getMidiValue(controlValue)
                     {
-                        return Math.round((offsetValue + 50) * 1.27);
+                        return controlValue + 64;
                     }
 
                     let semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
