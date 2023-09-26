@@ -682,70 +682,84 @@ ResSynth.host = (function(document)
                 }
             }
 
-            let channelOptions = getElem("channelSelect").options, 
-                settingsSelectSynthSettings = getElem("settingsSelect").options[settingsSelect.selectedIndex].synthSettings,
-                keyboardSplitChangedMsg = "",
-                modifiedChannelsString = "",
-                exportSettings = {};
-
-            
-
-            exportSettings.name = ""; // is set below
-            exportSettings.keyboardSplitIndex = channelOptions[0].hostSettings.keyboardSplitIndex;
-            exportSettings.channelSettings = [];
-
-            for(let ch = 0; ch < 16; ch++)
+            function getExportName(settingsSelectSynthSettingsName, modifiedChannelsString, settingsSelectKeyboardSplitIndex, exportKeyboardSplitIndex)
             {
-                let exportChannelSettings = {},
-                    hostSettings = channelOptions[ch].hostSettings,                    
-                    settingsSelectChannelSettings = settingsSelectSynthSettings.channelSettings[ch];
+                let keyboardSplitChangedMsg = "";
 
-                exportChannelSettings.name = hostSettings.name;
-                exportChannelSettings.bankIndex = hostSettings.bankIndex;
-                exportChannelSettings.presetIndex = hostSettings.presetIndex;
-                exportChannelSettings.mixtureIndex = hostSettings.mixtureIndex;
-                exportChannelSettings.tuningGroupIndex = hostSettings.tuningGroupIndex;
-                exportChannelSettings.tuningIndex = hostSettings.tuningIndex;
-                exportChannelSettings.semitonesOffset = hostSettings.semitonesOffset;
-                exportChannelSettings.centsOffset = hostSettings.centsOffset;
-                exportChannelSettings.pitchWheel = hostSettings.pitchWheel;
-                exportChannelSettings.modWheel = hostSettings.modWheel;
-                exportChannelSettings.volume = hostSettings.volume;
-                exportChannelSettings.pan = hostSettings.pan;
-                exportChannelSettings.reverberation = hostSettings.reverberation;
-                exportChannelSettings.pitchWheelSensitivity = hostSettings.pitchWheelSensitivity;
-                exportChannelSettings.triggerKey = hostSettings.triggerKey;
-                exportChannelSettings.velocityPitchSensitivity = hostSettings.velocityPitchSensitivity;
-                //exportChannelSettings.keyboardSplitIndex = hostSettings.keyboardSplitIndex;
-                exportChannelSettings.keyboardOrnamentsArrayIndex = hostSettings.keyboardOrnamentsArrayIndex;
-
-                if(settingsSelectChannelSettings.isEqual(exportChannelSettings) === false)
+                if(settingsSelectKeyboardSplitIndex !== exportKeyboardSplitIndex)
                 {
-                    modifiedChannelsString = modifiedChannelsString.concat(`${ch}, `);
+                    keyboardSplitChangedMsg = "keyboard split and ";
                 }
 
-                exportSettings.channelSettings.push(exportChannelSettings);
+                let msg = "(changed " + keyboardSplitChangedMsg + "channel(s) " + modifiedChannelsString + ")",
+                    exportName = `${settingsSelectSynthSettingsName} ${msg}`;
+
+                return exportName;  
             }
 
-            removeTrailingDefaultSettings(exportSettings.channelSettings);
-
-            if(modifiedChannelsString.length > 0)
+            function getChannelSettings(hostChannelOptions, settingsSelectChannelSettingsArray)
             {
-                modifiedChannelsString = modifiedChannelsString.slice(0, -2);
+                let modifiedChannelsString = "",
+                    channelSettings = [];
+
+                for(let ch = 0; ch < 16; ch++)
+                {
+                    let exportChannelSettings = {},
+                        hostSettings = hostChannelOptions[ch].hostSettings;
+
+                    exportChannelSettings.name = hostSettings.name;
+                    exportChannelSettings.bankIndex = hostSettings.bankIndex;
+                    exportChannelSettings.presetIndex = hostSettings.presetIndex;
+                    exportChannelSettings.mixtureIndex = hostSettings.mixtureIndex;
+                    exportChannelSettings.tuningGroupIndex = hostSettings.tuningGroupIndex;
+                    exportChannelSettings.tuningIndex = hostSettings.tuningIndex;
+                    exportChannelSettings.semitonesOffset = hostSettings.semitonesOffset;
+                    exportChannelSettings.centsOffset = hostSettings.centsOffset;
+                    exportChannelSettings.pitchWheel = hostSettings.pitchWheel;
+                    exportChannelSettings.modWheel = hostSettings.modWheel;
+                    exportChannelSettings.volume = hostSettings.volume;
+                    exportChannelSettings.pan = hostSettings.pan;
+                    exportChannelSettings.reverberation = hostSettings.reverberation;
+                    exportChannelSettings.pitchWheelSensitivity = hostSettings.pitchWheelSensitivity;
+                    exportChannelSettings.triggerKey = hostSettings.triggerKey;
+                    exportChannelSettings.velocityPitchSensitivity = hostSettings.velocityPitchSensitivity;
+                    //exportChannelSettings.keyboardSplitIndex = hostSettings.keyboardSplitIndex;
+                    exportChannelSettings.keyboardOrnamentsArrayIndex = hostSettings.keyboardOrnamentsArrayIndex;
+
+                    if(settingsSelectChannelSettingsArray[ch].isEqual(exportChannelSettings) === false)
+                    {
+                        modifiedChannelsString = modifiedChannelsString.concat(`${ch}, `);
+                    }
+
+                    channelSettings.push(exportChannelSettings);
+                }
+
+                removeTrailingDefaultSettings(channelSettings);
+
+                if(modifiedChannelsString.length > 0)
+                {
+                    modifiedChannelsString = modifiedChannelsString.slice(0, -2);
+                }
+
+                return {modifiedChannelsString, channelSettings};
             }
-            if(exportSettings.keyboardSplitIndex !== settingsSelectSynthSettings.channelSettings[0].keyboardSplitIndex)
-            {
-                keyboardSplitChangedMsg = "keyboard split and ";
-            }            
 
-            let msg = "(changed " + keyboardSplitChangedMsg + "channel(s) " + modifiedChannelsString + ")",
-                exportName = `${settingsSelectSynthSettings.name} ${msg}`;
+            let hostChannelOptions = getElem("channelSelect").options, 
+                settingsSelectSynthSettings = getElem("settingsSelect").options[settingsSelect.selectedIndex].synthSettings,
+                settingsSelectSynthSettingsName = settingsSelectSynthSettings.name,
+                settingsSelectChannelSettings = settingsSelectSynthSettings.channelSettings,
+                exportKeyboardSplitIndex = hostChannelOptions[0].hostSettings.keyboardSplitIndex,
+                settingsSelectKeyboardSplitIndex = settingsSelectChannelSettings[0].keyboardSplitIndex,
+                {modifiedChannelsString, channelSettings} = getChannelSettings(hostChannelOptions, settingsSelectChannelSettings),
+                exportSettings = {};
 
-            exportSettings.name = exportName;            
+            exportSettings.name = getExportName(settingsSelectSynthSettingsName, modifiedChannelsString, settingsSelectKeyboardSplitIndex, exportKeyboardSplitIndex);
+            exportSettings.keyboardSplitIndex = exportKeyboardSplitIndex;
+            exportSettings.channelSettings = channelSettings;
 
             const a = document.createElement("a");
             a.href = URL.createObjectURL(new Blob([JSON.stringify(exportSettings, null, "\t")], {type: "text/plain"}));
-            a.setAttribute("download", exportName + ".json");
+            a.setAttribute("download", exportSettings.name + ".json");
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
