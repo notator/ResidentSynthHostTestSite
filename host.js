@@ -168,24 +168,33 @@ ResSynth.host = (function(document)
             sendCommand(ResSynth.constants.COMMAND.CONTROL_CHANGE, controlIndex);
         },
 
-        // sets the new channel state in both the host and the synth
+        // sets all channels in the new synth state in both the host and the synth
         setSettings = function(settingsIndex)
         {
             let settingsSelect = getElem("settingsSelect"),
-                channelSettings = settingsSelect.options[settingsIndex].channelSettings,
+                channelSettingsArray = settingsSelect.options[settingsIndex].synthSettings.channelSettings,
                 channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex,
-                keyboardSplitSelect = getElem("keyboardSplitSelect"),
-                settingsClone = {...channelSettings};
+                keyboardSplitSelect = getElem("keyboardSplitSelect");
 
             // decided _not_ to silence the synth while resetting all the controls.
             // sendShortControl(ResSynth.constants.CONTROL.ALL_SOUND_OFF);
 
-            channelSelect.options[channel].hostSettings = settingsClone;
-            onChannelSelectChanged();
+            console.assert(channelSettingsArray.length === 16);
 
-            keyboardSplitSelect.selectedIndex = settingsClone.keyboardSplitIndex,
-                onKeyboardSplitSelectChanged();
+            for(let channel = 0; channel < channelSettingsArray.length; channel++)
+            {
+                let channelSettings = {...channelSettingsArray[channel]};
+
+                channelSelect.options[channel].hostSettings = channelSettings;
+                channelSelect.selectedIndex = channel;
+                onChannelSelectChanged(); // update synth
+            }
+
+            keyboardSplitSelect.selectedIndex = channelSelect.options[0].hostSettings.keyboardSplitIndex;
+            onKeyboardSplitSelectChanged();
+
+            channelSelect.selectedIndex = 0;
+            onChannelSelectChanged();
         },
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
