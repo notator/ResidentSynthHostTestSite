@@ -1110,7 +1110,7 @@ ResSynth.residentSynth = (function(window)
             {
                 let defaultSynthSettings = {};
 
-                defaultSynthSettings.name = "default settings";
+                defaultSynthSettings.name = "default settings in all channels";
                 defaultSynthSettings.channelSettings = [];
 
                 for(let channel = 0; channel < 16; channel++)
@@ -1155,9 +1155,20 @@ ResSynth.residentSynth = (function(window)
 
             function checkChannelSettings(channelSettings, synthSettingsName)
             {
+                function getErrorString(errorString, errorCondition, errorMessage)
+                {
+                    errorString = (errorCondition) ? errorString.concat(errorMessage, "\n") : errorString;
+                    return errorString;
+                }
+
                 function midiRangeError(value)
                 {
                     return (value < 0 || value > 127) ? true : false;
+                }
+
+                function midiErrorMsg(ctlString, value)
+                {
+                    return `${ctlString} out of range [0..127] (${ctlString}=${value})`;
                 }
 
                 let webAudioFontDef = ResSynth.webAudioFontDef,
@@ -1182,115 +1193,38 @@ ResSynth.residentSynth = (function(window)
                     keyboardOrnamentsArrayIndex = channelSettings.keyboardOrnamentsArrayIndex,
                     errorString = "";
 
-                if(webAudioFontDef === undefined)
-                {
-                    errorString = `webAudioFont must be defined.`;
-                }
-                else if(bankIndex < 0 || bankIndex >= webAudioFontDef.length)
-                {
-                    errorString = `bankIndex out of range (0..${webAudioFontDef.length - 1}).`;
-                }
-                else if(presetIndex < 0 || presetIndex >= webAudioFontDef[bankIndex].presets.length)
-                {
-                    errorString = `preset out of range in webAudioFontDef bank (bankIndex=${bankIndex}, presetIndex=${presetIndex})`;
-                }
-                else if(mixtureIndex < 0)
-                {
-                    errorString = `mixtureIndex must be >= 0`;
-                }
-                else if(mixtureDefs === undefined)
-                {
-                    if(mixtureIndex > 0)
-                    {
-                        errorString = `mixtureIndex must be 0 if mixtureDefs are not defined.`;
-                    }
-                }
-                else if(mixtureIndex >= mixtureDefs.length)
-                {
-                    errorString = `mixtureIndex out of range (0..${mixtureDefs.length - 1}): (mixtureIndex=${mixtureIndex})`;
-                }
-                else if(tuningGroupIndex < 0)
-                {
-                    errorString = `tuningGroupIndex must be >= 0`;
-                }
-                else if(tuningDefs === undefined)
-                {
-                    if(tuningGroupIndex > 0)
-                    {
-                        errorString = `tuningGroupIndex must be 0 if tuningDefs are not defined.`;
-                    }
-                }
-                else if(tuningGroupIndex >= tuningDefs.length)
-                {
-                    errorString = `tuningGroupIndex out of range (0..${tuningDefs.length - 1}): (tuningGroupIndex=${tuningGroupIndex})`;
-                }
-                else if(tuningIndex < 0)
-                {
-                    errorString = `tuningIndex must be >= 0`;
-                }
-                else if(tuningIndex >= tuningDefs[tuningGroupIndex].tunings.length)
-                {
-                    errorString = `tuningIndex out of range (0..${tuningDefs[tuningGroupIndex].tunings.length - 1}): (tuningIndex=${tuningIndex})`;
-                }
-                else if(keyboardOrnamentsArrayIndex < 0)
-                {
-                    errorString = `keyboardOrnamentsArrayIndex must be >= 0`;
-                }
-                else if(ornamentDefs === undefined)
-                {
-                    if(keyboardOrnamentsArrayIndex > 0)
-                    {
-                        errorString = `keyboardOrnamentsArrayIndex must be 0 if ornamentDefs are not defined.`;
-                    }
-                }
-                else if(keyboardOrnamentsArrayIndex >= ornamentDefs.length)
-                {
-                    errorString = `keyboardOrnamentsArrayIndex out of range (0..${ornamentDefs.length - 1}): (keyboardOrnamentsArrayIndex=${keyboardOrnamentsArrayIndex})`;
-                }
-                else if(semitonesOffset < -50 || semitonesOffset > 50)
-                {
-                    errorString = `semitonesOffset out of range [-50..+50] (semitonesOffset=${semitonesOffset})`;
-                }
-                else if(centsOffset < -50 || centsOffset > 50)
-                {
-                    errorString = `centsOffset out of range [-50..+50] (centsOffset=${centsOffset})`;
-                }
-                else if(midiRangeError(pitchWheel))
-                {
-                    errorString = `pitchWheel out of range [0..127] (pitchWheel=${pitchWheel})`;
-                }
-                else if(midiRangeError(modWheel))
-                {
-                    errorString = `modWheel out of range [0..127] (modWheel=${modWheel})`;
-                }
-                else if(midiRangeError(volume))
-                {
-                    errorString = `volume out of range [0..127] (volume=${volume})`;
-                }
-                else if(midiRangeError(pan))
-                {
-                    errorString = `pan out of range [0..127] (pan=${pan})`;
-                }
-                else if(midiRangeError(reverberation))
-                {
-                    errorString = `reverberation out of range [0..127] (reverberation=${reverberation})`;
-                }
-                else if(midiRangeError(pitchWheelSensitivity))
-                {
-                    errorString = `pitchWheelSensitivity out of range [0..127] (pitchWheelSensitivity=${pitchWheelSensitivity})`;
-                }
-                else if(midiRangeError(triggerKey))
-                {
-                    errorString = `triggerKey out of range [0..127] (triggerKey=${triggerKey})`;
-                }
-                else if(midiRangeError(velocityPitchSensitivity))
-                {
-                    errorString = `velocityPitchSensitivity out of range [0..127] (velocityPitchSensitivity=${velocityPitchSensitivity})`;
-                }
+                // N.B. "noMixtures", "noTuningGroup" and "noOrnament" options are inserted before the definitions given in
+                // ResSynth.mixtureDefs, ResSynth.tuningDefs and ResSynth.ornamentDefs, so the corresponding allowed indexes
+                // can be as large as the lengths of each of these definitions.
+                errorString = getErrorString(errorString, webAudioFontDef === undefined, `webAudioFont must be defined.`);
+                errorString = getErrorString(errorString, bankIndex < 0 || bankIndex >= webAudioFontDef.length, `bankIndex out of range (0..${webAudioFontDef.length - 1}).`);
+                errorString = getErrorString(errorString, presetIndex < 0 || presetIndex >= webAudioFontDef[bankIndex].presets.length, `preset out of range in webAudioFontDef bank (bankIndex=${bankIndex}, presetIndex=${presetIndex})`);
+                errorString = getErrorString(errorString, mixtureIndex < 0, `mixtureIndex must be >= 0`);
+                errorString = getErrorString(errorString, mixtureDefs === undefined, `mixtureIndex must be >= 0`);
+                errorString = getErrorString(errorString, mixtureDefs === undefined && mixtureIndex > 0, `mixtureIndex must be 0 if mixtureDefs are not defined.`);
+                errorString = getErrorString(errorString, mixtureDefs !== undefined && mixtureIndex >= mixtureDefs.length + 1, `mixtureIndex out of range (0..${mixtureDefs.length}): (mixtureIndex=${mixtureIndex})`);
+                errorString = getErrorString(errorString, tuningGroupIndex < 0, `tuningGroupIndex must be >= 0`);
+                errorString = getErrorString(errorString, tuningDefs === undefined && tuningGroupIndex > 0, `tuningGroupIndex must be 0 if tuningDefs are not defined.`);
+                errorString = getErrorString(errorString, tuningDefs !== undefined && tuningGroupIndex >= tuningDefs.length + 1, `tuningGroupIndex out of range (0..${tuningDefs.length}): (tuningGroupIndex=${tuningGroupIndex})`);
+                errorString = getErrorString(errorString, tuningIndex < 0, `tuningIndex must be >= 0`);
+                errorString = getErrorString(errorString, tuningDefs !== undefined && tuningIndex >= tuningDefs[tuningGroupIndex].tunings.length, `tuningIndex out of range (0..${tuningDefs[tuningGroupIndex].tunings.length - 1}): (tuningIndex=${tuningIndex})`);
+                errorString = getErrorString(errorString, keyboardOrnamentsArrayIndex < 0, `keyboardOrnamentsArrayIndex must be >= 0`);
+                errorString = getErrorString(errorString, ornamentDefs === undefined && keyboardOrnamentsArrayIndex > 0, `keyboardOrnamentsArrayIndex must be 0 if ornamentDefs are not defined.`);
+                errorString = getErrorString(errorString, ornamentDefs !== undefined && keyboardOrnamentsArrayIndex >= ornamentDefs.length + 1, `keyboardOrnamentsArrayIndex out of range (0..${ornamentDefs.length}): (keyboardOrnamentsArrayIndex=${keyboardOrnamentsArrayIndex})`);
+                errorString = getErrorString(errorString, semitonesOffset < -64 || semitonesOffset > 63, `semitonesOffset out of range [-64..+63] (semitonesOffset=${semitonesOffset})`);
+                errorString = getErrorString(errorString, centsOffset < -50 || centsOffset > 50, `centsOffset out of range [-50..+50] (centsOffset=${centsOffset})`);
+                errorString = getErrorString(errorString, midiRangeError(pitchWheel), midiErrorMsg("pitchWheel", pitchWheel));
+                errorString = getErrorString(errorString, midiRangeError(modWheel), midiErrorMsg("modWheel", modWheel));
+                errorString = getErrorString(errorString, midiRangeError(volume), midiErrorMsg("volume", volume));
+                errorString = getErrorString(errorString, midiRangeError(pan), midiErrorMsg("pan", pan));
+                errorString = getErrorString(errorString, midiRangeError(reverberation), midiErrorMsg("reverberation", reverberation));
+                errorString = getErrorString(errorString, midiRangeError(pitchWheelSensitivity), midiErrorMsg("pitchWheelSensitivity", pitchWheelSensitivity));
+                errorString = getErrorString(errorString, midiRangeError(triggerKey), midiErrorMsg("triggerKey", triggerKey));
+                errorString = getErrorString(errorString, midiRangeError(velocityPitchSensitivity), midiErrorMsg("velocityPitchSensitivity", velocityPitchSensitivity));
 
                 if(errorString.length > 0)
                 {
-                    errorString = `Error in synthSettings(name: ${synthSettingsName}): \n ` + errorString;
+                    errorString = `Error in synthSettings(name: ${synthSettingsName}): \n\n` + errorString;
                     alert(errorString);
                     throw errorString;
                 }
