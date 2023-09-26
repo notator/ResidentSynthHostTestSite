@@ -50,7 +50,8 @@ Tuning:
 ![screenshot_Tuning](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_2_Tuning.png "screenshot_Tuning")  
 Tuning groups can be configured in the _ResidentSynth_, and selected from the **tuning group** selector.  
 The **tuning** selector always contains the tunings available in the current tuning group.  
-The two **offset** numerical inputs determine the tuning offset in semitones and cents respectively. The semitones input takes integer values in the range -36 to +36. The cents input takes values in the range -50 to +50.  
+The two **offset** numerical inputs determine the tuning offset in semitones and cents respectively. The semitones offset input takes integer values in the range -64 to +63. The cents offset input takes values in the range -50 to +50.  
+Pitches that would end up exceeding the midi range (0..127) are silently coerced to midi pitch 0 or 127.  
 
 Commands and Controls:  
 ![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
