@@ -61,7 +61,7 @@ ResSynth.host = (function(document)
 
                 for(let i = 0; i < settingsSelectOptions.length; i++)
                 {
-                    let channelSettings = settingsSelectOptions[i].synthSettings.channelSettings[channel];
+                    let channelSettings = settingsSelectOptions[i].synthSettings.channelSettingsArray[channel];
 
                     if(channelSettings.isEqual(hostChannelSettings) && channelSettings.keyboardSplitIndex === hostChannelSettings.keyboardSplitIndex)
                     {
@@ -172,7 +172,7 @@ ResSynth.host = (function(document)
         setSettings = function(settingsIndex)
         {
             let settingsSelect = getElem("settingsSelect"),
-                channelSettingsArray = settingsSelect.options[settingsIndex].synthSettings.channelSettings,
+                channelSettingsArray = settingsSelect.options[settingsIndex].synthSettings.channelSettingsArray,
                 channelSelect = getElem("channelSelect"),
                 keyboardSplitSelect = getElem("keyboardSplitSelect");
 
@@ -183,7 +183,7 @@ ResSynth.host = (function(document)
 
             for(let channel = 0; channel < channelSettingsArray.length; channel++)
             {
-                let channelSettings = {...channelSettingsArray[channel]};
+                let channelSettings = channelSettingsArray[channel].clone();
 
                 channelSelect.options[channel].hostSettings = channelSettings;
                 channelSelect.selectedIndex = channel;
@@ -2014,12 +2014,12 @@ ResSynth.host = (function(document)
                 function setDefaultHostSettingsForEachChannel()
                 {
                     let settingsSelect = getElem("settingsSelect"),
-                        defaultChannelSettings = settingsSelect.options[0].synthSettings.channelSettings,
+                        defaultChannelSettingsArray = settingsSelect.options[0].synthSettings.channelSettingsArray,
                         channelOptions = getElem("channelSelect").options;
 
                     for(let channel = 0; channel < channelOptions.length; channel++)
                     {
-                        channelOptions[channel].hostSettings = {...defaultChannelSettings[channel]}; // clone
+                        channelOptions[channel].hostSettings = defaultChannelSettingsArray[channel].clone();
                     }
                 }
 

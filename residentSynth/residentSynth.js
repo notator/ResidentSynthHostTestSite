@@ -1106,24 +1106,6 @@ ResSynth.residentSynth = (function(window)
         // (Attributes can never be created or destroyed.)
         getSynthSettings = function(synthSettingsDefs)
         {
-            function getDefaultSynthSettings()
-            {
-                let defaultSynthSettings = {};
-
-                defaultSynthSettings.name = "default settings in all channels";
-                defaultSynthSettings.channelSettings = [];
-
-                for(let channel = 0; channel < 16; channel++)
-                {
-                    // The constructor sets .keyboardSplitIndex to its default (= 0);
-                    let defaultSettings = new ResSynth.channelSettings.ChannelSettings("default channel settings");
-                    Object.freeze(defaultSettings); // attribute values are frozen
-                    defaultSynthSettings.channelSettings.push(defaultSettings);
-                }
-
-                return defaultSynthSettings;
-            }
-
             function checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsName)
             {
                 let keyboardSplitDefs = ResSynth.keyboardSplitDefs,
@@ -1230,13 +1212,13 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            synthSettings.push(getDefaultSynthSettings()); // default at index 0
+            synthSettings.push(new ResSynth.synthSettings.SynthSettings()); // default at index 0
 
             if(synthSettingsDefs !== undefined && synthSettingsDefs.length > 0)
             {
                 for(var index = 0; index < synthSettingsDefs.length; index++)
                 {
-                    let newSynthSettings = {},
+                    let newSynthSettings = new ResSynth.synthSettings.SynthSettings(),
                         synthSettingsDef = synthSettingsDefs[index],
                         keyboardSplitIndex = synthSettingsDef.keyboardSplitIndex,
                         channelSettingsDefs = synthSettingsDef.channelSettings;
@@ -1244,51 +1226,37 @@ ResSynth.residentSynth = (function(window)
                     checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsDef.name);
 
                     newSynthSettings.name = synthSettingsDef.name;
-                    newSynthSettings.channelSettings = [];
+                    newSynthSettings.keyboardSplitIndex = keyboardSplitIndex;
 
+                    // N.B. newSynthSettings currently has 16 default ChannelSettings objects in its channelSettings array
+                    // but channelSettingsDefs.length may be less than 16.
                     for(var channel = 0; channel < channelSettingsDefs.length; channel++)
                     {
-                        let sp = channelSettingsDefs[channel],
-                            channelSettings = new ResSynth.channelSettings.ChannelSettings(sp.name);
+                        let csDef = channelSettingsDefs[channel],
+                            channelSettings = newSynthSettings.channelSettingsArray[channel];                        
 
+                        checkChannelSettings(csDef, synthSettingsDef.name);
+
+                        channelSettings.name = csDef.name;
+                        channelSettings.bankIndex = csDef.bankIndex;
+                        channelSettings.presetIndex = csDef.presetIndex;
+                        channelSettings.mixtureIndex = csDef.mixtureIndex;
+                        channelSettings.tuningGroupIndex = csDef.tuningGroupIndex;
+                        channelSettings.tuningIndex = csDef.tuningIndex;
+                        channelSettings.semitonesOffset = csDef.semitonesOffset;
+                        channelSettings.centsOffset = csDef.centsOffset;
+                        channelSettings.pitchWheel = csDef.pitchWheel;
+                        channelSettings.modWheel = csDef.modWheel;
+                        channelSettings.volume = csDef.volume;
+                        channelSettings.pan = csDef.pan;
+                        channelSettings.reverberation = csDef.reverberation;
+                        channelSettings.pitchWheelSensitivity = csDef.pitchWheelSensitivity;
+                        channelSettings.triggerKey = csDef.triggerKey;
+                        channelSettings.velocityPitchSensitivity = csDef.velocityPitchSensitivity;
                         channelSettings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
-
-                        checkChannelSettings(sp, synthSettingsDef.name);
-
-                        channelSettings.bankIndex = sp.bankIndex;
-                        channelSettings.presetIndex = sp.presetIndex;
-                        channelSettings.mixtureIndex = sp.mixtureIndex;
-                        channelSettings.tuningGroupIndex = sp.tuningGroupIndex;
-                        channelSettings.tuningIndex = sp.tuningIndex;
-                        channelSettings.semitonesOffset = sp.semitonesOffset;
-                        channelSettings.centsOffset = sp.centsOffset;
-                        channelSettings.pitchWheel = sp.pitchWheel;
-                        channelSettings.modWheel = sp.modWheel;
-                        channelSettings.volume = sp.volume;
-                        channelSettings.pan = sp.pan;
-                        channelSettings.reverberation = sp.reverberation;
-                        channelSettings.pitchWheelSensitivity = sp.pitchWheelSensitivity;
-                        channelSettings.triggerKey = sp.triggerKey;
-                        channelSettings.velocityPitchSensitivity = sp.velocityPitchSensitivity;
-                        channelSettings.keyboardOrnamentsArrayIndex = sp.keyboardOrnamentsArrayIndex;
+                        channelSettings.keyboardOrnamentsArrayIndex = csDef.keyboardOrnamentsArrayIndex;
 
                         Object.freeze(channelSettings); // attribute values are frozen
-
-                        newSynthSettings.channelSettings.push(channelSettings);
-                    }
-
-                    for(let channel = channelSettingsDefs.length; channel < 16; channel++)
-                    {
-                        // The constructor sets
-                        // .keyboardSplitIndex to its default (= 0)
-                        // .name to "default channel settings"
-                        let defaultSettings = new ResSynth.channelSettings.ChannelSettings("default channel settings");
-
-                        // Override .keyboardSplitIndex:
-                        defaultSettings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
-
-                        Object.freeze(defaultSettings); // attribute values are frozen
-                        newSynthSettings.channelSettings.push(defaultSettings);
                     }
 
                     synthSettings.push(newSynthSettings);
@@ -1856,7 +1824,7 @@ ResSynth.residentSynth = (function(window)
                 CTL.TUNING_INDEX,
                 CTL.SEMITONES_OFFSET,
                 CTL.CENTS_OFFSET,
-                CTL.SET_SETTINGS,
+                CTL.SET_CHANNEL_SETTINGS,
                 CTL.VELOCITY_PITCH_SENSITIVITY,
                 CTL.SET_KEYBOARD_ORNAMENT_DEFS,
                 CTL.SET_KEYBOARD_SPLIT_ARRAY
@@ -1900,7 +1868,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "webAudioFont", {value: channelPresets.webAudioFont, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(), writable: false});
-            Object.defineProperty(this, "synthSettings", {value: getSynthSettings(ResSynth.synthSettings), writable: false});
+            Object.defineProperty(this, "synthSettings", {value: getSynthSettings(ResSynth.synthSettingsDefs), writable: false});
 
             setPrivateChannelPerKeyArrays();
             setPrivateKeyOrnamentsArrays();
@@ -2014,12 +1982,12 @@ ResSynth.residentSynth = (function(window)
                 return midiValue - 64;
             }
 
-            // Note that the ResidentSynthHost does not call this function (i.e. send SET_SETTINGS messages)
+            // Note that the ResidentSynthHost does not call this function (i.e. send SET_CHANNEL_SETTINGS messages)
             // because it needs to update the ResidentSynth's channelSettings incrementally.
             // This function is provided for use in other applications, such as the AssistantPerformer.
-            function setSettings(channel, settingsIndex)
+            function setChannelSettings(channel, channelSettingsIndex)
             {
-                let channelSettings = synthSettings[settingsIndex];
+                let channelSettings = synthSettings.channelSettings[channelSettingsIndex];
 
                 updateBankIndex(channel, channelSettings.bankIndex);
                 channelControls[channel].presetIndex = channelSettings.presetIndex;
@@ -2069,8 +2037,8 @@ ResSynth.residentSynth = (function(window)
                 case CTL.CENTS_OFFSET:
                     channelControls[channel].centsOffset = getOffsetValue(value);
                     break;
-                case CTL.SET_SETTINGS:
-                    setSettings(channel, value);
+                case CTL.SET_CHANNEL_SETTINGS:
+                    setChannelSettings(channel, value);
                     break;
                 case CTL.TUNING_GROUP_INDEX:
                     updateTuningGroupIndex(channel, value); // sets tuning to the first tuning in the group

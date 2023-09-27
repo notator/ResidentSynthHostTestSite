@@ -1,4 +1,4 @@
-console.log('load synthSettings.js');
+console.log('load synthSettingsDefs.js');
 
 // Each synthSetting, in the synthSettings array defined here, defines settings that override the default settings in the synth's 16 channels.
 // The channel index for each override is its index in the channelSettingsArray.
@@ -49,7 +49,7 @@ console.log('load synthSettings.js');
 //
 // An ALL_CONTROLLERS_OFF message is sent before applying any settingsPreset.
 
-ResSynth.synthSettings =
+ResSynth.synthSettingsDefs =
 [
     // Internally, the synth creates a default synthSetting (named "settings 0 (default)"),
     // containing the default channelSetting in each channel, at index 0 of its list of alternate synthSettings.
