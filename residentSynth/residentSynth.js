@@ -946,7 +946,7 @@ ResSynth.residentSynth = (function(window)
         setPrivateKeyOrnamentsArrays = function()
         {
             // throws exception on error
-            function getInKeyOrnamentsArray(ornamentPerKeysString, fileOrnamentDefs)
+            function getInKeyOrnamentDefs(ornamentPerKeysString, fileOrnamentDefs)
             {
                 // throws exception on error
                 function getInKeyOrnamentDef(keyStr, ornamentName, fileOrnamentDefs)
@@ -1047,7 +1047,7 @@ ResSynth.residentSynth = (function(window)
                     }
                 }
 
-                let inKeyOrnamentsArray = [];
+                let inKeyOrnamentDefs = [];
 
                 if(ornamentPerKeysString.length > 0)
                 {
@@ -1058,16 +1058,16 @@ ResSynth.residentSynth = (function(window)
                         const [keyStr, ornamentName] = component.trim().split(":"),
                             inKeyOrnamentDef = getInKeyOrnamentDef(keyStr, ornamentName, fileOrnamentDefs);
 
-                        inKeyOrnamentsArray.push(inKeyOrnamentDef);
+                        inKeyOrnamentDefs.push(inKeyOrnamentDef);
                     }
                 }
 
-                if(inKeyOrnamentsArray.length > 0)
+                if(inKeyOrnamentDefs.length > 0)
                 {
-                    checkKeys(inKeyOrnamentsArray);
+                    checkKeys(inKeyOrnamentDefs);
                 }
 
-                return inKeyOrnamentsArray;
+                return inKeyOrnamentDefs;
             }
 
             const ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings,
@@ -1084,9 +1084,9 @@ ResSynth.residentSynth = (function(window)
                     for(var i = 0; i < ornamentPerKeysStrings.length; i++)
                     {
                         const keyOrnamentsString = ornamentPerKeysStrings[i],
-                            inKeyOrnamentDefs = getInKeyOrnamentsArray(keyOrnamentsString, fileOrnamentDefs);
+                            inKeyOrnamentDefs = getInKeyOrnamentDefs(keyOrnamentsString, fileOrnamentDefs);
 
-                        inKeyOrnamentDefsArrays.push(inKeyOrnamentDefs); // global keyOrnamentsArrays
+                        inKeyOrnamentDefsArrays.push(inKeyOrnamentDefs); // global inKeyOrnamentDefsArrays
                     }
                 }
                 catch(msg)
@@ -1439,24 +1439,25 @@ ResSynth.residentSynth = (function(window)
                 return new Promise(resolve => setTimeout(resolve, milliseconds));
             }
 
+            function midiLimit(value)
+            {
+                value = (value > 127) ? 127 : value;
+                value = (value < 0) ? 0 : value;
+
+                return value;
+            }
+
             // returns a new midiAttributes object
             function getMidiAttributes(chanPresets, chanControls, inKey, inVelocity)
             {
-                function midiLimit(value)
-                {
-                    value = (value > 127) ? 127 : value;
-                    value = (value < 0) ? 0 : value;
-
-                    return value;
-                }
-
                 let midi = {}; 
 
                 midi.preset = chanPresets[chanControls.presetIndex];
                 midi.inKey = inKey;  // the note stops when the inKey's noteOff arrives                
                 midi.inVelocity = inVelocity;
+                midi.midiCentsOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100); // valid throughout a mixture
                 // keyCentsPitch is the pitch described as a key.cents value in equal temperament.
-                midi.keyCentsPitch = midiLimit(chanControls.tuning[inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100));
+                midi.keyCentsPitch = midiLimit(chanControls.tuning[inKey] + midi.midiCentsOffset);
 
                 // velocityPitchValue14Bit is always the same for all octaves of the same absolute pitch
                 let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (midi.inKey % 12));
@@ -1495,13 +1496,12 @@ ResSynth.residentSynth = (function(window)
                 {
                     let mixture = mixtures[mixtureIndex],
                         extraNotes = mixture.extraNotes,
-                        except = mixture.except,
-                        keyMixtureIndex = except.find(x => x[0] === inKey),
+                        exceptKeyMixtureIndex = mixture.except.find(x => x[0] === inKey),
                         keyKeys = [];
 
-                    if(keyMixtureIndex !== undefined)
+                    if(exceptKeyMixtureIndex !== undefined)
                     {
-                        extraNotes = keyboardSplitDefs[keyMixtureIndex[1]].extraNotes;
+                        extraNotes = mixtures[exceptKeyMixtureIndex[1]].extraNotes;
                     }
 
                     for(let i = 0; i < extraNotes.length; i++)
@@ -1517,7 +1517,7 @@ ResSynth.residentSynth = (function(window)
 
                         // midi.preset is unchanged
                         midi.keyKey = inKey; // the key that turns this note off (unchanged in mix)
-                        midi.keyCentsPitch = chanControls.tuning[newKey] + semitonesOffset;
+                        midi.keyCentsPitch = midiLimit(chanControls.tuning[newKey] + midi.midiCentsOffset);
                         midi.velocity = newVelocity;
 
                         keyKeys.push(midi.keyKey);
@@ -1573,7 +1573,8 @@ ResSynth.residentSynth = (function(window)
 
                                 oMidi.preset = inMidi.preset;
                                 oMidi.inKey = noteOnMsg.key;
-                                oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + chanControls.semitonesOffset + (chanControls.centsOffset / 100);
+                                oMidi.midiCentsOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100);
+                                oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiCentsOffset,
                                 oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
 
                                 let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (oMidi.inKey % 12));

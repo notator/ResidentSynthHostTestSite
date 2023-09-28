@@ -1008,7 +1008,7 @@ ResSynth.host = (function(document)
                 let playbackChannelInfo = playbackChannelInfos.find(x => x.channel === recordingChannelInfo.channel);
                 if(playbackChannelInfo !== undefined)
                 {
-                    recordingChannelInfo = {...playbackChannelInfo};
+                    recordingChannelInfo = playbackChannelInfo.clone();
                     recordingChannelInfo.messages = [];
                 }
             }
@@ -1035,7 +1035,7 @@ ResSynth.host = (function(document)
         },
         // exported
         // This application can only record on a single channel.
-        // It can, however play back multi-channel recordings that use the same recordings format.
+        // It can, however play back multi-channel recordings.
         onStartRecordingButtonClicked = function()
         {
             function disableSettingsDiv()
@@ -1069,8 +1069,8 @@ ResSynth.host = (function(document)
             disableSettingsDiv();
 
             recordingChannelInfo = {}; // is global
-            recordingChannelInfo.channel = channelSelect.selectedIndex;
-            recordingChannelInfo.channelSettings = {...hostChannelSettings}; // a single channelSettings clone
+            recordingChannelInfo.channel = channel;
+            recordingChannelInfo.channelSettings = hostChannelSettings.clone(); // a single channelSettings clone
             recordingChannelInfo.messages = [];
 
             recording = {}; // global in host
