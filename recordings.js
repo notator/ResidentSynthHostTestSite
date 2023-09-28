@@ -27,7 +27,7 @@ ResSynth.recordings =
                             "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
                             "keyboardSplitIndex": 0,
-                            "keyboardOrnamentsArrayIndex": 1
+                            "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
                             [
@@ -866,7 +866,7 @@ ResSynth.recordings =
                         "triggerKey": 36,
                         "velocityPitchSensitivity": 0,
                         "keyboardSplitIndex": 0,
-                        "keyboardOrnamentsArrayIndex": 0
+                        "keyboardOrnamentsArrayIndex": 1
                     },
                     "messages": [
                         "144,60,68,0",
