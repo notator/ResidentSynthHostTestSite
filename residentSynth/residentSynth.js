@@ -1500,14 +1500,14 @@ ResSynth.residentSynth = (function(window)
                     }
                     note.noteOn();
                     //chanControls.currentNoteOns.push(note);
+                    return note;
                 }
 
-                function doMixture(midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
+                function doMixture(masterNote, midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
                 {
                     let mixture = mixtures[mixtureIndex],
                         extraNotes = mixture.extraNotes,
-                        exceptKeyMixtureIndex = mixture.except.find(x => x[0] === inKey),
-                        keyKeys = [];
+                        exceptKeyMixtureIndex = mixture.except.find(x => x[0] === inKey);
 
                     if(exceptKeyMixtureIndex !== undefined)
                     {
@@ -1530,25 +1530,31 @@ ResSynth.residentSynth = (function(window)
                         midi.keyCentsPitch = midiLimit(chanControls.tuning[newKey] + midi.midiCentsOffset);
                         midi.velocity = newVelocity;
 
-                        keyKeys.push(midi.keyKey);
-
-                        doNewIndividualNoteOn(midi);
+                        doNewIndividualNoteOn(midi, masterNote);
                     }
-
-                    return keyKeys;
                 }
 
-                doNewIndividualNoteOn(midi, masterNote);
+                masterNote = doNewIndividualNoteOn(midi, masterNote);
 
                 if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
                 {
-                    doMixture(midi, chanControls.mixtureIndex, midi.velocityPitchValue14Bit);
+                    doMixture(masterNote, midi, chanControls.mixtureIndex, midi.velocityPitchValue14Bit);
                 }
             }
 
-            async function playOrnamentAsync(inMidi, ornamentDef)
+            function getDummyMasterNote(inKey)
             {
-                async function doMsgAsync(inMidi, msg, ornamentNoteOnKeys, cancel)
+                let masterNote = {};
+                masterNote.inKey = inKey;
+                masterNote.subNotes = [];
+                masterNote.noteOff = () => { };
+
+                return masterNote;
+            }
+
+            async function playOrnamentAsync(masterNote, inMidi, ornamentDef)
+            {
+                async function doMsgAsync(masterNote, inMidi, msg, ornamentNoteOnKeys, cancel)
                 {
                     function midiVal(value)
                     {
@@ -1597,30 +1603,17 @@ ResSynth.residentSynth = (function(window)
                                     oMidi.velocityPitchValue14Bit = (((oMidi.inVelocity & 0x7f) << 7) | (oMidi.inVelocity & 0x7f)) - 8192;
                                 }
 
-                                ornamentNoteOnKeys.push(oMidi.inKey);
-
                                 doNoteOn(oMidi, masterNote);
                             }
                             break;
                         }
                         case "chordOff":
                         {
-                            let noteOffs = msg.noteOffs;
-                            for(let i = 0; i < noteOffs.length; i++)
+                            let subNotes = masterNote.subNotes;
+                            for(let i = 0; i < subNotes.length; i++)
                             {
-                                let currentChanNoteOns = chanControls.currentNoteOns,
-                                    note = currentChanNoteOns.find(x => x.inKey === noteOffs[i].key);                                
-
-                                if(note !== undefined)
-                                {
-                                    note.noteOff();
-
-                                    let index = currentChanNoteOns.indexOf(note);
-                                    currentChanNoteOns.splice(index, 1);
-
-                                    index = ornamentNoteOnKeys.indexOf(note.inKey);
-                                    ornamentNoteOnKeys.splice(index, 1);
-                                }
+                                subNotes[i].noteOff();
+                                subNotes.splice(i, 1);
                             }
                             break;
                         }                        
@@ -1636,7 +1629,7 @@ ResSynth.residentSynth = (function(window)
                     {
                         let ornamentMsg = ornamentMsgs[i];
 
-                        await doMsgAsync(inMidi, ornamentMsg, ornamentDef.ornamentNoteOnKeys, ornamentDef.cancel);
+                        await doMsgAsync(masterNote, inMidi, ornamentMsg, ornamentDef.ornamentNoteOnKeys, ornamentDef.cancel);
 
                         if(ornamentDef.cancel === true)
                         {
@@ -1676,8 +1669,10 @@ ResSynth.residentSynth = (function(window)
                 console.assert(inKeyOrnamentDef.inKey === midi.inKey);
                 ornamentDef.complete = false;
                 ornamentDef.cancel = false;
-                ornamentDef.ornamentNoteOnKeys = [];
-                playOrnamentAsync(midi, ornamentDef);
+                let masterNote = getDummyMasterNote(inKey);
+                currentMasterNotes.push(masterNote);
+                // masterNote.noteOff() does nothing.
+                playOrnamentAsync(masterNote, midi, ornamentDef);
             }
             else
             {
@@ -1741,10 +1736,9 @@ ResSynth.residentSynth = (function(window)
                 inKeyOrnamentDefs = chanControls.inKeyOrnamentDefs,
                 inKeyOrnamentDef = inKeyOrnamentDefs.find(x => x.inKey === inKey),
                 ornamentDef = (inKeyOrnamentDef === undefined) ? undefined : inKeyOrnamentDef.ornamentDef,
-                ornamentNoteOnKeys = (ornamentDef === undefined) ? undefined : ornamentDef.ornamentNoteOnKeys,
                 stopTime = 0;
 
-            if(ornamentNoteOnKeys !== undefined && ornamentNoteOnKeys.length > 0)
+            if(ornamentDef !== undefined && ornamentDef.cancel !== undefined)
             {
                 ornamentDef.cancel = true;
                 try
@@ -1756,24 +1750,24 @@ ResSynth.residentSynth = (function(window)
                     throw 'Condition not met:' + error.message;
                 }
 
-                doOrnamentNoteOffs(chanControls, ornamentDef);
+                //doOrnamentNoteOffs(chanControls, ornamentDef);
             }
-            else
-            {
-                let noteIndex = currentMasterNotes.findIndex(x => x.inKey === inKey);
-                if(noteIndex >= 0)
-                {
-                    let note = currentMasterNotes[noteIndex],
-                        subNotes = note.subNotes;
 
-                    for(var index = 0; index < subNotes.length; index++)
-                    {
-                        subNotes[index].noteOff(); // note.noteOff calls itself recursively
-                    }
-                    stopTime = note.noteOff();
-                    currentMasterNotes.splice(noteIndex, 1);
+            let noteIndex = currentMasterNotes.findIndex(x => x.inKey === inKey);
+            if(noteIndex >= 0)
+            {
+                let note = currentMasterNotes[noteIndex],
+                    subNotes = note.subNotes;
+
+                for(var index = 0; index < subNotes.length; index++)
+                {
+                    subNotes[index].noteOff(); // note.noteOff calls itself recursively
                 }
+                subNotes.length = 0;
+                stopTime = note.noteOff();
+                currentMasterNotes.splice(noteIndex, 1);
             }
+
 
             return stopTime;
         },
