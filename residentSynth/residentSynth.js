@@ -22,6 +22,7 @@ ResSynth.residentSynth = (function(window)
         channelPresets = [], // set in updateBankIndex
         channelAudioNodes = [], // initialized in synth.open
         channelControls = [], // initialized in synth.open
+        currentMasterNotes = [], // contains the notes created as a response to the noteOn(inChannel, inKey, inVelocity) function
         mixtures = [], // set by getMixtures()
         tuningGroups = [], // set by getTuningGroups()
         channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays(). This array has elements in range 0..15. Its length can be either 0 or 128.
@@ -1473,9 +1474,9 @@ ResSynth.residentSynth = (function(window)
                 return midi;
             }
 
-            function doNoteOn(midi)
+            function doNoteOn(midi, masterNote)
             {
-                function doNewIndividualNoteOn(midi)
+                function doNewIndividualNoteOn(midi, masterNote)
                 {
                     let zone, note,
                         preset = midi.preset,
@@ -1488,8 +1489,17 @@ ResSynth.residentSynth = (function(window)
                     }
                     // note on
                     note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
+                    note.subNotes = [];
+                    if(masterNote == undefined)
+                    {
+                        currentMasterNotes.push(note);
+                    }
+                    else
+                    {
+                        masterNote.subNotes.push(note);
+                    }
                     note.noteOn();
-                    chanControls.currentNoteOns.push(note);
+                    //chanControls.currentNoteOns.push(note);
                 }
 
                 function doMixture(midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
@@ -1528,7 +1538,7 @@ ResSynth.residentSynth = (function(window)
                     return keyKeys;
                 }
 
-                doNewIndividualNoteOn(midi);
+                doNewIndividualNoteOn(midi, masterNote);
 
                 if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
                 {
@@ -1589,7 +1599,7 @@ ResSynth.residentSynth = (function(window)
 
                                 ornamentNoteOnKeys.push(oMidi.inKey);
 
-                                doNoteOn(oMidi);
+                                doNoteOn(oMidi, masterNote);
                             }
                             break;
                         }
@@ -1671,7 +1681,7 @@ ResSynth.residentSynth = (function(window)
             }
             else
             {
-                doNoteOn(midi);
+                doNoteOn(midi); // 2nd argument, masterNote, is undefined here (noteOn() is the response to a keyboard event)
             }
         },
 
@@ -1750,13 +1760,18 @@ ResSynth.residentSynth = (function(window)
             }
             else
             {
-                for(var index = currentNoteOns.length - 1; index >= 0; index--)
+                let noteIndex = currentMasterNotes.findIndex(x => x.inKey === inKey);
+                if(noteIndex >= 0)
                 {
-                    if(currentNoteOns[index].inKey === inKey)
+                    let note = currentMasterNotes[noteIndex],
+                        subNotes = note.subNotes;
+
+                    for(var index = 0; index < subNotes.length; index++)
                     {
-                        stopTime = currentNoteOns[index].noteOff();
-                        currentNoteOns.splice(index, 1);
+                        subNotes[index].noteOff(); // note.noteOff calls itself recursively
                     }
+                    stopTime = note.noteOff();
+                    currentMasterNotes.splice(noteIndex, 1);
                 }
             }
 
