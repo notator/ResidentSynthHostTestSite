@@ -1474,72 +1474,67 @@ ResSynth.residentSynth = (function(window)
                 return midi;
             }
 
+            function doNewIndividualNoteOn(midi, masterNote)
+            {
+                let zone, note,
+                    preset = midi.preset,
+                    keyPitchBase = Math.floor(midi.keyCentsPitch);
+
+                zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
+                if(!zone)
+                {
+                    throw "zone  not found";
+                }
+                // note on
+                note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
+                note.subNotes = [];
+                if(masterNote == undefined)
+                {
+                    currentMasterNotes.push(note);
+                }
+                else
+                {
+                    masterNote.subNotes.push(note);
+                }
+                note.noteOn();
+                //chanControls.currentNoteOns.push(note);
+                return note;
+            }
+
+            function doMixture(masterNote, midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
+            {
+                let mixture = mixtures[mixtureIndex],
+                    extraNotes = mixture.extraNotes,
+                    exceptKeyMixtureIndex = mixture.except.find(x => x[0] === inKey);
+
+                if(exceptKeyMixtureIndex !== undefined)
+                {
+                    extraNotes = mixtures[exceptKeyMixtureIndex[1]].extraNotes;
+                }
+
+                for(let i = 0; i < extraNotes.length; i++)
+                {
+                    let keyVel = extraNotes[i],
+                        newKey = inKey + keyVel[0],
+                        newVelocity = Math.floor(inVelocity * keyVel[1]);
+
+                    newKey = (newKey > 127) ? 127 : newKey;
+                    newKey = (newKey < 0) ? 0 : newKey;
+                    newVelocity = (newVelocity > 127) ? 127 : newVelocity;
+                    newVelocity = (newVelocity < 1) ? 1 : newVelocity;
+
+                    // midi.preset is unchanged
+                    midi.keyKey = inKey; // the key that turns this note off (unchanged in mix)
+                    midi.keyCentsPitch = midiLimit(chanControls.tuning[newKey] + midi.midiCentsOffset);
+                    midi.velocity = newVelocity;
+
+                    doNewIndividualNoteOn(midi, masterNote);
+                }
+            }
+
             function doNoteOn(midi, masterNote)
             {
-                function doNewIndividualNoteOn(midi, masterNote)
-                {
-                    let zone, note,
-                        preset = midi.preset,
-                        keyPitchBase = Math.floor(midi.keyCentsPitch);
 
-                    zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
-                    if(!zone)
-                    {
-                        throw "zone  not found";
-                    }
-                    // note on
-                    note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
-                    note.subNotes = [];
-                    if(masterNote == undefined)
-                    {
-                        currentMasterNotes.push(note);
-                    }
-                    else
-                    {
-                        masterNote.subNotes.push(note);
-                    }
-                    note.noteOn();
-                    //chanControls.currentNoteOns.push(note);
-                    return note;
-                }
-
-                function doMixture(masterNote, midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
-                {
-                    let mixture = mixtures[mixtureIndex],
-                        extraNotes = mixture.extraNotes,
-                        exceptKeyMixtureIndex = mixture.except.find(x => x[0] === inKey);
-
-                    if(exceptKeyMixtureIndex !== undefined)
-                    {
-                        extraNotes = mixtures[exceptKeyMixtureIndex[1]].extraNotes;
-                    }
-
-                    for(let i = 0; i < extraNotes.length; i++)
-                    {
-                        let keyVel = extraNotes[i],
-                            newKey = inKey + keyVel[0],
-                            newVelocity = Math.floor(inVelocity * keyVel[1]);
-
-                        newKey = (newKey > 127) ? 127 : newKey;
-                        newKey = (newKey < 0) ? 0 : newKey;
-                        newVelocity = (newVelocity > 127) ? 127 : newVelocity;
-                        newVelocity = (newVelocity < 1) ? 1 : newVelocity;
-
-                        // midi.preset is unchanged
-                        midi.keyKey = inKey; // the key that turns this note off (unchanged in mix)
-                        midi.keyCentsPitch = midiLimit(chanControls.tuning[newKey] + midi.midiCentsOffset);
-                        midi.velocity = newVelocity;
-
-                        doNewIndividualNoteOn(midi, masterNote);
-                    }
-                }
-
-                masterNote = doNewIndividualNoteOn(midi, masterNote);
-
-                if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
-                {
-                    doMixture(masterNote, midi, chanControls.mixtureIndex, midi.velocityPitchValue14Bit);
-                }
             }
 
             function getDummyMasterNote(inKey)
@@ -1603,7 +1598,12 @@ ResSynth.residentSynth = (function(window)
                                     oMidi.velocityPitchValue14Bit = (((oMidi.inVelocity & 0x7f) << 7) | (oMidi.inVelocity & 0x7f)) - 8192;
                                 }
 
-                                doNoteOn(oMidi, masterNote);
+                                let subNote = doNewIndividualNoteOn(oMidi, masterNote);
+
+                                if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
+                                {
+                                    doMixture(subNote, oMidi, chanControls.mixtureIndex, oMidi.velocityPitchValue14Bit);
+                                }
                             }
                             break;
                         }
@@ -1612,9 +1612,17 @@ ResSynth.residentSynth = (function(window)
                             let subNotes = masterNote.subNotes;
                             for(let i = 0; i < subNotes.length; i++)
                             {
-                                subNotes[i].noteOff();
-                                subNotes.splice(i, 1);
+                                let subNote = subNotes[i],
+                                    mixtureNotes = subNote.subNotes;
+
+                                for(var j = 0; j < mixtureNotes.length; j++)
+                                {
+                                    mixtureNotes[j].noteOff();
+                                }
+                                mixtureNotes.length = 0;
+                                subNote.noteOff();
                             }
+                            subNotes.length = 0;
                             break;
                         }                        
                     }
@@ -1676,7 +1684,15 @@ ResSynth.residentSynth = (function(window)
             }
             else
             {
-                doNoteOn(midi); // 2nd argument, masterNote, is undefined here (noteOn() is the response to a keyboard event)
+                let masterNote = undefined;
+                // 2nd argument, masterNote, is undefined here (noteOn() is the response to a keyboard event)
+                masterNote = doNewIndividualNoteOn(midi, masterNote);
+
+                if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
+                {
+                    // pushes the new notes into masterNote.subNotes[]
+                    doMixture(masterNote, midi, chanControls.mixtureIndex, midi.velocityPitchValue14Bit);
+                }
             }
         },
 
@@ -1713,22 +1729,6 @@ ResSynth.residentSynth = (function(window)
                 });
             }
 
-            function doOrnamentNoteOffs(chanControls, ornamentDef)
-            {
-                let ornamentNoteOnKeys = ornamentDef.ornamentNoteOnKeys,
-                    currentChanNoteOns = chanControls.currentNoteOns;
-
-                for(let i = 0; i < ornamentNoteOnKeys.length; i++)
-                {
-                    let key = ornamentNoteOnKeys[i],
-                        index = currentChanNoteOns.findIndex(note => note.inKey === key);
-
-                    currentChanNoteOns[index].noteOff(); // ignore returned stopTime
-                    currentChanNoteOns.splice(index, 1);
-                }
-                ornamentNoteOnKeys.length = 0;
-            }
-
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
                 channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[inKey] : inChannel,
                 chanControls = channelControls[channel],
@@ -1749,8 +1749,6 @@ ResSynth.residentSynth = (function(window)
                 {
                     throw 'Condition not met:' + error.message;
                 }
-
-                //doOrnamentNoteOffs(chanControls, ornamentDef);
             }
 
             let noteIndex = currentMasterNotes.findIndex(x => x.inKey === inKey);
@@ -1759,15 +1757,23 @@ ResSynth.residentSynth = (function(window)
                 let note = currentMasterNotes[noteIndex],
                     subNotes = note.subNotes;
 
-                for(var index = 0; index < subNotes.length; index++)
+                for(let i = 0; i < subNotes.length; i++)
                 {
-                    subNotes[index].noteOff(); // note.noteOff calls itself recursively
+                    let subNote = subNotes[i],
+                        subSubNotes = subNote.subNotes; // mixtures inside ornaments...
+
+                    for(var j = 0; j < subSubNotes.length; j++)
+                    {
+                        subSubNotes[j].noteOff();
+                    }
+                    subSubNotes.length = 0;
+                    subNote.noteOff();
                 }
                 subNotes.length = 0;
+
                 stopTime = note.noteOff();
                 currentMasterNotes.splice(noteIndex, 1);
             }
-
 
             return stopTime;
         },
