@@ -849,7 +849,7 @@ ResSynth.residentSynth = (function(window)
                 {
                     return []; // the residentSynth will use the incoming message's channel
                 }
-                
+
                 const arraySize = 128,
                     keyChannelPairs = getKeyIntValuePairs(keyboardSplitDef),
                     channelPerKeyArray = (keyChannelPairs.length > 0) ? Array(arraySize).fill(0) : [];
@@ -981,7 +981,7 @@ ResSynth.residentSynth = (function(window)
                                     noteOn.velocityIncr = parseInt(noteOnDef[1]);
 
                                     msg.noteOns.push(noteOn);
-                                }                                
+                                }
                             }
                             else if(msgDef.chordOff !== undefined)
                             {
@@ -995,8 +995,8 @@ ResSynth.residentSynth = (function(window)
                                     noteOff.key = inKey + parseInt(chordOffDef[i]);
 
                                     msg.noteOffs.push(noteOff);
-                                } 
-                            } 
+                                }
+                            }
 
                             ornamentMsgs.push(msg);
                         }
@@ -1123,13 +1123,13 @@ ResSynth.residentSynth = (function(window)
                         errorString = `keyboardSplitIndex must be 0 if keyboardSplitDefs are undefined`;
                     }
                 }
-                else if( keyboardSplitIndex >= keyboardSplitDefs.length)
+                else if(keyboardSplitIndex >= keyboardSplitDefs.length)
                 {
                     errorString = `keyboardSplitIndex must be less than keyboardSplitDefs length (${keyboardSplitDefs.length})`;
                 }
 
                 if(errorString.length > 0)
-                { 
+                {
                     errorString = `Error in synthSettings (name:${synthSettingsName}):\n ` + errorString;
                     alert(errorString);
                     throw errorString;
@@ -1234,7 +1234,7 @@ ResSynth.residentSynth = (function(window)
                     for(var channel = 0; channel < channelSettingsDefs.length; channel++)
                     {
                         let csDef = channelSettingsDefs[channel],
-                            channelSettings = newSynthSettings.channelSettingsArray[channel];                        
+                            channelSettings = newSynthSettings.channelSettingsArray[channel];
 
                         checkChannelSettings(csDef, synthSettingsDef.name);
 
@@ -1314,20 +1314,46 @@ ResSynth.residentSynth = (function(window)
             channelControls[channel].centsOffset = centsOffset;
         },
 
+        //returns a flat list of all the notes in the masterNote object
+        getAllNotes = function(masterNote)
+        {
+            let allNotes = [],
+                subNotes = masterNote.subNotes;
+
+            if(masterNote.noteOn !== undefined) // ornament masterNotes have no noteOn() function.
+            {
+                allNotes.push(masterNote);
+            }
+
+            for(let i = 0; i < subNotes.length; i++)
+            {
+                let subNote = subNotes[i],
+                    subSubNotes = subNote.subNotes; // mixtures inside ornaments...
+
+                allNotes.push(subNote);
+
+                for(var j = 0; j < subSubNotes.length; j++)
+                {
+                    allNotes.push(subSubNotes[j]);
+                }
+            }
+            return allNotes;
+
+        },
+
         updatePitchWheel = function(channel, data1, data2)
         {
-            var pitchWheel14Bit = (((data2 & 0x7f) << 7) | (data1 & 0x7f)) - 8192,
-                currentNoteOns = channelControls[channel].currentNoteOns;
+            var pitchWheel14Bit = (((data2 & 0x7f) << 7) | (data1 & 0x7f)) - 8192;
 
             // data2 is the MSB, data1 is LSB.
             //console.log("updatePitchWheel() data1: " + data1 + " data2:" + data2 + " pitchWheel14Bit=" + pitchWheel14Bit + " (should be in range -8192..+8191)");
 
-            if(currentNoteOns !== undefined && currentNoteOns.length > 0)
+            for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                let nNoteOns = currentNoteOns.length;
-                for(let i = 0; i < nNoteOns; ++i)
+                let allNotes = getAllNotes(currentMasterNotes[i]);
+                for(var j = 0; j < allNotes.length; j++)
                 {
-                    currentNoteOns[i].updatePitchWheel(pitchWheel14Bit);
+                    allNotes[j].updatePitchWheel(pitchWheel14Bit);
                 }
             }
 
@@ -1335,19 +1361,18 @@ ResSynth.residentSynth = (function(window)
             channelControls[channel].pitchWheelData2 = data2; // for restoring channelSettings
             channelControls[channel].pitchWheel14Bit = pitchWheel14Bit; // for new noteOns
         },
+
         // The value argument is in range [0..127], meaning not modulated to as modulated as possible.
         // The frequency of the modMode depends on the frequency of the note...
         updateModWheel = function(channel, value)
         {
             //console.log("ResidentSynth: ModWheel channel:" + channel + " value:" + value);
-
-            let currentNoteOns = channelControls[channel].currentNoteOns;
-            if(currentNoteOns !== undefined && currentNoteOns.length > 0)
+            for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                let nNoteOns = currentNoteOns.length;
-                for(let i = 0; i < nNoteOns; ++i)
+                let allNotes = getAllNotes(currentMasterNotes[i]);
+                for(var j = 0; j < allNotes.length; j++)
                 {
-                    currentNoteOns[i].updateModWheel(channelAudioNodes[channel].modNode, channelAudioNodes[channel].modGainNode, value);
+                    allNotes[j].updateModWheel(channelAudioNodes[channel].modNode, channelAudioNodes[channel].modGainNode, value);
                 }
             }
 
@@ -1377,22 +1402,17 @@ ResSynth.residentSynth = (function(window)
         },
         updatePitchWheelSensitivity = function(channel, semitones)
         {
-            let chanControls = channelControls[channel],
-                currentNoteOns = chanControls.currentNoteOns;
-
-            if(currentNoteOns !== undefined && currentNoteOns.length > 0) // required for sounding notes
+            for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                let pitchWheel14Bit = chanControls.pitchWheel14Bit,
-                    nNoteOns = currentNoteOns.length;
-
-                for(let i = 0; i < nNoteOns; ++i)
+                let allNotes = getAllNotes(currentMasterNotes[i]);
+                for(var j = 0; j < allNotes.length; j++)
                 {
-                    currentNoteOns[i].pitchWheelSensitivity = semitones; // 0..127 semitones
-                    currentNoteOns[i].updatePitchWheel(pitchWheel14Bit);
+                    allNotes[j].pitchWheelSensitivity = semitones; // 0..127 semitones
+                    allNotes[j].updatePitchWheel(pitchWheel14Bit);
                 }
             }
 
-            chanControls.pitchWheelSensitivity = semitones; // for new noteOns
+            channelControls[channel].pitchWheelSensitivity = semitones; // for new noteOns
         },
 
         updateVelocityPitchSensitivity = function(channel, data2)
@@ -1404,33 +1424,17 @@ ResSynth.residentSynth = (function(window)
         {
             channelControls[channel].inKeyOrnamentDefs = inKeyOrnamentDefsArrays[inKeyOrnamentDefsIndex];
         },
-        // Must turn off notes in all channels, since the keyboard can be split,
-        // so we don't know which channels may be sounding.
+
         allSoundOff = function()
         {
-            function reconnectChannelInput(chanAudioNodes)
+            for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                // audioContext is inherited
-                chanAudioNodes.inputNode = audioContext.createStereoPanner();
-                chanAudioNodes.panNode = chanAudioNodes.inputNode;
-                chanAudioNodes.inputNode.connect(chanAudioNodes.reverberator.input);
-            }
-
-            for(let channel = 0; channel < 16; channel++)
-            {
-                let currentNoteOns = channelControls[channel].currentNoteOns,
-                    chanAudioNodes = channelAudioNodes[channel],
-                    inputNode = chanAudioNodes.inputNode,
-                    now = 0, stopTime = 0;
-
-                inputNode.disconnect();
-                while(currentNoteOns.length > 0)
+                let allNotes = getAllNotes(currentMasterNotes[i]);
+                for(var j = 0; j < allNotes.length; j++)
                 {
-                    now = audioContext.currentTime;
-                    stopTime = noteOff(channel, currentNoteOns[0].keyKey);
+                    allNotes[j].noteOff()
                 }
-                setTimeout(function() {reconnectChannelInput(chanAudioNodes)}, stopTime - now);
-            }            
+            }
         },
 
         noteOn = async function(inChannel, inKey, inVelocity)
@@ -1448,7 +1452,7 @@ ResSynth.residentSynth = (function(window)
                 return value;
             }
 
-            // returns a new midiAttributes object
+            // returns a new midiAttributes object 
             function getMidiAttributes(chanPresets, chanControls, inKey, inVelocity)
             {
                 let midi = {}; 
@@ -1461,7 +1465,7 @@ ResSynth.residentSynth = (function(window)
                 midi.keyCentsPitch = midiLimit(chanControls.tuning[inKey] + midi.midiCentsOffset);
 
                 // velocityPitchValue14Bit is always the same for all octaves of the same absolute pitch
-                let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (midi.inKey % 12));
+                let noteOn = currentMasterNotes.find(x => (x.inKey % 12) === (midi.inKey % 12));
                 if(noteOn !== undefined)
                 {
                     midi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
@@ -1497,7 +1501,7 @@ ResSynth.residentSynth = (function(window)
                     masterNote.subNotes.push(note);
                 }
                 note.noteOn();
-                //chanControls.currentNoteOns.push(note);
+
                 return note;
             }
 
@@ -1527,14 +1531,10 @@ ResSynth.residentSynth = (function(window)
                     midi.keyKey = inKey; // the key that turns this note off (unchanged in mix)
                     midi.keyCentsPitch = midiLimit(chanControls.tuning[newKey] + midi.midiCentsOffset);
                     midi.velocity = newVelocity;
+                    midi.velocityPitchValue14Bit = mixtureVelocityPitchValue14Bit;
 
                     doNewIndividualNoteOn(midi, masterNote);
                 }
-            }
-
-            function doNoteOn(midi, masterNote)
-            {
-
             }
 
             function getDummyMasterNote(inKey)
@@ -1588,7 +1588,7 @@ ResSynth.residentSynth = (function(window)
                                 oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiCentsOffset,
                                 oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
 
-                                let noteOn = chanControls.currentNoteOns.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
+                                let noteOn = currentMasterNotes.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
                                 if(noteOn !== undefined)
                                 {
                                     oMidi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
@@ -1659,12 +1659,16 @@ ResSynth.residentSynth = (function(window)
 
             if(inVelocity === 0)
             {
-                let currentNoteOns = chanControls.currentNoteOns,
-                    note = currentNoteOns.find(note => note.inKey === inKey);
+                let note = currentMasterNotes.find(x => x.inKey === inKey);
 
                 if(note !== undefined)
                 {
-                    note.noteOff();
+                    let allNotes = getAllNotes(note);
+
+                    for(let i = 0; i < allNotes.length; i++)
+                    {
+                        allNotes[i].noteOff();
+                    }
                 }
 
                 return;
@@ -1732,7 +1736,6 @@ ResSynth.residentSynth = (function(window)
             let inChannelPerKeyArray = channelControls[inChannel].channelPerKeyArray,
                 channel = (inChannelPerKeyArray.length > 0) ? inChannelPerKeyArray[inKey] : inChannel,
                 chanControls = channelControls[channel],
-                currentNoteOns = chanControls.currentNoteOns,
                 inKeyOrnamentDefs = chanControls.inKeyOrnamentDefs,
                 inKeyOrnamentDef = inKeyOrnamentDefs.find(x => x.inKey === inKey),
                 ornamentDef = (inKeyOrnamentDef === undefined) ? undefined : inKeyOrnamentDef.ornamentDef,
@@ -1939,8 +1942,6 @@ ResSynth.residentSynth = (function(window)
 
             let controlState = {};
             channelControls.push(controlState);
-
-            channelControls[channel].currentNoteOns = [];
 
             channelControls[channel].channelPerKeyArray = [];
             channelControls[channel].inKeyOrnamentDefs = [];
