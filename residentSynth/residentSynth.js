@@ -1444,7 +1444,7 @@ ResSynth.residentSynth = (function(window)
                 return new Promise(resolve => setTimeout(resolve, milliseconds));
             }
 
-            function midiLimit(value)
+            function midiVal(value)
             {
                 value = (value > 127) ? 127 : value;
                 value = (value < 0) ? 0 : value;
@@ -1462,7 +1462,7 @@ ResSynth.residentSynth = (function(window)
                 midi.inVelocity = inVelocity;
                 midi.midiCentsOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100); // valid throughout a mixture
                 // keyCentsPitch is the pitch described as a key.cents value in equal temperament.
-                midi.keyCentsPitch = midiLimit(chanControls.tuning[inKey] + midi.midiCentsOffset);
+                midi.keyCentsPitch = midiVal(chanControls.tuning[inKey] + midi.midiCentsOffset);
 
                 // velocityPitchValue14Bit is always the same for all octaves of the same absolute pitch
                 let noteOn = currentMasterNotes.find(x => (x.inKey % 12) === (midi.inKey % 12));
@@ -1489,9 +1489,11 @@ ResSynth.residentSynth = (function(window)
                 {
                     throw "zone  not found";
                 }
-                // note on
+
                 note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
-                note.subNotes = [];
+
+                note.noteOn();
+
                 if(masterNote == undefined)
                 {
                     currentMasterNotes.push(note);
@@ -1500,12 +1502,11 @@ ResSynth.residentSynth = (function(window)
                 {
                     masterNote.subNotes.push(note);
                 }
-                note.noteOn();
 
                 return note;
             }
 
-            function doMixture(masterNote, midi, mixtureIndex, mixtureVelocityPitchValue14Bit)
+            function doMixture(masterNote, midi, mixtureIndex)
             {
                 let mixture = mixtures[mixtureIndex],
                     extraNotes = mixture.extraNotes,
@@ -1519,19 +1520,13 @@ ResSynth.residentSynth = (function(window)
                 for(let i = 0; i < extraNotes.length; i++)
                 {
                     let keyVel = extraNotes[i],
-                        newKey = inKey + keyVel[0],
-                        newVelocity = Math.floor(inVelocity * keyVel[1]);
+                        newKey = midiVal(inKey + keyVel[0]),
+                        newVelocity = midiVal(Math.floor(inVelocity * keyVel[1]));
 
-                    newKey = (newKey > 127) ? 127 : newKey;
-                    newKey = (newKey < 0) ? 0 : newKey;
-                    newVelocity = (newVelocity > 127) ? 127 : newVelocity;
-                    newVelocity = (newVelocity < 1) ? 1 : newVelocity;
-
-                    // midi.preset is unchanged
-                    midi.keyKey = inKey; // the key that turns this note off (unchanged in mix)
-                    midi.keyCentsPitch = midiLimit(chanControls.tuning[newKey] + midi.midiCentsOffset);
+                    // midi.preset and midi.velocityPitchValue14Bit have both already been set, and do not change.
+                    midi.keyKey = inKey;
+                    midi.keyCentsPitch = midiVal(chanControls.tuning[newKey] + midi.midiCentsOffset);
                     midi.velocity = newVelocity;
-                    midi.velocityPitchValue14Bit = mixtureVelocityPitchValue14Bit;
 
                     doIndividualNoteOn(midi, masterNote);
                 }
@@ -1601,7 +1596,7 @@ ResSynth.residentSynth = (function(window)
 
                                 if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
                                 {
-                                    doMixture(subNote, oMidi, chanControls.mixtureIndex, oMidi.velocityPitchValue14Bit);
+                                    doMixture(subNote, oMidi, chanControls.mixtureIndex);
                                 }
                             }
                             break;
@@ -1695,7 +1690,7 @@ ResSynth.residentSynth = (function(window)
                 if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
                 {
                     // pushes the new notes into masterNote.subNotes[]
-                    doMixture(masterNote, midi, chanControls.mixtureIndex, midi.velocityPitchValue14Bit);
+                    doMixture(masterNote, midi, chanControls.mixtureIndex);
                 }
             }
         },

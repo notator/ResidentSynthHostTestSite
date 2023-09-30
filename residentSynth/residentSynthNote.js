@@ -40,6 +40,8 @@ ResSynth.residentSynthNote = (function()
 			this.velocityPitchValue14Bit = midi.velocityPitchValue14Bit;
 			this.velocityPitchSensitivity = channelControls.velocityPitchSensitivity; // float value in range 0..1;
 
+			this.subNotes = [];
+
 			if(channelAudioNodes.modNode !== undefined)
 			{
 				this.updateModWheel(channelAudioNodes.modNode, channelAudioNodes.modGainNode, channelControls.modWheel);
