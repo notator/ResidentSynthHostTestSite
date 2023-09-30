@@ -1408,7 +1408,7 @@ ResSynth.residentSynth = (function(window)
                 for(var j = 0; j < allNotes.length; j++)
                 {
                     allNotes[j].pitchWheelSensitivity = semitones; // 0..127 semitones
-                    allNotes[j].updatePitchWheel(pitchWheel14Bit);
+                    allNotes[j].updatePitchWheel(channelControls[channel].pitchWheel14Bit);
                 }
             }
 
