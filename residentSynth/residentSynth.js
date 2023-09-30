@@ -1315,12 +1315,12 @@ ResSynth.residentSynth = (function(window)
         },
 
         //returns a flat list of all the notes in the masterNote object
-        getAllNotes = function(masterNote)
+        getAllResidentSynthNotes = function(masterNote)
         {
             let allNotes = [],
                 subNotes = masterNote.subNotes;
 
-            if(masterNote.noteOn !== undefined) // ornament masterNotes have no noteOn() function.
+            if(masterNote instanceof ResSynth.residentSynthNote.ResidentSynthNote) // an ornament masterNotes is not a ResidentSynthNote.
             {
                 allNotes.push(masterNote);
             }
@@ -1350,7 +1350,7 @@ ResSynth.residentSynth = (function(window)
 
             for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                let allNotes = getAllNotes(currentMasterNotes[i]);
+                let allNotes = getAllResidentSynthNotes(currentMasterNotes[i]);
                 for(var j = 0; j < allNotes.length; j++)
                 {
                     allNotes[j].updatePitchWheel(pitchWheel14Bit);
@@ -1369,7 +1369,7 @@ ResSynth.residentSynth = (function(window)
             //console.log("ResidentSynth: ModWheel channel:" + channel + " value:" + value);
             for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                let allNotes = getAllNotes(currentMasterNotes[i]);
+                let allNotes = getAllResidentSynthNotes(currentMasterNotes[i]);
                 for(var j = 0; j < allNotes.length; j++)
                 {
                     allNotes[j].updateModWheel(channelAudioNodes[channel].modNode, channelAudioNodes[channel].modGainNode, value);
@@ -1404,7 +1404,7 @@ ResSynth.residentSynth = (function(window)
         {
             for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                let allNotes = getAllNotes(currentMasterNotes[i]);
+                let allNotes = getAllResidentSynthNotes(currentMasterNotes[i]);
                 for(var j = 0; j < allNotes.length; j++)
                 {
                     allNotes[j].pitchWheelSensitivity = semitones; // 0..127 semitones
@@ -1429,7 +1429,7 @@ ResSynth.residentSynth = (function(window)
         {
             for(let i = 0; i < currentMasterNotes.length; ++i)
             {
-                let allNotes = getAllNotes(currentMasterNotes[i]);
+                let allNotes = getAllResidentSynthNotes(currentMasterNotes[i]);
                 for(var j = 0; j < allNotes.length; j++)
                 {
                     allNotes[j].noteOff()
@@ -1478,7 +1478,7 @@ ResSynth.residentSynth = (function(window)
                 return midi;
             }
 
-            function doNewIndividualNoteOn(midi, masterNote)
+            function doIndividualNoteOn(midi, masterNote)
             {
                 let zone, note,
                     preset = midi.preset,
@@ -1533,23 +1533,22 @@ ResSynth.residentSynth = (function(window)
                     midi.velocity = newVelocity;
                     midi.velocityPitchValue14Bit = mixtureVelocityPitchValue14Bit;
 
-                    doNewIndividualNoteOn(midi, masterNote);
+                    doIndividualNoteOn(midi, masterNote);
                 }
             }
 
-            function getDummyMasterNote(inKey)
+            function getOrnamentMasterNote(inKey)
             {
-                let masterNote = {};
-                masterNote.inKey = inKey;
-                masterNote.subNotes = [];
-                masterNote.noteOff = () => { };
+                let ornamentMasterNote = {};
+                ornamentMasterNote.inKey = inKey;
+                ornamentMasterNote.subNotes = [];
 
-                return masterNote;
+                return ornamentMasterNote;
             }
 
             async function playOrnamentAsync(masterNote, inMidi, ornamentDef)
             {
-                async function doMsgAsync(masterNote, inMidi, msg, ornamentNoteOnKeys, cancel)
+                async function doMsgAsync(masterNote, inMidi, msg, cancel)
                 {
                     function midiVal(value)
                     {
@@ -1588,7 +1587,7 @@ ResSynth.residentSynth = (function(window)
                                 oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiCentsOffset,
                                 oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
 
-                                let noteOn = currentMasterNotes.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
+                                let noteOn = masterNote.subNotes.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
                                 if(noteOn !== undefined)
                                 {
                                     oMidi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
@@ -1598,7 +1597,7 @@ ResSynth.residentSynth = (function(window)
                                     oMidi.velocityPitchValue14Bit = (((oMidi.inVelocity & 0x7f) << 7) | (oMidi.inVelocity & 0x7f)) - 8192;
                                 }
 
-                                let subNote = doNewIndividualNoteOn(oMidi, masterNote);
+                                let subNote = doIndividualNoteOn(oMidi, masterNote);
 
                                 if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
                                 {
@@ -1637,7 +1636,7 @@ ResSynth.residentSynth = (function(window)
                     {
                         let ornamentMsg = ornamentMsgs[i];
 
-                        await doMsgAsync(masterNote, inMidi, ornamentMsg, ornamentDef.ornamentNoteOnKeys, ornamentDef.cancel);
+                        await doMsgAsync(masterNote, inMidi, ornamentMsg, ornamentDef.cancel);
 
                         if(ornamentDef.cancel === true)
                         {
@@ -1663,7 +1662,7 @@ ResSynth.residentSynth = (function(window)
 
                 if(note !== undefined)
                 {
-                    let allNotes = getAllNotes(note);
+                    let allNotes = getAllResidentSynthNotes(note);
 
                     for(let i = 0; i < allNotes.length; i++)
                     {
@@ -1678,19 +1677,20 @@ ResSynth.residentSynth = (function(window)
 
             if(ornamentDef !== undefined)
             {
+                let ornamentMasterNote = getOrnamentMasterNote(inKey);
+                currentMasterNotes.push(ornamentMasterNote);
+
                 console.assert(inKeyOrnamentDef.inKey === midi.inKey);
                 ornamentDef.complete = false;
                 ornamentDef.cancel = false;
-                let masterNote = getDummyMasterNote(inKey);
-                currentMasterNotes.push(masterNote);
-                // masterNote.noteOff() does nothing.
-                playOrnamentAsync(masterNote, midi, ornamentDef);
+
+                playOrnamentAsync(ornamentMasterNote, midi, ornamentDef);
             }
             else
             {
                 let masterNote = undefined;
                 // 2nd argument, masterNote, is undefined here (noteOn() is the response to a keyboard event)
-                masterNote = doNewIndividualNoteOn(midi, masterNote);
+                masterNote = doIndividualNoteOn(midi, masterNote);
 
                 if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
                 {
@@ -1758,23 +1758,13 @@ ResSynth.residentSynth = (function(window)
             if(noteIndex >= 0)
             {
                 let note = currentMasterNotes[noteIndex],
-                    subNotes = note.subNotes;
+                    allResidentSynthNotes = getAllResidentSynthNotes(note);
 
-                for(let i = 0; i < subNotes.length; i++)
+                for(let i = 0; i < allResidentSynthNotes.length; i++)
                 {
-                    let subNote = subNotes[i],
-                        subSubNotes = subNote.subNotes; // mixtures inside ornaments...
-
-                    for(var j = 0; j < subSubNotes.length; j++)
-                    {
-                        subSubNotes[j].noteOff();
-                    }
-                    subSubNotes.length = 0;
-                    subNote.noteOff();
+                    stopTime = allResidentSynthNotes[i].noteOff();
                 }
-                subNotes.length = 0;
 
-                stopTime = note.noteOff();
                 currentMasterNotes.splice(noteIndex, 1);
             }
 
