@@ -1587,7 +1587,7 @@ ResSynth.residentSynth = (function(window)
                                 oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiCentsOffset,
                                 oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
 
-                                let noteOn = masterNote.subNotes.find(x => (x.inKey % 12) === (oMidi.inKey % 12));
+                                let noteOn = masterNote.subNotes[0];
                                 if(noteOn !== undefined)
                                 {
                                     oMidi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
