@@ -5,8 +5,11 @@ This repository contains two major branches:
 &nbsp;&nbsp;&nbsp;&nbsp;**testSite**: the unstable development version, which can be tested [here](https://james-ingram-act-two.de/open-source/ResidentSynthHostTestSite/host.html).  
 
 Software synthesizers like the _ResidentSynth_ can be used by any web application as a substitute 
-for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformerTestSite), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).  
-The _ResidentSynth_ is intended to be configured for, and installed with, a web application that knows in advance which presets it needs. Loading time can therefore be minimized by not installing redundant presets. The synth uses a configurable [WebAudioFont](https://github.com/surikov/webaudiofont) that has at least one bank containing at least one preset. There can be up to 127 banks, each of which can contain up to 127 presets.  
+for end-user hardware. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformerTestSite), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
+
+The _ResidentSynth_ is intended to be configured for, and installed with, a web application that knows in advance:
+1. which presets it needs.<br /> Loading time can therefore be minimized by not installing redundant presets.<br />The synth uses a configurable [WebAudioFont](https://github.com/surikov/webaudiofont) that has at least one bank containing at least one preset.<br /> There can be up to 127 banks, each of which can contain up to 127 presets.
+2. which MIDI messages it supports.<br /> The _ResidentSynth_ can therefore use MIDI control messages with non-standard meanings.<br /> All the supported MIDI messages are documented <a href="#midiMessages">below</a>.   
 
 Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.  
 Issues relating to either of them should be raised here.  
@@ -118,6 +121,7 @@ This currently contains:
   
 More complete instructions as to how to edit these files are given in the files themselves.
 
+<a id="midiMessages"/>
 #### MIDI Messages
 See the file residentSynth/constants.js
 
@@ -133,7 +137,7 @@ See the file residentSynth/constants.js
    AFTERTOUCH (160, 0xA0)   
    CHANNEL_PRESSURE (208, 0xD0)  
    SYSEX (240, 0xF0)<br />
-
+   
 ##### Standard Controls
 * <em>Implemented</em>:<br />
     BANK (CC 0, 0x0)  
