@@ -33,8 +33,8 @@ Similarly, available audio outputs can be selected from the **Audio Output** sel
 Channels:  
 ![screenshot_channels](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_0_Channels.png "screenshot_Channels")  
 The residentSynth has 16 channels. Each channel can be edited independently, one at a time, using the **edit channel** selector. On selection, the channel's settings are loaded into the editable controls below.  
-The **keyboard split** selector can allocate different channels to different groups of keys on the attached input device. The default is for all keys to send messages on the currently displayed channel.  
-Other keyboard split configurations can be defined in the `keyboardSplitDefs.js` file (in `ResidentSynth/config`). These are loaded as options into the **keyboard split** selector when the application begins.
+The **keyboard split** selector can allocate different channels to different groups of keys on the attached input device. The default, in this host application, is for all keys to send messages on the currently displayed channel.  
+Other keyboard split configurations can be defined in the `ResidentSynth/config/keyboardSplitDefs.js` file (also see <a href="#keyboardSplitDefs">below</a>). These configurations are loaded as options, both into the _ResidentSynth_ and into the _ResidentSynthHost_ **keyboard split** selector when the application begins. The split configuration can be changed using the (non-standard) SET_KEYBOARD_SPLIT_ARRAY MIDI message.
 
 Sounds:  
 ![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
@@ -114,6 +114,7 @@ This currently contains:
 &nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js (optional)  
   
 Examples, and more complete instructions as to how to edit these files are given in the files themselves.
+<a id="keyboardSplitDefs"/>
 
 **`keyboardSplitDefs.js`**  
 If this file is missing, the default is for there to be no split. The host application decides the channel on which  messages will be sent.  
@@ -162,9 +163,10 @@ See the file residentSynth/constants.js
 	<a href="#tunings">TUNING_INDEX</a> (CC 19, 0x13)  
 	<a href="#pitchoffsets">SEMITONES_OFFSET</a> (CC 80, 0x50)  
 	<a href="#pitchoffsets">CENTS_OFFSET</a> (CC 81, 0x51)  
-	<a href="#settingspresets">SET_SETTINGS</a> (CC 82, 0x52)  
+	<a href="#settingspresets">SET_CHANNEL_SETTINGS</a> (CC 82, 0x52)  
 	<a href="#vpsensitivity">VELOCITY_PITCH_SENSITIVITY</a> (CC 83, 0x53)  
-	<a href="#ornaments">SET_ORNAMENT</a> (CC 75, 0x4B)
+	<a href="#ornaments">SET_KEYBOARD_ORNAMENT_DEFS</a> (CC 75, 0x4B)  
+        <a href="#keyboardsplit">SET_KEYBOARD_SPLIT_ARRAY</a> (CC 76, 0x4C)  
 	
 ##### WebAudioFontDef, Banks and Presets
 The preset definitions used here can be found in
