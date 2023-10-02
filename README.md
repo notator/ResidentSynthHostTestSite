@@ -122,6 +122,7 @@ This currently contains:
 More complete instructions as to how to edit these files are given in the files themselves.
 
 <a id="midiMessages"/>
+
 #### MIDI Messages
 See the file residentSynth/constants.js
 
