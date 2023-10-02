@@ -33,15 +33,8 @@ Similarly, available audio outputs can be selected from the **Audio Output** sel
 Channels:  
 ![screenshot_channels](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_0_Channels.png "screenshot_Channels")  
 The residentSynth has 16 channels. Each channel can be edited independently, one at a time, using the **edit channel** selector. On selection, the channel's settings are loaded into the editable controls below.  
-The **keyboard split** selector can allocate different channels to different groups of keys on the attached input keyboard. The default is for all keys to send messages on the currently displayed channel.  
-Other keyboard split configurations can be defined in the `keyboardSplitDefs.js` file (in `ResidentSynth/config`). These are loaded as options into the **keyboard split** selector when the application begins.  
-Split definition strings can have up to 127 `<key>:<channel>;` substrings, separated by optional whitespace. The final ";" is optional.  
-Each `<key>` is a number in range 0..127. The first `<key>` must be `0`. `<key>` values must be in ascending order, and may not repeat.  
-Each `<channel>` is a number in range 0..15. These values can be in any order, and can repeat within the string.  
-The default (empty) string means that all keys send messages on the channel currently being edited.  
-The split defintion string is parsed from left to right.
-All keys greater than or equal to the `<key>` substring send on the substring's `<channel>` unless overridden by a substring further to the right.  
-Valid split definition strings are `""`, `"0:0; 42:1;"`, `"0:3; 40:1; 50:2;"`, `"0:0; 40:1; 50:2; 60:0; 72:5"` etc.
+The **keyboard split** selector can allocate different channels to different groups of keys on the attached input device. The default is for all keys to send messages on the currently displayed channel.  
+Other keyboard split configurations can be defined in the `keyboardSplitDefs.js` file (in `ResidentSynth/config`). These are loaded as options into the **keyboard split** selector when the application begins.
 
 Sounds:  
 ![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
@@ -114,12 +107,23 @@ The _ResidentSynth_ can be configured by editing the files in its
 This currently contains:  
 &nbsp;&nbsp;&nbsp;&nbsp;presets (a folder containing clones of Surikov's preset files)  
 &nbsp;&nbsp;&nbsp;&nbsp;webAudioFontDef.js (required)  
-&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;keyboardSplitDefs.js (optional) 
+&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js (optional) 
 &nbsp;&nbsp;&nbsp;&nbsp;ornamentDefs.js (optional)  
-&nbsp;&nbsp;&nbsp;&nbsp;settingsPresets.js (optional)  
+&nbsp;&nbsp;&nbsp;&nbsp;synthSettingsDefs.js (optional)  
 &nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js (optional)  
   
-More complete instructions as to how to edit these files are given in the files themselves.
+Examples, and more complete instructions as to how to edit these files are given in the files themselves.
+
+**`keyboardSplitDefs.js`**  
+If this file is missing, the default is for there to be no split. The host application decides the channel on which  messages will be sent.  
+Split definition strings can have up to 127 `<key>:<channel>;` substrings, separated by optional whitespace. The final ";" is optional.  
+Each `<key>` is a number in range 0..127. The first `<key>` must be `0`. `<key>` values must be in ascending order, and may not repeat.  
+Each `<channel>` is a number in range 0..15. These values can be in any order, and can repeat within the string.  
+The default (empty) string means that all keys send messages on the channel currently being edited.  
+The split defintion string is parsed from left to right.
+All keys greater than or equal to the `<key>` substring send on the substring's `<channel>` unless overridden by a substring further to the right.  
+Valid split definition strings are, for example, `""`, `"0:0; 42:1;"`, `"0:3; 40:1; 50:2;"`, `"0:0; 40:1; 50:2; 60:0; 72:5"` etc.
 
 <a id="midiMessages"/>
 
