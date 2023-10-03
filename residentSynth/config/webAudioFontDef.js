@@ -1,42 +1,5 @@
 console.log('load webAudioFontDef.js');
 
-// The following presets are installed in the webAudioFontDef below.
-// This object should be adjusted accordingly when different instruments are installed.
-ResSynth.installedPresetIndex =
-{
-    PIANO: 0,
-    HARPSICHORD: 6,
-    CELESTA: 8,
-    GLOCKENSPIEL: 9,
-    MUSICBOX: 10,
-    VIBRAPHONE: 11,
-    MARIMBA: 12,
-    XYLOPHONE: 13,
-    TUBULAR_BELLS: 14,
-    DULCIMER: 15,
-    ORGAN: 16,
-    NYLON_GUITAR: 24,
-    STEEL_GUITAR: 25,
-    ELECTRIC_GUITAR_JAZZ: 26,
-    ELECTRIC_GUITAR_CLEAN: 27,
-    HARP: 46,
-    OOHS: 53,
-    TUBA: 58,
-    HORN: 60,
-    TENOR_SAX: 66,
-    OBOE: 68,
-    BASSOON: 70,
-    CLARINET: 71,
-    FLUTE: 73,
-    OCARINA: 79,
-    PAD_2: 89,
-    PAD_5: 92,
-    PAD_6: 93,
-    PAD_8: 95,
-    PERCUSSION_METAL_AND_WOOD: 126,
-    PERCUSSION_DRUMS: 127
-};
-
 // This webAudioFontDef contains an array of banks containing the instrument presets.
 // The MIDI BANK control message sets the current bank.
 // The MIDI PRESET command message will set the preset using the index in the bank's presets array.
