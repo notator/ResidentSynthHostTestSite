@@ -174,7 +174,7 @@ See the file residentSynth/constants.js
 	<a href="#tunings">TUNING_INDEX</a> (CC 19, 0x13)  
 	<a href="#pitchoffsets">SEMITONES_OFFSET</a> (CC 80, 0x50)  
 	<a href="#pitchoffsets">CENTS_OFFSET</a> (CC 81, 0x51)  
-	<a href="#settingspresets">SET_CHANNEL_SETTINGS</a> (CC 82, 0x52)  
+	<a href="#settingspresets">SET_SYNTH_SETTINGS</a> (CC 82, 0x52)  
 	<a href="#vpsensitivity">VELOCITY_PITCH_SENSITIVITY</a> (CC 83, 0x53)  
 	<a href="#ornaments">SET_KEYBOARD_ORNAMENT_DEFS</a> (CC 75, 0x4B)  
         <a href="#keyboardsplit">SET_KEYBOARD_SPLIT_ARRAY</a> (CC 76, 0x4C)  

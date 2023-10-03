@@ -1964,17 +1964,17 @@ ResSynth.host = (function(document)
                 function setSettingsSelect()
                 {
                     let settingsSelect = getElem("settingsSelect"),
-                        synthSettings = synth.synthSettings;
+                        synthSettingsArray = synth.synthSettingsArray;
 
-                    console.assert(synthSettings.length < 127);
+                    console.assert(synthSettingsArray.length < 127);
 
-                    for(let settingsIndex = 0; settingsIndex < synthSettings.length; settingsIndex++)
+                    for(let settingsIndex = 0; settingsIndex < synthSettingsArray.length; settingsIndex++)
                     {
-                        let synSettings = synthSettings[settingsIndex],
+                        let synthSettings = synthSettingsArray[settingsIndex],
                             option = new Option();
 
-                        option.innerHTML = synSettings.name;
-                        option.synthSettings = synSettings;
+                        option.innerHTML = synthSettings.name;
+                        option.synthSettings = synthSettings;
 
                         settingsSelect.options.add(option);
                     }

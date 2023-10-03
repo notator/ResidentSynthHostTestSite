@@ -196,7 +196,7 @@ ResSynth.constants = (function()
 				case CONTROL.TUNING_INDEX:
 				case CONTROL.SEMITONES_OFFSET:
 				case CONTROL.CENTS_OFFSET:
-				case CONTROL.SET_CHANNEL_SETTINGS:
+				case CONTROL.SET_SYNTH_SETTINGS:
 				case CONTROL.VELOCITY_PITCH_SENSITIVITY:
 					return (0);
 				case CONTROL.PITCH_WHEEL_SENSITIVITY:
@@ -282,7 +282,7 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "TUNING_INDEX", {value: 19, writable: false}); // MIDI General_purpose_slider_4  (value is the index of the tuning)	
 	Object.defineProperty(CONTROL, "SEMITONES_OFFSET", {value: 80, writable: false}); // MIDI General_purpose_button_1. (sent value is semitonesOffset + 50)
 	Object.defineProperty(CONTROL, "CENTS_OFFSET", {value: 81, writable: false}); // MIDI General_purpose_button_2. (sent value is centsOffset + 50)
-	Object.defineProperty(CONTROL, "SET_CHANNEL_SETTINGS", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is trigger key)
+	Object.defineProperty(CONTROL, "SET_SYNTH_SETTINGS", {value: 82, writable: false}); // MIDI General_purpose_button_3. (value is trigger key)
 	Object.defineProperty(CONTROL, "VELOCITY_PITCH_SENSITIVITY", {value: 83, writable: false}); // MIDI General_purpose_button_4. (value is semitones / 127)
 	Object.defineProperty(CONTROL, "SET_KEYBOARD_ORNAMENT_DEFS", {value: 75, writable: false}); // MIDI Sound Control 6. (value is ornament index)
 	Object.defineProperty(CONTROL, "SET_KEYBOARD_SPLIT_ARRAY", {value: 76, writable: false}); // MIDI Sound Control 7. (value is ornament index)

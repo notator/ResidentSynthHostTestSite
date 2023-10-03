@@ -28,7 +28,7 @@ ResSynth.residentSynth = (function(window)
         channelPerKeyArrays = [], // initialized by setPrivateChannelPerKeyArrays(). This array has elements in range 0..15. Its length can be either 0 or 128.
         inKeyOrnamentDefsArrays = [], // initialized by setPrivateOrnamentPerKeyArrays().
 
-        synthSettings = [],
+        synthSettingsArray = [],
 
         // see: https://developer.chrome.com/blog/audiocontext-setsinkid/
         setAudioOutputDevice = async function(deviceId)
@@ -1100,12 +1100,12 @@ ResSynth.residentSynth = (function(window)
             }
         },
 
-        // Sets and returns the internal, global synthSettings array. This will contain a default SynthSettings object followed by
+        // Sets and returns the internal, global synthSettingsArray. This will contain a default SynthSettings object followed by
         // the values set in the synthSettings.js file.
         // The values in the attributes of the returned channelSettings objects are immutable.
-        // Clone channelSettings using {...channelSettings} to create an object having mutable attributes.
+        // Clone channelSettings using channelSettings.clone().
         // (Attributes can never be created or destroyed.)
-        getSynthSettings = function(synthSettingsDefs)
+        getSynthSettingsArray = function(synthSettingsDefs)
         {
             function checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsName)
             {
@@ -1213,7 +1213,7 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            synthSettings.push(new ResSynth.synthSettings.SynthSettings()); // default at index 0
+            synthSettingsArray.push(new ResSynth.synthSettings.SynthSettings()); // default at index 0
 
             if(synthSettingsDefs !== undefined && synthSettingsDefs.length > 0)
             {
@@ -1260,10 +1260,10 @@ ResSynth.residentSynth = (function(window)
                         Object.freeze(channelSettings); // attribute values are frozen
                     }
 
-                    synthSettings.push(newSynthSettings);
+                    synthSettingsArray.push(newSynthSettings);
                 }
             }
-            return synthSettings;
+            return synthSettingsArray;
         },
 
         /*****************************************/
@@ -1828,7 +1828,7 @@ ResSynth.residentSynth = (function(window)
                 CTL.TUNING_INDEX,
                 CTL.SEMITONES_OFFSET,
                 CTL.CENTS_OFFSET,
-                CTL.SET_CHANNEL_SETTINGS,
+                CTL.SET_SYNTH_SETTINGS,
                 CTL.VELOCITY_PITCH_SENSITIVITY,
                 CTL.SET_KEYBOARD_ORNAMENT_DEFS,
                 CTL.SET_KEYBOARD_SPLIT_ARRAY
@@ -1872,7 +1872,7 @@ ResSynth.residentSynth = (function(window)
             Object.defineProperty(this, "webAudioFont", {value: channelPresets.webAudioFont, writable: false});
             Object.defineProperty(this, "mixtures", {value: getMixtures(), writable: false});
             Object.defineProperty(this, "tuningGroups", {value: getTuningGroups(), writable: false});
-            Object.defineProperty(this, "synthSettings", {value: getSynthSettings(ResSynth.synthSettingsDefs), writable: false});
+            Object.defineProperty(this, "synthSettingsArray", {value: getSynthSettingsArray(ResSynth.synthSettingsDefs), writable: false});
 
             setPrivateChannelPerKeyArrays();
             setPrivateKeyOrnamentsArrays();
@@ -1984,30 +1984,40 @@ ResSynth.residentSynth = (function(window)
                 return midiValue - 64;
             }
 
-            // Note that the ResidentSynthHost does not call this function (i.e. send SET_CHANNEL_SETTINGS messages)
-            // because it needs to update the ResidentSynth's channelSettings incrementally.
+            // Note that the ResidentSynthHost does not call this function (i.e. send SET_SYNTH_SETTINGS messages)
+            // because it synchronizes with the residentSynth when it updates its own controls.
             // This function is provided for use in other applications, such as the AssistantPerformer.
-            function setChannelSettings(channel, channelSettingsIndex)
+            function setSynthSettings(channel, synthSettingsIndex)
             {
-                let channelSettings = synthSettings.channelSettings[channelSettingsIndex];
+                function setChannelSettings(synthSettings, channel)
+                {
+                    let channelSettings = synthSettings.channelSettingsArray[channel];
 
-                updateBankIndex(channel, channelSettings.bankIndex);
-                channelControls[channel].presetIndex = channelSettings.presetIndex;
-                updateMixtureIndex(channel, channelSettings.mixtureIndex);
-                updateTuningGroupIndex(channel, channelSettings.tuningGroupIndex);
-                updateTuning(channel, channelSettings.tuningIndex);
-                updateSemitonesOffset(channel, channelSettings.semitonesOffset);
-                updateCentsOffset(channel, channelSettings.centsOffset);
-                updatePitchWheel(channel, channelSettings.pitchWheel, channelSettings.pitchWheel);
-                updateModWheel(channel, channelSettings.modWheel);
-                updateVolume(channel, channelSettings.volume);
-                updatePan(channel, channelSettings.pan);
-                updateReverberation(channel, channelSettings.reverberation);
-                updatePitchWheelSensitivity(channel, channelSettings.pitchWheelSensitivity);
-                updateTriggerKey(channel, channelSettings.triggerkey);
-                updateVelocityPitchSensitivity(channel, channelSettings.velocityPitchSensitivity);
-                updateKeyboardSplit(channel, channelSettings.keyboardSplitIndex);
-                updateInKeyOrnamentDefs(channel, channelSettings.keyboardOrnamentsArrayIndex);
+                    updateBankIndex(channel, channelSettings.bankIndex);
+                    channelControls[channel].presetIndex = channelSettings.presetIndex;
+                    updateMixtureIndex(channel, channelSettings.mixtureIndex);
+                    updateTuningGroupIndex(channel, channelSettings.tuningGroupIndex);
+                    updateTuning(channel, channelSettings.tuningIndex);
+                    updateSemitonesOffset(channel, channelSettings.semitonesOffset);
+                    updateCentsOffset(channel, channelSettings.centsOffset);
+                    updatePitchWheel(channel, channelSettings.pitchWheel, channelSettings.pitchWheel);
+                    updateModWheel(channel, channelSettings.modWheel);
+                    updateVolume(channel, channelSettings.volume);
+                    updatePan(channel, channelSettings.pan);
+                    updateReverberation(channel, channelSettings.reverberation);
+                    updatePitchWheelSensitivity(channel, channelSettings.pitchWheelSensitivity);
+                    updateTriggerKey(channel, channelSettings.triggerkey);
+                    updateVelocityPitchSensitivity(channel, channelSettings.velocityPitchSensitivity);
+                    updateKeyboardSplit(channel, channelSettings.keyboardSplitIndex);
+                    updateInKeyOrnamentDefs(channel, channelSettings.keyboardOrnamentsArrayIndex);
+                }
+
+                let synthSettings = synthSettingsArray[synthSettingsIndex];
+
+                for(var channel = 0; channel < 16; channel++)
+                {
+                    setChannelSettings(synthSettings, channel);
+                }
             }
 
             switch(control)
@@ -2039,8 +2049,8 @@ ResSynth.residentSynth = (function(window)
                 case CTL.CENTS_OFFSET:
                     channelControls[channel].centsOffset = getOffsetValue(value);
                     break;
-                case CTL.SET_CHANNEL_SETTINGS:
-                    setChannelSettings(channel, value);
+                case CTL.SET_SYNTH_SETTINGS:
+                    setSynthSettings(channel, value);
                     break;
                 case CTL.TUNING_GROUP_INDEX:
                     updateTuningGroupIndex(channel, value); // sets tuning to the first tuning in the group
