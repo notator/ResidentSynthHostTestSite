@@ -9,7 +9,9 @@ for end-user hardware. I am intending, for example, also to install it as one of
 
 The _ResidentSynth_ is intended to be configured for, and installed with, a web application that knows in advance:
 1. which presets it needs.<br /> Loading time can therefore be minimized by not installing redundant presets.<br />The synth uses a configurable [WebAudioFont](https://github.com/surikov/webaudiofont) that has at least one bank containing at least one preset.<br /> There can be up to 127 banks, each of which can contain up to 127 presets.
-2. which MIDI messages it supports.<br /> The _ResidentSynth_ can therefore use MIDI control messages with non-standard meanings.<br /> All the supported MIDI messages are documented <a href="#midiMessages">below</a>.   
+2. which MIDI messages it supports.<br /> The _ResidentSynth_ can therefore use MIDI control messages with non-standard meanings.<br /> All the supported MIDI messages are documented <a href="#midiMessages">below</a>.  
+
+The _ResidentSynth_'s configuration files are located in the `residentSynth/config` folder. They are loaded into both the _ResidentSynth_ and _ResidentSynthHost_ at start-time. 
 
 Both the _ResidentSynthHost_ and _ResidentSynth_ are being developed in _this_ repository.  
 Issues relating to either of them should be raised here.  
@@ -33,41 +35,50 @@ Similarly, available audio outputs can be selected from the **Audio Output** sel
 Channels:  
 ![screenshot_channels](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_0_Channels.png "screenshot_Channels")  
 The residentSynth has 16 channels. Each channel can be edited independently, one at a time, using the **edit channel** selector. On selection, the channel's settings are loaded into the editable controls below.  
-The **keyboard split** selector can allocate different channels to different groups of keys on the attached input device. The default, in this host application, is for all keys to send messages on the currently displayed channel.  
-Other keyboard split configurations can be defined in the `ResidentSynth/config/keyboardSplitDefs.js` file (also see <a href="#keyboardSplitDefs">below</a>). These configurations are loaded as options, both into the _ResidentSynth_ and into the _ResidentSynthHost_ **keyboard split** selector when the application begins. The split configuration can be changed using the (non-standard) SET_KEYBOARD_SPLIT_ARRAY MIDI message.
+The keyboard split configurations can be defined using the `residentSynth/config/keyboardSplitDefs.js` file (see <a href="#keyboardSplitDefs">below</a>).  
+If defined, the available configurations are loaded into the **keyboard split** selector, which can then be used to allocate different channels to different groups of keys on the attached input device. The default, in this host application, is for all keys to send messages on the currently displayed channel.  
+The split configuration can be changed in the _ResidentSynth_ using the (non-standard) SET_KEYBOARD_SPLIT_ARRAY message.
 
 Sounds:  
 ![screenshot_Fonts](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_1_Sound.png "screenshot_Sound")  
-Banks can be configured in the _ResidentSynth_, and selected from the **bank** selector.  
-The **preset** selector always contains the presets available in the currently selected bank.  
-Mixtures can also be configured in the _ResidentSynth_. They are selected from the **mixture** selector.  
+Banks and their presets _must_ be configured using the `residentsynth/config/webAudioFontDef.js` file.  
+Banks are selected using the **bank** selector. The **preset** selector always contains the presets available in the currently selected bank.  
+Banks and presets are selected in the _ResidentSynth_ using standard MIDI messages.  
+Mixtures can be configured using the `residentsynth/config/mixtureDefs.js` file. If the file is missing, the default is for there to be no performed mixture. If mixtures are defined, they can be selected using the **mixture** selector.  
+The mixture configuration can be changed in the _ResidentSynth_ using the (non-standard) MIXTURE_INDEX message.
 
 Tuning:  
 ![screenshot_Tuning](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_2_Tuning.png "screenshot_Tuning")  
-Tuning groups can be configured in the _ResidentSynth_, and selected from the **tuning group** selector.  
-The **tuning** selector always contains the tunings available in the current tuning group.  
-The two **offset** numerical inputs determine the tuning offset in semitones and cents respectively. The semitones offset input takes integer values in the range -64 to +63. The cents offset input takes values in the range -50 to +50.  
+Tuning groups and their tunings can be configured using the `residentsynth/config/tuningDefs.js` file. If this file is missing, the default is to use standard equal temperament (A=440Hz) tuning.  
+Tuning groups are selected using the **tuning group** selector. The **tuning** selector always contains the tunings available in the current tuning group.  
+The _tuning group_ can be changed in the _ResidentSynth_ using the (non-standard) TUNING_GROUP_INDEX message.  
+The _tuning_ can be changed in the _ResidentSynth_ using the (non-standard) TUNING_INDEX message.  
+The two **offset** numerical inputs determine the tuning offset in semitones and cents respectively. The semitones offset input takes integer values in the range -64 to +63. The cents offset input takes values in the range -50 to +50. 
 Pitches that would end up exceeding the midi range (0..127) are silently coerced to midi pitch 0 or 127.  
 
 Commands and Controls:  
 ![screenshot_Commands&Controls](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_3_Commands&Controls.png "screenshot_Commands&Controls")  
-Except for **reverberation**, **pitchWheelSensitivity** and **velocityPitchSensitivity**, these are standard MIDI commands and controls.   
+Except for **reverberation**, **pitchWheelSensitivity** and **velocityPitchSensitivity**, these are standard MIDI commands and controls. The three non-standard MIDI messages are REVERBERATION, PITCH_WHEEL_SENSITIVITY and VELOCITY_PITCH_SENSITIVITY.  
+Note: The _ResidentSynth_ implements PITCHWHEEL as a standard 14-bit command, but the _ResidentSynthHost_ simply sends the same 7-bit (range 0..127) value twice in the command message.  
+The **pitchWheelSensitivity** control is a replacement for the rather cumbersome procedure used by standard MIDI to change the range of the pitch wheel.  
 The **velocityPitchSensitivity** control raises an individual note's output pitch depending on its velocity. If this value is 0, the velocity will have no effect on the pitch. If this value is 127, the associated pitch range will be maximized.  
 A velocity of 1 always has no effect on the pitch. In equal temperament tuning, with velocityPitchSensitivity set to 127, a velocity of 127 will raise the pitch by one semitone. 
 The top seven controls can be changed either by dragging the sliders, or entering values in the numeric input fields. They also react to incoming MIDI messages: On my MIDI input device, they can also be set using the appropriate hardware wheels and knobs.  
 The **allSoundOff** button silences the _ResidentSynth_.  
-The **allControllersOff** button silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
+The **allControllersOff** button both silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
 
 Ornaments Control:  
-![screenshot_Keyboard](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Ornaments.png "screenshot_Keyboard")  
-Ornaments can be configured in the _ResidentSynth_, and are described more fully in its <a href="#ornaments">_Ornaments_</a> documentation below.    
-The **ornaments** string input field can be used here in the _ResidentSynthHost_ to assign particular ornaments to particular MIDI input key numbers. The input string can have up to 127 `<key>:<ornamentIndex>;` substrings, separated by optional whitespace. The final ";" is optional. For example: "60:0; 64:1; 72:0".   
+![screenshot_Ornaments](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_4_Ornaments.png "screenshot_Ornaments")  
+Ornaments can be configured using the `residentsynth/config/ornamentDefs.js` file. If this file is missing, all notes will simply be played without being ornamented. If present, the available ornament options will be available in the **ornaments** selector.  
+The corresponding, non-standard MIDI message is SET_KEYBOARD_ORNAMENT_DEFS.  
+See <a href="#ornaments" >below</a> for further information.  
 
 Preset Settings:  
 ![screenshot_Settings](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
-Preset settings can be configured in the _ResidentSynth_, and selected from the **preset settings** selector. These settings are channel-independent. Selecting one only sets the settings for the current channel.  
-If any individual control setting is subsequently changed in the GUI, the **export modified settings** button is activated, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported settings can then be copied to the _ResidentSynth_'s `settingsPresets.js` configuration file, and loaded into the **preset settings** selector when the app restarts.  
-The **trigger key** is a note number whose NOTE_ON will trigger the following settings in the list in the **preset settings** selector, rather than play a note. The trigger key can be any number from 0 to 127.  
+the **preset settings** selector is used to select 16-channel preset settings that can be configured using the `residentsynth/config/synthSettingsDefs.js` file. If the file is missing, all channels will be set to the same default settings.   
+If, while editing a channel's settings, any control is changed, the **export modified settings** button is enabled, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported channel settings can then be copied to the relevant channel in the `synthSettingsDefs.js` configuration file, and loaded into the **preset settings** selector when the application restarts.  
+Note that the _ResidentSynthHost_ synchronizes its channel settings with the _Residentsynth_'s when it updates its own controls, so it does not need to use the _ResidentSynth_'s non-standard SET_SYNTH_SETTINGS MIDI message. This is defined for use by other applications.   
+The **trigger key** is a note number whose NOTE_ON will trigger the following settings in the list in the **preset settings** selector, rather than play a note. The trigger key can be any number from 0 to 127. This is a feature of the _ResidentSynthHost_ that is not implemented in the _ResidentSynth_.  
 
 Recordings:  
 ![screenshot_Recording](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_6_Recordings.png "screenshot_Recording")  
