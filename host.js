@@ -848,7 +848,7 @@ ResSynth.host = (function(document)
                     let pwsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PITCH_WHEEL_SENSITIVITY, channelSettings.pitchWheelSensitivity]);
                     synth.send(pwsMsg);
                     // channelSettings.velocityPitchSensitivity
-                    let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity * 127]);
+                    let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity]);
                     synth.send(vpsMsg);
                     // channelSettings.keyboardSplitIndex
                     let ksiMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SET_KEYBOARD_SPLIT_ARRAY, channelSettings.keyboardSplitIndex]);

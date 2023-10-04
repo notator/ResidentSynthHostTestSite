@@ -1417,7 +1417,7 @@ ResSynth.residentSynth = (function(window)
 
         updateVelocityPitchSensitivity = function(channel, data2)
         {
-            channelControls[channel].velocityPitchSensitivity = data2 / 127; // semitones
+            channelControls[channel].velocityPitchSensitivity = data2 / 10; // semitones
         },
 
         updateInKeyOrnamentDefs = function(channel, inKeyOrnamentDefsIndex)
@@ -1464,15 +1464,18 @@ ResSynth.residentSynth = (function(window)
                 // keyCentsPitch is the pitch described as a key.cents value in equal temperament.
                 midi.keyCentsPitch = midiVal(chanControls.tuning[inKey] + midi.midiCentsOffset);
 
-                // velocityPitchValue14Bit is always the same for all octaves of the same absolute pitch
+                midi.velocityFactor = midi.inVelocity / 127;
+
+                // velocityPitchSensitivityFactor is always the same for all octaves of the same absolute pitch
                 let noteOn = currentMasterNotes.find(x => (x.inKey % 12) === (midi.inKey % 12));
+
                 if(noteOn !== undefined)
                 {
-                    midi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
+                    midi.velocityPitchSensitivityFactor = noteOn.velocityPitchSensitivityFactor;
                 }
                 else
                 {
-                    midi.velocityPitchValue14Bit = (((inVelocity & 0x7f) << 7) | (inVelocity & 0x7f)) - 8192;
+                    midi.velocityPitchSensitivityFactor = midi.velocityFactor;
                 }
 
                 return midi;
@@ -1523,10 +1526,10 @@ ResSynth.residentSynth = (function(window)
                         newKey = midiVal(inKey + keyVel[0]),
                         newVelocity = midiVal(Math.floor(inVelocity * keyVel[1]));
 
-                    // midi.preset and midi.velocityPitchValue14Bit have both already been set, and do not change.
+                    // midi.preset and midi.velocityPitchSensitivityFactor have already been set, and do not change.
                     midi.keyKey = inKey;
                     midi.keyCentsPitch = midiVal(chanControls.tuning[newKey] + midi.midiCentsOffset);
-                    midi.velocity = newVelocity;
+                    midi.velocityFactor = newVelocity / 127;
 
                     doIndividualNoteOn(midi, masterNote);
                 }
@@ -1581,15 +1584,16 @@ ResSynth.residentSynth = (function(window)
                                 oMidi.midiCentsOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100);
                                 oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiCentsOffset,
                                 oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
+                                oMidi.velocityFactor = oMidi.inVelocity / 127;
 
                                 let noteOn = masterNote.subNotes[0];
                                 if(noteOn !== undefined)
                                 {
-                                    oMidi.velocityPitchValue14Bit = noteOn.velocityPitchValue14Bit;
+                                    oMidi.velocityPitchSensitivityFactor = noteOn.velocityPitchSensitivityFactor;
                                 }
                                 else
                                 {
-                                    oMidi.velocityPitchValue14Bit = (((oMidi.inVelocity & 0x7f) << 7) | (oMidi.inVelocity & 0x7f)) - 8192;
+                                    oMidi.velocityPitchSensitivityFactor = oMidi.velocityFactor;
                                 }
 
                                 let subNote = doIndividualNoteOn(oMidi, masterNote);

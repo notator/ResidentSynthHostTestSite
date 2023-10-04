@@ -61,8 +61,8 @@ Commands and Controls:
 Except for **reverberation**, **pitchWheelSensitivity** and **velocityPitchSensitivity**, these are standard MIDI commands and controls. The three non-standard MIDI messages are REVERBERATION, PITCH_WHEEL_SENSITIVITY and VELOCITY_PITCH_SENSITIVITY.  
 Note: The _ResidentSynth_ implements PITCHWHEEL as a standard 14-bit command, but the _ResidentSynthHost_ simply sends the same 7-bit (range 0..127) value twice in the command message.  
 The **pitchWheelSensitivity** control is a replacement for the rather cumbersome procedure used by standard MIDI to change the range of the pitch wheel.  
-The **velocityPitchSensitivity** control raises an individual note's output pitch depending on its velocity. If this value is 0, the velocity will have no effect on the pitch. If this value is 127, the associated pitch range will be maximized.  
-A velocity of 1 always has no effect on the pitch. In equal temperament tuning, with velocityPitchSensitivity set to 127, a velocity of 127 will raise the pitch by one semitone. 
+The **velocityPitchSensitivity** control raises an individual note's output pitch depending on its velocity. The maximum pitch deviation (at velocity 127) is this value/10 semitones. In other words, in equal temperament tuning: If this value is 0, the velocity will have no effect on the pitch; if this value is 10, velocity 127 will raise the pitch by 1 semitone; if this value is 127, velocity 127 will raise the pitch by 12.7 semitones.  
+
 The top seven controls can be changed either by dragging the sliders, or entering values in the numeric input fields. They also react to incoming MIDI messages: On my MIDI input device, they can also be set using the appropriate hardware wheels and knobs.  
 The **allSoundOff** button silences the _ResidentSynth_.  
 The **allControllersOff** button both silences the _ResidentSynth_, and sets the six variable controls in this section to their default values.
