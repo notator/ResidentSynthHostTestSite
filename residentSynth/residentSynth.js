@@ -206,7 +206,7 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            function getFinalizedPresets(fontPresetNames, percussionPresets)
+            function getFinalizedPresets(bankPresetNames, percussionPresets)
             {
                 function getPresetOptionName(presetName, originalPresetIndex, isPercussion)
                 {
@@ -245,12 +245,12 @@ ResSynth.residentSynth = (function(window)
                     return presetOptionName;
                 }
 
-                let fontPresets = [];
+                let bankPresets = [];
 
-                for(var presetIndex = 0; presetIndex < fontPresetNames.length; presetIndex++)
+                for(var presetIndex = 0; presetIndex < bankPresetNames.length; presetIndex++)
                 {
                     let isPercussion = false,
-                        presetName = fontPresetNames[presetIndex],
+                        presetName = bankPresetNames[presetIndex],
                         zones;
 
                     if(window[presetName] === undefined)
@@ -269,10 +269,10 @@ ResSynth.residentSynth = (function(window)
                     let originalPresetIndex = zones[0].midi,
                         presetOptionName = getPresetOptionName(presetName, originalPresetIndex, isPercussion);
 
-                    fontPresets.push({name: presetOptionName, originalPresetIndex: originalPresetIndex, zones: zones, isPercussion: isPercussion});
+                    bankPresets.push({name: presetOptionName, originalPresetIndex: originalPresetIndex, zones: zones, isPercussion: isPercussion});
                 }
 
-                return fontPresets;
+                return bankPresets;
             }
 
             function adjustForResidentSynth(webAudioFont)

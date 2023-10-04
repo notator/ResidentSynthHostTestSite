@@ -1,7 +1,11 @@
 console.log('load webAudioFontDef.js');
 
 // This webAudioFontDef contains an array of banks containing the instrument presets.
-// The MIDI BANK control message sets the current bank.
+// Each bank should be given a descriptive name.
+// Presets are given names automatically, using their source and General MIDI name.
+// (The sources used here are either FluidR3 or GeneralUserGS. The GeneralMIDI name is found
+// using the original presetIndex -- the number part of Surikov's file name.)
+// The MIDI BANK control message sets the current bank using its index in this array.
 // The MIDI PRESET command message will set the preset using the index in the bank's presets array.
 ResSynth.webAudioFontDef =
     [

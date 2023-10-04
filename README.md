@@ -106,28 +106,40 @@ MIDI Controller messages for non-standard purposes. These are documented below.
 #### To use the _ResidentSynth_ in other web applications:
 
 1. copy the 'residentSynth' folder to the application site
-2. adjust the files in the contained 'config' folder as required (see below).
-3. load the appropriate files in the application's main .html file (see, for example, the files included at the end of host.html).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
+2. adjust the files in the `residentSynth/config` folder as required (see below).
+3. load the appropriate files in the application's main .html file (see, for example, the files included at the end of `host.html`).<br />Note that recordings.js is specific to the _ResidentSynthHost_ application. The synth does not itself implement recording functions.
 4. call the synth's constructor: `let synth = new ResSynth.residentSynth.ResidentSynth();`
 5. call `synth.open();`<br /> In order to comply with a web standard, this has to be done after a user interaction with the GUI.
-6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The application is shielded from lower-level interaction with the audio system because the synth uses a private WebAudioAPI `AudioContext` object.
+6. send MIDI messages to the synth using `synth.send(midiMessage)`.<br /> The `midiMessage` is a 3-value `Uint8Array`. Messages are processed immediately. Timestamps are ignored. The _ResidentSynth_ uses the Web Audio API to interact with the system's underlying audio hardware.
 
 #### Configuration
-The _ResidentSynth_ can be configured by editing the files in its
-'config' folder.  
+The _ResidentSynth_ can be configured by editing the contents of the `residentSynth/config` folder.  
 This currently contains:  
-&nbsp;&nbsp;&nbsp;&nbsp;presets (a folder containing clones of Surikov's preset files)  
+&nbsp;&nbsp;&nbsp;&nbsp;presets &mdash; a folder containing clones of Surikov's preset files (required)  
 &nbsp;&nbsp;&nbsp;&nbsp;webAudioFontDef.js (required)  
-&nbsp;&nbsp;&nbsp;&nbsp;keyboardSplitDefs.js (optional) 
-&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js (optional) 
+&nbsp;&nbsp;&nbsp;&nbsp;keyboardSplitDefs.js (optional)   
+&nbsp;&nbsp;&nbsp;&nbsp;mixtureDefs.js (optional)   
 &nbsp;&nbsp;&nbsp;&nbsp;ornamentDefs.js (optional)  
 &nbsp;&nbsp;&nbsp;&nbsp;synthSettingsDefs.js (optional)  
 &nbsp;&nbsp;&nbsp;&nbsp;tuningDefs.js (optional)  
   
-Examples, and more complete instructions as to how to edit these files are given in the files themselves.
+These files contain instructions as to how they can be edited, and examples of their required structure. The editing instructions are as follows:  
+
+<a id="webAudioFontDef"/>
+
+**`webAudioFontDef.js`**  
+The webAudioFontDef contains an array of banks containing the instrument presets.  
+Each bank should be given a descriptive name.  
+Presets are given names automatically, using their source and General MIDI name.  
+(The sources used here are either FluidR3 or GeneralUserGS. The GeneralMIDI name is found  
+using the original presetIndex -- the number part of Surikov's file name.)  
+The MIDI BANK control message sets the current bank using its index in this array.  
+The MIDI PRESET command message will set the preset using the index in the bank's presets array.  
+
 <a id="keyboardSplitDefs"/>
 
 **`keyboardSplitDefs.js`**  
+
 If this file is missing, the default is for there to be no split. The host application decides the channel on which  messages will be sent.  
 Split definition strings can have up to 127 `<key>:<channel>;` substrings, separated by optional whitespace. The final ";" is optional.  
 Each `<key>` is a number in range 0..127. The first `<key>` must be `0`. `<key>` values must be in ascending order, and may not repeat.  
@@ -136,6 +148,21 @@ The default (empty) string means that all keys send messages on the channel curr
 The split defintion string is parsed from left to right.
 All keys greater than or equal to the `<key>` substring send on the substring's `<channel>` unless overridden by a substring further to the right.  
 Valid split definition strings are, for example, `""`, `"0:0; 42:1;"`, `"0:3; 40:1; 50:2;"`, `"0:0; 40:1; 50:2; 60:0; 72:5"` etc.
+
+<a id="mixtureDefs"/>
+
+**`mixtureDefs.js`**  
+<a id="ornamentDefs"/>
+
+**`ornamentDefs.js`**  
+<a id="synthSettingsDefs"/>
+
+**`synthSettingsDefs.js`** 
+
+<a id="tuningDefs"/>
+
+**`tuningDefs.js`** 
+
 
 <a id="midiMessages"/>
 
