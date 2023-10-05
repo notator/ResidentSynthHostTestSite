@@ -1299,37 +1299,27 @@ ResSynth.host = (function(document)
                 {
                     function setKeyboardSplitSelect()
                     {
-                        let keyboardSplitSelect = getElem("keyboardSplitSelect"),
-                            keyboardSplitDefs = ResSynth.keyboardSplitDefs;
+                        let keyboardSplitSelect = getElem("keyboardSplitSelect");
 
-                        if(keyboardSplitDefs === undefined) // no keyboardSplitDefs.js file
-                        {
-                            let option = new Option();
+                        // this option is always added by default to index 0
+                        let option = new Option();
+                        option.innerHTML = "no split (messages will be sent on the current channel)";
+                        keyboardSplitSelect.options.add(option);
 
-                            option.innerHTML = "no splits have been defined. (messages will be sent on the current channel)";
-                            keyboardSplitSelect.options.add(option);
-                            keyboardSplitSelect.selectedIndex = 0;
-                            keyboardSplitSelect.disabled = true;
-                        }
-                        else
+                        if(ResSynth.keyboardSplitDefs !== undefined)
                         {
+                            let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
+
                             for(let i = 0; i < keyboardSplitDefs.length; i++)
                             {
                                 let keyboardSplitDef = keyboardSplitDefs[i],
                                     option = new Option();
 
-                                if(keyboardSplitDef.length === 0)
-                                {
-                                    option.innerHTML = "no split (messages will be sent on the currently displayed channel)";
-                                }
-                                else
-                                {
-                                    option.innerHTML = keyboardSplitDef;
-                                }
-
+                                option.innerHTML = keyboardSplitDef;
                                 keyboardSplitSelect.options.add(option);
                             }
                         }
+
                         keyboardSplitSelect.selectedIndex = 0;
                     }
 

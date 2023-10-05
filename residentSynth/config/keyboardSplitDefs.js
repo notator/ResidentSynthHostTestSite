@@ -1,12 +1,13 @@
 console.log('load keyboardSplitDefs.js');
 
 // This file can be omitted by applications that don't use split keyboards.
-// The keyboardSplitDefs array contains up to 127 keyboardSplit definition (=keyboardSplitDef) strings,
-// each of which contains up to 127 `<key>:<channel>;` substrings separated by whitespace.
-// An empty keyboardSplitDef means that there is no overriding keyboardSplit, so that the incoming
-// MIDI message's channel will be used unchanged. This is also the default used when this file does not exist.
+// The keyboardSplitDefs array contains up to 126 keyboardSplit definition (=keyboardSplitDef) strings,
+// each of which must contain between 1 and 127 `<key>:<channel>;` substrings separated by whitespace.
+// An empty keyboardSplitDef is illegal here, but is allocated automatically as the first definition internally,
+// meaning that the MIDI message's channel will be used unchanged. This is also the default used when this file does not exist.
+//
 // The following restrictions are checked when this file is loaded into the ResidentSynth:
-// There are less than 128 keyboardSplitDef strings in the array.
+// There are less than 127 keyboardSplitDef strings in the array.
 // Each `<key>` must be an integer in range 0..127. The first `<key>` must be 0, with the rest in ascending
 // order. `<key>` values may not repeat in the string.
 // Each `<channel>` is an integer in range 0..15. These values can be in any order, and repeat in the string.
@@ -20,7 +21,7 @@ console.log('load keyboardSplitDefs.js');
 // using its index in this array.
 ResSynth.keyboardSplitDefs =
     [
-        "", // index 0, (use incoming channel)
+        // index 0 is automatically given the value "", meaning that the message channel will be used.
         "0:0", // index 1 
         "0:0; 60:1", // index 2
         "0:0; 48:1; 60:0; 72:1", // index 3

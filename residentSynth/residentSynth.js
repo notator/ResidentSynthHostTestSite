@@ -790,15 +790,22 @@ ResSynth.residentSynth = (function(window)
             // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
             const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
 
-            if(keyValuesStringsArray.length > 128)
+            // channelPerKeyArrays[0] is allocated automatically. Indices 1..127 are then allocated from keyboardSplitDefs.js.
+            // The index in channelPerKeyArrays is sent as part of the SET_KEYBOARD_SPLIT_ARRAY midi message, so cant be greater than 127.
+            if(keyValuesStringsArray.length > 126)
             {
-                throw `keyboardSplitDefs.js: There may not be more than 128 keyboardSplit definition strings in the array.`;
+                throw `keyboardSplitDefs.js: There may not be more than 126 keyboardSplit definition strings in the array.`;
             }
             else
             {
                 for(let i = 0; i < keyValuesStringsArray.length; i++) 
                 {
                     let keyValuesString = keyValuesStringsArray[i];
+
+                    if(keyValuesString.length === 0)
+                    {
+                        throw `Illegal zero-length keyboardSplitString.: Definition index: ${i}`;
+                    }
 
                     if(longInputStringRegex.test(keyValuesString) === false)
                     {
@@ -810,8 +817,7 @@ ResSynth.residentSynth = (function(window)
 
         setPrivateChannelPerKeyArrays = function()
         {
-            // If keyboardSplitDefs[defIndex].length > 0, returns an array of 128 channel indices, one per key index.
-            // Otherwise returns an empty array (the residentSynth will use the incoming message's channel).
+            // Returns an array of 128 channel indices, one per key index.
             // Throws an exception if keys are not unique and in ascending order, or a channel or key is out of range.
             // 01.09.2023: Interestingly, this function was partly optimized in a dialog with ChatGPT.
             // ChatGPT uses some constructs that I should adopt: (const etc.)
@@ -843,14 +849,8 @@ ResSynth.residentSynth = (function(window)
                     }
                 }
 
-                const keyboardSplitDef = keyboardSplitDefs[defIndex];
-
-                if(keyboardSplitDef.length === 0)
-                {
-                    return []; // the residentSynth will use the incoming message's channel
-                }
-
-                const arraySize = 128,
+                const keyboardSplitDef = keyboardSplitDefs[defIndex],
+                    arraySize = 128,
                     keyChannelPairs = getKeyIntValuePairs(keyboardSplitDef),
                     channelPerKeyArray = (keyChannelPairs.length > 0) ? Array(arraySize).fill(0) : [];
 
@@ -893,11 +893,9 @@ ResSynth.residentSynth = (function(window)
 
             let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
 
-            if(keyboardSplitDefs === undefined)
-            {
-                channelPerKeyArrays.push([]); // an empty array means use the incoming message channel
-            }
-            else
+            channelPerKeyArrays.push([]); // an empty array means use the incoming message channel (channelPerKeyArrays[0] always has this value.)
+
+            if(keyboardSplitDefs !== undefined)
             {
                 try
                 {
