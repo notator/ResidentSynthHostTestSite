@@ -629,16 +629,17 @@ ResSynth.residentSynth = (function(window)
                         {
                             let extraNote = extraNotes[k],
                                 dataLength = extraNote.length,
-                                noteIncr, // extraNote[0]
-                                velFac; // extraNote[1]
+                                keyIncr, // extraNote[0]
+                                velIncr; // extraNote[1]
 
                             if(dataLength > 0)
                             {
                                 console.assert(dataLength === 2);
-                                noteIncr = extraNote[0]
-                                velFac = extraNote[1]
-                                console.assert(Number.isInteger(noteIncr) && noteIncr >= -127 && noteIncr <= 127);
-                                console.assert(velFac > 0 && velFac <= 100.0);
+                                keyIncr = extraNote[0]
+                                velIncr = extraNote[1]
+                                console.assert(Number.isInteger(keyIncr) && keyIncr >= -127 && keyIncr <= 127);
+                                console.assert(Number.isInteger(velIncr) && velIncr >= -127 && velIncr <= 127);
+
                             }
                         }
                     }
@@ -1522,7 +1523,9 @@ ResSynth.residentSynth = (function(window)
                 {
                     let keyVel = extraNotes[i],
                         newKey = midiVal(inKey + keyVel[0]),
-                        newVelocity = midiVal(Math.floor(inVelocity * keyVel[1]));
+                        newVelocity = midiVal(inVelocity + keyVel[1]);
+
+                    newVelocity = (newVelocity === 0) ? 1 : newVelocity;
 
                     // midi.preset and midi.velocityPitchSensitivityFactor have already been set, and do not change.
                     midi.keyKey = inKey;
