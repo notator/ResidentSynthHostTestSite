@@ -1,30 +1,35 @@
 console.log('load mixtureDefs.js');
 
-// This file can be omitted by applications that don't use mixtures.
-// There can be 1..127 mixture definitions in the mixtureDefs, each of which has the following
-// attributes:
-//   name
-//   extraNotes - a possibly empty array of up to 127 [keyInterval, relativeVelocity] arrays
-//   except - a possibly empty array of up to 127 [note, mixtureIndex] arrays
-//
-// extraNotes defines notes that will be added to the original note when the mixture is active:
-//   keyInterval is an integer in range - 127..127
-//   relativeVelocity is the (float) factor by which to multiply the original note's velocity.
-//   relativeVelocity will usually be in range 0..1, but can be <= 100.0.
-//
-// The except attribute defines keys that are assigned a different mixture when this mixture
-// is selected.
-//   note is an integer in range 0..127 denoting the relevant note (value in MIDI message)
-//   mixtureIndex is an integer pointing at the mixture (extraNotes) to apply to this note.
-// A Mixture may not contain more than one except definition for a particular note.
-//
-// Even if this file is missing, the first mixture in the synth's internal mixtures array
-// (set using synth.getMixtures()) will always be a "no mixtures" entry having:
-//              {   // index 0
-//                  name: "no mixture",
-//                  extraNotes: [],
-//                  except: []
-//              } 
+
+// This file can be omitted by applications that don't use mixtures.  
+// The mixtureDefs array contains up to 126 mixture definitions. These are allocated
+// to indexes 1 to 127 of an internal array that will be accessed by the (non-standard MIDI)
+// MIXTURE_INDEX message. Index 0 is reserved for a "no mixture" mixture definition, that is
+// allocated internally even if this file does not exist(see below).  
+// Each mixture definition has the following attributes:
+//     `name` // an arbitrary, descriptive string.
+//     `extraNotes` // a possibly empty array of up to 127 `[keyInterval, velocityInterval]` arrays,
+//     `except` // a possibly empty array of up to 127 `[key, mixtureIndex]` arrays
+//  
+// The `extraNotes` attribute defines values that will be added to the original note's key and 
+// velocity values to define a new note in the mixture.  
+// Both `keyInterval` and `velocityInterval` are integers in range -127..127. New note keys are
+// silently coerced to the range 0..127.New note velocities are silently coerced to the range 1..127.
+//  
+// The `except` attribute defines keys that are assigned a different mixture when this mixture is selected.  
+//     `key` is an integer in range 0..127 denoting the key (value in MIDI message) for which the `mixtureIndex` applies
+//     `mixtureIndex` is the index of the mixture whose `extraNotes` apply to this `key`.  
+// A Mixture may not contain more than one `except` definition for a particular`key`.
+//   
+// The "no mixture" mixture definition, allocated to index 0 for the MIXTURE_INDEX message even if
+// this file is missing, has the following form:
+// ```
+//     {  
+//         name: "no mixture",  
+//         extraNotes: [],  
+//         except: []  
+//     }
+// ```
 ResSynth.mixtureDefs =
     [
         {   // index 1 (index 0 is automatically "no mixtures" -- see above.)
@@ -36,7 +41,7 @@ ResSynth.mixtureDefs =
                 ]
         },
         {   // index 2
-            name: "mostly +19",
+            name: "all +19 except 64, 65, 66, 67, 68, 69",
             extraNotes:
                 [
                     [19, 0.5]
