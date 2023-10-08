@@ -1,36 +1,41 @@
 console.log('load ornamentDefs.js');
 
 // This file can be omitted by applications that don't use ornaments.
-// There can be up to 128 ornamentPerKeysStrings in the ornamentPerKeysStrings array, each of which
-// contains zero or more "<key>:<ornamentName>;" strings separated by whitespace.
-// An empty ornamentPerKeyString means that there are no ornaments defined. This is the default when this file does not exist.
-// Otherwise, each ornamentPerKeyString contains up to 127 "<key>:<ornamentName>;" sub-strings separated by whitespace.
-// The following restrictions are checked when this file is loaded into the ResidentSynth using setPrivateOrnamentPerKeyArrays():
-// There are less than 128 ornamentPerKeysStrings defined in this file.
-// Each <key> is a number in range 0..127. Key values must be in ascending order, and may not repeat.
-// Each <ornamentName> is a the <name> attribute of an ornamentDef defined below in ResSynth.ornamentDefs.
-// The <ornamentName> values can be in any order, and may repeat in the string.
-// The ':' and ';' characters must be present, except at the very end of each ornamentPerKeyString.
-// The following ornamentPerKeysStrings provide examples of valid strings.
-// In the ResidentSynthHost, these strings are used to populate a select control.
+// It contains the definitions of two objects: the `ResSynth.ornamentPerKeysStrings` and the
+// `ResSynth.ornamentsDefs`.The strings in the`ResSynth.ornamentPerKeysStrings` connect particular
+// ornaments to particular keys, using the ornament definitions in the`ResSynth.ornamentsDefs`.
+//
+// The(non-standard MIDI) SET_KEYBOARD_ORNAMENT_DEFS message sets the ornament per key configuration
+// by sending the configuration's index in an internal list of configurations.
+// The first configuration in the internal list(at index 0) always sets "no ornaments defined".
+// Subsequent configurations are set using the `ornamentPerKeysStrings` array.
+//
+// The `ResSynth.ornamentPerKeysStrings` array contains up to 126 ornamentPerKeysString elements,
+// each of which  contains between 1 and 127 `<key>:<ornamentName>;` sub-strings separated by whitespace.
+// Each `<key>` is a number in range 0..127. `<key>` values must be in ascending order, and may not repeat.
+// Each `<ornamentName>` is the `<name>` attribute of an ornament defined in the`ResSynth.ornamentDefs`.
+// The`<ornamentName>` values can be in any order, and may repeat within an ornamentPerKeysString.
+// The `:` and `;` characters must be present, except at the very end of each ornamentPerKeysString.
 ResSynth.ornamentPerKeysStrings =
     [
-        "",
-        "64:turn1",
-        "64:turn2; 66:tr1",
-        "64:rpt1; 66:tr3; 68:trem1; 70:trem2"
+         // message index 0 will be allocated automatically to mean "no ornaments defined"
+        "64:turn1", // message index 1
+        "64:turn2; 66:tr1", // message index 2
+        "64:rpt1; 66:tr3; 68:trem1; 70:trem2" // message index 3
     ];
 
-// There can be 1..127 ornament definitions in the ornamentDefs, each of which has name, msgs and repeat attributes.
-// Each msgs definition is an array containing objects having one each of the following attributes (defining their type):
-//      delay: milliseconds -- must always be > 0 (default is no delay between messages)
-//      chordOn: an array of [keyIncrement, velocityIncrement] arrays (one element per note in the chord)
-//      chordOff: an array of [keyIncrement] values matching the keyIncrements in the chordOn (one element per note in the chord)
-// delay must always be > 0 (default is no delay between messages)
-// keyIncrement and velocityIncrement must each be in range -127..127.
-// The repeat attribute is a boolean value that can be either "yes" or "no".
-// If the repeat attribute is "no", the ornamented event ends when the trigger note's noteOff is received.
-// If the repeat attribute is "yes", the chords are played in a continuous cycle until the trigger note's noteOff is received.
+// The `ResSynth.ornamentDefs` contain up to 127 ornament definitions, each of which has a `name`, `msgs`
+// and `repeat` attribute.
+//      `name` is an arbitrary, descriptive string.
+//      `msgs` is an array containing objects of the following types:
+//           `delay`: milliseconds // must always be > 0 (default is no delay between messages)
+//           `chordOn`: an array of `[keyIncrement, velocityIncrement]` arrays (one element per note in the chord)
+//           `chordOff`: an array of `[keyIncrement]` values matching the keyIncrements in the chordOn (one element per note in the chord)
+// `keyIncrement` and `velocityIncrement` must each be in range - 127..127.
+// The resulting key values are silently coerced to the range 0..127. Velocities are silently coerced to the range 1..127.
+// The `repeat` attribute is a boolean value that can be either "yes" or "no".
+// If the `repeat` attribute is "no", the ornamented event ends when the ornamented note's noteOff is received.
+// If the `repeat`  attribute is "yes", the `msgs` are played in a continuous cycle until the ornamented note's noteOff is received.
 ResSynth.ornamentDefs =
     [
         {

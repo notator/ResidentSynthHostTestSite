@@ -197,6 +197,38 @@ The "no mixture" mixture definition, allocated to index 0 for the MIXTURE_INDEX 
 <a id="ornamentDefs"/>
 
 **`ornamentDefs.js`**  
+This file can be omitted by applications that don't use ornaments.  
+It contains the definitions of two objects: the **`ResSynth.ornamentPerKeysStrings`** and the
+**`ResSynth.ornamentsDefs`**. The strings in the **`ResSynth.ornamentPerKeysStrings`** connect particular ornaments to particular keys, using the ornament definitions in the **`ResSynth.ornamentsDefs`**.
+
+The (non-standard MIDI) SET_KEYBOARD_ORNAMENT_DEFS message sets the ornament per key configuration
+by sending the configuration's index in an internal list of configurations.
+The first configuration in the internal list (at index 0) always sets "no ornaments defined".
+Subsequent configurations are set using the **`ResSynth.ornamentPerKeysStrings`** array.
+
+The **`ResSynth.ornamentPerKeysStrings`** array contains up to 126 ornamentPerKeysString elements, each of which
+contains between 1 and 127 `<key>:<ornamentName>;` sub-strings separated by whitespace.  
+&emsp;Each `<key>` is a number in range 0..127. `<key>` values must be in ascending order, and may not repeat.  
+&emsp;Each `<ornamentName>` is the `<name>` attribute of an ornament defined in the `ResSynth.ornamentDefs`.  
+The `<ornamentName>` values can be in any order, and may repeat within an ornamentPerKeysString.  
+The `:` and `;` characters must be present, except at the very end of each ornamentPerKeysString.
+
+The **`ResSynth.ornamentDefs`** contain up to 127 ornament definitions, each of which has a `name`, `msgs` and `repeat` attribute.  
+&emsp;`name` is an arbitrary, descriptive string.  
+&emsp;`msgs` is an array containing objects of the following types:  
+&emsp;&emsp;&emsp;`delay`: milliseconds -- must always be > 0 (default is no delay between messages)  
+&emsp;&emsp;&emsp;`chordOn`: an array of `[keyIncrement, velocityIncrement]` arrays (one element  
+&emsp;&emsp;&emsp;&emsp;&emsp; per note in the chord)  
+&emsp;&emsp;&emsp;`chordOff`: an array of `[keyIncrement]` values matching the `keyIncrement`s in the  
+&emsp;&emsp;&emsp;&emsp;&emsp;`chordOn` (one element per note in the chord).  
+&emsp;&emsp;&emsp;&emsp;&emsp;`keyIncrement` and `velocityIncrement` must each be in range -127..127.  
+&emsp;&emsp;&emsp;&emsp;&emsp;The resulting key values are silently coerced to the range 0..127.  
+&emsp;&emsp;&emsp;&emsp;&emsp;Velocities are silently coerced to the range 1..127.  
+&emsp;`repeat` is a boolean value that can be either "yes" or "no".  
+&emsp;&emsp;&emsp;If the `repeat` attribute is "no", the ornamented event ends when the ornamented note's noteOff  
+&emsp;&emsp;&emsp;is received. If the `repeat` attribute is "yes", the `msgs` are played in a continuous cycle until the  
+&emsp;&emsp;&emsp;ornamented note's noteOff is received.
+
 <a id="synthSettingsDefs"/>
 
 **`synthSettingsDefs.js`** 

@@ -24,7 +24,6 @@ ResSynth.host = (function(document)
         playbackChannelInfos = undefined, // used while playing back or recording a channel
         playbackChannelIndices = [], // used while playing back a recording
         cancelPlayback = false, // used while playing back.
-        keyChannels = [], // contains the current channel per key. Is null while there is an error in the input field. 
         keyOrnaments = [], // contains current keyOrnament objects. Always exists, but can be empty.
 
         getElem = function(elemID)
@@ -434,10 +433,10 @@ ResSynth.host = (function(document)
 
             function setAndSendOrnamentsDivControls(hostChannelSettings)
             {
-                let keyOrnamentsSelect = getElem("keyOrnamentsSelect");
+                let ornamentsSelect = getElem("ornamentsSelect");
 
-                keyOrnamentsSelect.selectedIndex = hostChannelSettings.keyboardOrnamentsArrayIndex;
-                onKeyOrnamentsSelectChanged();
+                ornamentsSelect.selectedIndex = hostChannelSettings.keyboardOrnamentsArrayIndex;
+                onOrnamentsSelectChanged();
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -1274,14 +1273,14 @@ ResSynth.host = (function(document)
             synth.send(setKeyboardSplitIndexMsg);
         },
 
-        onKeyOrnamentsSelectChanged = function()
+        onOrnamentsSelectChanged = function()
         {
             const constants = ResSynth.constants;
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
-                keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
-                keyboardOrnamentsArrayIndex = keyOrnamentsSelect.selectedIndex,
+                ornamentsSelect = getElem("ornamentsSelect"),
+                keyboardOrnamentsArrayIndex = ornamentsSelect.selectedIndex,
                 keyboardOrnamentsArrayIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_ORNAMENT_DEFS, keyboardOrnamentsArrayIndex]);
 
             hostChannelSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
@@ -1910,46 +1909,33 @@ ResSynth.host = (function(document)
                     sendShortControl(ResSynth.constants.CONTROL.ALL_CONTROLLERS_OFF);
                 }
 
-                function setKeyboardDiv()
+                function setOrnamentsDiv()
                 {
                     function setKeyOrnamentsSelect()
                     {
-                        let keyOrnamentsSelect = getElem("keyOrnamentsSelect"),
+                        let ornamentsSelect = getElem("ornamentsSelect"),
                             ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings;
 
-                        if(ornamentPerKeysStrings === undefined) // no ornamentDefs.js file
-                        {
-                            let option = new Option();
+                        let option = new Option();
 
-                            option.innerHTML = "no ornaments have been defined";
-                            keyOrnamentsSelect.options.add(option);
-                            keyOrnamentsSelect.selectedIndex = 0;
-                            keyOrnamentsSelect.disabled = true;                            
-                        }
-                        else
+                        option.innerHTML = "none";
+                        ornamentsSelect.options.add(option);
+ 
+                        if(ornamentPerKeysStrings !== undefined)
                         {
                             for(let i = 0; i < ornamentPerKeysStrings.length; i++)
                             {
-                                let ornamentPerKeysString = ornamentPerKeysStrings[i],
-                                    option = new Option();
+                                let option = new Option();
 
-                                if(ornamentPerKeysString.length === 0)
-                                {
-                                    option.innerHTML = "none";
-                                }
-                                else
-                                {
-                                    option.innerHTML = ornamentPerKeysString;
-                                }
-
-                                keyOrnamentsSelect.options.add(option);
+                                option.innerHTML = ornamentPerKeysStrings[i];
+                                ornamentsSelect.options.add(option);
                             }
                         }
-                        keyOrnamentsSelect.selectedIndex = 0;
+
+                        ornamentsSelect.selectedIndex = 0;
                     }
 
                     setKeyOrnamentsSelect();
-
                 }
                 function setSettingsSelect()
                 {
@@ -2053,7 +2039,7 @@ ResSynth.host = (function(document)
                 setSemitonesAndCentsControls();
 
                 setCommandsAndControlsDivs();
-                setKeyboardDiv();
+                setOrnamentsDiv();
                 setSettingsSelect();
                 setRecordingSelect();
 
@@ -2374,7 +2360,7 @@ ResSynth.host = (function(document)
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
 
-            onKeyOrnamentsSelectChanged: onKeyOrnamentsSelectChanged,
+            onKeyOrnamentsSelectChanged: onOrnamentsSelectChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,
             holdCheckboxClicked: holdCheckboxClicked,

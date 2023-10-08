@@ -1049,23 +1049,22 @@ ResSynth.residentSynth = (function(window)
 
                 let inKeyOrnamentDefs = [];
 
-                if(ornamentPerKeysString.length > 0)
+                if(ornamentPerKeysString.length === 0)
                 {
-                    const components = ornamentPerKeysString.split(";");
-
-                    for(const component of components)
-                    {
-                        const [keyStr, ornamentName] = component.trim().split(":"),
-                            inKeyOrnamentDef = getInKeyOrnamentDef(keyStr, ornamentName, fileOrnamentDefs);
-
-                        inKeyOrnamentDefs.push(inKeyOrnamentDef);
-                    }
+                    throw `ornamentPerKeysString may not be empty`;
                 }
 
-                if(inKeyOrnamentDefs.length > 0)
+                const components = ornamentPerKeysString.split(";");
+
+                for(const component of components)
                 {
-                    checkKeys(inKeyOrnamentDefs);
+                    const [keyStr, ornamentName] = component.trim().split(":"),
+                        inKeyOrnamentDef = getInKeyOrnamentDef(keyStr, ornamentName, fileOrnamentDefs);
+
+                    inKeyOrnamentDefs.push(inKeyOrnamentDef);
                 }
+
+                checkKeys(inKeyOrnamentDefs);
 
                 return inKeyOrnamentDefs;
             }
@@ -1073,11 +1072,9 @@ ResSynth.residentSynth = (function(window)
             const ornamentPerKeysStrings = ResSynth.ornamentPerKeysStrings,
                 fileOrnamentDefs = ResSynth.ornamentDefs;
 
-            if(ornamentPerKeysStrings === undefined || fileOrnamentDefs === undefined)
-            {
-                inKeyOrnamentDefsArrays.push([]); // an empty array means there are no ornaments defined.
-            }
-            else
+            inKeyOrnamentDefsArrays.push([]); // an empty array means there are no ornaments defined.
+
+            if(ornamentPerKeysStrings !== undefined && fileOrnamentDefs !== undefined)
             {
                 try
                 {
