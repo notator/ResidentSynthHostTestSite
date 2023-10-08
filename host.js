@@ -24,31 +24,10 @@ ResSynth.host = (function(document)
         playbackChannelInfos = undefined, // used while playing back or recording a channel
         playbackChannelIndices = [], // used while playing back a recording
         cancelPlayback = false, // used while playing back.
-        keyOrnaments = [], // contains current keyOrnament objects. Always exists, but can be empty.
 
         getElem = function(elemID)
         {
             return document.getElementById(elemID);
-        },
-
-        // Should be called immediately before any CMD.NOTE_ON && velocity !== 0 messages are sent.)
-        checkSendSetOrnament = function(keyOrnaments, currentChannel, key, recordingMessages)
-        {
-            let keyOrnament = keyOrnaments.find(x => x.key === key);
-            if(keyOrnament !== undefined)
-            {
-                let constants = ResSynth.constants,
-                    CONTROL_CHANGE_STATUS = constants.COMMAND.CONTROL_CHANGE + currentChannel,
-                    SET_ORNAMENT_CONTROL = constants.CONTROL.SET_ORNAMENT,
-                    msg = new Uint8Array([CONTROL_CHANGE_STATUS, SET_ORNAMENT_CONTROL, keyOrnament.ornament]);
-
-                synth.send(msg);
-                if(recordingMessages !== undefined)
-                {
-                    let now = performance.now();
-                    recordingMessages.push({msg, now});
-                }
-            }
         },
 
         setExportState = function(channel, hostChannelSettings)
@@ -99,10 +78,6 @@ ResSynth.host = (function(document)
             switch(commandIndex)
             {
                 case CMD.NOTE_ON:
-                    if(data2 > 0)
-                    {
-                        checkSendSetOrnament(keyOrnaments, currentChannel, data1, undefined);
-                    }
                     msg = new Uint8Array([status, data1, data2]);
                     break;
                 case CMD.NOTE_OFF:
@@ -277,10 +252,6 @@ ResSynth.host = (function(document)
                     }
                     else
                     {
-                        if(command === CMD.NOTE_ON && data[2] !== 0)
-                        {
-                            checkSendSetOrnament(keyOrnaments, currentChannel, data[1], recordingChannelInfo.messages);
-                        }
                         synth.send(msg);
                         let now = performance.now();
                         recordingChannelInfo.messages.push({msg, now});
@@ -296,10 +267,6 @@ ResSynth.host = (function(document)
                             if(inputDevice.name.localeCompare("E-MU Xboard49") === 0)
                             {
                                 msg[2] = getRectifiedEMUVelocity(msg[2]);
-                            }
-                            if(msg[2] !== 0)
-                            {
-                                checkSendSetOrnament(keyOrnaments, currentChannel, msg[1], undefined);
                             }
                             //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
                             break;
