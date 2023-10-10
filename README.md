@@ -170,12 +170,10 @@ This file can be omitted by applications that don't use mixtures.
 The mixtureDefs array contains up to 126 mixture definitions. These are allocated to indexes 1 to 127 of an internal array that will be accessed by the (non-standard MIDI) MIXTURE_INDEX message.  
 Index 0 is reserved for a "no mixture" mixture definition,
 that is allocated internally even if this file does not exist (see below).  
-Each mixture definition has the following attributes:
-```
-        name // an arbitrary, descriptive string.
-        extraNotes // a possibly empty array of up to 127 [keyInterval, velocityInterval] arrays,
-        except // a possibly empty array of up to 127 [key, mixtureIndex] arrays
-```
+Each mixture definition has the following attributes:  
+&emsp;&emsp;`name` // an arbitrary, descriptive string.  
+&emsp;&emsp;`extraNotes` // a possibly empty array of up to 127 [keyInterval, velocityInterval] arrays,  
+&emsp;&emsp;`except` // a possibly empty array of up to 127 [key, mixtureIndex] arrays
 
 The `extraNotes` attribute defines values that will be added to the original note's key and velocity values to define a new note in the mixture.  
 Both `keyInterval` and `velocityInterval` are integers in range -127..127. New note keys are silently coerced to the range 0..127. New note velocities are silently coerced to the range 1..127.
@@ -231,7 +229,52 @@ The **`ResSynth.ornamentDefs`** contain up to 127 ornament definitions, each of 
 
 <a id="synthSettingsDefs"/>
 
-**`synthSettingsDefs.js`** 
+**`synthSettingsDefs.js`**  
+This file can be omitted by applications that don't use custom settings.  
+It defines the `ResSynth.synthSettingsDefs` array, containing the definitions of settings for the _ResidentSynth_ that can be used to override the default channel settings which are otherwise set in the synth's 16 channels.
+
+On loading, the _ResidentSynth_ creates an internal list of alternative settings. The first alternative (at index 0) always contains the channel default settings in all 16 channels. Subsequent alternatives are defined in the `ResSynth.synthSettingsDefs` array. The first setting to be defined in the `ResSynth.synthSettingsDefs` array is therefore at index 1 in the internal list.  
+The (non-standard MIDI) SET_SYNTH_SETTINGS message sets all 16 channels in the _ResidentSynth_ by sending the index of the synthSettings in the internal list.
+
+The **synthSettings** attributes are as follows:  
+&emsp;&emsp;`name` -- an arbitrary, descriptive string (default: "default synth settings")  
+&emsp;&emsp;`keyboardSplitIndex` -- the index (default: 0) in the synth's internal array of alternative  
+&emsp;&emsp;&emsp;&emsp;keyboard splits (see keyboardSplitDefs). This `keyboardSplitIndex` value always  
+&emsp;&emsp;&emsp;&emsp;overrides the corresponding value in the individual channel settings.  
+&emsp;&emsp;`channelSettings` -- an array of up to 16 channelSettings objects. These are allocated,  
+&emsp;&emsp;&emsp;&emsp;in order, to the _ResidentSynth_'s channels, beginning at channel 0.  
+&emsp;&emsp;&emsp;&emsp;Channels that don't exist in a **synthSettings** definition are given the default channel settings. 
+
+The **channelSettings** attributes are as follows:  
+&emsp;&emsp;&emsp;&emsp;`name` // an arbitrary descriptive string (default is "default channel settings")
+- selects:  // The index values of the _ResidentSynthHost_'s select controls.  
+&emsp;&emsp;`bankIndex` // integer 0..n-1 (default: 0), where n is the number of banks defined in  
+&emsp;&emsp;&emsp;&emsp;webAudioFontDef.js  
+&emsp;&emsp;`presetIndex` // integer 0..n-1 (default: 0), where n is the number of presets defined in the bank  
+&emsp;&emsp;&emsp;&emsp;defined in webAudioFontDef.js  
+&emsp;&emsp;`mixtureIndex` // integer 0..n (default: 0), where n is the number of mixtures defined in  
+&emsp;&emsp;&emsp;&emsp;mixtureDefs.js  
+&emsp;&emsp;`tuningGroupIndex` // integer 0..n (default: 0), where n is the number of tuningGroups defined in  
+&emsp;&emsp;&emsp;&emsp;tuningDefs.js  
+&emsp;&emsp;`tuningIndex` // integer 0..n (default: 0), where n is the number of tunings in the group defined in  
+&emsp;&emsp;&emsp;&emsp;tuningDefs.js  
+&emsp;&emsp;`keyboardSplitIndex` // integer 0..n (default: 0), where n is the number of keyboardSplitDefs   
+&emsp;&emsp;&emsp;&emsp;defined in keyboardSplitDefs.js  
+&emsp;&emsp;`keyboardOrnamentsArrayIndex` // integer 0..n (default: 0), where n is the number of  
+&emsp;&emsp;&emsp;&emsp;ornamentPerKeysStrings defined in ornamentDefs.js  
+- integerInputs: // The values of the _ResidentSynthHost_'s numerical input controls.  
+&emsp;&emsp;`semitonesOffset` // -64..+63  (default: 0)  
+&emsp;&emsp;`centsOffset` // -50..+50  (default: 0)  
+&emsp;&emsp;`triggerKey` // 0..127  (default: 36) -- not used by the _ResidentSynth_.  
+- sliders: // The values of the _ResidentSynthHost_'s command and control sliders.  
+&emsp;&emsp;`pitchWheel` // 0..127 (default 64) (The value is used for both MSB and LSB)  
+&emsp;&emsp;`modWheel` // 0..127 (default: 0)  
+&emsp;&emsp;`volume` // 0..127 (default: 100)  
+&emsp;&emsp;`pan` // 0..127 (default: 64)  
+&emsp;&emsp;`reverberation` // 0..127   (default: 0)  
+&emsp;&emsp;`pitchWheelSensitivity` // 0..127  (default: 2)  
+&emsp;&emsp;`velocityPitchSensitivity` // 0.0..127  (default: 0) 
+
 
 <a id="tuningDefs"/>
 
