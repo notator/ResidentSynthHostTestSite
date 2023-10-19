@@ -451,7 +451,7 @@ ResSynth.host = (function(document)
 
             setOptions(presetSelect, presetOptionsArray);
 
-            presetSelect.selectedIndex = hostChannelSettings.presetIndex;
+            presetSelect.selectedIndex = 0;
             onPresetSelectChanged();
 
             hostChannelSettings.bankIndex = bankSelect.selectedIndex;
@@ -522,7 +522,7 @@ ResSynth.host = (function(document)
 
             setOptions(tuningSelect, tuningOptionsArray);
 
-            tuningSelect.selectedIndex = hostChannelSettings.tuningIndex;
+            tuningSelect.selectedIndex = 0
             onTuningSelectChanged();
 
             hostChannelSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
