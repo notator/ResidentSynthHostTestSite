@@ -44,8 +44,8 @@ ResSynth.tuningsFactory = (function()
             check(tuning);
             coerce(tuning);
 
-        //    let freq = getFrequency(tuning[69]);
-        //    console.log("tuning[69]=" + tuning[69].toString() + " - A4Frequency=" + freq.toString() + "Hz");
+            //    let freq = getFrequency(tuning[69]);
+            //    console.log("tuning[69]=" + tuning[69].toString() + " - A4Frequency=" + freq.toString() + "Hz");
         },
 
         // Returns the number of cents equivalent to the frequencyRatio
@@ -450,37 +450,84 @@ ResSynth.tuningsFactory = (function()
         return tuning;
     };
 
-    // Returns a new tuning that is the originalTuning transposed by semitoneTransposition.
-    // (A4 can be tuned to any value.)
-    // If semitoneTransposition is negative, the tuning is transposed downwards.
-    TuningsFactory.prototype.getTransposedTuning = function(tuning, semitoneTransposition)
+    // See comment on Odd Harmonic Tunings in tuningDefs.js
+    TuningsFactory.prototype.getOddHarmonicTunings = function(tuningGroupDef)
     {
-        let transposedTuning = [];
-        for(var i = 0; i < tuning.length; i++)
+        // Returns the centDelta values in ascending order from the root key.
+        function getRootCentsDeltas(keyFactorArray)
         {
-            let midiCents = tuning[i] + semitoneTransposition;
+            let rootKey = keyFactorArray[0][0],
+                keyCentsDeltas = [];
 
-            transposedTuning.push(midiCents);
+            for(let i = 0; i < keyFactorArray.length; i++)
+            {
+                let keyFactor = keyFactorArray[i],
+                    key = keyFactor[0],
+                    factor = keyFactor[1],
+                    semitonesAboveA4 = getCents(factor) / 100,
+                    floorSemitonesAboveA4 = Math.floor(semitonesAboveA4),
+                    centsDelta = semitonesAboveA4 - floorSemitonesAboveA4;
+
+                if(floorSemitonesAboveA4 < (key - rootKey))
+                {
+                    centsDelta -= 1;
+                }
+
+                keyCentsDeltas.push({key, centsDelta});
+            }
+
+            keyCentsDeltas = keyCentsDeltas.sort((a, b) => a.key - b.key);
+
+            let rootCentsDeltas = [];
+            for(let i = 0; i < keyCentsDeltas.length; i++)
+            {
+                rootCentsDeltas.push(keyCentsDeltas[i].centsDelta);
+            }
+
+            return rootCentsDeltas;
         }
 
-        finalizeTuning(transposedTuning);
+        function getTuning(rootCentsDeltas, tuningDef)
+        {
+            let rootKey = tuningDef.root % 12,
+                tuning = [];
 
-        return transposedTuning;
+            console.assert(rootCentsDeltas.length === 12);
+
+            tuning.name = tuningDef.name;
+
+            // set tuning pattern at root
+            let deltaIndex = 12 - rootKey;
+            for(let i = 0; i < 128; i++)
+            {
+                tuning.push(i + rootCentsDeltas[deltaIndex++ % 12]);
+            }
+
+            // now shift A4 to 440Hz
+            let aCentsDelta = tuning[9] - 9;
+            for(let i = 0; i < 128; i++)
+            {
+                tuning[i] -= aCentsDelta;
+            }
+
+            finalizeTuning(tuning);
+
+            return tuning;
+        }        
+
+        let rootCentsDeltas = getRootCentsDeltas(tuningGroupDef.keyFactorArray),
+            tuningDefs = tuningGroupDef.tunings,
+            tunings = [];
+
+        for(var i = 0; i < tuningDefs.length; i++)
+        {
+            let tuning = getTuning(rootCentsDeltas, tuningDefs[i]);
+
+            tunings.push(tuning);
+        }
+
+        return tunings;
     };
-
-    // Returns the number of cents equivalent to the frequencyRatio
-    TuningsFactory.prototype.getCents = function(frequencyRatio)
-    {
-        return getCents(frequencyRatio);
-    },
-
-    // Coerces the values in the tuning to 0.0 <= value < 128.0
-    // and rounds them to a maximum of four decimal places.
-    // This function should be called on every tuning that has been changed.
-    TuningsFactory.prototype.finalizeTuning = function(tuning)
-    {
-        return finalizeTuning(tuning);
-    }
 
 	return API;
 

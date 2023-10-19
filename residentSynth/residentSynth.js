@@ -760,6 +760,16 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
+                        case wmtg.FUNCTION_GET_ODD_HARMONIC_TUNINGS:
+                            {
+                                let tunings = tuningsFactory.getOddHarmonicTunings(tuningGroupDef);
+
+                                for(let k = 0; k < tunings.length; k++)
+                                {
+                                    tuningGroup.push(tunings[k]);
+                                }
+                                break;
+                            }
                         default:
                             console.assert(false, "Unknown tuning type.");
                     }

@@ -6,10 +6,12 @@ console.log('load tuningDefs.js');
 ResSynth.tuningConstructors =
 {
 	FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR: 0,
-	FUNCTION_GET_PARTCH_TUNING: 1,
+	FUNCTION_GET_ODD_HARMONIC_TUNINGS: 1,
 	FUNCTION_GET_WARPED_OCTAVES_TUNING: 2,
 	FUNCTION_GET_WARPED_GAMUT_TUNING: 3,
-	FUNCTION_GET_BAROQUE_TUNING: 4
+	FUNCTION_GET_PARTCH_TUNING: 4,
+	FUNCTION_GET_BAROQUE_TUNING: 5
+
 };
 
 // All tunings are initially related to standard A4=440Hz.
@@ -26,7 +28,7 @@ ResSynth.tuningDefs =
 			//    2. Each interval is then transposed into each available octave (128 MIDI pitches)
 			//    3. The tuning is transposed so that the pitch at midiKey[root] is root.
 			ctor: ResSynth.tuningConstructors.FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR,
-			name: "constant factor tunings",
+			name: "constant factor tunings (A4=440Hz)",
 			tunings:
 				[
 					{
@@ -73,63 +75,84 @@ ResSynth.tuningDefs =
 					}
 				]
 		},
-		// Partch
+		// Odd harmonic tunings
 		{
-			// This tuning group uses the following constructor:
-			//   tuning = getPartchTuning(root);
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_PARTCH_TUNING,
-			name: "Partch tunings",
-			tunings:
-				[
-					{
-						name: "Partch C, root=0",
-						root: 0
-					},
-					{
-						name: "Partch C#, root=1",
-						root: 1
-					},
-					{
-						name: "Partch D, root=2",
-						root: 2
-					},
-					{
-						name: "Partch D#, root=3",
-						root: 3
-					},
-					{
-						name: "Partch E, root=4",
-						root: 4
-					},
-					{
-						name: "Partch F, root=5",
-						root: 5
-					},
-					{
-						name: "Partch F#, root=6",
-						root: 6
-					},
-					{
-						name: "Partch G, root=7",
-						root: 7
-					},
-					{
-						name: "Partch G#, root=8",
-						root: 8
-					},
-					{
-						name: "Partch A, root=9",
-						root: 9
-					},
-					{
-						name: "Partch A#, root=10",
-						root: 10
-					},
-					{
-						name: "Partch B, root=11",
-						root: 11
-					}
-				]
+		// Constructor:   tunings = getOddHarmonicTunings(keyFactorArray);
+		// This constructor uses the odd-numbered harmonics to return 128-note tunings
+		// having a maximum number of perfect fifths and thirds.
+		// All the returned tunings have A4=440Hz.
+		// When the root is A, there are perfect fifths between keys A-E, E-B, C#-G#, G-D,
+		// and perfect major thirds between A-C#, E-G# and C#-F.
+		// (So there are three perfect major triads: A-C#-E, E-G#-B, C#-F-G#.)
+		// Other roots are transposed accordingly, but always with A4=440Hz.
+		ctor: ResSynth.tuningConstructors.FUNCTION_GET_ODD_HARMONIC_TUNINGS,
+		name: "odd harmonic tunings (A4=440Hz)",
+		keyFactorArray:
+			[
+				[57, 1],      // A = 440Hz
+				[64, 3 / 2],  // E (5th above A)
+				[61, 5 / 4],  // C# (3rd above A)
+				[67, 7 / 4],  // G
+				[59, 9 / 8],  // B (5th above E)
+				[63, 11 / 8], // D#
+				[66, 13 / 8], // F#
+				[68, 15 / 8], // G# (5th above C#, 3rd above E)
+				[58, 17 / 16], // A#
+				[60, 19 / 16], // C
+				[62, 21 / 16], // D (5th above G)
+				[65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16 .
+			],
+		tunings:
+			[
+				{
+					name: "Root C :5ths C-G, G-D, E-B, A#-F; 3rds C-E, G-B, E-G#",
+					root: 48 // C
+				},
+				{
+					name: "Root C#:5ths C#-G#, G#-D#, F-C, B-F#; 3rds C#-F, G#-C, F-A",
+					root: 49 // C#
+				},
+				{
+					name: "Root D:5ths D-A, A-E, F#-C#, C-G; 3rds D-F#, A-C#, F#-A#",
+					root: 50 // D
+				},
+				{
+					name: "Root D#:5ths D#-A#, A#-F, G-D, C#-G#; 3rds D#-G, A#-D, G-B",
+					root: 51 // D#
+				},
+				{
+					name: "Root E:5ths E-B, B-F#, G#-D#, D-A; 3rds E-G#, B-D#, G#-C",
+					root: 52 // E
+				},
+				{
+					name: "Root F:5ths F-C, C-G, A-E, D#-A#; 3rds F-A, C-E, A-C#",
+					root: 53 // F
+				},
+				{
+					name: "Root F#:5ths F#-C#, C#-G#, A#-F, E-B; 3rds F#-A#, C#-F, A#-D",
+					root: 54 // F#
+				},
+				{
+					name: "Root G:5ths G-D, D-A, B-F#, F-C; 3rds G-B, D-F#, B-D#",
+					root: 55 // G
+				},
+				{
+					name: "Root G#:5ths G#-D#, D#-A#, C-G, F#-C#; 3rds G#-C, D#-G, C-E",
+					root: 56 // G#
+				},
+				{
+					name: "Root A:5ths A-E, E-B, C#-G#, G-D; 3rds A-C#, E-G#, C#-F",
+					root: 57 // A
+				},
+				{
+					name: "Root A#:5ths A#-F, F-C, D-A, G#-D#; 3rds A#-D, F-A, D-F#",
+					root: 58 // A#
+				},
+				{
+					name: "Root B:5ths B-F#, F#-C#, D#-A#, A-E; 3rds B-D#, F#-A#, D#-G",
+					root: 59 // B
+				}
+			]
 		},
 		// Warped octave tunings
 		{
@@ -290,13 +313,71 @@ ResSynth.tuningDefs =
 							]
 					}
 				]
+	    },
+		// Partch
+		{
+			// This tuning group uses the following constructor:
+			//   tuning = getPartchTuning(root);
+			ctor: ResSynth.tuningConstructors.FUNCTION_GET_PARTCH_TUNING,
+			name: "Partch tunings  (A4=440Hz)",
+			tunings:
+				[
+					{
+						name: "Partch C, root=0",
+						root: 0
+					},
+					{
+						name: "Partch C#, root=1",
+						root: 1
+					},
+					{
+						name: "Partch D, root=2",
+						root: 2
+					},
+					{
+						name: "Partch D#, root=3",
+						root: 3
+					},
+					{
+						name: "Partch E, root=4",
+						root: 4
+					},
+					{
+						name: "Partch F, root=5",
+						root: 5
+					},
+					{
+						name: "Partch F#, root=6",
+						root: 6
+					},
+					{
+						name: "Partch G, root=7",
+						root: 7
+					},
+					{
+						name: "Partch G#, root=8",
+						root: 8
+					},
+					{
+						name: "Partch A, root=9",
+						root: 9
+					},
+					{
+						name: "Partch A#, root=10",
+						root: 10
+					},
+					{
+						name: "Partch B, root=11",
+						root: 11
+					}
+				]
 		},
 		// Baroque collection (Poletti)
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
 			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
-			name: "Baroque (Poletti):  Circulating/Rational",
+			name: "Baroque (Poletti):  Circulating/Rational (A4=414Hz)",
 			tunings:
 				[
 					{
@@ -341,7 +422,7 @@ ResSynth.tuningDefs =
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
 			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
-			name: "Baroque (Poletti):  Circulating/Pragmatic",
+			name: "Baroque (Poletti):  Circulating/Pragmatic (A4=414Hz)",
 			tunings:
 				[
 					{
@@ -374,7 +455,7 @@ ResSynth.tuningDefs =
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
 			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
-			name: "Baroque (Poletti):  Meantone/Mollified",
+			name: "Baroque (Poletti):  Meantone/Mollified (A4=414Hz)",
 			tunings:
 				[
 					{
@@ -451,7 +532,7 @@ ResSynth.tuningDefs =
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
 			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
-			name: "Baroque (Poletti):  Meantone/Regular",
+			name: "Baroque (Poletti):  Meantone/Regular (A4=414Hz)",
 			tunings:
 				[
 					{
@@ -483,5 +564,5 @@ ResSynth.tuningDefs =
 						offsets: [0.0, -36.5, -10.4, 15.6, -20.9, 5.2, -31.3, -5.2, -41.7, -15.6, 10.4, -26.1]
 					}
 				]
-	}
+		}
 	];
