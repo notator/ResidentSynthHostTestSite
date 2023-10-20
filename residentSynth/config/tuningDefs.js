@@ -81,8 +81,8 @@ ResSynth.tuningDefs =
 		// This constructor uses the odd-numbered natural harmonics to return 128-note tunings,
 		// on 12 different root keys, each of which contains three perfect major triads.
 		// When the root key is A, there are four perfect fifths between keys A-E, E-B, C#-G#, G-D,
-		// and perfect major thirds between A-C#, E-G# and C#-F.
-		// (The three perfect major triads are: A-C#-E, E-G#-B, C#-F-G#.)
+		// and three perfect major thirds between A-C#, E-G# and C#-F.
+		// (So there are three perfect major triads: A-C#-E, E-G#-B, C#-F-G#.)
 		// The tunings are initially constructed with their root pitches at frequencies
 		// equal to their standard equal temperament values, but the absolute height of a tuning
 		// will actually be calculated dynamically as the root changes, in order to "modulate" smoothly:
