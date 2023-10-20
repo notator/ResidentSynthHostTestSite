@@ -760,9 +760,9 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case wmtg.FUNCTION_GET_ODD_HARMONIC_TUNINGS:
+                        case wmtg.FUNCTION_GET_HARMONIC_TUNINGS:
                             {
-                                let tunings = tuningsFactory.getOddHarmonicTunings(tuningGroupDef);
+                                let tunings = tuningsFactory.getHarmonicTunings(tuningGroupDef);
 
                                 for(let k = 0; k < tunings.length; k++)
                                 {
@@ -1297,20 +1297,53 @@ ResSynth.residentSynth = (function(window)
             channelControls[channel].mixtureIndex = mixtureIndex;
         },
 
-        // sets channelControl.tuning to the first tuning in the group.
+        // sets channelControl.tuning to the first tuning in the group
+        // (without changing channelControls[channel].previousTuning).
         updateTuningGroupIndex = function(channel, tuningGroupIndex)
         {
             channelControls[channel].tuningGroupIndex = tuningGroupIndex;
             channelControls[channel].tuningIndex = 0;
             channelControls[channel].tuning = tuningGroups[tuningGroupIndex][0];
         },
+
         updateTuning = function(channel, tuningIndex)
         {
-            let tuningGroupIndex = channelControls[channel].tuningGroupIndex;
+            function transposeNewTuningToPreviousTuning(chanControls, tuningIndex, newTuning)
+            {
+                let root = tuningIndex + 60, // tunings are ordered by root. Choose a root near the middle of the tuning.                    
+                    previousTuning = (chanControls.previousTuning !== undefined) ? chanControls.previousTuning : chanControls.tuning,
+                    previousRootMidiCents = previousTuning[root],
+                    tuningRootMidiCents = newTuning[root],
+                    tuningDelta = previousRootMidiCents - tuningRootMidiCents;
 
-            channelControls[channel].tuningIndex = tuningIndex;
-            channelControls[channel].tuning = tuningGroups[tuningGroupIndex][tuningIndex];
+                for(let i = 12; i < 115; i++)
+                {
+                    newTuning[i] = midiVal(newTuning[i] + tuningDelta);
+                }
+                for(let i = 0; i < 12; i++)
+                {
+                    newTuning[i] = midiVal(newTuning[i + 12] - 12);
+                }
+                for(let i = 115; i < 128; i++)
+                {
+                    newTuning[i] = midiVal(newTuning[i - 12] + 12);
+                }
+            }
+
+            let tuningGroupIndex = channelControls[channel].tuningGroupIndex,
+                newTuning = tuningGroups[tuningGroupIndex][tuningIndex],
+                chanControls = channelControls[channel];
+
+            if(tuningGroupIndex === ResSynth.tuningConstructors.FUNCTION_GET_HARMONIC_TUNINGS)
+            {
+                transposeNewTuningToPreviousTuning(chanControls, tuningIndex, newTuning);               
+            }
+
+            chanControls.tuningIndex = tuningIndex;
+            chanControls.tuning = newTuning;
+            chanControls.previousTuning = newTuning;
         },
+
         updateSemitonesOffset = function(channel, semitonesOffset)
         {
             channelControls[channel].semitonesOffset = semitonesOffset;
@@ -1443,19 +1476,19 @@ ResSynth.residentSynth = (function(window)
             }
         },
 
+        midiVal = function(value)
+        {
+            value = (value > 127) ? 127 : value;
+            value = (value < 0) ? 0 : value;
+
+            return value;
+        },
+
         noteOn = async function(inChannel, inKey, inVelocity)
         {
             function wait(milliseconds)
             {
                 return new Promise(resolve => setTimeout(resolve, milliseconds));
-            }
-
-            function midiVal(value)
-            {
-                value = (value > 127) ? 127 : value;
-                value = (value < 0) ? 0 : value;
-
-                return value;
             }
 
             // returns a new midiAttributes object 

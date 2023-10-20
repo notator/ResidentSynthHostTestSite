@@ -6,7 +6,7 @@ console.log('load tuningDefs.js');
 ResSynth.tuningConstructors =
 {
 	FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR: 0,
-	FUNCTION_GET_ODD_HARMONIC_TUNINGS: 1,
+	FUNCTION_GET_HARMONIC_TUNINGS: 1,
 	FUNCTION_GET_WARPED_OCTAVES_TUNING: 2,
 	FUNCTION_GET_WARPED_GAMUT_TUNING: 3,
 	FUNCTION_GET_PARTCH_TUNING: 4,
@@ -75,81 +75,69 @@ ResSynth.tuningDefs =
 					}
 				]
 		},
-		// Odd harmonic tunings
-		{
-		// Constructor:   tunings = getOddHarmonicTunings(keyFactorArray);
-		// This constructor uses the odd-numbered harmonics to return 128-note tunings
-		// having a maximum number of perfect fifths and thirds.
-		// All the returned tunings have A4=440Hz.
-		// When the root is A, there are perfect fifths between keys A-E, E-B, C#-G#, G-D,
+		// Harmonic tunings
+		{		
+		// Constructor:   tunings = getHarmonicTunings();
+		// This constructor uses the odd-numbered natural harmonics to return 128-note tunings,
+		// on 12 different root keys, each of which contains three perfect major triads.
+		// When the root key is A, there are four perfect fifths between keys A-E, E-B, C#-G#, G-D,
 		// and perfect major thirds between A-C#, E-G# and C#-F.
-		// (So there are three perfect major triads: A-C#-E, E-G#-B, C#-F-G#.)
-		// Other roots are transposed accordingly, but always with A4=440Hz.
-		ctor: ResSynth.tuningConstructors.FUNCTION_GET_ODD_HARMONIC_TUNINGS,
-		name: "odd harmonic tunings (A4=440Hz)",
-		keyFactorArray:
-			[
-				[57, 1],      // A = 440Hz
-				[64, 3 / 2],  // E (5th above A)
-				[61, 5 / 4],  // C# (3rd above A)
-				[67, 7 / 4],  // G
-				[59, 9 / 8],  // B (5th above E)
-				[63, 11 / 8], // D#
-				[66, 13 / 8], // F#
-				[68, 15 / 8], // G# (5th above C#, 3rd above E)
-				[58, 17 / 16], // A#
-				[60, 19 / 16], // C
-				[62, 21 / 16], // D (5th above G)
-				[65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16 .
-			],
+		// (The three perfect major triads are: A-C#-E, E-G#-B, C#-F-G#.)
+		// The tunings are initially constructed with their root pitches at frequencies
+		// equal to their standard equal temperament values, but the absolute height of a tuning
+		// will actually be calculated dynamically as the root changes, in order to "modulate" smoothly:
+		// Successive tunings are transposed so that their root key has the same frequency as
+        // it had in the preceding tuning.
+		ctor: ResSynth.tuningConstructors.FUNCTION_GET_HARMONIC_TUNINGS,
+		name: "harmonic tunings",
 		tunings:
 			[
 				{
-					name: "Root C :5ths C-G, G-D, E-B, A#-F; 3rds C-E, G-B, E-G#",
+					name: "C&emsp;|| 5ths C-G, G-D, E-B, A#-F; 3rds C-E, G-B, E-G#",
 					root: 48 // C
 				},
 				{
-					name: "Root C#:5ths C#-G#, G#-D#, F-C, B-F#; 3rds C#-F, G#-C, F-A",
+					name: "C# || 5ths C#-G#, G#-D#, F-C, B-F#; 3rds C#-F, G#-C, F-A",
 					root: 49 // C#
 				},
 				{
-					name: "Root D:5ths D-A, A-E, F#-C#, C-G; 3rds D-F#, A-C#, F#-A#",
+					name: "D&emsp;|| 5ths D-A, A-E, F#-C#, C-G; 3rds D-F#, A-C#, F#-A#",
 					root: 50 // D
 				},
 				{
-					name: "Root D#:5ths D#-A#, A#-F, G-D, C#-G#; 3rds D#-G, A#-D, G-B",
+					name: "D# || 5ths D#-A#, A#-F, G-D, C#-G#; 3rds D#-G, A#-D, G-B",
 					root: 51 // D#
 				},
 				{
-					name: "Root E:5ths E-B, B-F#, G#-D#, D-A; 3rds E-G#, B-D#, G#-C",
+					name: "E&emsp;|| 5ths E-B, B-F#, G#-D#, D-A; 3rds E-G#, B-D#, G#-C",
 					root: 52 // E
 				},
 				{
-					name: "Root F:5ths F-C, C-G, A-E, D#-A#; 3rds F-A, C-E, A-C#",
+					name: "F&emsp;|| 5ths F-C, C-G, A-E, D#-A#; 3rds F-A, C-E, A-C#",
 					root: 53 // F
 				},
 				{
-					name: "Root F#:5ths F#-C#, C#-G#, A#-F, E-B; 3rds F#-A#, C#-F, A#-D",
+					name: "F# || 5ths F#-C#, C#-G#, A#-F, E-B; 3rds F#-A#, C#-F, A#-D",
 					root: 54 // F#
 				},
 				{
-					name: "Root G:5ths G-D, D-A, B-F#, F-C; 3rds G-B, D-F#, B-D#",
+					name: "G&emsp;|| 5ths G-D, D-A, B-F#, F-C; 3rds G-B, D-F#, B-D#",
 					root: 55 // G
 				},
 				{
-					name: "Root G#:5ths G#-D#, D#-A#, C-G, F#-C#; 3rds G#-C, D#-G, C-E",
+					name: "G# || 5ths G#-D#, D#-A#, C-G, F#-C#; 3rds G#-C, D#-G, C-E",
 					root: 56 // G#
 				},
 				{
-					name: "Root A:5ths A-E, E-B, C#-G#, G-D; 3rds A-C#, E-G#, C#-F",
+					name: "A&emsp;|| 5ths A-E, E-B, C#-G#, G-D; 3rds A-C#, E-G#, C#-F",
 					root: 57 // A
 				},
 				{
-					name: "Root A#:5ths A#-F, F-C, D-A, G#-D#; 3rds A#-D, F-A, D-F#",
+					name: "A# || 5ths A#-F, F-C, D-A, G#-D#; 3rds A#-D, F-A, D-F#",
 					root: 58 // A#
 				},
 				{
-					name: "Root B:5ths B-F#, F#-C#, D#-A#, A-E; 3rds B-D#, F#-A#, D#-G",
+					name: "B&emsp;|| 5ths B-F#, F#-C#, D#-A#, A-E; 3rds B-D#, F#-A#, D#-G",
 					root: 59 // B
 				}
 			]

@@ -14,8 +14,7 @@ ResSynth.tuningsFactory = (function()
         // The argument is an array of 128 floating point numbers representing the number of
         // (floating point) semitones above MIDI C0 for each MIDI key (=index).
         // An exception is thrown if the argument's length is not 128, or it contains anything other than numbers.
-        // This function justifies the values in the array by coercing them to 0.0 <= value < 128.0 and rounding
-        // them to a maximum of four decimal places. 
+        // This function coerces the values in the array to 0.0 <= value < 128.0.
         // Note that the values in the tuning will usually be in ascending order, but that this is not absolutely necessary.
         finalizeTuning = function(tuning)
         {
@@ -28,11 +27,12 @@ ResSynth.tuningsFactory = (function()
                     console.assert(!Number.isNaN(value));
                 }
             }
+
             function coerce(tuning)
             {
                 for(let i = 0; i < 128; i++)
                 {
-                    let value = Math.round(tuning[i] * 10000) / 10000;
+                    let value = tuning[i];
 
                     value = (value < 0) ? 0 : value;
                     value = (value >= 128) ? 127.9999 : value;
@@ -43,9 +43,6 @@ ResSynth.tuningsFactory = (function()
 
             check(tuning);
             coerce(tuning);
-
-            //    let freq = getFrequency(tuning[69]);
-            //    console.log("tuning[69]=" + tuning[69].toString() + " - A4Frequency=" + freq.toString() + "Hz");
         },
 
         // Returns the number of cents equivalent to the frequencyRatio
@@ -450,12 +447,28 @@ ResSynth.tuningsFactory = (function()
         return tuning;
     };
 
-    // See comment on Odd Harmonic Tunings in tuningDefs.js
-    TuningsFactory.prototype.getOddHarmonicTunings = function(tuningGroupDef)
+    // See comment on Harmonic Tunings in tuningDefs.js
+    TuningsFactory.prototype.getHarmonicTunings = function(tuningGroupDef)
     {
         // Returns the centDelta values in ascending order from the root key.
-        function getRootCentsDeltas(keyFactorArray)
+        function getRootCentsDeltas()
         {
+            const keyFactorArray =
+                [
+                    [57, 1],      // A
+                    [64, 3 / 2],  // E(5th above A)
+                    [61, 5 / 4],  // C# (3rd above A)
+                    [67, 7 / 4],  // G
+                    [59, 9 / 8],  // B (5th above E)
+                    [63, 11 / 8], // D#
+                    [66, 13 / 8], // F#
+                    [68, 15 / 8], // G# (5th above C#, 3rd above E)
+                    [58, 17 / 16], // A#
+                    [60, 19 / 16], // C
+                    [62, 21 / 16], // D (5th above G)
+                    [65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16.
+                ];
+
             let rootKey = keyFactorArray[0][0],
                 keyCentsDeltas = [];
 
@@ -503,19 +516,12 @@ ResSynth.tuningsFactory = (function()
                 tuning.push(i + rootCentsDeltas[deltaIndex++ % 12]);
             }
 
-            // now shift A4 to 440Hz
-            let aCentsDelta = tuning[9] - 9;
-            for(let i = 0; i < 128; i++)
-            {
-                tuning[i] -= aCentsDelta;
-            }
-
             finalizeTuning(tuning);
 
             return tuning;
-        }        
+        }          
 
-        let rootCentsDeltas = getRootCentsDeltas(tuningGroupDef.keyFactorArray),
+        let rootCentsDeltas = getRootCentsDeltas(),
             tuningDefs = tuningGroupDef.tunings,
             tunings = [];
 
