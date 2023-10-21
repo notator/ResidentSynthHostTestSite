@@ -1310,7 +1310,10 @@ ResSynth.residentSynth = (function(window)
         {
             function transposeNewTuningToPreviousTuning(chanControls, tuningIndex, newTuning)
             {
-                let root = tuningIndex + 60, // tunings are ordered by root. Choose a root near the middle of the tuning.                    
+                // There are 12, dynamically transposable, harmonic tunings, ordered by root, with C tuning at index 0.
+                // tuningIndex is therefore in range 0..11.
+
+                let root = tuningIndex + 60, // choose a root near the middle of the tuning (root will be in range 60..71).                    
                     previousTuning = (chanControls.previousTuning !== undefined) ? chanControls.previousTuning : chanControls.tuning,
                     previousRootMidiCents = previousTuning[root],
                     tuningRootMidiCents = newTuning[root],
