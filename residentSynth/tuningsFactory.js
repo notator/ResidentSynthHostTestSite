@@ -592,7 +592,7 @@ ResSynth.tuningsFactory = (function()
                 rootCentsDeltas.push(keyCentsDeltas[i].centsDelta);
             }
 
-            consoleLogInfo(rootCentsDeltas);
+            // consoleLogInfo(rootCentsDeltas);
 
             return rootCentsDeltas;
         }

@@ -87,7 +87,7 @@ ResSynth.tuningDefs =
 		// equal to their standard equal temperament values, but the absolute height of a tuning
 		// will actually be calculated dynamically as the root changes, in order to "modulate" smoothly:
 		// Successive tunings are transposed so that their root key has the same frequency as
-        // it had in the preceding tuning.
+        // it had in the preceding tuning. See: residentSynth.updateTuning(channel, tuningIndex).
 		ctor: ResSynth.tuningConstructors.FUNCTION_GET_HARMONIC_TUNINGS,
 		name: "harmonic tunings",
 		tunings:
