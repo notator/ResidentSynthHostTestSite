@@ -1298,7 +1298,7 @@ ResSynth.residentSynth = (function(window)
         },
 
         // sets channelControl.tuning to the first tuning in the group
-        // (without changing channelControls[channel].previousTuning).
+        // without affecting channelControls[channel].previousTuning.
         updateTuningGroupIndex = function(channel, tuningGroupIndex)
         {
             channelControls[channel].tuningGroupIndex = tuningGroupIndex;
@@ -1310,26 +1310,37 @@ ResSynth.residentSynth = (function(window)
         {
             function transposeNewTuningToPreviousTuning(chanControls, tuningIndex, newTuning)
             {
-                // There are 12, dynamically transposable, harmonic tunings, ordered by root, with C tuning at index 0.
-                // tuningIndex is therefore in range 0..11.
-
-                let root = tuningIndex + 60, // choose a root near the middle of the tuning (root will be in range 60..71).                    
-                    previousTuning = (chanControls.previousTuning !== undefined) ? chanControls.previousTuning : chanControls.tuning,
+                // The reason why root is set to tuningIndex + 60:
+                // There are 12, dynamically transposable, harmonic tunings, each having 128 MidiCent values, ordered by root.
+                // The tuning array at tuningIndex 0 has root C (because MIDI key 0 is C, and the default MidiCent value for MIDI key 0 in this tuning is 0).
+                // The default MidiCent value for MIDI key 1 in tunings[1] is C# = 1, etc.)
+                // The tuningIndex argument to this function is the index of the newTuning in the 12 harmonic tuning arrays, is therefore in range 0..11.
+                // Each MidiCent value in these tuning arrays is the frequency of the corresponding MIDI key in the corresponding tuning. (MIDI key number = index).
+                // To avoid values near the beginnings and ends of tuning arrays (that may have been coerced to 0 or 127),
+                // the root key that is to have an equal MidiCent value in the previous and current tunings after the transposition,
+                // is taken from the middle of two tuning arrays.
+                // By adding a multiple of 12, root%12 will be equal to tuningIndex. The end result is that all octaves of the root key in the newTuning will
+                // have the same MidiCents value as they had in the previous tuning.
+                // Since tuningIndex is in range 0..11, root will be in range 60..71.                
+                let root = tuningIndex + 60,                    
+                    previousTuning = chanControls.previousTuning,
                     previousRootMidiCents = previousTuning[root],
                     tuningRootMidiCents = newTuning[root],
                     tuningDelta = previousRootMidiCents - tuningRootMidiCents;
 
-                for(let i = 12; i < 115; i++)
+                let low = root, high = root + 12;
+
+                for(let i = low; i < high; i++)
                 {
                     newTuning[i] = midiVal(newTuning[i] + tuningDelta);
                 }
-                for(let i = 0; i < 12; i++)
-                {
-                    newTuning[i] = midiVal(newTuning[i + 12] - 12);
-                }
-                for(let i = 115; i < 128; i++)
+                for(let i = high; i < 128; i++)
                 {
                     newTuning[i] = midiVal(newTuning[i - 12] + 12);
+                }
+                for(let i = low - 1; i >= 0; i--)
+                {
+                    newTuning[i] = midiVal(newTuning[i + 12] - 12);
                 }
             }
 
@@ -1820,7 +1831,12 @@ ResSynth.residentSynth = (function(window)
         {
             updateBankIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
             updateMixtureIndex(channel, 0);
-            updateTuningGroupIndex(channel, 0);  // sets channelControl.tuning to the first tuning in the group.
+
+            // updateTuningGroupIndex(...) sets channelControl.tuning to the first tuning
+            // in the group, without affecting channelControls[channel].previousTuning.
+            updateTuningGroupIndex(channel, 0);
+            channelControls[channel].previousTuning = channelControls[channel].tuning;
+
             updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's tuning value in NoteOn. 
             updateCentsOffset(channel, 0); // centsOffset/100 will be added to the key's tuning value in NoteOn. 
         },
