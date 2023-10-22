@@ -1319,8 +1319,8 @@ ResSynth.residentSynth = (function(window)
                 // To avoid values near the beginnings and ends of tuning arrays (that may have been coerced to 0 or 127),
                 // the root key that is to have an equal MidiCent value in the previous and current tunings after the transposition,
                 // is taken from the middle of two tuning arrays.
-                // By adding a multiple of 12, root%12 will be equal to tuningIndex. The end result is that all octaves of the root key in the newTuning will
-                // have the same MidiCents value as they had in the previous tuning.
+                // By adding a multiple of 12, root%12 will be equal to tuningIndex.
+                // The end result is that all octaves of the root key in the newTuning will have the same MidiCents value as they had in the previous tuning.
                 // Since tuningIndex is in range 0..11, root will be in range 60..71.                
                 let root = tuningIndex + 60,                    
                     previousTuning = chanControls.previousTuning,
