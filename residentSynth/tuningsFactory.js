@@ -51,16 +51,15 @@ ResSynth.tuningsFactory = (function()
             return 1200 * Math.log2(frequencyRatio);
         },
 
-        getFrequency = function(midiCents)
+        getFrequency = function(midiFreq)
         {
-            let pow = (midiCents - 69) / 12,
+            let pow = (midiFreq - 69) / 12,
                 frequency = Math.pow(2, pow) * 440;
 
             return frequency;
         },
 
-        // Transpose the tuning so that A4 (midi key 69) has a midiCent value equivalent to a4Frequency
-        // The A4 midiCents value is rounded to a maximum of 4 decimal places.
+        // Transpose the tuning so that A4 (midi key 69) has a midiFreq value of 69.0.
         transposeTuningForA4Frequency = function(tuning, a4Frequency)
         {
             let currentA4Frequency = getFrequency(tuning[69]),
@@ -68,16 +67,9 @@ ResSynth.tuningsFactory = (function()
 
             for(var i = 0; i < 128; i++)
             {
-                let value = Math.round((tuning[i] + semitonesDiff) * 10000) / 10000;
-                tuning[i] = value;
+                tuning[i] = tuning[i] + semitonesDiff; // will be coerced to 0..<128 later
             }
         },
-
-        //// Converts a frequency in Hertz to a MidiCent value (semitones above MIDI C0)
-        //getMidiCents = function(frequency)
-        //{
-        //    return this.getCents(frequency / ResSynth.constants.MIDI_0_FREQUENCY) / 100.0;
-        //},
 
         // Returns a 128-note tuning (containing octave tunings) defined by cent offsets from equal temperament.
         // (For example, the tunings defined on the Quick Reference sheet at https://polettipiano.com/wordpress/?page_id=706)
@@ -212,8 +204,8 @@ ResSynth.tuningsFactory = (function()
     };
 
     // Returns a 128-note tuning (containing octave tunings) tuned according to Harry Partch's scale with A4 tuned to 440Hz.
-    // The rootKey (which is allocated a pitch of rootKey MidiCents above C0) is an integer in range [0..11].
-    // Keys below the rootKey are allocated the same MidiCent value as the rootKey.
+    // The rootKey (which is allocated a MidiFreq of rootKey above C0) is an integer in range [0..11].
+    // Keys below the rootKey are allocated the same MidiFreq value as the rootKey.
     TuningsFactory.prototype.getPartchTuning = function(rootKey)
     {
         function getPartchETTuningOffsets(rootKey)
@@ -341,19 +333,19 @@ ResSynth.tuningsFactory = (function()
             }
 
             // Returns a tuningSegment, calculated from the keyValuesArray, having a .rootKey attribute that determines the key for the first value.
-            // A tuningSegment is a contiguous array of increasing MidiCent values, one per key in range.
-            // The keyValuesArray is an array containing only the [key,pitch] arrays that define fixed points in the (warped) midiCentsArraySegment.
+            // A tuningSegment is a contiguous array of increasing MidiFreq values, one per key in range.
+            // The keyValuesArray is an array containing only the [key,pitch] arrays that define fixed points in the (warped) midiFreqArraySegment.
             // The returned values do not exceed the range of the values in the keyValuesArray argument.
             // The returned values have been interpolated (per key) between those in the keyValuesArray argument.
             function getTuningSegment(keyValuesArray)
             {
                 checkGamutKeyValuesArray(keyValuesArray);
 
-                let midiCentsArraySegment = [];
+                let midiFreqArraySegment = [];
 
-                midiCentsArraySegment.rootKey = keyValuesArray[0][0];
+                midiFreqArraySegment.rootKey = keyValuesArray[0][0];
 
-                midiCentsArraySegment.push(keyValuesArray[0][1]);
+                midiFreqArraySegment.push(keyValuesArray[0][1]);
                 for(var j = 1; j < keyValuesArray.length; j++)
                 {
                     let prevValue = keyValuesArray[j - 1][1],
@@ -362,12 +354,12 @@ ResSynth.tuningsFactory = (function()
                     for(var k = 0; k < nKeys; k++)
                     {
                         let value = prevValue + vIncr;
-                        midiCentsArraySegment.push(value);
+                        midiFreqArraySegment.push(value);
                         prevValue = value;
                     }
                 }
 
-                return midiCentsArraySegment;
+                return midiFreqArraySegment;
 
             }
 
@@ -379,10 +371,10 @@ ResSynth.tuningsFactory = (function()
             {
                 tuning.push(gamutKeyValuesArray[0][1]);
             }
-            let midiCentsArraySegment = getTuningSegment(gamutKeyValuesArray);
-            for(let i = 0; i < midiCentsArraySegment.length; i++)
+            let midiFreqArraySegment = getTuningSegment(gamutKeyValuesArray);
+            for(let i = 0; i < midiFreqArraySegment.length; i++)
             {
-                tuning.push(midiCentsArraySegment[i]);
+                tuning.push(midiFreqArraySegment[i]);
             }
             while(tuning.length < 128)
             {

@@ -1311,22 +1311,25 @@ ResSynth.residentSynth = (function(window)
             function transposeNewTuningToPreviousTuning(chanControls, tuningIndex, newTuning)
             {
                 // The reason why root is set to tuningIndex + 60:
-                // There are 12, dynamically transposable, harmonic tunings, each having 128 MidiCent values, ordered by root.
-                // The tuning array at tuningIndex 0 has root C (because MIDI key 0 is C, and the default MidiCent value for MIDI key 0 in this tuning is 0).
-                // The default MidiCent value for MIDI key 1 in tunings[1] is C# = 1, etc.)
+                // There are 12, dynamically transposable, harmonic tunings, each having 128 MidiFreq values, ordered by root.
+                // A MidiFreq is a frequency described as a floating point MIDI value in range 0..<128.
+                // A difference of a semitone between midiFreq values is a difference of 1.0
+                // A difference of a cent between midiFreq values is a difference of 0.01
+                // The tuning array at tuningIndex 0 has root C (because MIDI key 0 is C, and the default MidiFreq value for MIDI key 0 in this tuning is 0).
+                // The default MidiFreq value for MIDI key 1 (C#) in tunings[1] is 1, etc.)
                 // The tuningIndex argument to this function is the index of the newTuning in the 12 harmonic tuning arrays, is therefore in range 0..11.
-                // Each MidiCent value in these tuning arrays is the frequency of the corresponding MIDI key in the corresponding tuning. (MIDI key number = index).
+                // Each MidiFreq value in these tuning arrays is the frequency of the corresponding MIDI key in the corresponding tuning. (MIDI key number = index).
                 // To avoid values near the beginnings and ends of tuning arrays (that may have been coerced to 0 or 127),
-                // the root key that is to have an equal MidiCent value in the previous and current tunings after the transposition,
-                // is taken from the middle of two tuning arrays.
+                // the root key that is to have an equal MidiFreq value in the previous and current tunings after the transposition,
+                // is taken from the middle of the tuning arrays.
                 // By adding a multiple of 12, root%12 will be equal to tuningIndex.
-                // The end result is that all octaves of the root key in the newTuning will have the same MidiCents value as they had in the previous tuning.
+                // The end result is that all octaves of the root key in the newTuning will have the same MidiFreq values that they had in the previous tuning.
                 // Since tuningIndex is in range 0..11, root will be in range 60..71.                
                 let root = tuningIndex + 60,                    
                     previousTuning = chanControls.previousTuning,
-                    previousRootMidiCents = previousTuning[root],
-                    tuningRootMidiCents = newTuning[root],
-                    tuningDelta = previousRootMidiCents - tuningRootMidiCents;
+                    previousRootMidiFreq = previousTuning[root],
+                    tuningRootMidiFreq = newTuning[root],
+                    tuningDelta = previousRootMidiFreq - tuningRootMidiFreq;
 
                 let low = root, high = root + 12;
 
@@ -1513,9 +1516,8 @@ ResSynth.residentSynth = (function(window)
                 midi.preset = chanPresets[chanControls.presetIndex];
                 midi.inKey = inKey;  // the note stops when the inKey's noteOff arrives                
                 midi.inVelocity = inVelocity;
-                midi.midiCentsOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100); // valid throughout a mixture
-                // keyCentsPitch is the pitch described as a key.cents value in equal temperament.
-                midi.keyCentsPitch = midiVal(chanControls.tuning[inKey] + midi.midiCentsOffset);
+                midi.midiFreqOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100); // valid throughout a mixture
+                midi.midiFreq = midiVal(chanControls.tuning[inKey] + midi.midiFreqOffset);
 
                 midi.velocityFactor = midi.inVelocity / 127;
 
@@ -1538,7 +1540,7 @@ ResSynth.residentSynth = (function(window)
             {
                 let zone, note,
                     preset = midi.preset,
-                    keyPitchBase = Math.floor(midi.keyCentsPitch);
+                    keyPitchBase = Math.floor(midi.midiFreq);
 
                 zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
                 if(!zone)
@@ -1583,7 +1585,7 @@ ResSynth.residentSynth = (function(window)
 
                     // midi.preset and midi.velocityPitchSensitivityFactor have already been set, and do not change.
                     midi.keyKey = inKey;
-                    midi.keyCentsPitch = midiVal(chanControls.tuning[newKey] + midi.midiCentsOffset);
+                    midi.midiFreq = midiVal(chanControls.tuning[newKey] + midi.midiFreqOffset);
                     midi.velocityFactor = newVelocity / 127;
 
                     doIndividualNoteOn(midi, masterNote);
@@ -1636,8 +1638,8 @@ ResSynth.residentSynth = (function(window)
 
                                 oMidi.preset = inMidi.preset;
                                 oMidi.inKey = noteOnMsg.key;
-                                oMidi.midiCentsOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100);
-                                oMidi.keyCentsPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiCentsOffset,
+                                oMidi.midiFreqOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100);
+                                oMidi.midiFreq = chanControls.tuning[oMidi.inKey] + oMidi.midiFreqOffset,
                                 oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
                                 oMidi.velocityFactor = oMidi.inVelocity / 127;
 
