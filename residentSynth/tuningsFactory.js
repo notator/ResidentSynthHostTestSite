@@ -51,15 +51,15 @@ ResSynth.tuningsFactory = (function()
             return 1200 * Math.log2(frequencyRatio);
         },
 
-        getFrequency = function(midiFreq)
+        getFrequency = function(midiPitch)
         {
-            let pow = (midiFreq - 69) / 12,
+            let pow = (midiPitch - 69) / 12,
                 frequency = Math.pow(2, pow) * 440;
 
             return frequency;
         },
 
-        // Transpose the tuning so that A4 (midi key 69) has a midiFreq value of 69.0.
+        // Transpose the tuning so that A4 (midi key 69) has midiPitch 69.0.
         transposeTuningForA4Frequency = function(tuning, a4Frequency)
         {
             let currentA4Frequency = getFrequency(tuning[69]),
@@ -204,8 +204,8 @@ ResSynth.tuningsFactory = (function()
     };
 
     // Returns a 128-note tuning (containing octave tunings) tuned according to Harry Partch's scale with A4 tuned to 440Hz.
-    // The rootKey (which is allocated a MidiFreq of rootKey above C0) is an integer in range [0..11].
-    // Keys below the rootKey are allocated the same MidiFreq value as the rootKey.
+    // The rootKey (which is allocated a MidiPitch of rootKey) is an integer in range [0..11].
+    // Keys below the rootKey are allocated the same MidiPitch value as the rootKey.
     TuningsFactory.prototype.getPartchTuning = function(rootKey)
     {
         function getPartchETTuningOffsets(rootKey)
@@ -333,19 +333,19 @@ ResSynth.tuningsFactory = (function()
             }
 
             // Returns a tuningSegment, calculated from the keyValuesArray, having a .rootKey attribute that determines the key for the first value.
-            // A tuningSegment is a contiguous array of increasing MidiFreq values, one per key in range.
-            // The keyValuesArray is an array containing only the [key,pitch] arrays that define fixed points in the (warped) midiFreqArraySegment.
+            // A tuningSegment is a contiguous array of increasing MidiPitch values, one per key in range.
+            // The keyValuesArray is an array containing only the [key,pitch] arrays that define fixed points in the (warped) tuningSegment.
             // The returned values do not exceed the range of the values in the keyValuesArray argument.
             // The returned values have been interpolated (per key) between those in the keyValuesArray argument.
             function getTuningSegment(keyValuesArray)
             {
                 checkGamutKeyValuesArray(keyValuesArray);
 
-                let midiFreqArraySegment = [];
+                let tuningSegment = [];
 
-                midiFreqArraySegment.rootKey = keyValuesArray[0][0];
+                tuningSegment.rootKey = keyValuesArray[0][0];
 
-                midiFreqArraySegment.push(keyValuesArray[0][1]);
+                tuningSegment.push(keyValuesArray[0][1]);
                 for(var j = 1; j < keyValuesArray.length; j++)
                 {
                     let prevValue = keyValuesArray[j - 1][1],
@@ -354,12 +354,12 @@ ResSynth.tuningsFactory = (function()
                     for(var k = 0; k < nKeys; k++)
                     {
                         let value = prevValue + vIncr;
-                        midiFreqArraySegment.push(value);
+                        tuningSegment.push(value);
                         prevValue = value;
                     }
                 }
 
-                return midiFreqArraySegment;
+                return tuningSegment;
 
             }
 
@@ -371,10 +371,10 @@ ResSynth.tuningsFactory = (function()
             {
                 tuning.push(gamutKeyValuesArray[0][1]);
             }
-            let midiFreqArraySegment = getTuningSegment(gamutKeyValuesArray);
-            for(let i = 0; i < midiFreqArraySegment.length; i++)
+            let tuningSegment = getTuningSegment(gamutKeyValuesArray);
+            for(let i = 0; i < tuningSegment.length; i++)
             {
-                tuning.push(midiFreqArraySegment[i]);
+                tuning.push(tuningSegment[i]);
             }
             while(tuning.length < 128)
             {
