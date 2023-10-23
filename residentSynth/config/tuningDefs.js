@@ -3,6 +3,13 @@ console.log('load tuningDefs.js');
 // This file can be omitted by applications that do not define special tunings.
 // (12-tone Equal Temperament tuning is always defined by default.)
 
+// MidiPitch definition:
+// A MidiPitch is a pitch described as a floating point MIDI value in range 0..<128.
+// By definition, MidiPitch 69.0 is the frequency of MIDI key 69 (A4) in standard
+// equal temperament (440Hz).
+// A difference of 1.0 between midiPitch values is equivalent to a semitone.
+// A difference of 0.01 between midiPitch values is equivalent to a cent.
+
 ResSynth.tuningConstructors =
 {
 	FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR: 0,
@@ -78,16 +85,29 @@ ResSynth.tuningDefs =
 		// Harmonic tunings
 		{		
 		// Constructor:   tunings = getHarmonicTunings();
-		// This constructor uses the odd-numbered natural harmonics to return 128-note tunings,
-		// on 12 different root keys, each of which contains three perfect major triads.
+		// This constructor uses the odd-numbered natural harmonics to return 12 128-note tunings,
+		// on 12 different root keys. Each tuning is constructed with its root midiPitch equal to
+		// its root key, (tuning[rootKey] === rootKey), so that the root key midiPitches are always
+		// equal to their standard equal temperament frequencies.
+		// Each tuning contains three perfect major triads:
 		// When the root key is A, there are four perfect fifths between keys A-E, E-B, C#-G#, G-D,
 		// and three perfect major thirds between A-C#, E-G# and C#-F.
 		// (So there are three perfect major triads: A-C#-E, E-G#-B, C#-F-G#.)
-		// The tunings are initially constructed with their root pitches at frequencies
-		// equal to their standard equal temperament values, but the absolute height of a tuning
-		// will actually be calculated dynamically as the root changes, in order to "modulate" smoothly:
-		// Successive tunings are transposed so that their root key has the same frequency as
-        // it had in the preceding tuning. See: residentSynth.updateTuning(channel, tuningIndex).
+		// With a root at 0, the difference (in cents) between a key's midiPitch and its equal
+		// temperament value is as follows:
+		//                                        keys
+		//       0     1     2     3     4     5     6     7     8     9     10    11
+		//       --------------------------------------------------------------------
+		//    0| 0     5     4     2    14    29    49     2    27    59     31    12
+		//
+		// Changes of tuning ("modulation") will therefore be more or less noticeable depending
+		// on the proximity of the new key to the root. This order, according to the above table,
+		// is as follows:
+		//                                        keys
+		//                        ------------------------------------
+		//                        0, 7, 3, 2, 1, 11, 4, 8, 5, 10, 6, 9
+		// Pitch differences less than ca 5 cents are innocuous, so "modulations" to keys 7, 3, 2, 1
+		// can be done fairly smoothly.
 		ctor: ResSynth.tuningConstructors.FUNCTION_GET_HARMONIC_TUNINGS,
 		name: "harmonic tunings",
 		tunings:

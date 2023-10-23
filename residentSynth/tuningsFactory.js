@@ -442,100 +442,101 @@ ResSynth.tuningsFactory = (function()
     // See comment on Harmonic Tunings in tuningDefs.js
     TuningsFactory.prototype.getHarmonicTunings = function(tuningGroupDef)
     {
-        function consoleLogInfo(rootCentsDeltas)
-        {
-            function getYDiffsString(xyDiffs, y)
-            {
-                let rval = "",
-                    yDiffs = xyDiffs[y];
+        // Please leave this comment!
+        //function consoleLogInfo(rootCentsDeltas)
+        //{
+        //    function getYDiffsString(xyDiffs, y)
+        //    {
+        //        let rval = "",
+        //            yDiffs = xyDiffs[y];
 
-                for(let x = 0; x < yDiffs.length; x++)
-                {                    
-                    rval = rval + (`[${y},${x}]=${yDiffs[x]} `);
-                }
+        //        for(let x = 0; x < yDiffs.length; x++)
+        //        {                    
+        //            rval = rval + (`[${y},${x}]=${yDiffs[x]} `);
+        //        }
 
-                rval += "\n";
+        //        rval += "\n";
 
-                return rval;
-            }
+        //        return rval;
+        //    }
 
-            function getSortedYKeysString(xyDiffs, y)
-            {
-                let yDiffs = xyDiffs[y],
-                    keyDiffs = [];
+        //    function getSortedYKeysString(xyDiffs, y)
+        //    {
+        //        let yDiffs = xyDiffs[y],
+        //            keyDiffs = [];
 
-                for(let key = 0; key < yDiffs.length; key++)
-                {
-                    let diff = yDiffs[key];
-                    keyDiffs.push({key, diff});
-                }
+        //        for(let key = 0; key < yDiffs.length; key++)
+        //        {
+        //            let diff = yDiffs[key];
+        //            keyDiffs.push({key, diff});
+        //        }
 
-                keyDiffs.sort((a, b) => a.diff - b.diff);
+        //        keyDiffs.sort((a, b) => a.diff - b.diff);
 
-                let rval = `${y}| `;
-                for(let i = 0; i < keyDiffs.length; i++)
-                {
-                    rval += `${keyDiffs[i].key}, `;
-                }
-                return rval;
-            }
+        //        let rval = `${y}| `;
+        //        for(let i = 0; i < keyDiffs.length; i++)
+        //        {
+        //            rval += `${keyDiffs[i].key}, `;
+        //        }
+        //        return rval;
+        //    }
             
-            let ds = [];
-            for(var i = 0; i < rootCentsDeltas.length; i++)
-            {
-                ds.push(Math.round(rootCentsDeltas[i] * 100) / 100);
-            }
+        //    let ds = [];
+        //    for(var i = 0; i < rootCentsDeltas.length; i++)
+        //    {
+        //        ds.push(Math.round(rootCentsDeltas[i] * 100) / 100);
+        //    }
 
-            let xyDiffs = [],
-                xyDict = [];
+        //    let xyDiffs = [],
+        //        xyDict = [];
 
-            for(var y = 0; y < ds.length; y++)
-            {
-                let dy = ds[y],
-                    yDiffs = [];
+        //    for(var y = 0; y < ds.length; y++)
+        //    {
+        //        let dy = ds[y],
+        //            yDiffs = [];
 
-                for(let x = 0; x < ds.length; x++)
-                {
-                    let diff = Math.abs(Math.round((dy - ds[x]) * 100) / 100);
-                    yDiffs.push(diff);
+        //        for(let x = 0; x < ds.length; x++)
+        //        {
+        //            let diff = Math.abs(Math.round((dy - ds[x]) * 100) / 100);
+        //            yDiffs.push(diff);
 
-                    let coordinate = `[${y},${x}]`;
-                    xyDict.push({coordinate, diff});
-                }
+        //            let coordinate = `[${y},${x}]`;
+        //            xyDict.push({coordinate, diff});
+        //        }
 
-                xyDiffs.push(yDiffs);
-            }
+        //        xyDiffs.push(yDiffs);
+        //    }
 
-            console.log("--------- absolute cents difference between all keys:\n");
-            for(var y = 0; y < ds.length; y++)
-            {
-                let string = getYDiffsString(xyDiffs, y);
-                console.log(string);
-            }
+        //    console.log("--------- absolute cents difference between all keys:\n");
+        //    for(var y = 0; y < ds.length; y++)
+        //    {
+        //        let string = getYDiffsString(xyDiffs, y);
+        //        console.log(string);
+        //    }
 
-            console.log(`\n\n---- coordinate diffs in order of diff\n`);
-            xyDict.sort((a, b) => a.diff - b.diff);
-            let dictStr = "",
-                prevDiff = -1;
-            for(var i = 0; i < xyDict.length; i++)
-            {
-                let coordinateDiff = xyDict[i];
-                if(coordinateDiff.diff !== prevDiff)
-                {
-                    dictStr = dictStr + `\n${coordinateDiff.diff} : `;
-                    prevDiff = coordinateDiff.diff;
-                }
-                dictStr = dictStr + `${coordinateDiff.coordinate}, `;
-            }
-            console.log(dictStr);
+        //    console.log(`\n\n---- coordinate diffs in order of diff\n`);
+        //    xyDict.sort((a, b) => a.diff - b.diff);
+        //    let dictStr = "",
+        //        prevDiff = -1;
+        //    for(var i = 0; i < xyDict.length; i++)
+        //    {
+        //        let coordinateDiff = xyDict[i];
+        //        if(coordinateDiff.diff !== prevDiff)
+        //        {
+        //            dictStr = dictStr + `\n${coordinateDiff.diff} : `;
+        //            prevDiff = coordinateDiff.diff;
+        //        }
+        //        dictStr = dictStr + `${coordinateDiff.coordinate}, `;
+        //    }
+        //    console.log(dictStr);
 
-            console.log("--------- key harmony hierarchy:\n");
-            for(var y = 0; y < xyDiffs.length; y++)
-            {
-                let hierarchySring = getSortedYKeysString(xyDiffs, y);
-                console.log(hierarchySring);
-            }
-        }
+        //    console.log("--------- key harmony hierarchy:\n");
+        //    for(var y = 0; y < xyDiffs.length; y++)
+        //    {
+        //        let hierarchySring = getSortedYKeysString(xyDiffs, y);
+        //        console.log(hierarchySring);
+        //    }
+        //}
 
         // Returns the centDelta values in ascending order from the root key.
         function getRootCentsDeltas()
@@ -584,6 +585,7 @@ ResSynth.tuningsFactory = (function()
                 rootCentsDeltas.push(keyCentsDeltas[i].centsDelta);
             }
 
+            // Please leave this comment!
             // consoleLogInfo(rootCentsDeltas);
 
             return rootCentsDeltas;
