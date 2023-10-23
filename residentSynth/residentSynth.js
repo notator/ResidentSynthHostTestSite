@@ -680,7 +680,7 @@ ResSynth.residentSynth = (function(window)
         {
             let tuningsFactory = new ResSynth.tuningsFactory.TuningsFactory(),
                 tuningGroupDefs = ResSynth.tuningDefs,
-                wmtg = ResSynth.tuningConstructors;
+                tuningType = ResSynth.tuningType;
 
             if(tuningGroupDefs !== undefined || tuningGroupDefs.length > 0)
             {
@@ -694,7 +694,7 @@ ResSynth.residentSynth = (function(window)
 
                     switch(tuningGroupDef.ctor)
                     {
-                        case wmtg.FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR:
+                        case tuningType.CONSTANT_FACTOR:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
@@ -708,7 +708,7 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case wmtg.FUNCTION_GET_PARTCH_TUNING:
+                        case tuningType.PARTCH:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
@@ -721,7 +721,7 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case wmtg.FUNCTION_GET_WARPED_OCTAVES_TUNING:
+                        case tuningType.WARPED_OCTAVES:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
@@ -734,7 +734,7 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case wmtg.FUNCTION_GET_WARPED_GAMUT_TUNING:
+                        case tuningType.WARPED_GAMUT:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
@@ -747,7 +747,7 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case wmtg.FUNCTION_GET_BAROQUE_TUNING:
+                        case tuningType.BAROQUE:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
@@ -760,7 +760,7 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case wmtg.FUNCTION_GET_HARMONIC_TUNINGS:
+                        case tuningType.HARMONIC:
                             {
                                 let tunings = tuningsFactory.getHarmonicTunings(tuningGroupDef);
 

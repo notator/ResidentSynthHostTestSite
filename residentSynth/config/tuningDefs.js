@@ -10,15 +10,14 @@ console.log('load tuningDefs.js');
 // A difference of 1.0 between midiPitch values is equivalent to a semitone.
 // A difference of 0.01 between midiPitch values is equivalent to a cent.
 
-ResSynth.tuningConstructors =
+ResSynth.tuningType =
 {
-	FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR: 0,
-	FUNCTION_GET_HARMONIC_TUNINGS: 1,
-	FUNCTION_GET_WARPED_OCTAVES_TUNING: 2,
-	FUNCTION_GET_WARPED_GAMUT_TUNING: 3,
-	FUNCTION_GET_PARTCH_TUNING: 4,
-	FUNCTION_GET_BAROQUE_TUNING: 5
-
+	CONSTANT_FACTOR: 0,
+	HARMONIC: 1,
+	WARPED_OCTAVES: 2,
+	WARPED_GAMUT: 3,
+	PARTCH: 4,
+	BAROQUE: 5
 };
 
 // All tunings are initially related to standard A4=440Hz.
@@ -34,7 +33,7 @@ ResSynth.tuningDefs =
 			//    1. The 'factor' is first applied recursively to define 11 chromatic intervals from the base 1.
 			//    2. Each interval is then transposed into each available octave (128 MIDI pitches)
 			//    3. The tuning is transposed so that the pitch at midiKey[root] is root.
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_TUNING_FROM_CONSTANT_FACTOR,
+			ctor: ResSynth.tuningType.CONSTANT_FACTOR,
 			name: "constant factor tunings (A4=440Hz)",
 			tunings:
 				[
@@ -89,16 +88,22 @@ ResSynth.tuningDefs =
 		// on 12 different root keys. Each tuning is constructed with its root midiPitch equal to
 		// its root key, (tuning[rootKey] === rootKey), so that the root key midiPitches are always
 		// equal to their standard equal temperament frequencies.
-		// Each tuning contains three perfect major triads:
-		// When the root key is A, there are four perfect fifths between keys A-E, E-B, C#-G#, G-D,
-		// and three perfect major thirds between A-C#, E-G# and C#-F.
-		// (So there are three perfect major triads: A-C#-E, E-G#-B, C#-F-G#.)
+		// When the root key is A, there are:
+		//     1. four perfect fifths between keys A-E, E-B, C#-G#, G-D,
+		//     2. three perfect major thirds between A-C#, E-G# and C#-F,
+		//     3. one perfect minor seventh A-G
+		// So there are:
+		//     1. three perfect major triads: A-C#-E, E-G#-B, C#-F-G#,
+		//     3. one perfect augmented triad: C-E-G#
+		//     4. one perfect diminished triad: C#-E-G
+		//     2. one perfect diminished seventh chord: A-C#-E-G.
+		//
 		// With a root at 0, the difference (in cents) between a key's midiPitch and its equal
 		// temperament value is as follows:
 		//                                        keys
-		//       0     1     2     3     4     5     6     7     8     9     10    11
-		//       --------------------------------------------------------------------
-		//    0| 0     5     4     2    14    29    49     2    27    59     31    12
+		//                      0   1   2   3   4   5   6   7   8   9   10  11
+		//                    ------------------------------------------------
+		//                   0| 0   5   4   2  14  29  49   2  27  59   31  12
 		//
 		// Changes of tuning ("modulation") will therefore be more or less noticeable depending
 		// on the proximity of the new key to the root. This order, according to the above table,
@@ -108,7 +113,7 @@ ResSynth.tuningDefs =
 		//                        0, 7, 3, 2, 1, 11, 4, 8, 5, 10, 6, 9
 		// Pitch differences less than ca 5 cents are innocuous, so "modulations" to keys 7, 3, 2, 1
 		// can be done fairly smoothly.
-		ctor: ResSynth.tuningConstructors.FUNCTION_GET_HARMONIC_TUNINGS,
+		ctor: ResSynth.tuningType.HARMONIC,
 		name: "harmonic tunings",
 		tunings:
 			[
@@ -166,7 +171,7 @@ ResSynth.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "octaves");
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_WARPED_OCTAVES_TUNING,
+			ctor: ResSynth.tuningType.WARPED_OCTAVES,
 			name: "warped octave tunings",
 			tunings:
 				[
@@ -251,7 +256,7 @@ ResSynth.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "gamut");
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_WARPED_GAMUT_TUNING,
+			ctor: ResSynth.tuningType.WARPED_GAMUT,
 			name: "warped gamut tunings",
 			tunings:
 				[
@@ -326,7 +331,7 @@ ResSynth.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getPartchTuning(root);
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_PARTCH_TUNING,
+			ctor: ResSynth.tuningType.PARTCH,
 			name: "Partch tunings  (A4=440Hz)",
 			tunings:
 				[
@@ -384,7 +389,7 @@ ResSynth.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningType.BAROQUE,
 			name: "Baroque (Poletti):  Circulating/Rational (A4=414Hz)",
 			tunings:
 				[
@@ -429,7 +434,7 @@ ResSynth.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningType.BAROQUE,
 			name: "Baroque (Poletti):  Circulating/Pragmatic (A4=414Hz)",
 			tunings:
 				[
@@ -462,7 +467,7 @@ ResSynth.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningType.BAROQUE,
 			name: "Baroque (Poletti):  Meantone/Mollified (A4=414Hz)",
 			tunings:
 				[
@@ -539,7 +544,7 @@ ResSynth.tuningDefs =
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getBaroqueTuning(tuningOffsets);
-			ctor: ResSynth.tuningConstructors.FUNCTION_GET_BAROQUE_TUNING,
+			ctor: ResSynth.tuningType.BAROQUE,
 			name: "Baroque (Poletti):  Meantone/Regular (A4=414Hz)",
 			tunings:
 				[
