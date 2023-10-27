@@ -98,7 +98,7 @@ ________________________________________________________________________________
 ________________________________________________________________________________________________________________
 
 'Intervals that enable _smooth_tuning-modulation_, and their absolute proximity to ET' hierarchy per mode (y)
-These key-intervals have (rounded) deviations from equal temperament less than 0.6 in the above table.
+These key-intervals have (rounded) deviations from equal temperament less than 0.06 in the above table.
 
                                       key-interval from mode's base-key
                                         1        2        3        4     
