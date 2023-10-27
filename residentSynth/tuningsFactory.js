@@ -21,7 +21,7 @@ ResSynth.tuningsFactory = (function()
             function check(tuning)
             {
                 console.assert(tuning.length === 128);
-                for(var i = 0; i < 128; i++)
+                for(let i = 0; i < 128; i++)
                 {
                     let value = tuning[i];
                     console.assert(!Number.isNaN(value));
@@ -65,7 +65,7 @@ ResSynth.tuningsFactory = (function()
             let currentA4Frequency = getFrequency(tuning[69]),
                 semitonesDiff = getCents(a4Frequency / currentA4Frequency) / 100;
 
-            for(var i = 0; i < 128; i++)
+            for(let i = 0; i < 128; i++)
             {
                 tuning[i] = tuning[i] + semitonesDiff; // will be coerced to 0..<128 later
             }
@@ -112,7 +112,7 @@ ResSynth.tuningsFactory = (function()
     {
         let tuning = [];
 
-        for(var i = 0; i < 128; i++)
+        for(let i = 0; i < 128; i++)
         {
             tuning.push(i);
         }
@@ -140,7 +140,7 @@ ResSynth.tuningsFactory = (function()
         {
             let factors = [];
 
-            for(var i = 0; i < 9; i++)
+            for(let i = 0; i < 9; i++)
             {
                 let factor = Math.pow(factorBase, i);
                 while(!(factor < 2))
@@ -150,7 +150,7 @@ ResSynth.tuningsFactory = (function()
                 factors.push(factor);
             }
 
-            for(var i = 1; i < 4; i++)
+            for(let i = 1; i < 4; i++)
             {
                 let factor = 1 / factors[i];
                 factors.push(factor);
@@ -169,7 +169,7 @@ ResSynth.tuningsFactory = (function()
             factors.sort(); // factors[0] is the factor (=1.0) for C0
 
             let tuningOffsets = [];
-            for(var i = 0; i < factors.length; i++)
+            for(let i = 0; i < factors.length; i++)
             {
                 let centsOffset = getCents(factors[i]) - (i * 100);
                 tuningOffsets.push(centsOffset);
@@ -177,7 +177,7 @@ ResSynth.tuningsFactory = (function()
 
             // rotate the tuningOffsets until tuningOffsets[0] (=0) is at newTuningOffsets[rootKey].
             let rotatedTuningOffsets = [];
-            for(var i = 0; i < 12; i++)
+            for(let i = 0; i < 12; i++)
             {
                 let newIndex = (i + rootKey) % 12;
                 rotatedTuningOffsets[newIndex] = tuningOffsets[i];
@@ -226,7 +226,7 @@ ResSynth.tuningsFactory = (function()
             ];
 
             let tuningOffsets = [];
-            for(var i = 0; i < partchFundamentals.length; ++i)
+            for(let i = 0; i < partchFundamentals.length; ++i)
             {
                 let centsOffset = getCents(partchFundamentals[i]) - (i * 100);
                 tuningOffsets.push(centsOffset);
@@ -234,7 +234,7 @@ ResSynth.tuningsFactory = (function()
 
             // rotate the tuningOffsets until tuningOffsets[0] (=0) is at newTuningOffsets[rootKey].
             let rotatedTuningOffsets = [];
-            for(var i = 0; i < 12; i++)
+            for(let i = 0; i < 12; i++)
             {
                 let newIndex = (i + rootKey) % 12;
                 rotatedTuningOffsets[newIndex] = tuningOffsets[i];
@@ -273,7 +273,7 @@ ResSynth.tuningsFactory = (function()
         function checkArrayParameters(keyValuesArray)
         {
             console.assert(Array.isArray(keyValuesArray) && keyValuesArray.length > 1);
-            for(var i = 0; i < keyValuesArray.length; i++)
+            for(let i = 0; i < keyValuesArray.length; i++)
             {
                 let keyValuePair = keyValuesArray[i];
                 console.assert(Array.isArray(keyValuePair));
@@ -295,7 +295,7 @@ ResSynth.tuningsFactory = (function()
 
             let previousKey = keyValuesArray[0][0],
                 previousValue = keyValuesArray[0][1];
-            for(var i = 1; i < keyValuesArray.length; i++)
+            for(let i = 1; i < keyValuesArray.length; i++)
             {
                 let key = keyValuesArray[i][0],
                     value = keyValuesArray[i][1];
@@ -318,7 +318,7 @@ ResSynth.tuningsFactory = (function()
 
                 let previousKey = gamutKeyValuesArray[0][0],
                     previousValue = gamutKeyValuesArray[0][1];
-                for(var i = 1; i < gamutKeyValuesArray.length; i++)
+                for(let i = 1; i < gamutKeyValuesArray.length; i++)
                 {
                     let key = gamutKeyValuesArray[i][0],
                         value = gamutKeyValuesArray[i][1];
@@ -346,12 +346,12 @@ ResSynth.tuningsFactory = (function()
                 tuningSegment.rootKey = keyValuesArray[0][0];
 
                 tuningSegment.push(keyValuesArray[0][1]);
-                for(var j = 1; j < keyValuesArray.length; j++)
+                for(let j = 1; j < keyValuesArray.length; j++)
                 {
                     let prevValue = keyValuesArray[j - 1][1],
                         nKeys = keyValuesArray[j][0] - keyValuesArray[j - 1][0],
                         vIncr = ((keyValuesArray[j][1] - keyValuesArray[j - 1][1]) / nKeys);
-                    for(var k = 0; k < nKeys; k++)
+                    for(let k = 0; k < nKeys; k++)
                     {
                         let value = prevValue + vIncr;
                         tuningSegment.push(value);
@@ -390,9 +390,9 @@ ResSynth.tuningsFactory = (function()
             checkRepeatingOctavesKeyValueArray(keyValuesArray);
 
             let complete = false;
-            for(var octaveIncr = 0; octaveIncr < 127; octaveIncr += 12)
+            for(let octaveIncr = 0; octaveIncr < 127; octaveIncr += 12)
             {
-                for(var i = 0; i < keyValuesArray.length; i++)
+                for(let i = 0; i < keyValuesArray.length; i++)
                 {
                     let key = keyValuesArray[i][0] + octaveIncr,
                         value = keyValuesArray[i][1] + octaveIncr;
@@ -442,101 +442,215 @@ ResSynth.tuningsFactory = (function()
     // See comment on Harmonic Tunings in tuningDefs.js
     TuningsFactory.prototype.getHarmonicTunings = function(tuningGroupDef)
     {
-        // Please leave this comment!
-        //function consoleLogInfo(rootCentsDeltas)
-        //{
-        //    function getYDiffsString(xyDiffs, y)
-        //    {
-        //        let rval = "",
-        //            yDiffs = xyDiffs[y];
+        function logHarmonicTuningsInfos(tunings)
+        {
+            function logTopNumbers(xLength)
+            {
+                let str = "    ";
+                for(let z = 0; z < xLength; z++)
+                {
+                    str = str.concat(`   ${z}`);
+                }
+                console.log(str + "\n");
+                str = "       ";
+                for(let z = 0; z < xLength; z++)
+                {
+                    str = str.concat(`----`);
+                }
+                console.log(str + "\n");
+            }
 
-        //        for(let x = 0; x < yDiffs.length; x++)
-        //        {                    
-        //            rval = rval + (`[${y},${x}]=${yDiffs[x]} `);
-        //        }
+            function logRootXYArray(xyArray)
+            { 
+                function logRowY(y, xArray)
+                {
+                    let str = `${y}|`;
+                    for(let x = 0; x < xArray.length; x++)
+                    {
+                        let value = Math.round(xArray[x] * 100) / 100;
+                        str = str.concat(`   ${value}`);
+                    }
+                    console.log(str + "\n");
+                }
 
-        //        rval += "\n";
+                let ySize = xyArray.length,
+                    xSize = xyArray[0].length;
 
-        //        return rval;
-        //    }
+                logTopNumbers(xSize);
 
-        //    function getSortedYKeysString(xyDiffs, y)
-        //    {
-        //        let yDiffs = xyDiffs[y],
-        //            keyDiffs = [];
+                for(let y = 0; y < ySize; y++)
+                {
+                    logRowY(y, xyArray[y]);
+                }
+            }
 
-        //        for(let key = 0; key < yDiffs.length; key++)
-        //        {
-        //            let diff = yDiffs[key];
-        //            keyDiffs.push({key, diff});
-        //        }
+            function logIntervalProximitiesArray(xyArray)
+            {
+                function logRowY(y, xArray)
+                {
+                    let str = `${y}|`;
+                    for(let x = 0; x < xArray.length; x++)
+                    {
+                        let iProx = xArray[x],
+                            index = iProx.index,
+                            diff = Math.round(iProx.diff * 100) / 100;
 
-        //        keyDiffs.sort((a, b) => a.diff - b.diff);
+                        str = str.concat(`   ${index}:${diff}`);
+                    }
+                    console.log(str + "\n");
+                }
 
-        //        let rval = `${y}| `;
-        //        for(let i = 0; i < keyDiffs.length; i++)
-        //        {
-        //            rval += `${keyDiffs[i].key}, `;
-        //        }
-        //        return rval;
-        //    }
+                let ySize = xyArray.length,
+                    xSize = xyArray[0].length;
+
+                logTopNumbers(xSize);
+
+                for(let y = 0; y < ySize; y++)
+                {
+                    logRowY(y, xyArray[y]);
+                }
+            }
+
+            function getRootXYArray(tunings)// 12x12
+            {
+                let rootXYArray = []; // 12x12
+
+                for(let y = 0; y < 12; y++)
+                {
+                    let tuningsRow = tunings[y],
+                        row = [];
+                    for(let x = 12; x < 24; x++)
+                    {
+                        row.push(tuningsRow[x] - 12);
+                    }
+                    rootXYArray.push(row);
+                }
+                return rootXYArray;
+            }
+
+            function getPitchDiffsArray(rootXYArray)
+            {
+                let pitchDiffsArray = [],
+                    yDim = rootXYArray.length,
+                    xDim = rootXYArray[0].length;
+
+                for(let y = 0; y < yDim; y++)
+                {
+                    let pdXArray = [],
+                        xArray = rootXYArray[y],
+                        rootPitch = xArray[y];
+
+                    for(let x = 0; x < xDim; x++)
+                    {
+                        pdXArray.push(xArray[x] - rootPitch);
+                    }
+                    pitchDiffsArray.push(pdXArray);
+                }
+
+                return pitchDiffsArray;
+            }
+
+            function getPitchDiffsRPIArray(pitchDiffsArray)
+            {
+                let rootArray = pitchDiffsArray[0],
+                    pitchDiffsRPIArray = [],
+                    xDim = pitchDiffsArray[0].length;
+                
+                for(let x1 = 0; x1 < xDim; x1++)
+                {
+                    let pdRPIXArray = [],
+                        rootValue = rootArray[x1],
+                        index = 0;    
+
+                    for(let x2 = x1; x2 < (x1 + 12); x2++)
+                    { 
+                        let value = rootArray[x2 % xDim] - rootValue; // adjusted so that root is at index 0 in pdRPIXArray
+
+                        value = (value < 0) ? value + 12 : value; // all intervals are ascending
+                        value -= index++; // values (which can now be negative again) are relative to the nearest equal temperament pitch.
+
+                        pdRPIXArray.push(value);
+                    }
+                    pitchDiffsRPIArray.push(pdRPIXArray);
+                }
+
+                return pitchDiffsRPIArray;
+
+            }
+
+            function getModePitchConsonanceHierarchiesArray(modePitchDiffsArray)
+            {
+                let pitchConsonanceHierarchiesArray = [];
+
+                for(let y = 0; y < modePitchDiffsArray.length; y++)
+                {
+                    let diffs = modePitchDiffsArray[y],
+                        diffDiffIndexes = [];
+
+                    for(let x = 0; x < diffs.length; x++)
+                    {
+                        let index = x,
+                            diff = Math.abs(diffs[index]);
+
+                        diffDiffIndexes.push({index, diff});
+                    }
+
+                    diffDiffIndexes.sort((a, b) => a.diff - b.diff);
+
+                    pitchConsonanceHierarchiesArray.push(diffDiffIndexes);
+                }
+                return pitchConsonanceHierarchiesArray;
+            }
+
+            function getAbsoluteIntervalsArray(xArray)
+            {
+                let absoluteIntervalsArray = [];
+
+                for(let y = 0; y < xArray.length; y++)
+                {
+                    let yPitch = xArray[y],
+                        yIntervals = [];
+
+                    for(let x = 0; x < xArray.length; x++)
+                    {
+                        let interval = (x - y - ((xArray[x] - yPitch)) + 12) % 12;
+
+                        interval = (interval > 11) ? interval -= 12 : interval;
+
+                        yIntervals.push(interval);
+                    }
+
+                    absoluteIntervalsArray.push(yIntervals);
+                }
+
+                return absoluteIntervalsArray;
+
+            }
             
-        //    let ds = [];
-        //    for(var i = 0; i < rootCentsDeltas.length; i++)
-        //    {
-        //        ds.push(Math.round(rootCentsDeltas[i] * 100) / 100);
-        //    }
+            let rootXYArray = getRootXYArray(tunings); // a 12x12 array
 
-        //    let xyDiffs = [],
-        //        xyDict = [];
+            console.log("\n*** tunings per key (x) per tuning (y) ***");
+            logRootXYArray(rootXYArray);
 
-        //    for(var y = 0; y < ds.length; y++)
-        //    {
-        //        let dy = ds[y],
-        //            yDiffs = [];
+            let pitchDiffsArray = getPitchDiffsArray(rootXYArray);
+            console.log("\n*** ET semitones difference between key and root key (x) per tuning (y)) ***");
+            logRootXYArray(pitchDiffsArray);
 
-        //        for(let x = 0; x < ds.length; x++)
-        //        {
-        //            let diff = Math.abs(Math.round((dy - ds[x]) * 100) / 100);
-        //            yDiffs.push(diff);
+            console.log("\n*** There are 12 modes in each tuning:                ***");
+            console.log("\n*** Each mode has a different base-key in the tuning. ***\n");
 
-        //            let coordinate = `[${y},${x}]`;
-        //            xyDict.push({coordinate, diff});
-        //        }
+            let modePitchDiffsArray = getPitchDiffsRPIArray(pitchDiffsArray);
+            console.log("\n*** difference (in ET semitones) from ET, per interval (x) per mode (y) ***");
+            logRootXYArray(modePitchDiffsArray);
 
-        //        xyDiffs.push(yDiffs);
-        //    }
+            let modePitchConsonanceHierarchiesArray = getModePitchConsonanceHierarchiesArray(modePitchDiffsArray);
+            console.log("\n*** 'Intervals and their Proximity to ET' hierarchy per mode (y) ***");
+            logIntervalProximitiesArray(modePitchConsonanceHierarchiesArray);
 
-        //    console.log("--------- absolute cents difference between all keys:\n");
-        //    for(var y = 0; y < ds.length; y++)
-        //    {
-        //        let string = getYDiffsString(xyDiffs, y);
-        //        console.log(string);
-        //    }
-
-        //    console.log(`\n\n---- coordinate diffs in order of diff\n`);
-        //    xyDict.sort((a, b) => a.diff - b.diff);
-        //    let dictStr = "",
-        //        prevDiff = -1;
-        //    for(var i = 0; i < xyDict.length; i++)
-        //    {
-        //        let coordinateDiff = xyDict[i];
-        //        if(coordinateDiff.diff !== prevDiff)
-        //        {
-        //            dictStr = dictStr + `\n${coordinateDiff.diff} : `;
-        //            prevDiff = coordinateDiff.diff;
-        //        }
-        //        dictStr = dictStr + `${coordinateDiff.coordinate}, `;
-        //    }
-        //    console.log(dictStr);
-
-        //    console.log("--------- key harmony hierarchy:\n");
-        //    for(var y = 0; y < xyDiffs.length; y++)
-        //    {
-        //        let hierarchySring = getSortedYKeysString(xyDiffs, y);
-        //        console.log(hierarchySring);
-        //    }
-        //}
+            let absoluteIntervalsArray = getAbsoluteIntervalsArray(rootXYArray[0]);
+            console.log("\n*** degrees of dissonance (absolute interval differences) between keys in Mode[0] (both x and y are Mode[0] keys) ***");
+            logRootXYArray(absoluteIntervalsArray);
+        }
 
         // Returns the centDelta values in ascending order from the root key.
         function getRootCentsDeltas()
@@ -585,9 +699,6 @@ ResSynth.tuningsFactory = (function()
                 rootCentsDeltas.push(keyCentsDeltas[i].centsDelta);
             }
 
-            // Please leave this comment!
-            // consoleLogInfo(rootCentsDeltas);
-
             return rootCentsDeltas;
         }
 
@@ -616,12 +727,14 @@ ResSynth.tuningsFactory = (function()
             tuningDefs = tuningGroupDef.tunings,
             tunings = [];
 
-        for(var i = 0; i < tuningDefs.length; i++)
+        for(let i = 0; i < tuningDefs.length; i++)
         {
             let tuning = getTuning(rootCentsDeltas, tuningDefs[i]);
 
             tunings.push(tuning);
         }
+
+        logHarmonicTuningsInfos(tunings);
 
         return tunings;
     };

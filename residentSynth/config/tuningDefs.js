@@ -3,12 +3,21 @@ console.log('load tuningDefs.js');
 // This file can be omitted by applications that do not define special tunings.
 // (12-tone Equal Temperament tuning is always defined by default.)
 
-// MidiPitch definition:
-// A MidiPitch is a pitch described as a floating point MIDI value in range 0..<128.
-// By definition, MidiPitch 69.0 is the frequency of MIDI key 69 (A4) in standard
-// equal temperament (440Hz).
-// A difference of 1.0 between midiPitch values is equivalent to a semitone.
-// A difference of 0.01 between midiPitch values is equivalent to a cent.
+// Definitions:
+// A MidiKey is an integer in range 0..127. This is the MIDI key value sent in MIDI messages.
+// If the message is sent from a keyboard, the midiKey value designates a physical key on the keyboard.
+//
+// A MidiPitch is a pitch described as a floating point value in range 0..<128.
+// By definition, MidiPitch 69.0 is 440Hz, which is the frequency of MidiKey 69 (A4) in standard
+// equal temperament.
+// Integer MidiPitch values are separated by one equal temperament semitone.
+// MidiPitch values that differ by 0.01 differ by one equal temperament cent.
+//
+// A Tuning is an array of 128 MidiPitch values. Tuning[MidiKey] is the MidiPitch of the MidiKey
+// in that tuning. By convention, the MidiPitches in a tuning are always in ascending order.
+//
+// Modes: There are 12 modes in each tuning, one per MidiKey in the tuning's lowest octave.
+// A mode's BaseKey is the lowest MidiKey in the Mode (at Mode[0]).
 
 ResSynth.tuningType =
 {
@@ -84,35 +93,12 @@ ResSynth.tuningDefs =
 		// Harmonic tunings
 		{		
 		// Constructor:   tunings = getHarmonicTunings();
-		// This constructor uses the odd-numbered natural harmonics to return 12 128-note tunings,
-		// on 12 different root keys. Each tuning is constructed with its root midiPitch equal to
-		// its root key, (tuning[rootKey] === rootKey), so that the root key midiPitches are always
-		// equal to their standard equal temperament frequencies.
-		// When the root key is A, there are:
-		//     1. four perfect fifths between keys A-E, E-B, C#-G#, G-D,
-		//     2. three perfect major thirds between A-C#, E-G# and C#-F,
-		//     3. one perfect minor seventh A-G
-		// So there are:
-		//     1. three perfect major triads: A-C#-E, E-G#-B, C#-F-G#,
-		//     3. one perfect augmented triad: C-E-G#
-		//     4. one perfect diminished triad: C#-E-G
-		//     2. one perfect diminished seventh chord: A-C#-E-G.
-		//
-		// With a root at 0, the difference (in cents) between a key's midiPitch and its equal
-		// temperament value is as follows:
-		//                                        keys
-		//                      0   1   2   3   4   5   6   7   8   9   10  11
-		//                    ------------------------------------------------
-		//                   0| 0   5   4   2  14  29  49   2  27  59   31  12
-		//
-		// Changes of tuning ("modulation") will therefore be more or less noticeable depending
-		// on the proximity of the new key to the root. This order, according to the above table,
-		// is as follows:
-		//                                        keys
-		//                        ------------------------------------
-		//                        0, 7, 3, 2, 1, 11, 4, 8, 5, 10, 6, 9
-		// Pitch differences less than ca 5 cents are innocuous, so "modulations" to keys 7, 3, 2, 1
-		// can be done fairly smoothly.
+		// This constructor uses the _odd-numbered_natural_harmonics_ to return 12 128-note tunings,
+		// on 12 different root MidiKeys.
+		// Each tuning is constructed with its root midiPitch equal to its root key, so that the root key
+		// midiPitches are always equal to their standard equal temperament frequencies. Nevertheless, each
+		// tuning contains _perfect_ intervals with respect to its root.
+		// See further comments in residentSynth/harmonicTunings.txt
 		ctor: ResSynth.tuningType.HARMONIC,
 		name: "harmonic tunings",
 		tunings:
