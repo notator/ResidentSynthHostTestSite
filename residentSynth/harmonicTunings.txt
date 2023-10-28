@@ -4,11 +4,11 @@ Harmonic Tunings
 ================
 
 This document contains
-1. Definitions that are currently also in tuningDefs.js (23.10.2023).
+1. Definitions that are currently also in tuningDefs.js (28.10.2023).
 2. Edited versions of console.log messages created by code in the (currently disabled)
    logHarmonicTuningsInfos(tunings) function inside tuningsFactory.getHarmonicTunings().
 
-Definitions (23.10.2023: these are repeated at the top of tuningDefs.js)
+Definitions (28.10.2023: these are repeated at the top of tuningDefs.js)
 
 // A MidiKey is an integer in range 0..127. This is the MIDI key value sent in MIDI messages.
 // If the message is sent from a keyboard, the midiKey value designates a physical key on the keyboard. 
@@ -24,6 +24,17 @@ Definitions (23.10.2023: these are repeated at the top of tuningDefs.js)
 //
 // Modes: There are 12 modes in each tuning, one per MidiKey in the tuning's lowest octave.
 // A mode's BaseKey is the lowest MidiKey in the Mode (at Mode[0]).
+// Every BaseKey's midiPitch is a standard equal temperament pitch.
+//
+// Mode modulation: In mode modulation, a midiKey in the initial mode becomes the baseKey in the
+// target mode, thus changing the midiPitch of that key.
+// The change of midiPitch for the pivot key is more audible, as its position (in the initial mode)
+// is further to the right in the following list:
+//      0, 7, 3, 2, 1, 11, 4, 8, 5, 10, 6, 9
+// For modulations to degrees 0, 7, 3, 2, 1, the pivot key's midiPitch change is (more or less) inaudible.
+// For modulations to degrees 11 and 4, the pivot key's midiPitch change is clearly audible.
+// For modulations to degrees 8, 5, 10, 6, 9, the pivot key's midiPitch change is clearly and increasingly audible.
+// Interesting that a modulation to 5 (the 'sub-dominant') is clearly audible.
     
 Comment on tuningDefs.js/Harmonic Tunings (23.10.2023)
 // Constructor:   tunings = getHarmonicTunings();

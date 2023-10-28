@@ -3,7 +3,7 @@ console.log('load tuningDefs.js');
 // This file can be omitted by applications that do not define special tunings.
 // (12-tone Equal Temperament tuning is always defined by default.)
 
-// Definitions:
+// Definitions (28.10.2023):
 // A MidiKey is an integer in range 0..127. This is the MIDI key value sent in MIDI messages.
 // If the message is sent from a keyboard, the midiKey value designates a physical key on the keyboard.
 //
@@ -18,6 +18,17 @@ console.log('load tuningDefs.js');
 //
 // Modes: There are 12 modes in each tuning, one per MidiKey in the tuning's lowest octave.
 // A mode's BaseKey is the lowest MidiKey in the Mode (at Mode[0]).
+// Every BaseKey's midiPitch is a standard equal temperament pitch.
+//
+// Mode modulation: In mode modulation, a midiKey in the initial mode becomes the baseKey in the
+// target mode, thus changing the midiPitch of that key.
+// The change of midiPitch for the pivot key is more audible, as its position (in the initial mode)
+// is further to the right in the following list:
+//      0, 7, 3, 2, 1, 11, 4, 8, 5, 10, 6, 9
+// For modulations to degrees 0, 7, 3, 2, 1, the pivot key's midiPitch change is (more or less) inaudible.
+// For modulations to degrees 11 and 4, the pivot key's midiPitch change is clearly audible.
+// For modulations to degrees 8, 5, 10, 6, 9, the pivot key's midiPitch change is clearly and increasingly audible.
+// Interesting that a modulation to 5 (the 'sub-dominant') is clearly audible.
 
 ResSynth.tuningType =
 {
