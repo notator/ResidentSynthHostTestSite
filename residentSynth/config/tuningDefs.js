@@ -15,20 +15,8 @@ console.log('load tuningDefs.js');
 //
 // A Tuning is an array of 128 MidiPitch values. Tuning[MidiKey] is the MidiPitch of the MidiKey
 // in that tuning. By convention, the MidiPitches in a tuning are always in ascending order.
-//
-// Modes: There are 12 modes in each tuning, one per MidiKey in the tuning's lowest octave.
-// A mode's BaseKey is the lowest MidiKey in the Mode (at Mode[0]).
-// Every BaseKey's midiPitch is a standard equal temperament pitch.
-//
-// Mode modulation: In mode modulation, a midiKey in the initial mode becomes the baseKey in the
-// target mode, thus changing the midiPitch of that key.
-// The change of midiPitch for the pivot key is more audible, as its position (in the initial mode)
-// is further to the right in the following list:
-//      0, 7, 3, 2, 1, 11, 4, 8, 5, 10, 6, 9
-// For modulations to degrees 0, 7, 3, 2, 1, the pivot key's midiPitch change is (more or less) inaudible.
-// For modulations to degrees 11 and 4, the pivot key's midiPitch change is clearly audible.
-// For modulations to degrees 8, 5, 10, 6, 9, the pivot key's midiPitch change is clearly and increasingly audible.
-// Interesting that a modulation to 5 (the 'sub-dominant') is clearly audible.
+// When the tuning is changed (even across tuning types), one or more midiKeys change pitch by less
+// than 0.05 semitones. These midiKeys can be used as pivots in harmonic progressions.
 
 ResSynth.tuningType =
 {
@@ -107,9 +95,27 @@ ResSynth.tuningDefs =
 		// This constructor uses the _odd-numbered_natural_harmonics_ to return 12 128-note tunings,
 		// on 12 different root MidiKeys.
 		// Each tuning is constructed with its root midiPitch equal to its root key, so that the root key
-		// midiPitches are always equal to their standard equal temperament frequencies. Nevertheless, each
-		// tuning contains _perfect_ intervals with respect to its root.
-		// See further comments in residentSynth/harmonicTunings.txt
+		// midiPitches are always equal to their standard equal temperament frequencies.
+		// (Nevertheless, each tuning contains _perfect_ intervals with respect to its root.)
+		// The midiPitches per key(x) per harmonic tuning(y) are as follows:
+ 		// 		                                          key
+		//              C      C#     D      D#     E      F      F#     G      G#     A      A#     B
+		//          ---------------------------------------------------------------------------------------
+		// 	      0 |  0      1.05   2.04   2.98   3.86   4.71   5.51   7.02   7.73   8.41    9.69  10.88
+		//        1 | -0.12   1      2.05   3.04   3.98   4.86   5.71   6.51   8.02   8.73    9.41  10.69
+		//        2 | -0.31   0.88   2      3.05   4.04   4.98   5.86   6.71   7.51   9.02    9.73  10.41
+		//        3 | -0.59   0.69   1.88   3      4.05   5.04   5.98   6.86   7.71   8.51   10.02  10.73
+		//        4 | -0.27   0.41   1.69   2.88   4      5.05   6.04   6.98   7.86   8.71    9.51  11.02
+		// tuning 5 |  0.02   0.73   1.41   2.69   3.88   5      6.05   7.04   7.98   8.86    9.71  10.51
+		//        6 | -0.49   1.02   1.73   2.41   3.69   4.88   6      7.05   8.04   8.98    9.86  10.71
+		//        7 | -0.29   0.51   2.02   2.73   3.41   4.69   5.88   7      8.05   9.04    9.98  10.86
+		//        8 | -0.14   0.71   1.51   3.02   3.73   4.41   5.69   6.88   8      9.05   10.04  10.98
+		//        9 | -0.02   0.86   1.71   2.51   4.02   4.73   5.41   6.69   7.88   9      10.05  11.04
+		//       10 |  0.04   0.98   1.86   2.71   3.51   5.02   5.73   6.41   7.69   8.88   10     11.05
+		//       11 |  0.05   1.04   1.98   2.86   3.71   4.51   6.02   6.73   7.41   8.69    9.88  11
+		//
+		// N.B.In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
+		// In other octaves, the midiPitches are _all_ equal to their midiKey + these decimal values.
 		ctor: ResSynth.tuningType.HARMONIC,
 		name: "harmonic tunings",
 		tunings:

@@ -460,7 +460,7 @@ ResSynth.tuningsFactory = (function()
                 console.log(str + "\n");
             }
 
-            function logRootXYArray(xyArray)
+            function logXYArray(xyArray)
             { 
                 function logRowY(y, xArray)
                 {
@@ -626,30 +626,152 @@ ResSynth.tuningsFactory = (function()
                 return absoluteIntervalsArray;
 
             }
-            
+
+            function getDiffsInfo(rootXYArray, rootIndex)
+            {
+                let diffsArray = [],
+                    pivotKeys = [],
+                    rootTuning = rootXYArray[rootIndex];
+
+                for(let y = rootIndex; y < rootIndex + 12; y++)
+                {
+                    let yDiffs = [],
+                        targetTuningIndex = y % 12,
+                        targetTuning = rootXYArray[targetTuningIndex];
+
+                    for(let key = 0; key < targetTuning.length; key++)
+                    {
+                        let diff = targetTuning[key] - rootTuning[key];
+
+                        if(Math.abs(diff) > 0.05)
+                        {
+                            diff = NaN;
+                        }
+                        else if(y !== rootIndex)
+                        {
+                            //let tuningIndex = (y + rootIndex) % 12;
+                            pivotKeys.push({targetTuningIndex, key});
+                        }
+
+                        yDiffs.push(diff);
+                    }
+                    diffsArray.push(yDiffs);
+                }
+
+                pivotKeys.sort((a, b) => a.key - b.key);
+
+                return {diffsArray, pivotKeys};
+            }
+
+            function logPivotKeys(pivotKeys)
+            {
+                let str = "";
+                for(let i = 0; i < pivotKeys.length; i++)
+                {
+                    let pivotKey = pivotKeys[i];
+                    str += `{k=${pivotKey.key},t=${pivotKey.targetTuningIndex}}, `;
+                    if(str.length > 80)
+                    {
+                        console.log(`${str}\n`);
+                        str = "";
+                    }
+                }
+                console.log(`${str}\n`);
+            }
+
+            function logAllPivotKeysArray(allPivotKeysArray)
+            {
+                function getAllTuningChangeKeysArray(allPivotKeysArray)
+                {
+                    let allTuningChangeKeysArray = [];
+
+                    // initialize allTuningChangeKeysArray
+                    for(let targetTuningIndex = 0; targetTuningIndex < allPivotKeysArray.length; targetTuningIndex++)
+                    {
+                        let xArray = [];
+                        for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
+                        {
+                            xArray.push("");
+                        }
+                        allTuningChangeKeysArray.push(xArray);
+                    }
+
+                    for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
+                    {
+                        let pivotKeys = allPivotKeysArray[initialTuningIndex];
+                        for(let i = 0; i < pivotKeys.length; i++)
+                        {
+                            let pivotKey = pivotKeys[i];
+                            allTuningChangeKeysArray[pivotKey.targetTuningIndex][initialTuningIndex] += `${pivotKey.key},`;
+                        }
+                    }
+
+                    // remove trailing commas
+                    for(let targetTuningIndex = 0; targetTuningIndex < allPivotKeysArray.length; targetTuningIndex++)
+                    {
+                        for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
+                        {
+                            let str = allTuningChangeKeysArray[targetTuningIndex][initialTuningIndex];
+
+                            str = str.slice(0, -1); // remove comma
+                        }
+                    }
+
+                    return allTuningChangeKeysArray;
+
+                }
+                let allTuningChangeKeysArray = getAllTuningChangeKeysArray(allPivotKeysArray); // a 12x12 array of strings, each string contains the pivot keys separated by commas
+
+                logTopNumbers(12); // initial tuning indexes
+
+                for(let targetTuningIndex = 0; targetTuningIndex < allPivotKeysArray.length; targetTuningIndex++)
+                {
+                    let xString = "";
+                    for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
+                    {
+                        let keysStr = allTuningChangeKeysArray[targetTuningIndex][initialTuningIndex];
+
+                        xString = `${xString}  ${keysStr}`;
+                    }
+                    console.log(`${targetTuningIndex}| ${xString}`);
+                }
+            }
+
             let rootXYArray = getRootXYArray(tunings); // a 12x12 array
 
             console.log("\n*** tunings per key (x) per tuning (y) ***");
-            logRootXYArray(rootXYArray);
+            logXYArray(rootXYArray);
 
-            let pitchDiffsArray = getPitchDiffsArray(rootXYArray);
-            console.log("\n*** ET semitones difference between key and root key (x) per tuning (y)) ***");
-            logRootXYArray(pitchDiffsArray);
+            //let pitchDiffsArray = getPitchDiffsArray(rootXYArray);
+            //console.log("\n*** ET semitones difference between key and root key (x) per tuning (y)) ***");
+            //logRootXYArray(pitchDiffsArray);
 
-            console.log("\n*** There are 12 modes in each tuning:                ***");
-            console.log("\n*** Each mode has a different base-key in the tuning. ***\n");
+            //console.log("\n*** There are 12 modes in each tuning:                ***");
+            //console.log("\n*** Each mode has a different base-key in the tuning. ***\n");
 
-            let modePitchDiffsArray = getPitchDiffsRPIArray(pitchDiffsArray);
-            console.log("\n*** difference (in ET semitones) from ET, per interval (x) per mode (y) ***");
-            logRootXYArray(modePitchDiffsArray);
+            //let modePitchDiffsArray = getPitchDiffsRPIArray(pitchDiffsArray);
+            //console.log("\n*** difference (in ET semitones) from ET, per interval (x) per mode (y) ***");
+            //logRootXYArray(modePitchDiffsArray);
 
-            let modePitchConsonanceHierarchiesArray = getModePitchConsonanceHierarchiesArray(modePitchDiffsArray);
-            console.log("\n*** 'Intervals and their Proximity to ET' hierarchy per mode (y) ***");
-            logIntervalProximitiesArray(modePitchConsonanceHierarchiesArray);
+            //let modePitchConsonanceHierarchiesArray = getModePitchConsonanceHierarchiesArray(modePitchDiffsArray);
+            //console.log("\n*** 'Intervals and their Proximity to ET' hierarchy per mode (y) ***");
+            //logIntervalProximitiesArray(modePitchConsonanceHierarchiesArray);
 
-            let absoluteIntervalsArray = getAbsoluteIntervalsArray(rootXYArray[0]);
-            console.log("\n*** degrees of dissonance (absolute interval differences) between keys in Mode[0] (both x and y are Mode[0] keys) ***");
-            logRootXYArray(absoluteIntervalsArray);
+            //let absoluteIntervalsArray = getAbsoluteIntervalsArray(rootXYArray[0]);
+            //console.log("\n*** degrees of dissonance (absolute interval differences) between keys in Mode[0] (both x and y are Mode[0] keys) ***");
+            //logRootXYArray(absoluteIntervalsArray);
+
+            let allPivotKeysArray = [];
+            for(let rootIndex = 0; rootIndex < rootXYArray.length; rootIndex++)
+            {
+                let diffsInfo = getDiffsInfo(rootXYArray, rootIndex);
+                console.log(`\n*** difference from rootKey ${rootIndex} tuning ***`);
+                logXYArray(diffsInfo.diffsArray);
+                logPivotKeys(diffsInfo.pivotKeys);
+
+                allPivotKeysArray.push(diffsInfo.pivotKeys);
+            }
+            logAllPivotKeysArray(allPivotKeysArray);
         }
 
         // Returns the centDelta values in ascending order from the root key.
