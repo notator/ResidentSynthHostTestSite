@@ -46,7 +46,7 @@ Comment on tuningDefs.js/Harmonic Tunings (23.10.2023)
 //
 ===================================================================================================
 
-midiPitches per key (x) per tuning (y)
+midiPitches per key (x) per tuning (y) (old tunings)
 N.B.: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
 In other octaves, the midiPitches are _all_ equal to their midiKey + these decimal values.
 
@@ -66,6 +66,28 @@ tuning 5|    0.02   0.73   1.41   2.69   3.88   5      6.05   7.04   7.98   8.86
       10|    0.04   0.98   1.86   2.71   3.51   5.02   5.73   6.41   7.69   8.88   10     11.05 
       11|    0.05   1.04   1.98   2.86   3.71   4.51   6.02   6.73   7.41   8.69    9.88  11
 
+_______________________________________________________________________________________________
+
+midiPitches per key (x) per tuning (y) (diagonal tunings)
+N.B.: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
+In other octaves, _all_ tunings are such that tuning[midiKey][rootKey] equals tuning[0][rootKey].
+
+                                                  midiKey
+                    C     C#    D     D#    E     F     F#    G     G#    A     A#     B
+                    0     1     2     3     4     5     6     7     8     9     10    11
+                ---------------------------------------------------------------------------
+           C   0|   0.00  1.05  2.04  2.98  3.86  4.71  5.51  7.02  7.73  8.41  9.69  10.88
+           C#  1|  -0.07  1.05  2.10  3.09  4.02  4.91  5.76  6.56  8.07  8.78  9.45  10.74
+           D   2|  -0.27  0.92  2.04  3.09  4.08  5.01  5.90  6.75  7.55  9.06  9.77  10.44
+           D#  3|  -0.62  0.66  1.86  2.98  4.02  5.01  5.95  6.84  7.68  8.49  9.99  10.70
+  tuning   E   4|  -0.41  0.27  1.55  2.75  3.86  4.91  5.90  6.84  7.73  8.57  9.38  10.88
+(root key) F   5|  -0.27  0.43  1.11  2.40  3.59  4.71  5.76  6.75  7.68  8.57  9.42  10.22
+           F#  6|  -0.97  0.53  1.24  1.92  3.20  4.40  5.51  6.56  7.55  8.49  9.38  10.22
+           G   7|  -0.27  0.53  2.04  2.75  3.42  4.71  5.90  7.02  8.07  9.06  9.99  10.88
+           G#  8|  -0.41  0.43  1.24  2.75  3.45  4.13  5.41  6.61  7.73  8.78  9.77  10.70
+           A   9|  -0.62  0.27  1.11  1.92  3.42  4.13  4.81  6.09  7.29  8.41  9.45  10.44
+           A# 10|  -0.27  0.66  1.55  2.40  3.20  4.71  5.41  6.09  7.38  8.57  9.69  10.74
+           B  11|  -0.07  0.92  1.86  2.75  3.59  4.40  5.90  6.61  7.29  8.57  9.77  10.88
 _______________________________________________________________________________________________
 
 difference (in ET semitones) from equal temperament, per key-interval (x) per mode (y)

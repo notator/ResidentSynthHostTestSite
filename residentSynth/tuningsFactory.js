@@ -824,7 +824,8 @@ ResSynth.tuningsFactory = (function()
             return rootCentsDeltas;
         }
 
-        function getTuning(rootCentsDeltas, tuningDef)
+        // Returns tunings in which the midiPitch at tuning[midiKey][midiKey] is equal to midiKey.
+        function getRootTuning(rootCentsDeltas, tuningDef)
         {
             let rootKey = tuningDef.root % 12,
                 tuning = [];
@@ -843,18 +844,45 @@ ResSynth.tuningsFactory = (function()
             finalizeTuning(tuning);
 
             return tuning;
-        }          
+        }    
+
+        // Returns tunings in which the midiPitch at tuning[midiKey][midiKey] is equal to
+        // the midiPitch at tuning[0][midiKey].
+        function getDiagonalTunings(rootTunings)
+        {
+            let rootTuning0 = rootTunings[0],
+                diagonalTunings = [];
+
+            for(let tuningIndex = 0; tuningIndex < rootTunings.length; tuningIndex++)
+            {
+                let rootTuning = rootTunings[tuningIndex],
+                    diagonalTuning = [],
+                    delta = rootTuning0[tuningIndex] - tuningIndex;
+
+                diagonalTuning.name = rootTuning.name;
+                for(var midiKey = 0; midiKey < rootTuning.length; midiKey++)
+                {
+                    diagonalTuning.push(rootTuning[midiKey] + delta);
+                }
+
+                diagonalTunings.push(diagonalTuning);
+
+            }
+            return diagonalTunings;
+        }
 
         let rootCentsDeltas = getRootCentsDeltas(),
             tuningDefs = tuningGroupDef.tunings,
-            tunings = [];
+            rootTunings = [];
 
         for(let i = 0; i < tuningDefs.length; i++)
         {
-            let tuning = getTuning(rootCentsDeltas, tuningDefs[i]);
+            let rootTuning = getRootTuning(rootCentsDeltas, tuningDefs[i]);
 
-            tunings.push(tuning);
+            rootTunings.push(rootTuning);
         }
+
+        let tunings = getDiagonalTunings(rootTunings);
 
         logHarmonicTuningsInfos(tunings);
 

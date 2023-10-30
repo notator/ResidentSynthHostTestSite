@@ -122,51 +122,51 @@ ResSynth.tuningDefs =
 			[
 				{
 					name: "C&emsp;|| 5ths C-G, G-D, E-B, A#-F; 3rds C-E, G-B, E-G#",
-					root: 48 // C
+					root: 48 // C key
 				},
 				{
 					name: "C# || 5ths C#-G#, G#-D#, F-C, B-F#; 3rds C#-F, G#-C, F-A",
-					root: 49 // C#
+					root: 49 // C# key
 				},
 				{
 					name: "D&emsp;|| 5ths D-A, A-E, F#-C#, C-G; 3rds D-F#, A-C#, F#-A#",
-					root: 50 // D
+					root: 50 // D key
 				},
 				{
 					name: "D# || 5ths D#-A#, A#-F, G-D, C#-G#; 3rds D#-G, A#-D, G-B",
-					root: 51 // D#
+					root: 51 // D# key
 				},
 				{
 					name: "E&emsp;|| 5ths E-B, B-F#, G#-D#, D-A; 3rds E-G#, B-D#, G#-C",
-					root: 52 // E
+					root: 52 // E key
 				},
 				{
 					name: "F&emsp;|| 5ths F-C, C-G, A-E, D#-A#; 3rds F-A, C-E, A-C#",
-					root: 53 // F
+					root: 53 // F key
 				},
 				{
 					name: "F# || 5ths F#-C#, C#-G#, A#-F, E-B; 3rds F#-A#, C#-F, A#-D",
-					root: 54 // F#
+					root: 54 // F# key
 				},
 				{
 					name: "G&emsp;|| 5ths G-D, D-A, B-F#, F-C; 3rds G-B, D-F#, B-D#",
-					root: 55 // G
+					root: 55 // G key
 				},
 				{
 					name: "G# || 5ths G#-D#, D#-A#, C-G, F#-C#; 3rds G#-C, D#-G, C-E",
-					root: 56 // G#
+					root: 56 // G# key
 				},
 				{
 					name: "A&emsp;|| 5ths A-E, E-B, C#-G#, G-D; 3rds A-C#, E-G#, C#-F",
-					root: 57 // A
+					root: 57 // A key
 				},
 				{
 					name: "A# || 5ths A#-F, F-C, D-A, G#-D#; 3rds A#-D, F-A, D-F#",
-					root: 58 // A#
+					root: 58 // A# key
 				},
 				{
 					name: "B&emsp;|| 5ths B-F#, F#-C#, D#-A#, A-E; 3rds B-D#, F#-A#, D#-G",
-					root: 59 // B
+					root: 59 // B key
 				}
 			]
 		},
