@@ -442,340 +442,8 @@ ResSynth.tuningsFactory = (function()
     // See comment on Harmonic Tunings in tuningDefs.js
     TuningsFactory.prototype.getHarmonicTunings = function(tuningGroupDef)
     {
-        function logHarmonicTuningsInfos(tunings)
-        {
-            function logTopNumbers(xLength)
-            {
-                let str = "    ";
-                for(let z = 0; z < xLength; z++)
-                {
-                    str = str.concat(`   ${z}`);
-                }
-                console.log(str + "\n");
-                str = "       ";
-                for(let z = 0; z < xLength; z++)
-                {
-                    str = str.concat(`----`);
-                }
-                console.log(str + "\n");
-            }
-
-            function logXYArray(xyArray)
-            { 
-                function logRowY(y, xArray)
-                {
-                    let str = `${y}|`;
-                    for(let x = 0; x < xArray.length; x++)
-                    {
-                        let value = Math.round(xArray[x] * 100) / 100;
-                        str = str.concat(`   ${value}`);
-                    }
-                    console.log(str + "\n");
-                }
-
-                let ySize = xyArray.length,
-                    xSize = xyArray[0].length;
-
-                logTopNumbers(xSize);
-
-                for(let y = 0; y < ySize; y++)
-                {
-                    logRowY(y, xyArray[y]);
-                }
-            }
-
-            function logIntervalProximitiesArray(xyArray)
-            {
-                function logRowY(y, xArray)
-                {
-                    let str = `${y}|`;
-                    for(let x = 0; x < xArray.length; x++)
-                    {
-                        let iProx = xArray[x],
-                            index = iProx.index,
-                            diff = Math.round(iProx.diff * 100) / 100;
-
-                        str = str.concat(`   ${index}:${diff}`);
-                    }
-                    console.log(str + "\n");
-                }
-
-                let ySize = xyArray.length,
-                    xSize = xyArray[0].length;
-
-                logTopNumbers(xSize);
-
-                for(let y = 0; y < ySize; y++)
-                {
-                    logRowY(y, xyArray[y]);
-                }
-            }
-
-            function getRootXYArray(tunings)// 12x12
-            {
-                let rootXYArray = []; // 12x12
-
-                for(let y = 0; y < 12; y++)
-                {
-                    let tuningsRow = tunings[y],
-                        row = [];
-                    for(let x = 12; x < 24; x++)
-                    {
-                        row.push(tuningsRow[x] - 12);
-                    }
-                    rootXYArray.push(row);
-                }
-                return rootXYArray;
-            }
-
-            function getPitchDiffsArray(rootXYArray)
-            {
-                let pitchDiffsArray = [],
-                    yDim = rootXYArray.length,
-                    xDim = rootXYArray[0].length;
-
-                for(let y = 0; y < yDim; y++)
-                {
-                    let pdXArray = [],
-                        xArray = rootXYArray[y],
-                        rootPitch = xArray[y];
-
-                    for(let x = 0; x < xDim; x++)
-                    {
-                        pdXArray.push(xArray[x] - rootPitch);
-                    }
-                    pitchDiffsArray.push(pdXArray);
-                }
-
-                return pitchDiffsArray;
-            }
-
-            function getPitchDiffsRPIArray(pitchDiffsArray)
-            {
-                let rootArray = pitchDiffsArray[0],
-                    pitchDiffsRPIArray = [],
-                    xDim = pitchDiffsArray[0].length;
-                
-                for(let x1 = 0; x1 < xDim; x1++)
-                {
-                    let pdRPIXArray = [],
-                        rootValue = rootArray[x1],
-                        index = 0;    
-
-                    for(let x2 = x1; x2 < (x1 + 12); x2++)
-                    { 
-                        let value = rootArray[x2 % xDim] - rootValue; // adjusted so that root is at index 0 in pdRPIXArray
-
-                        value = (value < 0) ? value + 12 : value; // all intervals are ascending
-                        value -= index++; // values (which can now be negative again) are relative to the nearest equal temperament pitch.
-
-                        pdRPIXArray.push(value);
-                    }
-                    pitchDiffsRPIArray.push(pdRPIXArray);
-                }
-
-                return pitchDiffsRPIArray;
-
-            }
-
-            function getModePitchConsonanceHierarchiesArray(modePitchDiffsArray)
-            {
-                let pitchConsonanceHierarchiesArray = [];
-
-                for(let y = 0; y < modePitchDiffsArray.length; y++)
-                {
-                    let diffs = modePitchDiffsArray[y],
-                        diffDiffIndexes = [];
-
-                    for(let x = 0; x < diffs.length; x++)
-                    {
-                        let index = x,
-                            diff = Math.abs(diffs[index]);
-
-                        diffDiffIndexes.push({index, diff});
-                    }
-
-                    diffDiffIndexes.sort((a, b) => a.diff - b.diff);
-
-                    pitchConsonanceHierarchiesArray.push(diffDiffIndexes);
-                }
-                return pitchConsonanceHierarchiesArray;
-            }
-
-            function getAbsoluteIntervalsArray(xArray)
-            {
-                let absoluteIntervalsArray = [];
-
-                for(let y = 0; y < xArray.length; y++)
-                {
-                    let yPitch = xArray[y],
-                        yIntervals = [];
-
-                    for(let x = 0; x < xArray.length; x++)
-                    {
-                        let interval = (x - y - ((xArray[x] - yPitch)) + 12) % 12;
-
-                        interval = (interval > 11) ? interval -= 12 : interval;
-
-                        yIntervals.push(interval);
-                    }
-
-                    absoluteIntervalsArray.push(yIntervals);
-                }
-
-                return absoluteIntervalsArray;
-
-            }
-
-            function getDiffsInfo(rootXYArray, rootIndex)
-            {
-                let diffsArray = [],
-                    pivotKeys = [],
-                    rootTuning = rootXYArray[rootIndex];
-
-                for(let y = rootIndex; y < rootIndex + 12; y++)
-                {
-                    let yDiffs = [],
-                        targetTuningIndex = y % 12,
-                        targetTuning = rootXYArray[targetTuningIndex];
-
-                    for(let key = 0; key < targetTuning.length; key++)
-                    {
-                        let diff = targetTuning[key] - rootTuning[key];
-
-                        if(Math.abs(diff) > 0.05)
-                        {
-                            diff = NaN;
-                        }
-                        else if(y !== rootIndex)
-                        {
-                            //let tuningIndex = (y + rootIndex) % 12;
-                            pivotKeys.push({targetTuningIndex, key});
-                        }
-
-                        yDiffs.push(diff);
-                    }
-                    diffsArray.push(yDiffs);
-                }
-
-                pivotKeys.sort((a, b) => a.key - b.key);
-
-                return {diffsArray, pivotKeys};
-            }
-
-            function logPivotKeys(pivotKeys)
-            {
-                let str = "";
-                for(let i = 0; i < pivotKeys.length; i++)
-                {
-                    let pivotKey = pivotKeys[i];
-                    str += `{k=${pivotKey.key},t=${pivotKey.targetTuningIndex}}, `;
-                    if(str.length > 80)
-                    {
-                        console.log(`${str}\n`);
-                        str = "";
-                    }
-                }
-                console.log(`${str}\n`);
-            }
-
-            function logAllPivotKeysArray(allPivotKeysArray)
-            {
-                function getAllTuningChangeKeysArray(allPivotKeysArray)
-                {
-                    let allTuningChangeKeysArray = [];
-
-                    // initialize allTuningChangeKeysArray
-                    for(let targetTuningIndex = 0; targetTuningIndex < allPivotKeysArray.length; targetTuningIndex++)
-                    {
-                        let xArray = [];
-                        for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
-                        {
-                            xArray.push("");
-                        }
-                        allTuningChangeKeysArray.push(xArray);
-                    }
-
-                    for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
-                    {
-                        let pivotKeys = allPivotKeysArray[initialTuningIndex];
-                        for(let i = 0; i < pivotKeys.length; i++)
-                        {
-                            let pivotKey = pivotKeys[i];
-                            allTuningChangeKeysArray[pivotKey.targetTuningIndex][initialTuningIndex] += `${pivotKey.key},`;
-                        }
-                    }
-
-                    // remove trailing commas
-                    for(let targetTuningIndex = 0; targetTuningIndex < allPivotKeysArray.length; targetTuningIndex++)
-                    {
-                        for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
-                        {
-                            let str = allTuningChangeKeysArray[targetTuningIndex][initialTuningIndex];
-
-                            str = str.slice(0, -1); // remove comma
-                        }
-                    }
-
-                    return allTuningChangeKeysArray;
-
-                }
-                let allTuningChangeKeysArray = getAllTuningChangeKeysArray(allPivotKeysArray); // a 12x12 array of strings, each string contains the pivot keys separated by commas
-
-                logTopNumbers(12); // initial tuning indexes
-
-                for(let targetTuningIndex = 0; targetTuningIndex < allPivotKeysArray.length; targetTuningIndex++)
-                {
-                    let xString = "";
-                    for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArray.length; initialTuningIndex++)
-                    {
-                        let keysStr = allTuningChangeKeysArray[targetTuningIndex][initialTuningIndex];
-
-                        xString = `${xString}  ${keysStr}`;
-                    }
-                    console.log(`${targetTuningIndex}| ${xString}`);
-                }
-            }
-
-            let rootXYArray = getRootXYArray(tunings); // a 12x12 array
-
-            console.log("\n*** tunings per key (x) per tuning (y) ***");
-            logXYArray(rootXYArray);
-
-            //let pitchDiffsArray = getPitchDiffsArray(rootXYArray);
-            //console.log("\n*** ET semitones difference between key and root key (x) per tuning (y)) ***");
-            //logRootXYArray(pitchDiffsArray);
-
-            //console.log("\n*** There are 12 modes in each tuning:                ***");
-            //console.log("\n*** Each mode has a different base-key in the tuning. ***\n");
-
-            //let modePitchDiffsArray = getPitchDiffsRPIArray(pitchDiffsArray);
-            //console.log("\n*** difference (in ET semitones) from ET, per interval (x) per mode (y) ***");
-            //logRootXYArray(modePitchDiffsArray);
-
-            //let modePitchConsonanceHierarchiesArray = getModePitchConsonanceHierarchiesArray(modePitchDiffsArray);
-            //console.log("\n*** 'Intervals and their Proximity to ET' hierarchy per mode (y) ***");
-            //logIntervalProximitiesArray(modePitchConsonanceHierarchiesArray);
-
-            //let absoluteIntervalsArray = getAbsoluteIntervalsArray(rootXYArray[0]);
-            //console.log("\n*** degrees of dissonance (absolute interval differences) between keys in Mode[0] (both x and y are Mode[0] keys) ***");
-            //logRootXYArray(absoluteIntervalsArray);
-
-            let allPivotKeysArray = [];
-            for(let rootIndex = 0; rootIndex < rootXYArray.length; rootIndex++)
-            {
-                let diffsInfo = getDiffsInfo(rootXYArray, rootIndex);
-                console.log(`\n*** difference from rootKey ${rootIndex} tuning ***`);
-                logXYArray(diffsInfo.diffsArray);
-                logPivotKeys(diffsInfo.pivotKeys);
-
-                allPivotKeysArray.push(diffsInfo.pivotKeys);
-            }
-            logAllPivotKeysArray(allPivotKeysArray);
-        }
-
-        // Returns the centDelta values in ascending order from the root key.
-        function getRootCentsDeltas()
+         // Returns the centDelta values in ascending order from the root key.
+        function getRootCentsDeltasForHarmonicTuning()
         {
             const keyFactorArray =
                 [
@@ -825,26 +493,39 @@ ResSynth.tuningsFactory = (function()
         }
 
         // Returns tunings in which the midiPitch at tuning[midiKey][midiKey] is equal to midiKey.
-        function getRootTuning(rootCentsDeltas, tuningDef)
-        {
-            let rootKey = tuningDef.root % 12,
-                tuning = [];
-
-            console.assert(rootCentsDeltas.length === 12);
-
-            tuning.name = tuningDef.name;
-
-            // set tuning pattern at root
-            let deltaIndex = 12 - rootKey;
-            for(let i = 0; i < 128; i++)
+        function getRootTunings(tuningDefs, rootCentsDeltas)
+        {            
+            function getRootTuning(rootCentsDeltas, tuningDef)
             {
-                tuning.push(i + rootCentsDeltas[deltaIndex++ % 12]);
+                let rootKey = tuningDef.root % 12,
+                    tuning = [];
+
+                console.assert(rootCentsDeltas.length === 12);
+
+                tuning.name = tuningDef.name;
+
+                // set tuning pattern at root
+                let deltaIndex = 12 - rootKey;
+                for(let i = 0; i < 128; i++)
+                {
+                    tuning.push(i + rootCentsDeltas[deltaIndex++ % 12]);
+                }
+
+                finalizeTuning(tuning);
+
+                return tuning;
+            }  
+
+            let rootTunings = [];
+            for(let i = 0; i < tuningDefs.length; i++)
+            {
+                let rootTuning = getRootTuning(rootCentsDeltas, tuningDefs[i]);
+
+                rootTunings.push(rootTuning);
             }
 
-            finalizeTuning(tuning);
-
-            return tuning;
-        }    
+            return rootTunings;
+        }  
 
         // Returns tunings in which the midiPitch at tuning[midiKey][midiKey] is equal to
         // the midiPitch at tuning[0][midiKey].
@@ -871,22 +552,189 @@ ResSynth.tuningsFactory = (function()
             return diagonalTunings;
         }
 
-        let rootCentsDeltas = getRootCentsDeltas(),
-            tuningDefs = tuningGroupDef.tunings,
-            rootTunings = [];
-
-        for(let i = 0; i < tuningDefs.length; i++)
+        function logHarmonicTuningsInfos(harmonicTunings)
         {
-            let rootTuning = getRootTuning(rootCentsDeltas, tuningDefs[i]);
+            // returns a 12x12 array
+            function getRootXYArray(harmonicTunings)
+            {
+                let rootXYArray = [];
 
-            rootTunings.push(rootTuning);
+                for(let y = 0; y < 12; y++)
+                {
+                    let tuningsRow = harmonicTunings[y],
+                        row = [];
+                    for(let x = 12; x < 24; x++)
+                    {
+                        row.push(tuningsRow[x] - 12);
+                    }
+                    rootXYArray.push(row);
+                }
+                return rootXYArray;
+            }
+
+            // returns a string of length width,
+            // padded with spaces on the right.
+            function padRight(n, width)
+            {
+                let rval = n.toString();
+
+                while(rval.length < width)
+                {
+                    rval = rval + " ";
+                }
+
+                return rval;
+            }
+
+            // returns a string of length width,
+            // padded with spaces on the left.
+            function padLeft(n, width)
+            {
+                let rval = n.toString();
+
+                while(rval.length < width)
+                {
+                    rval = " " + rval;
+                }
+
+                return rval;
+            }
+
+            function logTopNumbers(xLength, columnWidth)
+            {
+                let str = padRight("", columnWidth + 3);
+                for(let z = 0; z < xLength; z++)
+                {
+                    str = str.concat(`${padRight(z, columnWidth)}`);
+                }
+                console.log(str + "\n");
+                let underline = padRight("", columnWidth);
+                while(underline.length < str.length)
+                {
+                    underline = underline + "-";
+                }
+                console.log(underline + "\n");
+            }
+
+            function logRootXYArray(rootXYArray, columnWidth)
+            {
+                function logRowY(y, xArray, columnWidth)
+                {
+                    let str = `${padLeft(y.toString() + "|  ", columnWidth + 3)}`;
+                    for(let x = 0; x < xArray.length; x++)
+                    {
+                        let value = Math.round(xArray[x] * 100) / 100;
+                        str = str.concat(`${padRight(value, columnWidth)}`);
+                    }
+                    console.log(str + "\n");
+                }
+
+                let ySize = rootXYArray.length,
+                    xSize = rootXYArray[0].length;
+
+                logTopNumbers(xSize, columnWidth);
+
+                for(let y = 0; y < ySize; y++)
+                {
+                    logRowY(y, rootXYArray[y], columnWidth);
+                }
+            }
+
+            function logAllPivotKeysArrays(allPivotKeysArrays, columnWidth)
+            {
+                function getKeysString(pivotKeysArray)
+                {
+                    let rval = "";
+                    if(pivotKeysArray.length === 0)
+                    {
+                        rval = "ALL";
+                    }
+                    else
+                    {
+                        for(let i = 0; i < pivotKeysArray.length; i++)
+                        {
+                            rval += `${pivotKeysArray[i]},`;
+                        }
+                        rval = rval.slice(0, -1);
+                    }
+                    return rval;
+                }
+
+                logTopNumbers(12, columnWidth); // target tuning indexes
+
+                for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArrays.length; initialTuningIndex++)
+                {
+                    let xString = "",
+                        pivotKeysArrays = allPivotKeysArrays[initialTuningIndex];
+
+                    for(let targetTuningIndex = 0; targetTuningIndex < 12; targetTuningIndex++)
+                    {
+                        let pivotKeysArray = pivotKeysArrays[targetTuningIndex],
+                            keysStr = getKeysString(pivotKeysArray);
+
+                        xString = `${xString}${padRight(keysStr, columnWidth)}`;
+                    }
+                    console.log(`${padLeft(initialTuningIndex, columnWidth)}|  ${xString}`);
+                }
+            }
+
+            function getAllPivotKeysArrays(rootXYArray)
+            {
+                // The indexth element in the returned array is an array containing the keyIndexes
+                // that pivot from the initialTuning to the indexth tuning.
+                function getPivotKeysFromInitialTuning(initialTuningIndex, rootXYArray)
+                {
+                    let pivotKeyArrays = [[], [], [], [], [], [], [], [], [], [], [], []],
+                        initialTuning = rootXYArray[initialTuningIndex];
+
+                    for(let targetTuningIndex = 0; targetTuningIndex < rootXYArray.length; targetTuningIndex++)
+                    {
+                        if(targetTuningIndex !== initialTuningIndex)
+                        {
+                            let targetTuning = rootXYArray[targetTuningIndex];
+
+                            for(let keyIndex = 0; keyIndex < rootXYArray[0].length; keyIndex++)
+                            {
+                                let diff = targetTuning[keyIndex] - initialTuning[keyIndex];
+
+                                if((Math.abs(diff) <= 0.05))
+                                {
+                                    pivotKeyArrays[targetTuningIndex].push(keyIndex);
+                                }
+                            }
+                        }
+                    }
+
+                    return pivotKeyArrays;
+                }
+
+                let allPivotKeysArrays = [];
+                for(let initialTuningIndex = 0; initialTuningIndex < rootXYArray.length; initialTuningIndex++)
+                {
+                    let pivotKeys = getPivotKeysFromInitialTuning(initialTuningIndex, rootXYArray);
+
+                    allPivotKeysArrays.push(pivotKeys);
+                }
+                return allPivotKeysArrays;
+            }
+
+            let rootXYArray = getRootXYArray(harmonicTunings); // rootXYArray is a 12x12 array
+            console.log("\n*** harmonic tunings: tunings per key (x) and tuning (y) ***");
+            logRootXYArray(rootXYArray, 7);
+
+            let allPivotKeysArrays = getAllPivotKeysArrays(rootXYArray);
+            console.log("\n*** harmonic tunings: keys having similar pitches in x and y tunings  ***");
+            logAllPivotKeysArrays(allPivotKeysArrays, 10);
         }
 
-        let tunings = getDiagonalTunings(rootTunings);
+        let tuningDefs = tuningGroupDef.tunings,
+            rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(),            
+            rootTunings = getRootTunings(tuningDefs, rootCentsDeltas),
+            harmonicTunings = getDiagonalTunings(rootTunings);
 
-        logHarmonicTuningsInfos(tunings);
+        logHarmonicTuningsInfos(harmonicTunings);
 
-        return tunings;
+        return harmonicTunings;
     };
 
 	return API;

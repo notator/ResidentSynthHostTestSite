@@ -15,8 +15,6 @@ console.log('load tuningDefs.js');
 //
 // A Tuning is an array of 128 MidiPitch values. Tuning[MidiKey] is the MidiPitch of the MidiKey
 // in that tuning. By convention, the MidiPitches in a tuning are always in ascending order.
-// When the tuning is changed (even across tuning types), one or more midiKeys change pitch by less
-// than 0.05 semitones. These midiKeys can be used as pivots in harmonic progressions.
 
 ResSynth.tuningType =
 {
@@ -94,28 +92,60 @@ ResSynth.tuningDefs =
 		// Constructor:   tunings = getHarmonicTunings();
 		// This constructor uses the _odd-numbered_natural_harmonics_ to return 12 128-note tunings,
 		// on 12 different root MidiKeys.
-		// Each tuning is constructed with its root midiPitch equal to its root key, so that the root key
-		// midiPitches are always equal to their standard equal temperament frequencies.
-		// (Nevertheless, each tuning contains _perfect_ intervals with respect to its root.)
-		// The midiPitches per key(x) per harmonic tuning(y) are as follows:
- 		// 		                                          key
-		//              C      C#     D      D#     E      F      F#     G      G#     A      A#     B
-		//          ---------------------------------------------------------------------------------------
-		// 	      0 |  0      1.05   2.04   2.98   3.86   4.71   5.51   7.02   7.73   8.41    9.69  10.88
-		//        1 | -0.12   1      2.05   3.04   3.98   4.86   5.71   6.51   8.02   8.73    9.41  10.69
-		//        2 | -0.31   0.88   2      3.05   4.04   4.98   5.86   6.71   7.51   9.02    9.73  10.41
-		//        3 | -0.59   0.69   1.88   3      4.05   5.04   5.98   6.86   7.71   8.51   10.02  10.73
-		//        4 | -0.27   0.41   1.69   2.88   4      5.05   6.04   6.98   7.86   8.71    9.51  11.02
-		// tuning 5 |  0.02   0.73   1.41   2.69   3.88   5      6.05   7.04   7.98   8.86    9.71  10.51
-		//        6 | -0.49   1.02   1.73   2.41   3.69   4.88   6      7.05   8.04   8.98    9.86  10.71
-		//        7 | -0.29   0.51   2.02   2.73   3.41   4.69   5.88   7      8.05   9.04    9.98  10.86
-		//        8 | -0.14   0.71   1.51   3.02   3.73   4.41   5.69   6.88   8      9.05   10.04  10.98
-		//        9 | -0.02   0.86   1.71   2.51   4.02   4.73   5.41   6.69   7.88   9      10.05  11.04
-		//       10 |  0.04   0.98   1.86   2.71   3.51   5.02   5.73   6.41   7.69   8.88   10     11.05
-		//       11 |  0.05   1.04   1.98   2.86   3.71   4.51   6.02   6.73   7.41   8.69    9.88  11
+		// The MidiPitches in the tuning at tuning index 0 begin with MidiPitch 0.00 at (root) MidiKey 0 (MIDI C).
+		// Each further tuning is constructed by rotating tuning[0] (horizontally in the diagram below) so that its
+		// root MidiPitch is at each MidiKey in turn, then transposing it bodily by a few cents so that its root
+		// midiPitch is equal to the midiPitch of the root key in tuning[0]. For example, the root MidiPitch in
+		// tuning[5] is at MidiKey 5, and has MidiPitch 4.71 (= MidiPitch of tuning[0][5])
+		// Each tuning continues to have _perfect_ harmonic intervals with respect to its root.
+		// ________________________________________________________________________________________________________
 		//
-		// N.B.In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
-		// In other octaves, the midiPitches are _all_ equal to their midiKey + these decimal values.
+		//                   --- midiPitches per key (x) per tuning (y) (diagonal tunings) ---
+		// Note 1: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
+		//         In other octaves, _all_ tunings are such that tuning[midiKey][rootKey] equals tuning[0][rootKey].
+		// Note 2: Internally, MidiPitches are simple floating point values: Here, for convenience, they are rounded
+		//         to the nearest cent.
+		//
+		//                                                   midiKey
+		//                     C     C#    D     D#    E     F     F#    G     G#    A     A#     B
+		//                     0     1     2     3     4     5     6     7     8     9     10    11
+		//                 ---------------------------------------------------------------------------
+		//            C   0|   0.00  1.05  2.04  2.98  3.86  4.71  5.51  7.02  7.73  8.41  9.69  10.88
+		//            C#  1|  -0.07  1.05  2.10  3.09  4.02  4.91  5.76  6.56  8.07  8.78  9.45  10.74
+		//            D   2|  -0.27  0.92  2.04  3.09  4.08  5.01  5.90  6.75  7.55  9.06  9.77  10.44
+		//            D#  3|  -0.62  0.66  1.86  2.98  4.02  5.01  5.95  6.84  7.68  8.49  9.99  10.70
+		//   tuning   E   4|  -0.41  0.27  1.55  2.75  3.86  4.91  5.90  6.84  7.73  8.57  9.38  10.88
+		// (root key) F   5|  -0.27  0.43  1.11  2.40  3.59  4.71  5.76  6.75  7.68  8.57  9.42  10.22
+		//            F#  6|  -0.97  0.53  1.24  1.92  3.20  4.40  5.51  6.56  7.55  8.49  9.38  10.22
+		//            G   7|  -0.27  0.53  2.04  2.75  3.42  4.71  5.90  7.02  8.07  9.06  9.99  10.88
+		//            G#  8|  -0.41  0.43  1.24  2.75  3.45  4.13  5.41  6.61  7.73  8.78  9.77  10.70
+		//            A   9|  -0.62  0.27  1.11  1.92  3.42  4.13  4.81  6.09  7.29  8.41  9.45  10.44
+		//            A# 10|  -0.27  0.66  1.55  2.40  3.20  4.71  5.41  6.09  7.38  8.57  9.69  10.74
+		//            B  11|  -0.07  0.92  1.86  2.75  3.59  4.40  5.90  6.61  7.29  8.57  9.77  10.88
+		// _____________________________________________________________________________________________________________________________________
+		//
+		//                                 --- pivot keys: keys whose tuning difference is <= 0.05 in tunings x and y. ---
+		// Note 1: The key values are mirrored along the "ALL" diagonal. (Either the x or y tuning can be thought of as the target).
+		// Note 2: The _key_ values in this table are also _absolute_, i.e.: 0=C, 1=C#, 2=D, 3=D#, 4=E, 5=F, 6=F#, 7=G, 8=G#, 9=A, 10=A#, 11=B.
+		//
+		//                                                                   target tuning
+		//                  C         C#        D         D#        E         F         F#        G         G#        A        A#        B
+		//                  0         1         2         3         4         5         6         7         8         9        10        11
+		//              ------------------------------------------------------------------------------------------------------------------------
+		//         C   0|   ALL       1         2         3,8       4,8,11    5,8       6         2,5,7,11  8         9         5,10    11
+		//         C#  1|   1         ALL       3         4,11      5         6,10      7         8         7,9,11   10        11        0,7
+		//         D   2|   2         3         ALL       5,6       6         0,7       8         0,2,6,9  10        11         0        1,6,10
+		//         D#  3|   3,8       4,11      5,6       ALL       6,7,8     8         9         6,10      8,11      0         1,11     2,6
+		//         E   4|   4,8,11    5         6         6,7,8     ALL       8,9,10   10         3,6,11    0,3,8     1         2,9      3,6,9,11
+		// initial F   5|   5,8       6,10      0,7       8         8,9,10    ALL      10,11      0,5       1,8       2,10      0,3,5,9  4,9
+		//  tuning F#  6|   6         7         8         9        10        10,11      ALL       1         2,7       3         4        5,7
+		//         G   7|   2,5,7,11  8         0,2,6,9   6,10      3,6,11    0,5       1         ALL       3,4       4         0,5      3,6,11
+		//         G#  8|   8         7,9,11   10         8,11      0,3,8     1,8       2,7       3,4       ALL       4,5       6,11     3,7,10
+		//         A   9|   9        10        11         0         1         2,10      3         4         4,5       ALL       7        8
+		//         A# 10|   5,10     11         0         1,11      2,9       0,3,5,9   4         0,5       6,11      7         ALL      9
+		//         B  11|   11        0,7       1,6,10    2,6       3,6,9,11  4,9       5,7       3,6,11    3,7,10    8         9        ALL
+		//
+		// =====================================================================================================================================
 		ctor: ResSynth.tuningType.HARMONIC,
 		name: "harmonic tunings",
 		tunings:
