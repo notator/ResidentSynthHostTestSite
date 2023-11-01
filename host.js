@@ -235,16 +235,7 @@ ResSynth.host = (function(document)
                     command = data[0] & 0xF0,
                     msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]);
 
-                // Note that triggerKeys send normal noteOn messages while recording is in progress!
-                // This is currently by design!
-                if(triggerKey !== undefined && command === CMD.NOTE_ON && data[1] === triggerKey && recording === undefined)
-                {
-                    if(data[2] !== 0)
-                    {
-                        doTriggerAction();
-                    }
-                }
-                else if(recording !== undefined)
+                if(recording !== undefined)
                 {
                     if(playbackChannelIndices.includes(currentChannel) && command === CMD.NOTE_ON)
                     {
@@ -252,49 +243,55 @@ ResSynth.host = (function(document)
                     }
                     else
                     {
-                        synth.send(msg);
                         let now = performance.now();
                         recordingChannelInfo.messages.push({msg, now});
                     }
                 }
-                else if(!(command === CMD.NOTE_OFF && data[1] === triggerKey)) // EMU never sends NOTE_OFF, but anyway...
+
+                switch(command)
                 {
-                    switch(command)
+                    case CMD.NOTE_OFF:
+                        break;
+                    case CMD.NOTE_ON:
+                        if(inputDevice.name.localeCompare("E-MU Xboard49") === 0)
+                        {
+                            msg[2] = getRectifiedEMUVelocity(msg[2]);
+                        }
+                        //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
+                        break;
+                    case CMD.CONTROL_CHANGE:
+                        updateGUI_ControlsTable(data[1], data[2]);
+                        //console.log("control change: " + getMsgString(data));
+                        break;
+                    case CMD.PRESET:
+                        //console.log("preset: " + getMsgString(data));
+                        break;
+                    case CMD.PITCHWHEEL:
+                        // This host uses pitchWheel values in range 0..127, so data[1] (the fine byte) is ignored here.
+                        // But note that the residentSynth _does_ use both data[1] and data[2] when responding
+                        // to PITCHWHEEL messages (including those that come from the E-MU keyboard), so PITCHWHEEL
+                        // messages sent from this host's GUI use a data[1] value that is calculated on the fly.
+                        updateGUI_CommandsTable(command, data[2]);
+                        //console.log("pitchWheel: value=" + data[2]);
+                        break;
+                    default:
+                        // Neither the residentSynth nor the residentSynthHost process
+                        // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages
+                        // so the input device (the keyboard or Assistant Performer)
+                        // should not send them (at performance time)
+                        // These commands will be sent to the ResidentSynth, but flagged
+                        // as errors there.
+                        break;
+                }
+
+                synth.send(msg);
+
+                if(triggerKey !== undefined && command === CMD.NOTE_ON && data[1] === triggerKey)
+                {
+                    if(data[2] !== 0)
                     {
-                        case CMD.NOTE_OFF:
-                            break;
-                        case CMD.NOTE_ON:
-                            if(inputDevice.name.localeCompare("E-MU Xboard49") === 0)
-                            {
-                                msg[2] = getRectifiedEMUVelocity(msg[2]);
-                            }
-                            //console.log("NoteOn: key=" + data[1] + ", velocity=" + data[2]);
-                            break;
-                        case CMD.CONTROL_CHANGE:
-                            updateGUI_ControlsTable(data[1], data[2]);
-                            //console.log("control change: " + getMsgString(data));
-                            break;
-                        case CMD.PRESET:
-                            //console.log("preset: " + getMsgString(data));
-                            break;
-                        case CMD.PITCHWHEEL:
-                            // This host uses pitchWheel values in range 0..127, so data[1] (the fine byte) is ignored here.
-                            // But note that the residentSynth _does_ use both data[1] and data[2] when responding
-                            // to PITCHWHEEL messages (including those that come from the E-MU keyboard), so PITCHWHEEL
-                            // messages sent from this host's GUI use a data[1] value that is calculated on the fly.
-                            updateGUI_CommandsTable(command, data[2]);
-                            //console.log("pitchWheel: value=" + data[2]);
-                            break;
-                        default:
-                            // Neither the residentSynth nor the residentSynthHost process
-                            // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages
-                            // so the input device (the keyboard or Assistant Performer)
-                            // should not send them (at performance time)
-                            // These commands will be sent to the ResidentSynth, but flagged
-                            // as errors there.
-                            break;
+                        doTriggerAction();
                     }
-                    synth.send(msg);
                 }
             }
 
