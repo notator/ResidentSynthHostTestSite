@@ -88,7 +88,12 @@ ResSynth.mixtureDefs =
                     [9, -20], [13, -30], [12, -40], [24, -50]
                 ],
             except: []
-        }
+    },
+    {   // index 7
+        name: "harmonics1",
+        extraNotes: [[19, -20], [28, -30], [34, -40], [38, -50], [42, -60]],
+        except: []
+    }
     ];
 
 
