@@ -69,29 +69,15 @@ ResSynth.host = (function(document)
             }
         },
 
-        sendCommand = function(commandIndex, data1, data2)
+        sendMessage = function(msg)
         {
-            var CMD = ResSynth.constants.COMMAND,
-                status = commandIndex + currentChannel,
-                msg;
-
-            switch(commandIndex)
-            {
-                case CMD.NOTE_ON:
-                    msg = new Uint8Array([status, data1, data2]);
-                    break;
-                case CMD.NOTE_OFF:
-                case CMD.CONTROL_CHANGE:
-                case CMD.PITCHWHEEL:
-                    msg = new Uint8Array([status, data1, data2]);
-                    break;
-                case CMD.PRESET:
-                    msg = new Uint8Array([status, data1]);
-                    break;
-                default:
-                    console.warn("Error: Not a command, or attempt to set the value of a command that has no value.");
-            }
             synth.send(msg);
+            if(recording !== undefined)
+            {
+                let now = performance.now();
+
+                recordingChannelInfo.messages.push({msg, now});
+            }
         },
 
         setOptions = function(select, options)
@@ -113,7 +99,8 @@ ResSynth.host = (function(document)
 
         sendLongControl = function(controlIndex, value)
         {
-            sendCommand(ResSynth.constants.COMMAND.CONTROL_CHANGE, controlIndex, value);
+            let msg = new Uint8Array([ResSynth.constants.COMMAND.CONTROL_CHANGE + currentChannel, controlIndex, value]);
+            sendMessage(msg);
         },
 
         sendShortControl = function(controlIndex)
@@ -139,7 +126,8 @@ ResSynth.host = (function(document)
             }
 
             // controlIndex === ResSynth.constants.CONTROL.ALL_CONTROLLERS_OFF || controlIndex === ResSynth.constants.CONTROL.ALL_SOUND_OFF
-            sendCommand(ResSynth.constants.COMMAND.CONTROL_CHANGE, controlIndex);
+            let msg = new Uint8Array([ResSynth.constants.COMMAND.CONTROL_CHANGE + currentChannel, controlIndex]);
+            sendMessage(msg);
         },
 
         // sets all channels in the new synth state in both the host and the synth
@@ -221,7 +209,7 @@ ResSynth.host = (function(document)
 
                     settingsSelect.selectedIndex = nextSettingsIndex;
 
-                    setSettings(nextSettingsIndex); // sets the channel and its state in both the host and the synth
+                    setSettings(nextSettingsIndex); // sets all channel states in both the host and the synth
 
                     nextSettingsIndex = (nextSettingsIndex < (settingsSelect.options.length - 1)) ? nextSettingsIndex + 1 : 0;
 
@@ -234,19 +222,6 @@ ResSynth.host = (function(document)
                     CMD = ResSynth.constants.COMMAND,
                     command = data[0] & 0xF0,
                     msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]);
-
-                if(recording !== undefined)
-                {
-                    if(playbackChannelIndices.includes(currentChannel) && command === CMD.NOTE_ON)
-                    {
-                        cancelPlayback = true;
-                    }
-                    else
-                    {
-                        let now = performance.now();
-                        recordingChannelInfo.messages.push({msg, now});
-                    }
-                }
 
                 switch(command)
                 {
@@ -284,7 +259,12 @@ ResSynth.host = (function(document)
                         break;
                 }
 
-                synth.send(msg);
+                if(recording !== undefined && playbackChannelIndices.includes(currentChannel) && command === CMD.NOTE_ON)
+                {
+                    cancelPlayback = true;
+                }
+
+                sendMessage(msg)
 
                 if(triggerKey !== undefined && command === CMD.NOTE_ON && data[1] === triggerKey)
                 {
@@ -409,7 +389,7 @@ ResSynth.host = (function(document)
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
-            currentChannel = channel; // the global currentChannel is used by synth.send(...)
+            currentChannel = channel; // the global currentChannel is used when constructing all midi messages
 
             setAndSendWebAudioFontDivControls(hostChannelSettings);
             setAndSendTuningDivControls(hostChannelSettings);
@@ -444,7 +424,8 @@ ResSynth.host = (function(document)
                 presetOptionsArray = selectedBankOption.presetOptionsArray,
                 bankIndexMsg = getBankIndexMsg(channel, bankSelect.selectedIndex);
 
-            synth.send(bankIndexMsg);
+
+            sendMessage(bankIndexMsg);
 
             setOptions(presetSelect, presetOptionsArray);
 
@@ -472,7 +453,7 @@ ResSynth.host = (function(document)
                 presetIndex = presetSelect.selectedIndex,
                 presetMsg = getPresetMsg(channel, presetIndex);
 
-            synth.send(presetMsg);
+            sendMessage(presetMsg);
 
             mixtureSelect.selectedIndex = hostChannelSettings.mixtureIndex;
             onMixtureSelectChanged();
@@ -499,7 +480,7 @@ ResSynth.host = (function(document)
                 mixtureIndex = mixtureSelect.selectedIndex,
                 mixtureMessage = getMixtureMsg(channel, mixtureIndex);
 
-            synth.send(mixtureMessage);
+            sendMessage(mixtureMessage);
 
             hostChannelSettings.mixtureIndex = mixtureIndex;
 
@@ -542,8 +523,8 @@ ResSynth.host = (function(document)
                 setTuningGroupIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_GROUP_INDEX, tuningGroupIndex]),
                 setTuningIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_INDEX, tuningIndex]);
 
-            synth.send(setTuningGroupIndexMsg);
-            synth.send(setTuningIndexMsg);
+            sendMessage(setTuningGroupIndexMsg);
+            sendMessage(setTuningIndexMsg);
 
             semitonesOffsetNumberInput.value = hostChannelSettings.semitonesOffset;
             onSemitonesOffsetNumberInputChanged();
@@ -571,7 +552,7 @@ ResSynth.host = (function(document)
             midiValue = semitonesOffsetNumberInput.midiValue(semitonesOffset);
             semitonesOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SEMITONES_OFFSET, midiValue]);
 
-            synth.send(semitonesOffsetMsg);
+            sendMessage(semitonesOffsetMsg);
 
             hostChannelSettings.semitonesOffset = semitonesOffset;
 
@@ -592,7 +573,7 @@ ResSynth.host = (function(document)
             midiValue = centsOffsetNumberInput.midiValue(centsOffset);
             centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, midiValue]);
 
-            synth.send(centsOffsetMsg);
+            sendMessage(centsOffsetMsg);
 
             hostChannelSettings.centsOffset = centsOffset;
 
@@ -771,54 +752,54 @@ ResSynth.host = (function(document)
 
                     // channelSettings.bankIndex
                     let bankIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.BANK, channelSettings.bankIndex]);
-                    synth.send(bankIndexMsg);
+                    sendMessage(bankIndexMsg);
                     // channelSettings.presetIndex
                     let presetMsg = new Uint8Array([CMD.PRESET + channel, channelSettings.presetIndex]);
-                    synth.send(presetMsg);
+                    sendMessage(presetMsg);
                     // channelSettings.mixtureIndex
                     let mixtureMessage = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MIXTURE_INDEX, channelSettings.mixtureIndex]);
-                    synth.send(mixtureMessage);
+                    sendMessage(mixtureMessage);
                     // channelSettings.tuningGroupIndex
                     let tuningGroupIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_GROUP_INDEX, channelSettings.tuningGroupIndex]);
-                    synth.send(tuningGroupIndexMsg);
+                    sendMessage(tuningGroupIndexMsg);
                     // channelSettings.tuningIndex
                     let tuningIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_INDEX, channelSettings.tuningIndex]);
-                    synth.send(tuningIndexMsg);
+                    sendMessage(tuningIndexMsg);
                     // channelSettings.semitonesOffset
                     let sMidiValue = semitonesOffsetNumberInput.midiValue(channelSettings.semitonesOffset);
                     let semitonesOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SEMITONES_OFFSET, sMidiValue]);
-                    synth.send(semitonesOffsetMsg);
+                    sendMessage(semitonesOffsetMsg);
                     // channelSettings.centsOffset
                     let cMidiValue = centsOffsetNumberInput.midiValue(channelSettings.centsOffset);
                     let centsOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.CENTS_OFFSET, cMidiValue]);
-                    synth.send(centsOffsetMsg);
+                    sendMessage(centsOffsetMsg);
                     // channelSettings.pitchWheel
                     let pitchWheelMsg = new Uint8Array([CMD.PITCHWHEEL + channel, channelSettings.pitchWheel, channelSettings.pitchWheel]);
-                    synth.send(pitchWheelMsg);
+                    sendMessage(pitchWheelMsg);
                     // channelSettings.modWheel
                     let modWheelMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MODWHEEL, channelSettings.modWheel]);
-                    synth.send(modWheelMsg);
+                    sendMessage(modWheelMsg);
                     // channelSettings.volume
                     let volMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VOLUME, channelSettings.volume]);
-                    synth.send(volMsg);
+                    sendMessage(volMsg);
                     // channelSettings.pan
                     let panMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PAN, channelSettings.pan]);
-                    synth.send(panMsg);
+                    sendMessage(panMsg);
                     // channelSettings.reverberation 
                     let reverbMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.REVERBERATION, channelSettings.reverberation]);
-                    synth.send(reverbMsg);
+                    sendMessage(reverbMsg);
                     // channelSettings.pitchWheelSensitivity
                     let pwsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PITCH_WHEEL_SENSITIVITY, channelSettings.pitchWheelSensitivity]);
-                    synth.send(pwsMsg);
+                    sendMessage(pwsMsg);
                     // channelSettings.velocityPitchSensitivity
                     let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity]);
-                    synth.send(vpsMsg);
+                    sendMessage(vpsMsg);
                     // channelSettings.keyboardSplitIndex
                     let ksiMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SET_KEYBOARD_SPLIT_ARRAY, channelSettings.keyboardSplitIndex]);
-                    synth.send(ksiMsg);
+                    sendMessage(ksiMsg);
                     // channelSettings.keyboardOrnamentsArrayIndex
                     let koaMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SET_KEYBOARD_ORNAMENT_DEFS, channelSettings.keyboardOrnamentsArrayIndex]);
-                    synth.send(koaMsg);                    
+                    sendMessage(koaMsg);                   
                 }
 
                 for(var i = 0; i < playbackChannels.length; i++)
@@ -865,7 +846,7 @@ ResSynth.host = (function(document)
                             }
 
                             await wait(delay, cancelPlayback);
-                            synth.send(pbMsg);
+                            sendMessage(pbMsg);
                             let now = performance.now();
                             recordingChannelMessages.push({pbMsg, now});
 
@@ -887,7 +868,7 @@ ResSynth.host = (function(document)
                             }
 
                             await wait(delay, cancelPlayback);
-                            synth.send(pbMsg);
+                            sendMessage(pbMsg);
                             playbackMessage.now = performance.now();
 
                             prevMsPos = thisMsPos;
@@ -920,7 +901,7 @@ ResSynth.host = (function(document)
                             CTL = ResSynth.constants.CONTROL,
                             msg = new Uint8Array([((channel + CMD.CONTROL_CHANGE) & 0xFF), CTL.ALL_SOUND_OFF, 0]);
 
-                        synth.send(msg);
+                        sendMessage(msg);
                     }
 
                     alert("Playback Canceled:\n\n" +
@@ -1015,10 +996,6 @@ ResSynth.host = (function(document)
                 settingsSelect.disabled = true;
                 exportSettingsButton.prevState = exportSettingsButton.disabled;
                 exportSettingsButton.disabled = true;
-
-                triggerKeyTitle.style.color = "darkgray";
-                triggerKeyInput.disabled = true;
-                settingsNameCell.style.color = "darkgray";
             }
 
             let startRecordingButton = getElem("startRecordingButton"),
@@ -1057,7 +1034,8 @@ ResSynth.host = (function(document)
                     let message = messages[i],
                         msg = message.msg,
                         msPositionReRecording = message.msPositionReRecording,
-                        str = msg[0].toString() + "," + msg[1].toString() + "," + msg[2].toString() + "," + msPositionReRecording.toString();
+                        msg2String = (msg[2] === undefined) ? "0" : msg[2].toString(),
+                        str = msg[0].toString() + "," + msg[1].toString() + "," + msg2String + "," + msPositionReRecording.toString();
 
                     rval.push(str);
                 }
@@ -1234,7 +1212,7 @@ ResSynth.host = (function(document)
             hostChannelSettings.keyboardSplitIndex = keyboardSplitIndex;
             setExportState(channel, hostChannelSettings);            
 
-            synth.send(setKeyboardSplitIndexMsg);
+            sendMessage(setKeyboardSplitIndexMsg);
         },
 
         onOrnamentsSelectChanged = function()
@@ -1250,7 +1228,7 @@ ResSynth.host = (function(document)
             hostChannelSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
             setExportState(channel, hostChannelSettings);
 
-            synth.send(keyboardOrnamentsArrayIndexMsg);
+            sendMessage(keyboardOrnamentsArrayIndexMsg);
         },
 
         // exported
@@ -1641,8 +1619,8 @@ ResSynth.host = (function(document)
                                         }
 
                                         //console.log("d1=" + data1 + " d2=" + data2);
-
-                                        sendCommand(cmdIndex, data1, data2);
+                                        let msg = new Uint8Array([cmdIndex + currentChannel, data1, data2]);
+                                        sendMessage(msg);
                                     }
                                     else
                                     {
@@ -2049,7 +2027,8 @@ ResSynth.host = (function(document)
         {
             function sendNoteOn(key, velocity)
             {
-                sendCommand(ResSynth.constants.COMMAND.NOTE_ON, key, velocity);
+                let msg = new Uint8Array([ResSynth.constants.COMMAND.NOTE_ON + currentChannel, key, velocity]);
+                sendMessage(msg);
             }
 
             let
@@ -2088,11 +2067,13 @@ ResSynth.host = (function(document)
 
                 if(synth.commands.indexOf(NOTE_OFF) >= 0)
                 {
-                    sendCommand(NOTE_OFF, noteIndex, noteVelocity);
+                    let msg = new Uint8Array([ResSynth.constants.COMMAND.NOTE_OFF + currentChannel, noteIndex, noteVelocity]);
+                    sendMessage(msg);
                 }
                 else
                 {
-                    sendCommand(NOTE_ON, noteIndex, 0);
+                    let msg = new Uint8Array([ResSynth.constants.COMMAND.NOTE_ON + currentChannel, noteIndex, 0]);
+                    sendMessage(msg);
                 }
             }
 
