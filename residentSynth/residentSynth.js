@@ -1113,6 +1113,17 @@ ResSynth.residentSynth = (function(window)
         // (Attributes can never be created or destroyed.)
         getSynthSettingsArray = function(synthSettingsDefs)
         {
+            function getDefaultSettings()
+            {
+                let defaultSettings = new ResSynth.synthSettings.SynthSettings(),
+                    channelSettingsArray = defaultSettings.channelSettingsArray;
+                for(var channel = 0; channel < 16; channel++)
+                {
+                    channelSettingsArray.push(new ResSynth.channelSettings.ChannelSettings());
+                }
+                return defaultSettings;
+            }
+
             function checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsName)
             {
                 let keyboardSplitDefs = ResSynth.keyboardSplitDefs,
@@ -1219,7 +1230,10 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            synthSettingsArray.push(new ResSynth.synthSettings.SynthSettings()); // default at index 0
+            let synthSettingsArray = [],
+                defaultSettings = getDefaultSettings();
+
+            synthSettingsArray.push(defaultSettings); // default at index 0
 
             if(synthSettingsDefs !== undefined && synthSettingsDefs.length > 0)
             {
@@ -1235,14 +1249,13 @@ ResSynth.residentSynth = (function(window)
                     newSynthSettings.name = synthSettingsDef.name;
                     newSynthSettings.keyboardSplitIndex = keyboardSplitIndex;
 
-                    // N.B. newSynthSettings currently has 16 default ChannelSettings objects in its channelSettings array
-                    // but channelSettingsDefs.length may be less than 16.
                     for(var channel = 0; channel < channelSettingsDefs.length; channel++)
                     {
                         let csDef = channelSettingsDefs[channel],
-                            channelSettings = newSynthSettings.channelSettingsArray[channel];
+                            channelSettings = new ResSynth.channelSettings.ChannelSettings(); 
 
-                        checkChannelSettings(csDef, synthSettingsDef.name);
+                        // 3.11.2023 change these assignments so that the csDef attributes are only used if not undefined.
+                        // then change and call the above checkChannelSettings() function accordingly.
 
                         channelSettings.name = csDef.name;
                         channelSettings.bankIndex = csDef.bankIndex;
@@ -1264,11 +1277,14 @@ ResSynth.residentSynth = (function(window)
                         channelSettings.keyboardOrnamentsArrayIndex = csDef.keyboardOrnamentsArrayIndex;
 
                         Object.freeze(channelSettings); // attribute values are frozen
+
+                        newSynthSettings.channelSettingsArray.push(channelSettings);
                     }
 
                     synthSettingsArray.push(newSynthSettings);
                 }
             }
+
             return synthSettingsArray;
         },
 

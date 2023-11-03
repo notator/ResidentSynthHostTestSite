@@ -130,34 +130,203 @@ ResSynth.host = (function(document)
             sendMessage(msg);
         },
 
-        // sets all channels in the new synth state in both the host and the synth
+        // Sets all channels in the new synth state in both the host and the synth
+        // The synth is _not_ silenced while resetting all the controls.
         setSettings = function(settingsIndex)
         {
+            // Returns an object having .triggerKey and .keyboardSplitIndex attributes.
+            // These should be the same in all channels.
+            // The values returned are the last in any settingsChanges in the channelSettingsArray.
+            function getGlobalSettingsChanges(channelSettingsArray)
+            {
+                let triggerKey = undefined,
+                    keyboardSplitIndex = undefined;
+
+                for(let channel = 0; channel < channelSettingsArray.length; channel++)
+                {
+                    let settingsChanges = channelSettingsArray[channel];
+
+                    if(settingsChanges.triggerKey !== undefined)
+                    {
+                        triggerKey = settingsChanges.triggerKey;
+                    }
+
+                    if(settingsChanges.keyboardSplitIndex !== undefined)
+                    {
+                        keyboardSplitIndex = settingsChanges.keyboardSplitIndex;
+                    }
+                }
+
+                return {triggerKey, keyboardSplitIndex};
+            }
+
+            function getNewHostSettings(channel, currentChannelSettings, settingsChanges, globalSettings)
+            {
+                // The semitonesOrCentsOffset is a value in range -64..+63 for semitones.
+                // The semitonesOrCentsOffset is a value in range -50..+50 for cents.
+                // The returned value is in range 0..127, for use in the midi messages.
+                function getOffsetMidiValue(semitonesOrCentsOffset)
+                {
+                    return semitonesOrCentsOffset + 64;
+                }
+
+                let CMD = ResSynth.constants.COMMAND,
+                    CTL = ResSynth.constants.CONTROL,
+                    cmdControl = CMD.CONTROL_CHANGE + channel,
+                    msg = undefined,
+                    newHostSettings = currentChannelSettings.clone();
+
+                if(settingsChanges.bankIndex !== undefined)
+                {
+                    let bankIndex = settingsChanges.bankIndex;
+                    newHostSettings.bankIndex = bankIndex;
+                    msg = new Uint8Array([cmdControl, CTL.BANK, bankIndex]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.presetIndex !== undefined)
+                {
+                    let presetIndex = settingsChanges.bankIndex;
+                    newHostSettings.presetIndex = presetIndex;
+                    msg = new Uint8Array([CMD.PRESET + channel, presetIndex]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.mixtureIndex !== undefined)
+                {
+                    let mixtureIndex = settingsChanges.mixtureIndex;
+                    newHostSettings.mixtureIndex = mixtureIndex;
+                    msg = new Uint8Array([cmdControl, CTL.MIXTURE_INDEX, mixtureIndex]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.tuningGroupIndex !== undefined)
+                {
+                    let tuningGroupIndex = settingsChanges.tuningGroupIndex;
+                    newHostSettings.tuningGroupIndex = tuningGroupIndex;
+                    msg = new Uint8Array([cmdControl, CTL.TUNING_GROUP_INDEX, tuningGroupIndex]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.tuningIndex !== undefined)
+                {
+                    let tuningIndex = settingsChanges.tuningIndex;
+                    newHostSettings.tuningIndex = tuningIndex;
+                    msg = new Uint8Array([cmdControl, CTL.TUNING_INDEX, tuningIndex]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.semitonesOffset !== undefined)
+                {
+                    let semitonesOffset = settingsChanges.semitonesOffset;
+                    newHostSettings.semitonesOffset = semitonesOffset;
+                    msg = new Uint8Array([cmdControl, CTL.SEMITONES_OFFSET, getOffsetMidiValue(semitonesOffset)]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.centsOffset !== undefined)
+                {
+                    let centsOffset = settingsChanges.centsOffset;
+                    newHostSettings.centsOffset = centsOffset;
+                    msg = new Uint8Array([cmdControl, CTL.CENTS_OFFSET, getOffsetMidiValue(centsOffset)]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.pitchWheel !== undefined)
+                {
+                    let pitchWheel = settingsChanges.pitchWheel;
+                    newHostSettings.pitchWheel = pitchWheel;
+                    msg = new Uint8Array([CMD.PITCHWHEEL + channel, pitchWheel, pitchWheel]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.modWheel !== undefined)
+                {
+                    let modWheel = settingsChanges.modWheel;
+                    newHostSettings.modWheel = modWheel;
+                    msg = new Uint8Array([cmdControl, CTL.MODWHEEL, modWheel]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.volume !== undefined)
+                {
+                    let volume = settingsChanges.volume;
+                    newHostSettings.volume = volume;
+                    msg = new Uint8Array([cmdControl, CTL.VOLUME, volume]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.pan !== undefined)
+                {
+                    let pan = settingsChanges.pan;
+                    newHostSettings.pan = pan;
+                    msg = new Uint8Array([cmdControl, CTL.PAN, pan]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.reverberation !== undefined)
+                {
+                    let reverberation = settingsChanges.reverberation;
+                    newHostSettings.reverberation = reverberation;
+                    msg = new Uint8Array([cmdControl, CTL.REVERBERATION, reverberation]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.pitchWheelSensitivity !== undefined)
+                {
+                    let pitchWheelSensitivity = settingsChanges.pitchWheelSensitivity;
+                    newHostSettings.pitchWheelSensitivity = pitchWheelSensitivity;
+                    msg = new Uint8Array([cmdControl, CTL.PITCH_WHEEL_SENSITIVITY, pitchWheelSensitivity]);
+                    sendMessage(msg);
+                }
+                if(settingsChanges.pitchWheelSensitivity !== undefined)
+                {
+                    let pitchWheelSensitivity = settingsChanges.pitchWheelSensitivity;
+                    newHostSettings.pitchWheelSensitivity = pitchWheelSensitivity;
+                    msg = new Uint8Array([cmdControl, CTL.PITCH_WHEEL_SENSITIVITY, pitchWheelSensitivity]);
+                    sendMessage(msg);
+                }
+                // the triggerKey is only set in the host.
+                if(globalSettings.triggerKey !== undefined)
+                {
+                    newHostSettings.triggerKey = globalSettings.triggerKey;
+                }
+                if(settingsChanges.velocityPitchSensitivity !== undefined)
+                {
+                    let velocityPitchSensitivity = settingsChanges.velocityPitchSensitivity;
+                    newHostSettings.velocityPitchSensitivity = velocityPitchSensitivity;
+                    msg = new Uint8Array([cmdControl, CTL.VELOCITY_PITCH_SENSITIVITY, velocityPitchSensitivity]);
+                    sendMessage(msg);
+                }
+                // the host and synth are set later by setting
+                // keyboardSplitSelect.selectedIndex = channelSelect.options[0].hostSettings.keyboardSplitIndex;
+                // and calling onKeyboardSplitSelectChanged().
+                if(globalSettings.keyboardSplitIndex !== undefined)
+                {
+                    newHostSettings.keyboardSplitIndex = globalSettings.keyboardSplitIndex;;
+                }
+                if(settingsChanges.keyboardOrnamentsArrayIndex !== undefined)
+                {
+                    let keyboardOrnamentsArrayIndex = settingsChanges.keyboardOrnamentsArrayIndex;
+                    newHostSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
+                    msg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, keyboardOrnamentsArrayIndex]);
+                    sendMessage(msg);
+                }
+
+                return newHostSettings;
+            }
+
             let settingsSelect = getElem("settingsSelect"),
                 channelSettingsArray = settingsSelect.options[settingsIndex].synthSettings.channelSettingsArray,
                 channelSelect = getElem("channelSelect"),
-                keyboardSplitSelect = getElem("keyboardSplitSelect");
+                keyboardSplitSelect = getElem("keyboardSplitSelect"),
+                globalSettings = getGlobalSettingsChanges(channelSettingsArray);
 
-            // decided _not_ to silence the synth while resetting all the controls.
-            // sendShortControl(ResSynth.constants.CONTROL.ALL_SOUND_OFF);
-
-            console.assert(channelSettingsArray.length === 16);
+            console.assert(channelSettingsArray.length > 0 && channelSettingsArray.length <= 16);            
 
             for(let channel = 0; channel < channelSettingsArray.length; channel++)
             {
-                let channelSettings = channelSettingsArray[channel].clone();
+                let currentChannelSettings = channelSelect.options[channel].hostSettings,
+                    settingsChanges = channelSettingsArray[channel],
+                    newHostSettings = getNewHostSettings(channel, currentChannelSettings, settingsChanges, globalSettings); // updates the synth
 
-                channelSelect.options[channel].hostSettings = channelSettings;
-                channelSelect.selectedIndex = channel;
-                onChannelSelectChanged(); // update synth
+                channelSelect.options[channel].hostSettings = newHostSettings;
             }
 
             keyboardSplitSelect.selectedIndex = channelSelect.options[0].hostSettings.keyboardSplitIndex;
             onKeyboardSplitSelectChanged();
 
-            channelSelect.selectedIndex = 0;
-            onChannelSelectChanged();
+            onChannelSelectChanged(true); // true means don't send midi messages!
         },
+
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
             function handleInputMessage(e)
@@ -334,20 +503,19 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onChannelSelectChanged = function()
+        onChannelSelectChanged = function(dontUpdateSynth)
         {
-
-            function setAndSendWebAudioFontDivControls(hostChannelSettings)
+            function setAndSendWebAudioFontDivControls(hostChannelSettings, dontUpdateSynth)
             {
                 let bankSelect = getElem("bankSelect");
 
                 bankSelect.selectedIndex = hostChannelSettings.bankIndex; // index in bankSelect
 
                 // set the soundFont in the synth, and the presetSelect then call onPresetSelectChanged() (which calls onMixtureSelectChanged())
-                onBankSelectChanged();
+                onBankSelectChanged(dontUpdateSynth);
             }
 
-            function setAndSendTuningDivControls(hostChannelSettings)
+            function setAndSendTuningDivControls(hostChannelSettings, dontUpdateSynth)
             {
                 let tuningGroupSelect = getElem("tuningGroupSelect");
 
@@ -355,10 +523,10 @@ ResSynth.host = (function(document)
 
                 // set the tuningSelect then call onTuningtSelectChanged()
                 // (which calls onSemitonesOffsetNumberInputChanged() and onCentsOffsetNumberInputChanged())
-                onTuningGroupSelectChanged();
+                onTuningGroupSelectChanged(dontUpdateSynth);
             }
 
-            function setAndSendLongControls(hostChannelSettings)
+            function setAndSendLongControls(hostChannelSettings, dontUpdateSynth)
             {
                 let pitchWheelLC = getElem("pitchWheelLongControl"),
                     modWheelLC = getElem("modWheelLongControl"),
@@ -367,20 +535,20 @@ ResSynth.host = (function(document)
                     reverberationLC = getElem("reverberationLongControl"),
                     pitchWheelSensitivityLC = getElem("pitchWheelSensitivityLongControl");
 
-                pitchWheelLC.setValue(hostChannelSettings.pitchWheel);
-                modWheelLC.setValue(hostChannelSettings.modWheel);
-                volumeLC.setValue(hostChannelSettings.volume);
-                panLC.setValue(hostChannelSettings.pan);
-                reverberationLC.setValue(hostChannelSettings.reverberation);
-                pitchWheelSensitivityLC.setValue(hostChannelSettings.pitchWheelSensitivity);
+                pitchWheelLC.setValue(hostChannelSettings.pitchWheel, dontUpdateSynth);
+                modWheelLC.setValue(hostChannelSettings.modWheel, dontUpdateSynth);
+                volumeLC.setValue(hostChannelSettings.volume, dontUpdateSynth);
+                panLC.setValue(hostChannelSettings.pan, dontUpdateSynth);
+                reverberationLC.setValue(hostChannelSettings.reverberation, dontUpdateSynth);
+                pitchWheelSensitivityLC.setValue(hostChannelSettings.pitchWheelSensitivity, dontUpdateSynth);
             }
 
-            function setAndSendOrnamentsDivControls(hostChannelSettings)
+            function setAndSendOrnamentsDivControls(hostChannelSettings, dontUpdateSynth)
             {
                 let ornamentsSelect = getElem("ornamentsSelect");
 
                 ornamentsSelect.selectedIndex = hostChannelSettings.keyboardOrnamentsArrayIndex;
-                onOrnamentsSelectChanged();
+                onOrnamentsSelectChanged(dontUpdateSynth);
             }
 
             let channelSelect = getElem("channelSelect"),
@@ -391,14 +559,14 @@ ResSynth.host = (function(document)
 
             currentChannel = channel; // the global currentChannel is used when constructing all midi messages
 
-            setAndSendWebAudioFontDivControls(hostChannelSettings);
-            setAndSendTuningDivControls(hostChannelSettings);
+            setAndSendWebAudioFontDivControls(hostChannelSettings, dontUpdateSynth);
+            setAndSendTuningDivControls(hostChannelSettings, dontUpdateSynth);
 
             setTriggersDivControls(hostChannelSettings); // uses currentChannel
 
-            setAndSendLongControls(hostChannelSettings);
+            setAndSendLongControls(hostChannelSettings, dontUpdateSynth);
 
-            setAndSendOrnamentsDivControls(hostChannelSettings);
+            setAndSendOrnamentsDivControls(hostChannelSettings, dontUpdateSynth);
 
             setExportState(channel, hostChannelSettings);
 
@@ -407,7 +575,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onBankSelectChanged = function()
+        onBankSelectChanged = function(dontUpdateSynth)
         {
             function getBankIndexMsg(channel, bankIndex)
             {
@@ -424,13 +592,13 @@ ResSynth.host = (function(document)
                 presetOptionsArray = selectedBankOption.presetOptionsArray,
                 bankIndexMsg = getBankIndexMsg(channel, bankSelect.selectedIndex);
 
-
-            sendMessage(bankIndexMsg);
+            if(!dontUpdateSynth)
+                sendMessage(bankIndexMsg);
 
             setOptions(presetSelect, presetOptionsArray);
 
             presetSelect.selectedIndex = 0;
-            onPresetSelectChanged();
+            onPresetSelectChanged(dontUpdateSynth);
 
             hostChannelSettings.bankIndex = bankSelect.selectedIndex;
 
@@ -438,7 +606,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onPresetSelectChanged = function()
+        onPresetSelectChanged = function(dontUpdateSynth)
         {
             function getPresetMsg(channel, presetIndex)
             {
@@ -453,10 +621,11 @@ ResSynth.host = (function(document)
                 presetIndex = presetSelect.selectedIndex,
                 presetMsg = getPresetMsg(channel, presetIndex);
 
-            sendMessage(presetMsg);
+            if(!dontUpdateSynth)
+                sendMessage(presetMsg);
 
             mixtureSelect.selectedIndex = hostChannelSettings.mixtureIndex;
-            onMixtureSelectChanged();
+            onMixtureSelectChanged(dontUpdateSynth);
 
             hostChannelSettings.presetIndex = presetSelect.selectedIndex;
 
@@ -464,7 +633,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onMixtureSelectChanged = function()
+        onMixtureSelectChanged = function(dontUpdateSynth)
         {
             function getMixtureMsg(channel, mixtureIndex)
             {
@@ -480,7 +649,8 @@ ResSynth.host = (function(document)
                 mixtureIndex = mixtureSelect.selectedIndex,
                 mixtureMessage = getMixtureMsg(channel, mixtureIndex);
 
-            sendMessage(mixtureMessage);
+            if(!dontUpdateSynth)
+                sendMessage(mixtureMessage);
 
             hostChannelSettings.mixtureIndex = mixtureIndex;
 
@@ -488,7 +658,7 @@ ResSynth.host = (function(document)
         },
 
         // exported (c.f. onBankSelectChanged() )
-        onTuningGroupSelectChanged = function()
+        onTuningGroupSelectChanged = function(dontUpdateSynth)
         {
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
@@ -501,7 +671,7 @@ ResSynth.host = (function(document)
             setOptions(tuningSelect, tuningOptionsArray);
 
             tuningSelect.selectedIndex = 0
-            onTuningSelectChanged();
+            onTuningSelectChanged(dontUpdateSynth);
 
             hostChannelSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
 
@@ -509,7 +679,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onTuningSelectChanged = function()
+        onTuningSelectChanged = function(dontUpdateSynth)
         {
             let channelSelect = getElem("channelSelect"),
                 tuningGroupIndex = getElem("tuningGroupSelect").selectedIndex,
@@ -523,14 +693,17 @@ ResSynth.host = (function(document)
                 setTuningGroupIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_GROUP_INDEX, tuningGroupIndex]),
                 setTuningIndexMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.TUNING_INDEX, tuningIndex]);
 
-            sendMessage(setTuningGroupIndexMsg);
-            sendMessage(setTuningIndexMsg);
+            if(!dontUpdateSynth)
+            {
+                sendMessage(setTuningGroupIndexMsg);
+                sendMessage(setTuningIndexMsg);
+            }
 
             semitonesOffsetNumberInput.value = hostChannelSettings.semitonesOffset;
-            onSemitonesOffsetNumberInputChanged();
+            onSemitonesOffsetNumberInputChanged(dontUpdateSynth);
 
             centsOffsetNumberInput.value = hostChannelSettings.centsOffset;
-            onCentsOffsetNumberInputChanged();
+            onCentsOffsetNumberInputChanged(dontUpdateSynth);
 
             hostChannelSettings.tuningIndex = tuningIndex;
 
@@ -538,7 +711,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onSemitonesOffsetNumberInputChanged = function()
+        onSemitonesOffsetNumberInputChanged = function(dontUpdateSynth)
         {
             let CONST = ResSynth.constants,
                 channelSelect = getElem("channelSelect"),
@@ -549,31 +722,35 @@ ResSynth.host = (function(document)
                 midiValue,
                 semitonesOffsetMsg;
 
-            midiValue = semitonesOffsetNumberInput.midiValue(semitonesOffset);
-            semitonesOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SEMITONES_OFFSET, midiValue]);
+            if(!dontUpdateSynth)
+            {
+                let midiValue = semitonesOffsetNumberInput.midiValue(semitonesOffset),
+                    semitonesOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.SEMITONES_OFFSET, midiValue]);
 
-            sendMessage(semitonesOffsetMsg);
+                sendMessage(semitonesOffsetMsg);
+            }
 
             hostChannelSettings.semitonesOffset = semitonesOffset;
 
             setExportState(channel, hostChannelSettings);
         },
         // exported
-        onCentsOffsetNumberInputChanged = function()
+        onCentsOffsetNumberInputChanged = function(dontUpdateSynth)
         {
             let CONST = ResSynth.constants,
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
-                centsOffset = parseInt(centsOffsetNumberInput.value),
-                midiValue,
-                centsOffsetMsg;
+                centsOffset = parseInt(centsOffsetNumberInput.value);
 
-            midiValue = centsOffsetNumberInput.midiValue(centsOffset);
-            centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, midiValue]);
+            if(!dontUpdateSynth)
+            {
+                let midiValue = centsOffsetNumberInput.midiValue(centsOffset),
+                    centsOffsetMsg = new Uint8Array([((currentChannel + CONST.COMMAND.CONTROL_CHANGE) & 0xFF), CONST.CONTROL.CENTS_OFFSET, midiValue]);
 
-            sendMessage(centsOffsetMsg);
+                sendMessage(centsOffsetMsg);
+            }
 
             hostChannelSettings.centsOffset = centsOffset;
 
@@ -602,7 +779,7 @@ ResSynth.host = (function(document)
             }
         },
 
-        onSettingsSelectChanged = function()
+        onSettingsSelectChanged = function() // always updates the synth
         {
             setSettings(getElem("settingsSelect").selectedIndex);
         },
@@ -745,60 +922,61 @@ ResSynth.host = (function(document)
                 {
                     let CMD = ResSynth.constants.COMMAND,
                         CTL = ResSynth.constants.CONTROL,
+                        cmdControl = CMD.CONTROL_CHANGE + channel
                         bankSelect = getElem("bankSelect"),
                         semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
                         centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
                         soundFont = bankSelect.options[channelSettings.bankIndex].soundFont;
 
                     // channelSettings.bankIndex
-                    let bankIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.BANK, channelSettings.bankIndex]);
+                    let bankIndexMsg = new Uint8Array([cmdControl, CTL.BANK, channelSettings.bankIndex]);
                     sendMessage(bankIndexMsg);
                     // channelSettings.presetIndex
                     let presetMsg = new Uint8Array([CMD.PRESET + channel, channelSettings.presetIndex]);
                     sendMessage(presetMsg);
                     // channelSettings.mixtureIndex
-                    let mixtureMessage = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MIXTURE_INDEX, channelSettings.mixtureIndex]);
+                    let mixtureMessage = new Uint8Array([cmdControl, CTL.MIXTURE_INDEX, channelSettings.mixtureIndex]);
                     sendMessage(mixtureMessage);
                     // channelSettings.tuningGroupIndex
-                    let tuningGroupIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_GROUP_INDEX, channelSettings.tuningGroupIndex]);
+                    let tuningGroupIndexMsg = new Uint8Array([cmdControl, CTL.TUNING_GROUP_INDEX, channelSettings.tuningGroupIndex]);
                     sendMessage(tuningGroupIndexMsg);
                     // channelSettings.tuningIndex
-                    let tuningIndexMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.TUNING_INDEX, channelSettings.tuningIndex]);
+                    let tuningIndexMsg = new Uint8Array([cmdControl, CTL.TUNING_INDEX, channelSettings.tuningIndex]);
                     sendMessage(tuningIndexMsg);
                     // channelSettings.semitonesOffset
                     let sMidiValue = semitonesOffsetNumberInput.midiValue(channelSettings.semitonesOffset);
-                    let semitonesOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SEMITONES_OFFSET, sMidiValue]);
+                    let semitonesOffsetMsg = new Uint8Array([cmdControl, CTL.SEMITONES_OFFSET, sMidiValue]);
                     sendMessage(semitonesOffsetMsg);
                     // channelSettings.centsOffset
                     let cMidiValue = centsOffsetNumberInput.midiValue(channelSettings.centsOffset);
-                    let centsOffsetMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.CENTS_OFFSET, cMidiValue]);
+                    let centsOffsetMsg = new Uint8Array([cmdControl, CTL.CENTS_OFFSET, cMidiValue]);
                     sendMessage(centsOffsetMsg);
                     // channelSettings.pitchWheel
                     let pitchWheelMsg = new Uint8Array([CMD.PITCHWHEEL + channel, channelSettings.pitchWheel, channelSettings.pitchWheel]);
                     sendMessage(pitchWheelMsg);
                     // channelSettings.modWheel
-                    let modWheelMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.MODWHEEL, channelSettings.modWheel]);
+                    let modWheelMsg = new Uint8Array([cmdControl, CTL.MODWHEEL, channelSettings.modWheel]);
                     sendMessage(modWheelMsg);
                     // channelSettings.volume
-                    let volMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VOLUME, channelSettings.volume]);
+                    let volMsg = new Uint8Array([cmdControl, CTL.VOLUME, channelSettings.volume]);
                     sendMessage(volMsg);
                     // channelSettings.pan
-                    let panMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PAN, channelSettings.pan]);
+                    let panMsg = new Uint8Array([cmdControl, CTL.PAN, channelSettings.pan]);
                     sendMessage(panMsg);
                     // channelSettings.reverberation 
-                    let reverbMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.REVERBERATION, channelSettings.reverberation]);
+                    let reverbMsg = new Uint8Array([cmdControl, CTL.REVERBERATION, channelSettings.reverberation]);
                     sendMessage(reverbMsg);
                     // channelSettings.pitchWheelSensitivity
-                    let pwsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.PITCH_WHEEL_SENSITIVITY, channelSettings.pitchWheelSensitivity]);
+                    let pwsMsg = new Uint8Array([cmdControl, CTL.PITCH_WHEEL_SENSITIVITY, channelSettings.pitchWheelSensitivity]);
                     sendMessage(pwsMsg);
                     // channelSettings.velocityPitchSensitivity
-                    let vpsMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity]);
+                    let vpsMsg = new Uint8Array([cmdControl, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity]);
                     sendMessage(vpsMsg);
                     // channelSettings.keyboardSplitIndex
-                    let ksiMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SET_KEYBOARD_SPLIT_ARRAY, channelSettings.keyboardSplitIndex]);
+                    let ksiMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_SPLIT_ARRAY, channelSettings.keyboardSplitIndex]);
                     sendMessage(ksiMsg);
                     // channelSettings.keyboardOrnamentsArrayIndex
-                    let koaMsg = new Uint8Array([CMD.CONTROL_CHANGE + channel, CTL.SET_KEYBOARD_ORNAMENT_DEFS, channelSettings.keyboardOrnamentsArrayIndex]);
+                    let koaMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, channelSettings.keyboardOrnamentsArrayIndex]);
                     sendMessage(koaMsg);                   
                 }
 
@@ -1215,20 +1393,24 @@ ResSynth.host = (function(document)
             sendMessage(setKeyboardSplitIndexMsg);
         },
 
-        onOrnamentsSelectChanged = function()
+        onOrnamentsSelectChanged = function(dontUpdateSynth)
         {
-            const constants = ResSynth.constants;
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
+                cmdControl = ResSynth.constants.COMMAND.CONTROL_CHANGE + channel,
+                CTL = ResSynth.constants.CONTROL,
                 hostChannelSettings = channelSelect.options[channel].hostSettings,
                 ornamentsSelect = getElem("ornamentsSelect"),
-                keyboardOrnamentsArrayIndex = ornamentsSelect.selectedIndex,
-                keyboardOrnamentsArrayIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_ORNAMENT_DEFS, keyboardOrnamentsArrayIndex]);
+                keyboardOrnamentsArrayIndex = ornamentsSelect.selectedIndex;
 
             hostChannelSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
             setExportState(channel, hostChannelSettings);
 
-            sendMessage(keyboardOrnamentsArrayIndexMsg);
+            if(!dontUpdateSynth)
+            {
+                let keyboardOrnamentsArrayIndexMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, keyboardOrnamentsArrayIndex]);
+                sendMessage(keyboardOrnamentsArrayIndexMsg);
+            }
         },
 
         // exported
@@ -1493,14 +1675,15 @@ ResSynth.host = (function(document)
                         }
 
                         // sets synth and channel GUI state
-                        function setLongControlValue(value)
+                        function setLongControlValue(value, dontUpdateSynth)
                         {
                             this.rangeInputElem.value = value;
                             this.numberInputElem.value = value;
 
                             setHostSettingsFromLongControl(this, value);
 
-                            this.numberInputElem.onchange(); // sets synth
+                            this.numberInputElem.dontUpdateSynth = dontUpdateSynth;
+                            this.numberInputElem.onchange(); // sets synth unless dontUpdateSynth is undefined or false
                         }
 
                         let nameStrTD = document.createElement("td");
@@ -1638,7 +1821,11 @@ ResSynth.host = (function(document)
 
                                     setHostSettingsFromLongControl(target.parentElement, value);
 
-                                    baseSendCommand(cmdIndex, value);
+                                    if(!this.dontUpdateSynth)
+                                    {
+                                        // this.dontUpdateSynth is undefined or false
+                                        baseSendCommand(cmdIndex, value);
+                                    }
                                 }
 
                                 function onSendCommandAgainButtonClick(event)
