@@ -30,43 +30,11 @@ ResSynth.host = (function(document)
             return document.getElementById(elemID);
         },
 
-        setExportState = function(channel, hostChannelSettings)
+        enableExportSettingsButton = function()
         {
-            function getNameOfIdenticalPresetSettings(channel, hostChannelSettings)
-            {
-                let presetName = undefined,
-                    settingsSelectOptions = getElem("settingsSelect").options;
-
-                for(let i = 0; i < settingsSelectOptions.length; i++)
-                {
-                    let channelSettings = settingsSelectOptions[i].synthSettings.channelSettingsArray[channel];
-
-                    if(channelSettings.isEqual(hostChannelSettings) && channelSettings.keyboardSplitIndex === hostChannelSettings.keyboardSplitIndex)
-                    {
-                        presetName = channelSettings.name;
-                        break;
-                    }
-                }
-                return presetName;
-            }
-
-            let exportSettingsButton = getElem("exportSettingsButton"),
-                presetSettingsName = getNameOfIdenticalPresetSettings(channel, hostChannelSettings);
-
-            if(presetSettingsName !== undefined)
-            {
-                hostChannelSettings.name = presetSettingsName;
-                exportSettingsButton.disabled = true;
-            }
-            else if(hostChannelSettings)
-            {
-                let name = hostChannelSettings.name;
-                if(!name.includes(" (modified)"))
-                {
-                    hostChannelSettings.name = name + " (modified)";
-                }
-                exportSettingsButton.disabled = false;
-            }
+            let exportSettingsButton = getElem("exportSettingsButton");
+            
+            exportSettingsButton.disabled = false;
         },
 
         sendMessage = function(msg)
@@ -350,8 +318,6 @@ ResSynth.host = (function(document)
                     nextSettingsIndex = (nextSettingsIndex < (settingsSelect.options.length - 1)) ? nextSettingsIndex + 1 : 0;
 
                     setTriggersDivControls(hostChannelSettings);
-
-                    setExportState(currentChannel, hostChannelSettings);
                 }
 
                 let data = e.data,
@@ -535,7 +501,7 @@ ResSynth.host = (function(document)
 
             setAndSendOrnamentsDivControls(hostChannelSettings);
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
 
             startRecordingButton.value = "start recording channel " + channel.toString();
             stopRecordingButton.value = "stop recording channel " + channel.toString();
@@ -568,7 +534,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.bankIndex = bankSelect.selectedIndex;
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
 
         // exported
@@ -594,7 +560,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.presetIndex = presetSelect.selectedIndex;
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
 
         // exported
@@ -618,7 +584,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.mixtureIndex = mixtureIndex;
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
 
         // exported (c.f. onBankSelectChanged() )
@@ -639,7 +605,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.tuningGroupIndex = tuningGroupSelect.selectedIndex;
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
 
         // exported
@@ -668,7 +634,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.tuningIndex = tuningIndex;
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
 
         // exported
@@ -687,7 +653,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.semitonesOffset = semitonesOffset;
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
         // exported
         onCentsOffsetNumberInputChanged = function()
@@ -706,7 +672,7 @@ ResSynth.host = (function(document)
 
             hostChannelSettings.centsOffset = centsOffset;
 
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
 
         // Throws an exception either if nextSettingsIndex is out of range,
@@ -736,7 +702,12 @@ ResSynth.host = (function(document)
             setSettings(getElem("settingsSelect").selectedIndex);
         },
 
-        //exported
+        // exported
+        // (TODO) Exports a SynthSettings object whose channelSettingsArray contains channelSettings that each:
+        // 1. have a channelIndex attribute
+        // 2. one or more of the other possible attributes.
+        //    Attributes that would be equal to their default values are omitted.
+        //    ChannelSettings that would contain no attributes except channelIndex are omitted.
         onExportSettingsButtonClicked = function()
         {
             function removeTrailingDefaultSettings(channelSettings)
@@ -851,7 +822,7 @@ ResSynth.host = (function(document)
 
             triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
             hostChannelSettings.triggerKey = triggerKey;
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
         },
         // exported
         onPlayRecordingButtonClicked = async function()
@@ -1340,7 +1311,7 @@ ResSynth.host = (function(document)
             }
 
             hostChannelSettings.keyboardSplitIndex = keyboardSplitIndex;
-            setExportState(channel, hostChannelSettings);            
+            enableExportSettingsButton();            
 
             sendMessage(setKeyboardSplitIndexMsg);
         },
@@ -1356,7 +1327,7 @@ ResSynth.host = (function(document)
                 keyboardOrnamentsArrayIndex = ornamentsSelect.selectedIndex;
 
             hostChannelSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
-            setExportState(channel, hostChannelSettings);
+            enableExportSettingsButton();
 
             let keyboardOrnamentsArrayIndexMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, keyboardOrnamentsArrayIndex]);
             sendMessage(keyboardOrnamentsArrayIndexMsg);
@@ -1604,7 +1575,7 @@ ResSynth.host = (function(document)
                                 break;
                         }
 
-                        setExportState(channel, hostChannelSettings);
+                        enableExportSettingsButton();
                     }
                 }
 
@@ -2122,6 +2093,8 @@ ResSynth.host = (function(document)
                 // It calls all the synth's public control functions, and
                 // sets corresponding values in the synth.
                 onChannelSelectChanged();
+
+                getElem("exportSettingsButton").disabled = true;
 
                 displayAllPage2Divs();
             }
