@@ -37,9 +37,9 @@ ResSynth.channelSettings = (function()
         this.pan = 64;
         this.reverberation = 0;
         this.pitchWheelSensitivity = 2;
-        this.triggerKey = 36; // used by host, but not by synth
         this.velocityPitchSensitivity = 0;
         this.keyboardSplitIndex = 0;
+        this.triggerKey = 36; // used by host, but not by synth 
         this.keyboardOrnamentsArrayIndex = 0;
 
         Object.preventExtensions(this); // disallow new attribute creation 
