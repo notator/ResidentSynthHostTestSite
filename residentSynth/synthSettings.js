@@ -26,12 +26,6 @@ ResSynth.synthSettings = (function()
         this.name = "default synth settings";
         this.keyboardSplitIndex = 0;
         this.channelSettingsArray = [];
-        
-        //for(var channel = 0; channel < 16; channel++)
-        //{
-        //    this.channelSettingsArray.push(new ResSynth.channelSettings.ChannelSettings());
-        //    console.assert(this.channelSettingsArray[0].keyboardSplitIndex === this.keyboardSplitIndex);
-        //}
 
         Object.preventExtensions(this); // disallow new attribute creation 
     },
