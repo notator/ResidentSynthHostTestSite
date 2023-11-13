@@ -32,7 +32,7 @@ ResSynth.channelSettings = (function()
 
     ChannelSettings.prototype.setDefaults = function()
     {
-        this.name = "default channel settings";
+        // this.channel is set by constructor, and not changed here.
         this.bankIndex = 0;
         this.presetIndex = 0;
         this.mixtureIndex = 0;
@@ -47,13 +47,12 @@ ResSynth.channelSettings = (function()
         this.reverberation = 0;
         this.pitchWheelSensitivity = 2;
         this.velocityPitchSensitivity = 0;
-        this.keyboardSplitIndex = 0;
-        this.triggerKey = 36; // used by host, but not by synth 
         this.keyboardOrnamentsArrayIndex = 0;
+        // triggerKey and keyboardSplitIndex are synthSettings, not channelSettings
     };
 
     // Returns true if the control attributes have the same values, otherwise false.
-    // Ignores the .channel, .name and .keyboardSplitIndex attributes.
+    // Ignores the .channel attribute.
     ChannelSettings.prototype.isSimilar = function(otherSettings)
     {
         let rval = true;
@@ -71,9 +70,7 @@ ResSynth.channelSettings = (function()
             || this.pan !== otherSettings.pan
             || this.reverberation !== otherSettings.reverberation
             || this.pitchWheelSensitivity !== otherSettings.pitchWheelSensitivity
-            || this.triggerKey !== otherSettings.triggerKey
             || this.velocityPitchSensitivity !== otherSettings.velocityPitchSensitivity
-            //|| this.keyboardSplitIndex !== otherSettings.keyboardSplitIndex
             || this.keyboardOrnamentsArrayIndex !== otherSettings.keyboardOrnamentsArrayIndex)
         {
             rval = false;
@@ -88,8 +85,6 @@ ResSynth.channelSettings = (function()
     {
         let clone = new ResSynth.channelSettings.ChannelSettings(this.channel);
 
-        if(this.name !== undefined)
-            clone.name = this.name; // (javascript strings are passed by reference, but are immutable)
         if(this.bankIndex !== undefined)
             clone.bankIndex = this.bankIndex;
         if(this.presetIndex !== undefined)
@@ -116,12 +111,8 @@ ResSynth.channelSettings = (function()
             clone.reverberation = this.reverberation;
         if(this.pitchWheelSensitivity !== undefined)
             clone.pitchWheelSensitivity = this.pitchWheelSensitivity;
-        if(this.triggerKey !== undefined)
-            clone.triggerKey = this.triggerKey;
         if(this.velocityPitchSensitivity !== undefined)
             clone.velocityPitchSensitivity = this.velocityPitchSensitivity;
-        if(this.keyboardSplitIndex !== undefined)
-            clone.keyboardSplitIndex = this.keyboardSplitIndex;
         if(this.keyboardOrnamentsArrayIndex !== undefined)
             clone.keyboardOrnamentsArrayIndex = this.keyboardOrnamentsArrayIndex;
 

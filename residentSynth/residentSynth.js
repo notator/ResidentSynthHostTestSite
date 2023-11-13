@@ -1860,7 +1860,6 @@ ResSynth.residentSynth = (function(window)
                 CTL.TUNING_INDEX,
                 CTL.SEMITONES_OFFSET,
                 CTL.CENTS_OFFSET,
-                CTL.SET_SYNTH_SETTINGS,
                 CTL.VELOCITY_PITCH_SENSITIVITY,
                 CTL.SET_KEYBOARD_ORNAMENT_DEFS,
                 CTL.SET_KEYBOARD_SPLIT_ARRAY
@@ -2016,42 +2015,6 @@ ResSynth.residentSynth = (function(window)
                 return midiValue - 64;
             }
 
-            // Note that the ResidentSynthHost does not call this function (i.e. send SET_SYNTH_SETTINGS messages)
-            // because it synchronizes with the residentSynth when it updates its own controls.
-            // This function is provided for use in other applications, such as the AssistantPerformer.
-            function setSynthSettings(channel, synthSettingsIndex)
-            {
-                function setChannelSettings(synthSettings, channel)
-                {
-                    let channelSettings = synthSettings.channelSettingsArray[channel];
-
-                    updateBankIndex(channel, channelSettings.bankIndex);
-                    channelControls[channel].presetIndex = channelSettings.presetIndex;
-                    updateMixtureIndex(channel, channelSettings.mixtureIndex);
-                    updateTuningGroupIndex(channel, channelSettings.tuningGroupIndex);
-                    updateTuning(channel, channelSettings.tuningIndex);
-                    updateSemitonesOffset(channel, channelSettings.semitonesOffset);
-                    updateCentsOffset(channel, channelSettings.centsOffset);
-                    updatePitchWheel(channel, channelSettings.pitchWheel, channelSettings.pitchWheel);
-                    updateModWheel(channel, channelSettings.modWheel);
-                    updateVolume(channel, channelSettings.volume);
-                    updatePan(channel, channelSettings.pan);
-                    updateReverberation(channel, channelSettings.reverberation);
-                    updatePitchWheelSensitivity(channel, channelSettings.pitchWheelSensitivity);
-                    updateTriggerKey(channel, channelSettings.triggerkey);
-                    updateVelocityPitchSensitivity(channel, channelSettings.velocityPitchSensitivity);
-                    updateKeyboardSplit(channel, channelSettings.keyboardSplitIndex);
-                    updateInKeyOrnamentDefs(channel, channelSettings.keyboardOrnamentsArrayIndex);
-                }
-
-                let synthSettings = synthSettingsArray[synthSettingsIndex];
-
-                for(var channel = 0; channel < 16; channel++)
-                {
-                    setChannelSettings(synthSettings, channel);
-                }
-            }
-
             switch(control)
             {
                 case CTL.BANK:
@@ -2080,9 +2043,6 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.CENTS_OFFSET:
                     channelControls[channel].centsOffset = getOffsetValue(value);
-                    break;
-                case CTL.SET_SYNTH_SETTINGS:
-                    setSynthSettings(channel, value);
                     break;
                 case CTL.TUNING_GROUP_INDEX:
                     updateTuningGroupIndex(channel, value); // sets tuning to the first tuning in the group

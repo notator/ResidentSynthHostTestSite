@@ -25,6 +25,7 @@ ResSynth.synthSettings = (function()
 
         this.name = "default synth settings";
         this.keyboardSplitIndex = 0;
+        this.triggerKey = 0;
         this.channelSettingsArray = [];
 
         Object.preventExtensions(this); // disallow new attribute creation 
@@ -40,13 +41,14 @@ ResSynth.synthSettings = (function()
     {
         let clone = new ResSynth.synthSettings.SynthSettings();
         
-        clone.name = this.name; // (javascript strings are passed by reference, but are immutable)
+        clone.name = this.name; // (javaScript strings are passed by reference, but are immutable)
         clone.keyboardSplitIndex = this.keyboardSplitIndex;
+        clone.triggerKey = this.triggerKey;
         clone.channelSettings = [];
 
-        for(let channel = 0; channel < this.channelSettings.length; channel++)
+        for(let index = 0; index < this.channelSettings.length; index++)
         {
-            clone.channelSettings.push(this.channelSettings[channel].clone());
+            clone.channelSettings.push(this.channelSettings[index].clone());
         } 
 
         return clone;

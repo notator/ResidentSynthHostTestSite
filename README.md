@@ -76,8 +76,7 @@ See <a href="#ornaments" >below</a> for further information.
 Preset Settings:  
 ![screenshot_Settings](https://github.com/notator/ResidentSynthHostTestSite/blob/testSite/images/ResidentSynthHost_5_Settings.png "screenshot_Settings")  
 the **preset settings** selector is used to select 16-channel preset settings that can be configured using the `residentsynth/config/synthSettingsDefs.js` file. If the file is missing, all channels will be set to the same default settings.   
-If, while editing a channel's settings, any control is changed, the **export modified settings** button is enabled, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported channel settings can then be copied to the relevant channel in the `synthSettingsDefs.js` configuration file, and loaded into the **preset settings** selector when the application restarts.  
-Note that the _ResidentSynthHost_ synchronizes its channel settings with the _Residentsynth_'s when it updates its own controls, so it does not need to use the _ResidentSynth_'s non-standard SET_SYNTH_SETTINGS MIDI message. This is defined for use by other applications.   
+If, while editing a channel's settings, any control is changed, the **export modified settings** button is enabled, allowing the current channel settings to be saved in a JSON file in the user's _Downloads_ folder. The exported channel settings can then be copied to the relevant channel in the `synthSettingsDefs.js` configuration file, and loaded into the **preset settings** selector when the application restarts.     
 The **trigger key** is a note number whose NOTE_ON will trigger the following settings in the list in the **preset settings** selector, rather than play a note. The trigger key can be any number from 0 to 127. This is a feature of the _ResidentSynthHost_ that is not implemented in the _ResidentSynth_.  
 
 Recordings:  
@@ -234,7 +233,6 @@ This file can be omitted by applications that don't use custom settings.
 It defines the `ResSynth.synthSettingsDefs` array, containing the definitions of settings for the _ResidentSynth_ that can be used to override the default channel settings which are otherwise set in the synth's 16 channels.
 
 On loading, the _ResidentSynth_ creates an internal list of alternative settings. The first alternative (at index 0) always contains the channel default settings in all 16 channels. Subsequent alternatives are defined in the `ResSynth.synthSettingsDefs` array. The first setting to be defined in the `ResSynth.synthSettingsDefs` array is therefore at index 1 in the internal list.  
-The (non-standard MIDI) SET_SYNTH_SETTINGS message sets all 16 channels in the _ResidentSynth_ by sending the index of the synthSettings in the internal list.
 
 The **synthSettings** attributes are as follows:  
 &emsp;&emsp;`name` -- an arbitrary, descriptive string (default: "default synth settings")  
@@ -317,8 +315,7 @@ See the file residentSynth/constants.js
 	<a href="#tunings">TUNING_GROUP_INDEX</a> (CC 18, 0x12)  
 	<a href="#tunings">TUNING_INDEX</a> (CC 19, 0x13)  
 	<a href="#pitchoffsets">SEMITONES_OFFSET</a> (CC 80, 0x50)  
-	<a href="#pitchoffsets">CENTS_OFFSET</a> (CC 81, 0x51)  
-	<a href="#settingspresets">SET_SYNTH_SETTINGS</a> (CC 82, 0x52)  
+	<a href="#pitchoffsets">CENTS_OFFSET</a> (CC 81, 0x51)   
 	<a href="#vpsensitivity">VELOCITY_PITCH_SENSITIVITY</a> (CC 83, 0x53)  
 	<a href="#ornaments">SET_KEYBOARD_ORNAMENT_DEFS</a> (CC 75, 0x4B)  
         <a href="#keyboardsplit">SET_KEYBOARD_SPLIT_ARRAY</a> (CC 76, 0x4C)  
