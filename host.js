@@ -712,11 +712,13 @@ ResSynth.host = (function(document)
         {
             function removeTrailingDefaultSettings(channelSettings)
             {
-                let defaultSettings = new ResSynth.channelSettings.ChannelSettings();
+                let defaultSettings = new ResSynth.channelSettings.ChannelSettings(0);
+
+                defaultSettings.setDefaults();
 
                 for(let ch = 15; ch >= 0; ch--)
                 {
-                    if(defaultSettings.isEqual(channelSettings[ch]))
+                    if(defaultSettings.isSimilar(channelSettings[ch])) // isSimilar ignores the .channel attribute
                     {
                         channelSettings.length -= 1;
                     }
@@ -771,7 +773,7 @@ ResSynth.host = (function(document)
                     //exportChannelSettings.keyboardSplitIndex = hostSettings.keyboardSplitIndex;
                     exportChannelSettings.keyboardOrnamentsArrayIndex = hostSettings.keyboardOrnamentsArrayIndex;
 
-                    if(settingsSelectChannelSettingsArray[ch].isEqual(exportChannelSettings) === false)
+                    if(settingsSelectChannelSettingsArray[ch].isSimilar(exportChannelSettings) === false)
                     {
                         modifiedChannelsString = modifiedChannelsString.concat(`${ch}, `);
                     }

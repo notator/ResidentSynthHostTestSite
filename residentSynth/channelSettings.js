@@ -16,13 +16,22 @@ ResSynth.channelSettings = (function()
 {
     "use strict";
 
-    let ChannelSettings = function()
+    let ChannelSettings = function(channel)
     {
         if(!(this instanceof ChannelSettings))
         {
             return new ChannelSettings();
         }
+        this.channel = channel;
+    },
 
+    API =
+    {
+        ChannelSettings: ChannelSettings // constructor
+    };
+
+    ChannelSettings.prototype.setDefaults = function()
+    {
         this.name = "default channel settings";
         this.bankIndex = 0;
         this.presetIndex = 0;
@@ -41,19 +50,11 @@ ResSynth.channelSettings = (function()
         this.keyboardSplitIndex = 0;
         this.triggerKey = 36; // used by host, but not by synth 
         this.keyboardOrnamentsArrayIndex = 0;
-
-        Object.preventExtensions(this); // disallow new attribute creation 
-    },
-
-    API =
-    {
-        ChannelSettings: ChannelSettings // constructor
     };
 
-    // Returns true if all attributes (except .name and .keyboardSplitIndex attributes)
-    // have the same values, otherwise false.
-    // Simply ignores the .name and .keyboardSplitIndex attributes.
-    ChannelSettings.prototype.isEqual = function(otherSettings)
+    // Returns true if the control attributes have the same values, otherwise false.
+    // Ignores the .channel, .name and .keyboardSplitIndex attributes.
+    ChannelSettings.prototype.isSimilar = function(otherSettings)
     {
         let rval = true;
 
@@ -80,29 +81,49 @@ ResSynth.channelSettings = (function()
         return rval;
     };
 
-    // Returns a clone of the calling ChannelSettings, including its name and keyboardSplitIndex.
+    // Returns a complete clone of the calling ChannelSettings, including
+    // all control attribute values, and the .channel .name and.keyboardSplitIndex.
+    // Only attributes that really exist are cloned.
     ChannelSettings.prototype.clone = function()
     {
-        let clone = new ResSynth.channelSettings.ChannelSettings();
-        
-        clone.name = this.name; // (javascript strings are passed by reference, but are immutable)
-        clone.bankIndex = this.bankIndex;
-        clone.presetIndex = this.presetIndex;
-        clone.mixtureIndex = this.mixtureIndex;
-        clone.tuningGroupIndex = this.tuningGroupIndex;
-        clone.tuningIndex = this.tuningIndex;
-        clone.semitonesOffset = this.semitonesOffset;
-        clone.centsOffset = this.centsOffset;
-        clone.pitchWheel = this.pitchWheel;
-        clone.modWheel = this.modWheel;
-        clone.volume = this.volume;
-        clone.pan = this.pan;
-        clone.reverberation = this.reverberation;
-        clone.pitchWheelSensitivity = this.pitchWheelSensitivity;
-        clone.triggerKey = this.triggerKey;
-        clone.velocityPitchSensitivity = this.velocityPitchSensitivity;
-        clone.keyboardSplitIndex = this.keyboardSplitIndex;
-        clone.keyboardOrnamentsArrayIndex = this.keyboardOrnamentsArrayIndex;
+        let clone = new ResSynth.channelSettings.ChannelSettings(this.channel);
+
+        if(this.name !== undefined)
+            clone.name = this.name; // (javascript strings are passed by reference, but are immutable)
+        if(this.bankIndex !== undefined)
+            clone.bankIndex = this.bankIndex;
+        if(this.presetIndex !== undefined)
+            clone.presetIndex = this.presetIndex;
+        if(this.mixtureIndex !== undefined)
+            clone.mixtureIndex = this.mixtureIndex;
+        if(this.tuningGroupIndex !== undefined)
+            clone.tuningGroupIndex = this.tuningGroupIndex;
+        if(this.tuningIndex !== undefined)
+            clone.tuningIndex = this.tuningIndex;
+        if(this.semitonesOffset !== undefined)
+            clone.semitonesOffset = this.semitonesOffset;
+        if(this.centsOffset !== undefined)
+            clone.centsOffset = this.centsOffset;
+        if(this.pitchWheel !== undefined)
+            clone.pitchWheel = this.pitchWheel;
+        if(this.modWheel !== undefined)
+            clone.modWheel = this.modWheel;
+        if(this.volume !== undefined)
+            clone.volume = this.volume;
+        if(this.pan !== undefined)
+            clone.pan = this.pan;
+        if(this.reverberation !== undefined)
+            clone.reverberation = this.reverberation;
+        if(this.pitchWheelSensitivity !== undefined)
+            clone.pitchWheelSensitivity = this.pitchWheelSensitivity;
+        if(this.triggerKey !== undefined)
+            clone.triggerKey = this.triggerKey;
+        if(this.velocityPitchSensitivity !== undefined)
+            clone.velocityPitchSensitivity = this.velocityPitchSensitivity;
+        if(this.keyboardSplitIndex !== undefined)
+            clone.keyboardSplitIndex = this.keyboardSplitIndex;
+        if(this.keyboardOrnamentsArrayIndex !== undefined)
+            clone.keyboardOrnamentsArrayIndex = this.keyboardOrnamentsArrayIndex;
 
         return clone;
     };

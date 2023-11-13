@@ -1113,15 +1113,19 @@ ResSynth.residentSynth = (function(window)
         // (Attributes can never be created or destroyed.)
         getSynthSettingsArray = function(synthSettingsDefs)
         {
-            function getDefaultSettings()
+            function getDefaultSynthSettings()
             {
-                let defaultSettings = new ResSynth.synthSettings.SynthSettings(),
-                    channelSettingsArray = defaultSettings.channelSettingsArray;
+                let defaultSynthSettings = new ResSynth.synthSettings.SynthSettings(),
+                    channelSettingsArray = defaultSynthSettings.channelSettingsArray;
                 for(var channel = 0; channel < 16; channel++)
                 {
-                    channelSettingsArray.push(new ResSynth.channelSettings.ChannelSettings());
+                    let defaultChannelSettings = new ResSynth.channelSettings.ChannelSettings(channel);
+
+                    defaultChannelSettings.setDefaults();
+
+                    channelSettingsArray.push(defaultChannelSettings);
                 }
-                return defaultSettings;
+                return defaultSynthSettings;
             }
 
             function checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsName)
@@ -1231,7 +1235,7 @@ ResSynth.residentSynth = (function(window)
             }
 
             let synthSettingsArray = [],
-                defaultSettings = getDefaultSettings();
+                defaultSettings = getDefaultSynthSettings();
 
             synthSettingsArray.push(defaultSettings); // default at index 0
 
@@ -1252,7 +1256,7 @@ ResSynth.residentSynth = (function(window)
                     for(var channel = 0; channel < channelSettingsDefs.length; channel++)
                     {
                         let csDef = channelSettingsDefs[channel],
-                            channelSettings = new ResSynth.channelSettings.ChannelSettings(); 
+                            channelSettings = new ResSynth.channelSettings.ChannelSettings(channel); 
 
                         // 3.11.2023 change these assignments so that the csDef attributes are only used if not undefined.
                         // then change and call the above checkChannelSettings() function accordingly.
