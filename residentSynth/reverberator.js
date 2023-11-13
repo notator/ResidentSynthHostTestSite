@@ -14,6 +14,8 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
+var ResSynth = ResSynth || {};
+
 ResSynth.reverberator = (function()
 {
 	"use strict";

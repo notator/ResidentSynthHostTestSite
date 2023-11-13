@@ -16,6 +16,8 @@ console.log('load tuningDefs.js');
 // A Tuning is an array of 128 MidiPitch values. Tuning[MidiKey] is the MidiPitch of the MidiKey
 // in that tuning. By convention, the MidiPitches in a tuning are always in ascending order.
 
+var ResSynth = ResSynth || {};
+
 ResSynth.tuningType =
 {
 	CONSTANT_FACTOR: 0,

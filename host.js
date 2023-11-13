@@ -7,6 +7,8 @@
 *  This file contains the implementation of the ResidentSynthHost's GUI. 
 */
 
+var ResSynth = ResSynth || {};
+
 ResSynth.host = (function(document)
 {
     "use strict";

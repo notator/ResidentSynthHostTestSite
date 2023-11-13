@@ -1,5 +1,7 @@
 console.log('load recordings.js');
 
+var ResSynth = ResSynth || {};
+
 ResSynth.recordings =
     [
         {

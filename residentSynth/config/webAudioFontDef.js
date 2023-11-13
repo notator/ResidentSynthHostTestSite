@@ -7,6 +7,9 @@ console.log('load webAudioFontDef.js');
 // using the original presetIndex -- the number part of Surikov's file name.)
 // The MIDI BANK control message sets the current bank using its index in this array.
 // The MIDI PRESET command message will set the preset using the index in the bank's presets array.
+
+var ResSynth = ResSynth || {};
+
 ResSynth.webAudioFontDef =
     [
         {

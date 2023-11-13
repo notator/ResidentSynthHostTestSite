@@ -6,6 +6,8 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
+var ResSynth = ResSynth || {};
+
 ResSynth.tuningsFactory = (function()
 {
     "use strict";

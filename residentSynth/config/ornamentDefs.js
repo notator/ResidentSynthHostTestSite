@@ -16,6 +16,9 @@ console.log('load ornamentDefs.js');
 // Each `<ornamentName>` is the `<name>` attribute of an ornament defined in the`ResSynth.ornamentDefs`.
 // The`<ornamentName>` values can be in any order, and may repeat within an ornamentPerKeysString.
 // The `:` and `;` characters must be present, except at the very end of each ornamentPerKeysString.
+
+var ResSynth = ResSynth || {};
+
 ResSynth.ornamentPerKeysStrings =
     [
          // message index 0 will be allocated automatically to mean "no ornaments defined"

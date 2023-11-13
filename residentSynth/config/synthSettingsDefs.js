@@ -26,30 +26,33 @@ console.log('load synthSettingsDefs.js');
 //
 // The *channelSettings* attributes are as follows:
 //     `channel` // the channel index to which the changes will be made.
-// * selects: // The index values of the _ResidentSynthHost_'s select controls. 
-//     `bankIndex` // integer 0..n-1 (default: 0), where n is the number of banks defined in 
+// * selects: // The index values of the _ResidentSynthHost_'s select controls.
+//     `bankIndex` // integer 0..n-1 (default: 0), where n is the number of banks defined in
 //         webAudioFontDef.js
 //     `presetIndex` // integer 0..n-1 (default: 0), where n is the number of presets defined
 //         in the bank defined in webAudioFontDef.js
-//     `mixtureIndex` // integer 0..n (default: 0), where n is the number of mixtures defined in 
+//     `mixtureIndex` // integer 0..n (default: 0), where n is the number of mixtures defined in
 //         mixtureDefs.js
 //     `tuningGroupIndex` // integer 0..n (default: 0), where n is the number of tuningGroups
 //         defined in tuningDefs.js
 //     `tuningIndex` // integer 0..n (default: 0), where n is the number of tunings in the group
 //         defined in tuningDefs.js
-//     `keyboardOrnamentsArrayIndex` // integer 0..n (default: 0), where n is the number of 
+//     `keyboardOrnamentsArrayIndex` // integer 0..n (default: 0), where n is the number of
 //         ornamentPerKeysStrings defined in ornamentDefs.js
-// * integerInputs: // The values of the _ResidentSynthHost_'s numerical input controls. 
-//     `semitonesOffset` // -64..+63 (default: 0) 
-//     `centsOffset` // -50..+50 (default: 0)  
-// * sliders: // The values of the _ResidentSynthHost_'s command and control sliders. 
-//     `pitchWheel` // 0..127 (default 64) (The value is used for both MSB and LSB) 
-//     `modWheel` // 0..127 (default: 0) 
-//     `volume` // 0..127 (default: 100) 
-//     `pan` // 0..127 (default: 64) 
-//     `reverberation` // 0..127 (default: 0) 
-//     `pitchWheelSensitivity` // 0..127 (default: 2) 
-//     `velocityPitchSensitivity` // 0.0..127 (default: 0) 
+// * integerInputs: // The values of the _ResidentSynthHost_'s numerical input controls.
+//     `semitonesOffset` // -64..+63 (default: 0)
+//     `centsOffset` // -50..+50 (default: 0)
+// * sliders: // The values of the _ResidentSynthHost_'s command and control sliders.
+//     `pitchWheel` // 0..127 (default 64) (The value is used for both MSB and LSB)
+//     `modWheel` // 0..127 (default: 0)
+//     `volume` // 0..127 (default: 100)
+//     `pan` // 0..127 (default: 64)
+//     `reverberation` // 0..127 (default: 0)
+//     `pitchWheelSensitivity` // 0..127 (default: 2)
+//     `velocityPitchSensitivity` // 0.0..127 (default: 0)
+
+var ResSynth = ResSynth || {};
+
 ResSynth.synthSettingsDefs =
     [
         {

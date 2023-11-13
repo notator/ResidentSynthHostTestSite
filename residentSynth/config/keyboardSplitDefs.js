@@ -11,14 +11,16 @@ console.log('load keyboardSplitDefs.js');
 // Each `<key>` must be an integer in range 0..127. The first `<key>` must be 0, with the rest in ascending
 // order. `<key>` values may not repeat in the string.
 // Each `<channel>` is an integer in range 0..15. These values can be in any order, and repeat in the string.
-// The `:` and `;` characters must be present, except at the very end of each keyboardSplitDef.  
+// The `:` and `;` characters must be present, except at the very end of each keyboardSplitDef.
 // Each keyboardSplitDef is parsed from left to right.
 // All keys greater than or equal to the `<key>` component of a `<key>:<channel>` substring send on the
-// substring's channel unless overridden by a substring further to the right.  
+// substring's channel unless overridden by a substring further to the right.
 // Example keyboardSplitDef strings are:
-// `""`, `"0:0; 42:1;"`, `"0:3; 40:1; 50:2;"`, `"0:0; 40:1; 50:2; 60:1; 72:5"` etc. 
-// The (non-standard MIDI) SET_KEYBOARD_SPLIT_ARRAY message sets the current keyboard split configuration  
+// `""`, `"0:0; 42:1;"`, `"0:3; 40:1; 50:2;"`, `"0:0; 40:1; 50:2; 60:1; 72:5"` etc.
+// The (non-standard MIDI) SET_KEYBOARD_SPLIT_ARRAY message sets the current keyboard split configuration
 // using its index in this array.
+var ResSynth = ResSynth || {};
+
 ResSynth.keyboardSplitDefs =
     [
         // index 0 is automatically given the value "", meaning that the message channel will be used.

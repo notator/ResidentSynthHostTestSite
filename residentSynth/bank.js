@@ -11,6 +11,7 @@
  * https://github.com/surikov/webaudiofont/blob/master/LICENSE.md
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
+var ResSynth = ResSynth || {};
 
 ResSynth.bank = (function()
 {

@@ -8,6 +8,8 @@
 * All this code is licensed under MIT
 */
 
+var ResSynth = ResSynth || {};
+
 ResSynth.residentSynthNote = (function()
 {
     "use strict";

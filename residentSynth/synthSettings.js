@@ -12,6 +12,8 @@
  * https://github.com/notator/WebMIDISynthHost/blob/master/License.md
  */
 
+var ResSynth = ResSynth || {};
+
 ResSynth.synthSettings = (function()
 {
     "use strict";
