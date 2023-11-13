@@ -90,7 +90,6 @@ ResSynth.synthSettingsDefs =
                     },
                     {
                         channel: 1,
-                        name: "channel 1: font = Study 2, semitonesOffset=-1.9",
                         bankIndex: 3,
                         //presetIndex: 0,
                         //mixtureIndex: 0,
@@ -109,7 +108,6 @@ ResSynth.synthSettingsDefs =
                     },
                     {
                         channel: 2,
-                        name: "channel 2: Harp (Fluid), semitonesOffset=0.5",
                         bankIndex: 1,
                         //presetIndex: 0,
                         //mixtureIndex: 0,
@@ -128,7 +126,6 @@ ResSynth.synthSettingsDefs =
                     },
                     {
                         channel: 3,
-                        name: "channel 3: Vibraphone, semitonesOffset=-0.5, pan=20",
                         bankIndex: 3,
                         presetIndex: 3,
                         //mixtureIndex: 0,
@@ -156,7 +153,6 @@ ResSynth.synthSettingsDefs =
                 [
                     {
                         channel: 0,
-                        name: "channel 0: font=Study 2, semitonesOffset=-1.9",
                         bankIndex: 3, // currently 1
                         //presetIndex: 0, // currently 0 (set by bankIndex)
                         //mixtureIndex: 0, // currently 0,
@@ -175,7 +171,6 @@ ResSynth.synthSettingsDefs =
                     },
                     {
                         channel: 1,
-                        name: "channel 1: (=defaults)", // this channelSettings contains the default channelSettings
                         bankIndex: 0, // currently 3,
                         //presetIndex: 0, //currently 0 (is set by bank),
                         //mixtureIndex: 0, //currently 0 (is set by bank),
@@ -194,7 +189,6 @@ ResSynth.synthSettingsDefs =
                     }
                     //{ No change in channel 2, so this entry is omitted altogether
                     //    channel: 2,
-                    //    name: "channel 2: Harp (Fluid), semitonesOffset=0.5",
                     //    bankIndex: 1, // currently 1,
                     //    presetIndex: 0, // currently 0,
                     //    mixtureIndex: 0, // currently 0,
@@ -213,7 +207,6 @@ ResSynth.synthSettingsDefs =
                     //},
                     //{ No change in channel 3, so this entry is omitted altogether
                     //{
-                    //    name: "channel 3: Vibraphone, semitonesOffset=-0.5, pan=20",
                     //    bankIndex: 3, // currently 3,
                     //    presetIndex: 3, // currently 3,
                     //    mixtureIndex: 0,               // currently 0,

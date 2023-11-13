@@ -1106,49 +1106,33 @@ ResSynth.residentSynth = (function(window)
             }
         },
 
-        // Sets and returns the internal, global synthSettingsArray. This will contain a default SynthSettings object followed by
-        // the values set in the synthSettings.js file.
-        // The values in the attributes of the returned channelSettings objects are immutable.
-        // Clone channelSettings using channelSettings.clone().
-        // (Attributes can never be created or destroyed.)
+        // Checks and returns the synthSettingsDefs defined in the synthSettingsDefs.js file.
         getSynthSettingsArray = function(synthSettingsDefs)
         {
-            function getDefaultSynthSettings()
-            {
-                let defaultSynthSettings = new ResSynth.synthSettings.SynthSettings(),
-                    channelSettingsArray = defaultSynthSettings.channelSettingsArray;
-                for(var channel = 0; channel < 16; channel++)
-                {
-                    let defaultChannelSettings = new ResSynth.channelSettings.ChannelSettings(channel);
-
-                    defaultChannelSettings.setDefaults();
-
-                    channelSettingsArray.push(defaultChannelSettings);
-                }
-                return defaultSynthSettings;
-            }
-
-            function checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsName)
+            function checkGlobalSynthSettings(keyboardSplitIndex, triggerKey, channelSettingsArray, synthSettingsName)
             {
                 let keyboardSplitDefs = ResSynth.keyboardSplitDefs,
                     errorString = "";
 
-                if(keyboardSplitIndex < 0)
+                if(keyboardSplitDefs !== undefined && keyboardSplitIndex !== undefined) // undefined is okay
                 {
-                    errorString = `keyboardSplitIndex must be greater than 0`;
-                }
-                else if(keyboardSplitDefs === undefined)
-                {
-                    if(keyboardSplitIndex > 0)
+                    if(keyboardSplitIndex < 0)
                     {
-                        errorString = `keyboardSplitIndex must be 0 if keyboardSplitDefs are undefined`;
+                        errorString = `keyboardSplitIndex must be greater than 0`;
+                    }
+                    else if(keyboardSplitIndex >= keyboardSplitDefs.length)
+                    {
+                        errorString = `keyboardSplitIndex must be less than keyboardSplitDefs length (${keyboardSplitDefs.length})`;
                     }
                 }
-                else if(keyboardSplitIndex >= keyboardSplitDefs.length)
+                if(triggerKey !== undefined && (triggerKey < 0 || triggerKey > 127)) // undefined is okay
                 {
-                    errorString = `keyboardSplitIndex must be less than keyboardSplitDefs length (${keyboardSplitDefs.length})`;
+                    errorString = `triggerKey must be undefined or in range 0..127`;
                 }
-
+                if(channelSettingsArray === undefined) // undefined is not okay (but the array can be empty)
+                {
+                    errorString = `channelSettingsArray must be defined (but can be empty)`;
+                }
                 if(errorString.length > 0)
                 {
                     errorString = `Error in synthSettings (name:${synthSettingsName}):\n ` + errorString;
@@ -1192,7 +1176,6 @@ ResSynth.residentSynth = (function(window)
                     pan = channelSettings.pan,
                     reverberation = channelSettings.reverberation,
                     pitchWheelSensitivity = channelSettings.pitchWheelSensitivity,
-                    triggerKey = channelSettings.triggerKey,
                     velocityPitchSensitivity = channelSettings.velocityPitchSensitivity,
                     keyboardOrnamentsArrayIndex = channelSettings.keyboardOrnamentsArrayIndex,
                     errorString = "";
@@ -1201,30 +1184,55 @@ ResSynth.residentSynth = (function(window)
                 // ResSynth.mixtureDefs, ResSynth.tuningDefs and ResSynth.ornamentDefs, so the corresponding allowed indexes
                 // can be as large as the lengths of each of these definitions.
                 errorString = getErrorString(errorString, webAudioFontDef === undefined, `webAudioFont must be defined.`);
-                errorString = getErrorString(errorString, bankIndex < 0 || bankIndex >= webAudioFontDef.length, `bankIndex out of range (0..${webAudioFontDef.length - 1}).`);
-                errorString = getErrorString(errorString, presetIndex < 0 || presetIndex >= webAudioFontDef[bankIndex].presets.length, `preset out of range in webAudioFontDef bank (bankIndex=${bankIndex}, presetIndex=${presetIndex})`);
-                errorString = getErrorString(errorString, mixtureIndex < 0, `mixtureIndex must be >= 0`);
-                errorString = getErrorString(errorString, mixtureDefs === undefined, `mixtureIndex must be >= 0`);
-                errorString = getErrorString(errorString, mixtureDefs === undefined && mixtureIndex > 0, `mixtureIndex must be 0 if mixtureDefs are not defined.`);
-                errorString = getErrorString(errorString, mixtureDefs !== undefined && mixtureIndex >= mixtureDefs.length + 1, `mixtureIndex out of range (0..${mixtureDefs.length}): (mixtureIndex=${mixtureIndex})`);
-                errorString = getErrorString(errorString, tuningGroupIndex < 0, `tuningGroupIndex must be >= 0`);
-                errorString = getErrorString(errorString, tuningDefs === undefined && tuningGroupIndex > 0, `tuningGroupIndex must be 0 if tuningDefs are not defined.`);
-                errorString = getErrorString(errorString, tuningDefs !== undefined && tuningGroupIndex >= tuningDefs.length + 1, `tuningGroupIndex out of range (0..${tuningDefs.length}): (tuningGroupIndex=${tuningGroupIndex})`);
-                errorString = getErrorString(errorString, tuningIndex < 0, `tuningIndex must be >= 0`);
-                errorString = getErrorString(errorString, tuningDefs !== undefined && tuningIndex >= tuningDefs[tuningGroupIndex].tunings.length, `tuningIndex out of range (0..${tuningDefs[tuningGroupIndex].tunings.length - 1}): (tuningIndex=${tuningIndex})`);
-                errorString = getErrorString(errorString, keyboardOrnamentsArrayIndex < 0, `keyboardOrnamentsArrayIndex must be >= 0`);
-                errorString = getErrorString(errorString, ornamentDefs === undefined && keyboardOrnamentsArrayIndex > 0, `keyboardOrnamentsArrayIndex must be 0 if ornamentDefs are not defined.`);
-                errorString = getErrorString(errorString, ornamentDefs !== undefined && keyboardOrnamentsArrayIndex >= ornamentDefs.length + 1, `keyboardOrnamentsArrayIndex out of range (0..${ornamentDefs.length}): (keyboardOrnamentsArrayIndex=${keyboardOrnamentsArrayIndex})`);
-                errorString = getErrorString(errorString, semitonesOffset < -64 || semitonesOffset > 63, `semitonesOffset out of range [-64..+63] (semitonesOffset=${semitonesOffset})`);
-                errorString = getErrorString(errorString, centsOffset < -50 || centsOffset > 50, `centsOffset out of range [-50..+50] (centsOffset=${centsOffset})`);
-                errorString = getErrorString(errorString, midiRangeError(pitchWheel), midiErrorMsg("pitchWheel", pitchWheel));
-                errorString = getErrorString(errorString, midiRangeError(modWheel), midiErrorMsg("modWheel", modWheel));
-                errorString = getErrorString(errorString, midiRangeError(volume), midiErrorMsg("volume", volume));
-                errorString = getErrorString(errorString, midiRangeError(pan), midiErrorMsg("pan", pan));
-                errorString = getErrorString(errorString, midiRangeError(reverberation), midiErrorMsg("reverberation", reverberation));
-                errorString = getErrorString(errorString, midiRangeError(pitchWheelSensitivity), midiErrorMsg("pitchWheelSensitivity", pitchWheelSensitivity));
-                errorString = getErrorString(errorString, midiRangeError(triggerKey), midiErrorMsg("triggerKey", triggerKey));
-                errorString = getErrorString(errorString, midiRangeError(velocityPitchSensitivity), midiErrorMsg("velocityPitchSensitivity", velocityPitchSensitivity));
+                if(bankIndex !== undefined)
+                    errorString = getErrorString(errorString, bankIndex < 0 || bankIndex >= webAudioFontDef.length, `bankIndex out of range (0..${webAudioFontDef.length - 1}).`);
+                if(presetIndex !== undefined)
+                    errorString = getErrorString(errorString, presetIndex < 0 || presetIndex >= webAudioFontDef[bankIndex].presets.length, `preset out of range in webAudioFontDef bank (bankIndex=${bankIndex}, presetIndex=${presetIndex})`);
+                if(mixtureIndex !== undefined)
+                {
+                    errorString = getErrorString(errorString, mixtureIndex < 0, `mixtureIndex must be >= 0`);
+                    errorString = getErrorString(errorString, mixtureDefs === undefined, `mixtureIndex must be >= 0`);
+                    errorString = getErrorString(errorString, mixtureDefs === undefined && mixtureIndex > 0, `mixtureIndex must be 0 if mixtureDefs are not defined.`);
+                    errorString = getErrorString(errorString, mixtureDefs !== undefined && mixtureIndex >= mixtureDefs.length + 1, `mixtureIndex out of range (0..${mixtureDefs.length}): (mixtureIndex=${mixtureIndex})`);
+                }
+                if(tuningGroupIndex !== undefined)
+                {
+                    errorString = getErrorString(errorString, tuningGroupIndex < 0, `tuningGroupIndex must be >= 0`);
+                    errorString = getErrorString(errorString, tuningDefs === undefined && tuningGroupIndex > 0, `tuningGroupIndex must be 0 if tuningDefs are not defined.`);
+                    errorString = getErrorString(errorString, tuningDefs !== undefined && tuningGroupIndex >= tuningDefs.length + 1, `tuningGroupIndex out of range (0..${tuningDefs.length}): (tuningGroupIndex=${tuningGroupIndex})`);
+                }
+                if(tuningIndex !== undefined)
+                {
+                    errorString = getErrorString(errorString, tuningIndex < 0, `tuningIndex must be >= 0`);
+                    if(tuningGroupIndex !== undefined)
+                    {
+                        errorString = getErrorString(errorString, tuningDefs !== undefined && tuningIndex >= tuningDefs[tuningGroupIndex].tunings.length, `tuningIndex out of range (0..${tuningDefs[tuningGroupIndex].tunings.length - 1}): (tuningIndex=${tuningIndex})`);
+                    }
+                }
+                if(keyboardOrnamentsArrayIndex !== undefined)
+                {
+                    errorString = getErrorString(errorString, keyboardOrnamentsArrayIndex < 0, `keyboardOrnamentsArrayIndex must be >= 0`);
+                    errorString = getErrorString(errorString, ornamentDefs === undefined && keyboardOrnamentsArrayIndex > 0, `keyboardOrnamentsArrayIndex must be 0 if ornamentDefs are not defined.`);
+                    errorString = getErrorString(errorString, ornamentDefs !== undefined && keyboardOrnamentsArrayIndex >= ornamentDefs.length + 1, `keyboardOrnamentsArrayIndex out of range (0..${ornamentDefs.length}): (keyboardOrnamentsArrayIndex=${keyboardOrnamentsArrayIndex})`);
+                }
+                if(semitonesOffset !== undefined)
+                    errorString = getErrorString(errorString, semitonesOffset < -64 || semitonesOffset > 63, `semitonesOffset out of range [-64..+63] (semitonesOffset=${semitonesOffset})`);
+                if(centsOffset !== undefined)
+                    errorString = getErrorString(errorString, centsOffset < -50 || centsOffset > 50, `centsOffset out of range [-50..+50] (centsOffset=${centsOffset})`);
+                if(pitchWheel !== undefined)
+                    errorString = getErrorString(errorString, midiRangeError(pitchWheel), midiErrorMsg("pitchWheel", pitchWheel));
+                if(modWheel !== undefined)
+                    errorString = getErrorString(errorString, midiRangeError(modWheel), midiErrorMsg("modWheel", modWheel));
+                if(volume !== undefined)
+                    errorString = getErrorString(errorString, midiRangeError(volume), midiErrorMsg("volume", volume));
+                if(pan !== undefined)
+                    errorString = getErrorString(errorString, midiRangeError(pan), midiErrorMsg("pan", pan));
+                if(reverberation !== undefined)
+                    errorString = getErrorString(errorString, midiRangeError(reverberation), midiErrorMsg("reverberation", reverberation));
+                if(pitchWheelSensitivity !== undefined)
+                    errorString = getErrorString(errorString, midiRangeError(pitchWheelSensitivity), midiErrorMsg("pitchWheelSensitivity", pitchWheelSensitivity));
+                if(velocityPitchSensitivity !== undefined)
+                    errorString = getErrorString(errorString, midiRangeError(velocityPitchSensitivity), midiErrorMsg("velocityPitchSensitivity", velocityPitchSensitivity));
 
                 if(errorString.length > 0)
                 {
@@ -1234,58 +1242,27 @@ ResSynth.residentSynth = (function(window)
                 }
             }
 
-            let synthSettingsArray = [],
-                defaultSettings = getDefaultSynthSettings();
-
-            synthSettingsArray.push(defaultSettings); // default at index 0
+            let synthSettingsArray = [];
 
             if(synthSettingsDefs !== undefined && synthSettingsDefs.length > 0)
             {
                 for(var index = 0; index < synthSettingsDefs.length; index++)
                 {
-                    let newSynthSettings = new ResSynth.synthSettings.SynthSettings(),
-                        synthSettingsDef = synthSettingsDefs[index],
-                        keyboardSplitIndex = synthSettingsDef.keyboardSplitIndex,
-                        channelSettingsDefs = synthSettingsDef.channelSettings;
+                    let synthSettings = synthSettingsDefs[index],
+                        keyboardSplitIndex = synthSettings.keyboardSplitIndex, // can be undefined
+                        triggerKey = synthSettings.triggerKey, // can be undefined
+                        channelSettings = synthSettings.channelSettings;
 
-                    checkKeyboardSplitIndex(keyboardSplitIndex, synthSettingsDef.name);
+                    checkGlobalSynthSettings(keyboardSplitIndex, triggerKey, channelSettings, synthSettings.name);                    
 
-                    newSynthSettings.name = synthSettingsDef.name;
-                    newSynthSettings.keyboardSplitIndex = keyboardSplitIndex;
-
-                    for(var channel = 0; channel < channelSettingsDefs.length; channel++)
+                    for(let index = 0; index < channelSettings.length; index++)
                     {
-                        let csDef = channelSettingsDefs[channel],
-                            channelSettings = new ResSynth.channelSettings.ChannelSettings(channel); 
+                        let chanSettings = channelSettings[index];
 
-                        // 3.11.2023 change these assignments so that the csDef attributes are only used if not undefined.
-                        // then change and call the above checkChannelSettings() function accordingly.
-
-                        channelSettings.name = csDef.name;
-                        channelSettings.bankIndex = csDef.bankIndex;
-                        channelSettings.presetIndex = csDef.presetIndex;
-                        channelSettings.mixtureIndex = csDef.mixtureIndex;
-                        channelSettings.tuningGroupIndex = csDef.tuningGroupIndex;
-                        channelSettings.tuningIndex = csDef.tuningIndex;
-                        channelSettings.semitonesOffset = csDef.semitonesOffset;
-                        channelSettings.centsOffset = csDef.centsOffset;
-                        channelSettings.pitchWheel = csDef.pitchWheel;
-                        channelSettings.modWheel = csDef.modWheel;
-                        channelSettings.volume = csDef.volume;
-                        channelSettings.pan = csDef.pan;
-                        channelSettings.reverberation = csDef.reverberation;
-                        channelSettings.pitchWheelSensitivity = csDef.pitchWheelSensitivity;
-                        channelSettings.triggerKey = csDef.triggerKey;
-                        channelSettings.velocityPitchSensitivity = csDef.velocityPitchSensitivity;
-                        channelSettings.keyboardSplitIndex = keyboardSplitIndex; // N.B.
-                        channelSettings.keyboardOrnamentsArrayIndex = csDef.keyboardOrnamentsArrayIndex;
-
-                        Object.freeze(channelSettings); // attribute values are frozen
-
-                        newSynthSettings.channelSettingsArray.push(channelSettings);
+                        checkChannelSettings(chanSettings, synthSettings.name)
                     }
 
-                    synthSettingsArray.push(newSynthSettings);
+                    synthSettingsArray.push(synthSettings);
                 }
             }
 
