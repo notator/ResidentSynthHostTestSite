@@ -175,7 +175,7 @@ ResSynth.synthSettingsDefs =
                         //presetIndex: 0, //currently 0 (is set by bank),
                         //mixtureIndex: 0, //currently 0 (is set by bank),
                         tuningGroupIndex: 0,// currently 3,
-                        tuningIndex: 0, //currently 0 (is set by tuningGroupIndex),
+                        // tuningIndex: 0, //currently 0 (is set by tuningGroupIndex),
                         semitonesOffset: 0, //currently -2,
                         centsOffset: 0, // currently 10,
                         //pitchWheel: 64, // currently 64,
