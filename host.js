@@ -17,7 +17,6 @@ ResSynth.host = (function(document)
         synth = null,
         inputDevice = null,
         currentChannel = 0,
-        nextSettingsIndex = 1,
         allLongInputControls = [], // used by AllControllersOff control
         triggerKey,
         recordings = [], // the recordings in recordings.js, converted
@@ -35,7 +34,7 @@ ResSynth.host = (function(document)
         enableExportSettingsButton = function()
         {
             let exportSettingsButton = getElem("exportSettingsButton");
-            
+
             exportSettingsButton.disabled = false;
         },
 
@@ -100,170 +99,6 @@ ResSynth.host = (function(document)
             sendMessage(msg);
         },
 
-        // Sets all channels in the new synth state in both the host and the synth
-        // The synth is _not_ silenced while resetting all the controls.
-        setSettings = function(settingsIndex)
-        {
-            // Returns an object having .triggerKey and .keyboardSplitIndex attributes.
-            // These should be the same in all channels.
-            // The values returned are the last in any settingsChanges in the channelSettingsArray.
-            function getGlobalSettingsChanges(channelSettingsArray)
-            {
-                let triggerKey = undefined,
-                    keyboardSplitIndex = undefined;
-
-                for(let channel = 0; channel < channelSettingsArray.length; channel++)
-                {
-                    let settingsChanges = channelSettingsArray[channel];
-
-                    if(settingsChanges.triggerKey !== undefined)
-                    {
-                        triggerKey = settingsChanges.triggerKey;
-                    }
-
-                    if(settingsChanges.keyboardSplitIndex !== undefined)
-                    {
-                        keyboardSplitIndex = settingsChanges.keyboardSplitIndex;
-                    }
-                }
-
-                return {triggerKey, keyboardSplitIndex};
-            }
-
-            function getNewHostSettings(currentChannelSettings, settingsChanges, globalSettings)
-            {
-                // The semitonesOrCentsOffset is a value in range -64..+63 for semitones.
-                // The semitonesOrCentsOffset is a value in range -50..+50 for cents.
-                // The returned value is in range 0..127, for use in the midi messages.
-                function getOffsetMidiValue(semitonesOrCentsOffset)
-                {
-                    return semitonesOrCentsOffset + 64;
-                }
-
-                let newHostSettings = currentChannelSettings.clone();
-
-                if(settingsChanges.bankIndex !== undefined)
-                {
-                    let bankIndex = settingsChanges.bankIndex;
-                    newHostSettings.bankIndex = bankIndex;
-                }
-                if(settingsChanges.presetIndex !== undefined)
-                {
-                    let presetIndex = settingsChanges.bankIndex;
-                    newHostSettings.presetIndex = presetIndex;
-                }
-                if(settingsChanges.mixtureIndex !== undefined)
-                {
-                    let mixtureIndex = settingsChanges.mixtureIndex;
-                    newHostSettings.mixtureIndex = mixtureIndex;
-                }
-                if(settingsChanges.tuningGroupIndex !== undefined)
-                {
-                    let tuningGroupIndex = settingsChanges.tuningGroupIndex;
-                    newHostSettings.tuningGroupIndex = tuningGroupIndex;
-                }
-                if(settingsChanges.tuningIndex !== undefined)
-                {
-                    let tuningIndex = settingsChanges.tuningIndex;
-                    newHostSettings.tuningIndex = tuningIndex;
-                }
-                if(settingsChanges.semitonesOffset !== undefined)
-                {
-                    let semitonesOffset = settingsChanges.semitonesOffset;
-                    newHostSettings.semitonesOffset = semitonesOffset;
-                }
-                if(settingsChanges.centsOffset !== undefined)
-                {
-                    let centsOffset = settingsChanges.centsOffset;
-                    newHostSettings.centsOffset = centsOffset;
-                }
-                if(settingsChanges.pitchWheel !== undefined)
-                {
-                    let pitchWheel = settingsChanges.pitchWheel;
-                    newHostSettings.pitchWheel = pitchWheel;
-                }
-                if(settingsChanges.modWheel !== undefined)
-                {
-                    let modWheel = settingsChanges.modWheel;
-                    newHostSettings.modWheel = modWheel;
-                }
-                if(settingsChanges.volume !== undefined)
-                {
-                    let volume = settingsChanges.volume;
-                    newHostSettings.volume = volume;
-                }
-                if(settingsChanges.pan !== undefined)
-                {
-                    let pan = settingsChanges.pan;
-                    newHostSettings.pan = pan;
-                }
-                if(settingsChanges.reverberation !== undefined)
-                {
-                    let reverberation = settingsChanges.reverberation;
-                    newHostSettings.reverberation = reverberation;
-                }
-                if(settingsChanges.pitchWheelSensitivity !== undefined)
-                {
-                    let pitchWheelSensitivity = settingsChanges.pitchWheelSensitivity;
-                    newHostSettings.pitchWheelSensitivity = pitchWheelSensitivity;
-                }
-                if(settingsChanges.pitchWheelSensitivity !== undefined)
-                {
-                    let pitchWheelSensitivity = settingsChanges.pitchWheelSensitivity;
-                    newHostSettings.pitchWheelSensitivity = pitchWheelSensitivity;
-                }
-                // the triggerKey is only set in the host.
-                if(globalSettings.triggerKey !== undefined)
-                {
-                    newHostSettings.triggerKey = globalSettings.triggerKey;
-                }
-                if(settingsChanges.velocityPitchSensitivity !== undefined)
-                {
-                    let velocityPitchSensitivity = settingsChanges.velocityPitchSensitivity;
-                    newHostSettings.velocityPitchSensitivity = velocityPitchSensitivity;
-                }
-
-                if(globalSettings.keyboardSplitIndex !== undefined)
-                {
-                    newHostSettings.keyboardSplitIndex = globalSettings.keyboardSplitIndex;;
-                }
-                if(settingsChanges.keyboardOrnamentsArrayIndex !== undefined)
-                {
-                    let keyboardOrnamentsArrayIndex = settingsChanges.keyboardOrnamentsArrayIndex;
-                    newHostSettings.keyboardOrnamentsArrayIndex = keyboardOrnamentsArrayIndex;
-                }
-
-                return newHostSettings;
-            }
-
-            let settingsSelect = getElem("settingsSelect"),
-                channelSettingsArray = settingsSelect.options[settingsIndex].synthSettings.channelSettingsArray,
-                channelSelect = getElem("channelSelect"),
-                keyboardSplitSelect = getElem("keyboardSplitSelect"),
-                globalSettings = getGlobalSettingsChanges(channelSettingsArray);
-
-            console.assert(channelSettingsArray.length > 0 && channelSettingsArray.length <= 16);            
-
-            for(let channel = 0; channel < channelSettingsArray.length; channel++)
-            {
-                let currentChannelSettings = channelSelect.options[channel].hostSettings,
-                    settingsChanges = channelSettingsArray[channel],
-                    newHostSettings = getNewHostSettings(currentChannelSettings, settingsChanges, globalSettings); // does not update the synth
-
-                channelSelect.options[channel].hostSettings = newHostSettings;
-
-                channelSelect.selectedIndex = channel;
-                onChannelSelectChanged(); // updates the synth
-            }
-
-            // These two are not handled by onChannelSelectChanged()
-            keyboardSplitSelect.selectedIndex = channelSelect.options[0].hostSettings.keyboardSplitIndex;
-            onKeyboardSplitSelectChanged();
-
-            channelSelect.selectedIndex = currentChannel;
-            onChannelSelectChanged();
-        },
-
         setInputDeviceEventListener = function(inputDeviceSelect)
         {
             function handleInputMessage(e)
@@ -310,16 +145,16 @@ ResSynth.host = (function(document)
 
                 function doTriggerAction()
                 {
-                    let hostChannelSettings = getElem("channelSelect").options[currentChannel].hostSettings,
-                        settingsSelect = getElem("settingsSelect");
+                    let settingsSelect = getElem("settingsSelect");
+
+                    settingsSelect.previousIndex = settingsSelect.selectedIndex;
+
+                    let nextSettingsIndex = settingsSelect.previousIndex + 1;
+                    nextSettingsIndex = (nextSettingsIndex === settingsSelect.options.length) ? 0: nextSettingsIndex;
 
                     settingsSelect.selectedIndex = nextSettingsIndex;
 
-                    setSettings(nextSettingsIndex); // sets all channel states in both the host and the synth
-
-                    nextSettingsIndex = (nextSettingsIndex < (settingsSelect.options.length - 1)) ? nextSettingsIndex + 1 : 0;
-
-                    setTriggersDivControls(hostChannelSettings);
+                    onSettingsSelectChanged();                    
                 }
 
                 let data = e.data,
@@ -496,8 +331,6 @@ ResSynth.host = (function(document)
 
             setAndSendWebAudioFontDivControls(hostChannelSettings);
             setAndSendTuningDivControls(hostChannelSettings);
-
-            setTriggersDivControls(hostChannelSettings); // uses currentChannel
 
             setAndSendLongControls(hostChannelSettings);
 
@@ -677,31 +510,124 @@ ResSynth.host = (function(document)
             enableExportSettingsButton();
         },
 
-        // Throws an exception either if nextSettingsIndex is out of range,
-        // or if the settings object has no name attribute.
-        setTriggersDivControls = function(hostChannelSettings)
+        onSettingsSelectChanged = function() // always updates both host and synth
         {
-            let settingsSelect = getElem("settingsSelect"),
-                triggerKeyInput = getElem("triggerKeyInput"),
-                settingsNameCell = getElem("settingsNameCell");
-
-            triggerKeyInput.value = hostChannelSettings.triggerKey;
-
-            onTriggerKeyInputChanged();
-
-            if(nextSettingsIndex >= settingsSelect.length)
+            function setGlobalSettingsInHost(settingsSelect)
             {
-                throw "Error: next settings preset index out of range.";
-            }
-            else
-            {
-                settingsNameCell.innerHTML = "next settings: " + settingsSelect.options[nextSettingsIndex].synthSettings.name;
-            }
-        },
+                let selectedIndex = settingsSelect.selectedIndex,
+                    synthSettings = settingsSelect.synthSettingsArray[selectedIndex],
+                    keyboardSplitIndex = synthSettings.keyboardSplitIndex,
+                    triggerKey = synthSettings.triggerKey;
 
-        onSettingsSelectChanged = function() // always updates the synth
-        {
-            setSettings(getElem("settingsSelect").selectedIndex);
+                if(selectedIndex === 0)
+                {
+                    // set defaults if not set in synthSettings 
+                    keyboardSplitIndex = (keyboardSplitIndex === undefined) ? 0 : keyboardSplitIndex;
+                    triggerKey = (triggerKey === undefined) ? 0 : triggerKey;
+                }
+
+                if(keyboardSplitIndex !== undefined)
+                {
+                    let keyboardSplitSelect = getElem("keyboardSplitSelect");
+
+                    keyboardSplitSelect.selectedIndex = keyboardSplitIndex;
+                    onKeyboardSplitSelectChanged();
+                }
+
+                if(triggerKey !== undefined)
+                {
+                    let triggerKeyInput = getElem("triggerKeyInput");
+
+                    triggerKeyInput.value = triggerKey;
+                    onTriggerKeyInputChanged(); // also sets global triggerKey and enables the exportSettingsButton;
+                }
+            }
+
+            function setChannelSettingsInHost(settingsSelect)
+            {
+                function setDefaultSettingsInEachChannelInHost()
+                {
+                    let channelOptions = getElem("channelSelect").options;
+
+                    for(let channel = 0; channel < channelOptions.length; channel++)
+                    {
+                        let defaultChannelSettings = new ResSynth.channelSettings.ChannelSettings(channel);
+
+                        defaultChannelSettings.setDefaults();
+                        channelOptions[channel].hostSettings = defaultChannelSettings;
+                    }
+                }
+
+                function updateHostChannels(hostChannelOptions, synthSettings)
+                {
+                    let channelSettingsArray = synthSettings.channelSettings;
+
+                    for(let i = 0; i < channelSettingsArray.length; i++)
+                    {
+                        let channelSettings = channelSettingsArray[i],
+                            keys = Object.keys(channelSettings),
+                            channel = channelSettings.channel,
+                            hostChannelSettings = hostChannelOptions[channel].hostSettings;
+
+                        // update host channel settings with each defined channel attribute.
+                        for(let keyIndex = 0; keyIndex < keys.length; keyIndex++)
+                        {
+                            let key = keys[keyIndex],
+                                newValue = channelSettings[key];
+
+                            if(key === "channel")
+                            {
+                                if(newValue !== hostChannelSettings[key])
+                                {
+                                    throw "error";
+                                }
+                            }
+                            else if(newValue === hostChannelSettings[key])
+                            {
+                                let errorStr = `Warning:\n` +
+                                    `Redundant attribute setting in the synthSettingsDefs.\n` +
+                                    `    setting: ${synthSettings.name}\n` +
+                                    `    channel: ${channelSettings.channel}\n` +
+                                    `    key: ${key}`;
+                                    
+                                alert(errorStr);
+                            }
+
+                            hostChannelSettings[key] = newValue;
+                        }                        
+                    }
+                }
+
+                let hostChannelOptions = getElem("channelSelect").options,
+                    selectedIndex = settingsSelect.selectedIndex,
+                    previousIndex = settingsSelect.previousIndex;
+
+                let startIndex = -1;
+                if(selectedIndex < previousIndex) // start at index 0
+                {
+                    setDefaultSettingsInEachChannelInHost();
+                    startIndex = 0;
+                }
+                else if(selectedIndex > previousIndex) // start at previousIndex + 1
+                {
+                    startIndex = previousIndex + 1;
+                }
+
+                for(let i = startIndex; i <= selectedIndex; i++)
+                {
+                    let synthSettings = settingsSelect.synthSettingsArray[i];
+                    updateHostChannels(hostChannelOptions, synthSettings);
+                }
+            }
+
+            let settingsSelect = getElem("settingsSelect");
+
+            setGlobalSettingsInHost(settingsSelect);
+            setChannelSettingsInHost(settingsSelect);
+
+            settingsSelect.previousIndex = settingsSelect.selectedIndex;
+
+            onChannelSelectChanged(); // updates the synth            
         },
 
         // exported
@@ -819,15 +745,13 @@ ResSynth.host = (function(document)
         // exported
         onTriggerKeyInputChanged = function()
         {
-            let triggerKeyInput = getElem("triggerKeyInput"),
-                channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex,
-                hostChannelSettings = channelSelect.options[channel].hostSettings;
+            let triggerKeyInput = getElem("triggerKeyInput");
 
-            triggerKey = parseInt(triggerKeyInput.value); // also set global triggerKey (for convenience, used in handleInputMessage)
-            hostChannelSettings.triggerKey = triggerKey;
+             // set the global triggerKey variable (for convenience, used in handleInputMessage)
+            triggerKey = parseInt(triggerKeyInput.value);
             enableExportSettingsButton();
         },
+
         // exported
         onPlayRecordingButtonClicked = async function()
         {
@@ -1302,22 +1226,12 @@ ResSynth.host = (function(document)
         onKeyboardSplitSelectChanged = function()
         {
             const constants = ResSynth.constants;
-            let channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex,
-                channelSelectOptions = channelSelect.options,
-                hostChannelSettings = channelSelectOptions[channel].hostSettings,
-                keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
-                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE + channel, constants.CONTROL.SET_KEYBOARD_SPLIT_ARRAY, keyboardSplitIndex]);
+            let keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
+                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE, constants.CONTROL.SET_KEYBOARD_SPLIT_ARRAY, keyboardSplitIndex]);
 
-            for(let chan = 0; chan < channelSelectOptions.length; chan++)
-            {
-                channelSelectOptions[chan].hostSettings.keyboardSplitIndex = keyboardSplitIndex;
-            }
+            sendMessage(setKeyboardSplitIndexMsg); // this message updates all channels (it ignores the channel bits in the message)
 
-            hostChannelSettings.keyboardSplitIndex = keyboardSplitIndex;
-            enableExportSettingsButton();            
-
-            sendMessage(setKeyboardSplitIndexMsg);
+            enableExportSettingsButton(); 
         },
 
         onOrnamentsSelectChanged = function()
@@ -1994,16 +1908,15 @@ ResSynth.host = (function(document)
 
                     for(let settingsIndex = 0; settingsIndex < synthSettingsArray.length; settingsIndex++)
                     {
-                        let synthSettings = synthSettingsArray[settingsIndex],
-                            option = new Option();
+                        let option = new Option();
 
-                        option.innerHTML = synthSettings.name;
-                        option.synthSettings = synthSettings;
-
+                        option.innerHTML = synthSettingsArray[settingsIndex].name;
                         settingsSelect.options.add(option);
                     }
 
+                    settingsSelect.synthSettingsArray = synthSettingsArray;
                     settingsSelect.selectedIndex = 0;
+                    settingsSelect.previousIndex = Number.MAX_VALUE;
                 }
 
                 function setRecordingSelect()
@@ -2033,18 +1946,6 @@ ResSynth.host = (function(document)
                     }
 
                     recordingSelect.selectedIndex = 0;
-                }
-
-                function setDefaultHostSettingsForEachChannel()
-                {
-                    let settingsSelect = getElem("settingsSelect"),
-                        defaultChannelSettingsArray = settingsSelect.options[0].synthSettings.channelSettingsArray,
-                        channelOptions = getElem("channelSelect").options;
-
-                    for(let channel = 0; channel < channelOptions.length; channel++)
-                    {
-                        channelOptions[channel].hostSettings = defaultChannelSettingsArray[channel].clone();
-                    }
                 }
 
                 function displayAllPage2Divs()
@@ -2091,12 +1992,7 @@ ResSynth.host = (function(document)
                 setSettingsSelect();
                 setRecordingSelect();
 
-                setDefaultHostSettingsForEachChannel();
-
-                // must be called after all the GUI controls have been set.
-                // It calls all the synth's public control functions, and
-                // sets corresponding values in the synth.
-                onChannelSelectChanged();
+                onSettingsSelectChanged();
 
                 getElem("exportSettingsButton").disabled = true;
 
@@ -2273,8 +2169,7 @@ ResSynth.host = (function(document)
                 const permission = await navigator.permissions.query({name: "microphone"});
                 if(permission.state == "prompt")
                 {
-                    alert("More audio outputs are available when user grants access to the mic");
-                    // More audio outputs are available when user grants access to the mic.
+                    alert("More audio outputs are available when user grants access to the microphone");
                     const stream = await navigator.mediaDevices.getUserMedia({audio: true});
                     stream.getTracks().forEach((track) => track.stop());
                 }
