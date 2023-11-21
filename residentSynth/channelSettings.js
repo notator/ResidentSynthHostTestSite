@@ -50,7 +50,6 @@ ResSynth.channelSettings = (function()
         this.pitchWheelSensitivity = 2;
         this.velocityPitchSensitivity = 0;
         this.keyboardOrnamentsArrayIndex = 0;
-        // triggerKey and keyboardSplitIndex are synthSettings, not channelSettings
     };
 
     // Returns true if the control attributes have the same values, otherwise false.
