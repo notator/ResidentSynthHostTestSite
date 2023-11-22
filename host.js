@@ -554,6 +554,9 @@ ResSynth.host = (function(document)
                         let defaultChannelSettings = new ResSynth.channelSettings.ChannelSettings(channel);
 
                         defaultChannelSettings.setDefaults();
+
+                        delete defaultChannelSettings.channel;
+
                         channelOptions[channel].hostSettings = defaultChannelSettings;
                     }
                 }
