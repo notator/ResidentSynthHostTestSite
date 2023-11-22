@@ -128,7 +128,7 @@ ResSynth.host = (function(document)
 
                     // longInputControls.length will be > 1 if there is more than one control has no ccIndex.
                     // This function simply updates all the regParam controls even though only one of them has changed.
-                    for(var i = 0; i < longInputControls.length; i++)
+                    for(let i = 0; i < longInputControls.length; i++)
                     {
                         let longInputControl = longInputControls[i];
 
@@ -631,58 +631,60 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        // (TODO) Exports a SynthSettings object whose channelSettingsArray contains channelSettings that each:
-        // 1. have a channelIndex attribute
-        // 2. one or more of the other possible attributes.
-        //    Attributes that would be equal to their default values are omitted.
-        //    ChannelSettings that would contain no attributes except channelIndex are omitted.
+        // Exports the current settings in a format similar to that of synthSettingsDefs.js
         onExportSettingsButtonClicked = function()
         {
-            function removeTrailingDefaultSettings(channelSettings)
+            function getChangedChannelSettingsArray(hostChannelOptions)
             {
-                let defaultSettings = new ResSynth.channelSettings.ChannelSettings(0);
-
-                defaultSettings.setDefaults();
-
-                for(let ch = 15; ch >= 0; ch--)
+                function removeTrailingDefaultSettings(defaultSettings, changedChannelSettingsArray)
                 {
-                    if(defaultSettings.isSimilar(channelSettings[ch])) // isSimilar ignores the .channel attribute
+                    for(let ch = 15; ch >= 0; ch--)
                     {
-                        channelSettings.length -= 1;
-                    }
-                    else
-                    {
-                        break;
+                        if(defaultSettings.isSimilar(changedChannelSettingsArray[ch])) // isSimilar ignores the .channel attribute
+                        {
+                            changedChannelSettingsArray.length -= 1;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
                 }
-            }
 
-            function getExportName(settingsSelectSynthSettingsName, modifiedChannelsString, settingsSelectKeyboardSplitIndex, exportKeyboardSplitIndex)
-            {
-                let keyboardSplitChangedMsg = "";
-
-                if(settingsSelectKeyboardSplitIndex !== exportKeyboardSplitIndex)
+                function removeChannelAttributes(changedChannelSettingsArray)
                 {
-                    keyboardSplitChangedMsg = "keyboard split and ";
+                    for(let channel = 0; channel < changedChannelSettingsArray.length; channel++)
+                    {
+                        let changedChannelSettings = changedChannelSettingsArray[channel];
+                        console.assert(changedChannelSettings.channel === channel);
+                        delete changedChannelSettings.channel;
+                    }
                 }
 
-                let msg = "(changed " + keyboardSplitChangedMsg + "channel(s) " + modifiedChannelsString + ")",
-                    exportName = `${settingsSelectSynthSettingsName} ${msg}`;
-
-                return exportName;  
-            }
-
-            function getChannelSettings(hostChannelOptions, settingsSelectChannelSettingsArray)
-            {
-                let modifiedChannelsString = "",
-                    channelSettings = [];
-
-                for(let ch = 0; ch < 16; ch++)
+                function addDefaultComments(defaultSettings, changedChannelSettingsArray)
                 {
-                    let exportChannelSettings = {},
-                        hostSettings = hostChannelOptions[ch].hostSettings;
+                    for(let channel = 0; channel < changedChannelSettingsArray.length; channel++)
+                    {
+                        let changedChannelSettings = changedChannelSettingsArray[channel];
 
-                    exportChannelSettings.name = hostSettings.name;
+                        if(defaultSettings.isSimilar(changedChannelSettings)) // isSimilar ignores the ._comment attribute
+                        {
+                            changedChannelSettings._comment = changedChannelSettings._comment + ` (default settings)`;
+                        }
+                    }
+                }
+
+                let changedChannelSettingsArray = [],
+                    defaultSettings = new ResSynth.channelSettings.ChannelSettings(0);
+
+                defaultSettings.setDefaults();                    ;
+
+                for(let channel = 0; channel < 16; channel++)
+                {
+                    let exportChannelSettings = new ResSynth.channelSettings.ChannelSettings(channel),
+                        hostSettings = hostChannelOptions[channel].hostSettings;
+
+                    exportChannelSettings._comment = `channel ${channel}`;
                     exportChannelSettings.bankIndex = hostSettings.bankIndex;
                     exportChannelSettings.presetIndex = hostSettings.presetIndex;
                     exportChannelSettings.mixtureIndex = hostSettings.mixtureIndex;
@@ -696,41 +698,31 @@ ResSynth.host = (function(document)
                     exportChannelSettings.pan = hostSettings.pan;
                     exportChannelSettings.reverberation = hostSettings.reverberation;
                     exportChannelSettings.pitchWheelSensitivity = hostSettings.pitchWheelSensitivity;
-                    exportChannelSettings.triggerKey = hostSettings.triggerKey;
                     exportChannelSettings.velocityPitchSensitivity = hostSettings.velocityPitchSensitivity;
-                    //exportChannelSettings.keyboardSplitIndex = hostSettings.keyboardSplitIndex;
                     exportChannelSettings.keyboardOrnamentsArrayIndex = hostSettings.keyboardOrnamentsArrayIndex;
 
-                    if(settingsSelectChannelSettingsArray[ch].isSimilar(exportChannelSettings) === false)
-                    {
-                        modifiedChannelsString = modifiedChannelsString.concat(`${ch}, `);
-                    }
-
-                    channelSettings.push(exportChannelSettings);
+                    changedChannelSettingsArray.push(exportChannelSettings);
                 }
 
-                removeTrailingDefaultSettings(channelSettings);
+                removeTrailingDefaultSettings(defaultSettings, changedChannelSettingsArray);
 
-                if(modifiedChannelsString.length > 0)
-                {
-                    modifiedChannelsString = modifiedChannelsString.slice(0, -2);
-                }
+                removeChannelAttributes(changedChannelSettingsArray);
 
-                return {modifiedChannelsString, channelSettings};
+                addDefaultComments(defaultSettings, changedChannelSettingsArray);
+
+                return changedChannelSettingsArray;
             }
 
             let hostChannelOptions = getElem("channelSelect").options, 
-                settingsSelectSynthSettings = getElem("settingsSelect").options[settingsSelect.selectedIndex].synthSettings,
-                settingsSelectSynthSettingsName = settingsSelectSynthSettings.name,
-                settingsSelectChannelSettings = settingsSelectSynthSettings.channelSettings,
-                exportKeyboardSplitIndex = hostChannelOptions[0].hostSettings.keyboardSplitIndex,
-                settingsSelectKeyboardSplitIndex = settingsSelectChannelSettings[0].keyboardSplitIndex,
-                {modifiedChannelsString, channelSettings} = getChannelSettings(hostChannelOptions, settingsSelectChannelSettings),
+                keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
+                triggerKey = getElem("triggerKeyInput").value,
+                changedChannelSettingsArray = getChangedChannelSettingsArray(hostChannelOptions),
                 exportSettings = {};
 
-            exportSettings.name = getExportName(settingsSelectSynthSettingsName, modifiedChannelsString, settingsSelectKeyboardSplitIndex, exportKeyboardSplitIndex);
-            exportSettings.keyboardSplitIndex = exportKeyboardSplitIndex;
-            exportSettings.channelSettings = channelSettings;
+            exportSettings.name = "exported synth settings";
+            exportSettings.keyboardSplitIndex = keyboardSplitIndex;
+            exportSettings.triggerKey = triggerKey;
+            exportSettings.channelSettingsArray = changedChannelSettingsArray;
 
             const a = document.createElement("a");
             a.href = URL.createObjectURL(new Blob([JSON.stringify(exportSettings, null, "\t")], {type: "text/plain"}));
@@ -759,7 +751,7 @@ ResSynth.host = (function(document)
             {
                 let channels = [];
 
-                for(var i = 0; i < playBackChannels.length; i++)
+                for(let i = 0; i < playBackChannels.length; i++)
                 {
                     channels.push(playBackChannels[i].channel);
                 }
@@ -831,7 +823,7 @@ ResSynth.host = (function(document)
                     sendMessage(koaMsg);                   
                 }
 
-                for(var i = 0; i < playbackChannels.length; i++)
+                for(let i = 0; i < playbackChannels.length; i++)
                 {
                     let playbackChannel = playbackChannels[i],
                         channel = playbackChannel.channel,
@@ -907,7 +899,7 @@ ResSynth.host = (function(document)
                 }
 
                 let promises = [];
-                for(var i = 0; i < playbackChannelInfos.length; i++) 
+                for(let i = 0; i < playbackChannelInfos.length; i++) 
                 {
                     promises.push(sendPlaybackChannelMessages(synth, playbackChannelInfos[i], recordingChannelInfo)); // async (send all channels in parallel)
                 }
@@ -923,7 +915,7 @@ ResSynth.host = (function(document)
 
                 if(cancelPlayback)
                 {
-                    for(var i = 0; i < playbackChannelIndices.length; i++)
+                    for(let i = 0; i < playbackChannelIndices.length; i++)
                     {
                         let channel = playbackChannelIndices[i],
                             CMD = ResSynth.constants.COMMAND,
@@ -938,7 +930,7 @@ ResSynth.host = (function(document)
                         "Only commands and controls can be overdubbed in an existing channel.");
                 }
 
-                for(var i = 0; i < playbackChannelIndices.length; i++)
+                for(let i = 0; i < playbackChannelIndices.length; i++)
                 {
                     channelSelect.selectedIndex = playbackChannelIndices[i];
                     onChannelSelectChanged();
@@ -1179,7 +1171,7 @@ ResSynth.host = (function(document)
 
                 setMsPosReRecording(rec.channels);
 
-                for(var cIndex = 0; cIndex < rec.channels.length; cIndex++)
+                for(let cIndex = 0; cIndex < rec.channels.length; cIndex++)
                 {
                     let channelsInfo = rec.channels[cIndex];
                     channelsInfo.messages = getStringArray(channelsInfo.messages);
@@ -1293,14 +1285,14 @@ ResSynth.host = (function(document)
                     {
                         let options = [];
 
-                        for(var bankIndex = 0; bankIndex < banks.length; bankIndex++)
+                        for(let bankIndex = 0; bankIndex < banks.length; bankIndex++)
                         {
                             let option = new Option("bankOption"),
                                 bank = banks[bankIndex],
                                 presets = bank.presets,
                                 presetOptionsArray = [];
 
-                                for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
+                                for(let presetIndex = 0; presetIndex < presets.length; presetIndex++)
                                 {
                                     let preset = presets[presetIndex],
                                         presetOption = new Option("presetOption");
@@ -1355,7 +1347,7 @@ ResSynth.host = (function(document)
                         }
                         else
                         {
-                            for(var mixtureIndex = 0; mixtureIndex < mixtures.length; mixtureIndex++)
+                            for(let mixtureIndex = 0; mixtureIndex < mixtures.length; mixtureIndex++)
                             {
                                 let option = new Option("mixtureOption");
 
@@ -1387,7 +1379,7 @@ ResSynth.host = (function(document)
                                 tuningGroup = tuningGroups[i],
                                 tuningOptionsArray = [];
 
-                            for(var j = 0; j < tuningGroup.length; j++)
+                            for(let j = 0; j < tuningGroup.length; j++)
                             {
                                 let tuningOption = new Option("tuningOption");
 
@@ -1927,7 +1919,7 @@ ResSynth.host = (function(document)
                             {
                                 checkArray("names", names, arrayLength);
 
-                                for(var i = 0; i < names.length; i++)
+                                for(let i = 0; i < names.length; i++)
                                 {
                                     let name = names[i];
                                     if((typeof name === 'string' || name instanceof String) === false)
@@ -2017,13 +2009,13 @@ ResSynth.host = (function(document)
                             {
                                 let channelSettingsPerSectionArray = [];
 
-                                for(var channel = 0; channel < channelSettingsArray.length; channel++)
+                                for(let channel = 0; channel < channelSettingsArray.length; channel++)
                                 {
                                     let channelAttributesObject = channelSettingsArray[channel],
                                         nSections = channelAttributesObject.bankIndex.length,
                                         channelSections = [];
 
-                                    for(var section = 0; section < nSections; section++)
+                                    for(let section = 0; section < nSections; section++)
                                     {
                                         let channelSectionSettings = {};
 
@@ -2329,7 +2321,7 @@ ResSynth.host = (function(document)
                     // recordings is a global array (has been retrieved from recodings.js)
                     if(recordings.length > 0)
                     {
-                        for(var i = 0; i < recordings.length; i++)
+                        for(let i = 0; i < recordings.length; i++)
                         {
                             let option = new Option();
                             option.innerHTML = recordings[i].name;
@@ -2602,7 +2594,7 @@ ResSynth.host = (function(document)
                 function getMessageData(msgStringsArray)
                 {
                     let msgData = [];
-                    for(var i = 0; i < msgStringsArray.length; i++)
+                    for(let i = 0; i < msgStringsArray.length; i++)
                     {
                         let msgStr = msgStringsArray[i],
                             strData = msgStr.split(","),
@@ -2626,14 +2618,14 @@ ResSynth.host = (function(document)
 
                 if(wRecordings !== undefined)
                 {
-                    for(var i = 0; i < wRecordings.length; i++)
+                    for(let i = 0; i < wRecordings.length; i++)
                     {
                         let record = wRecordings[i],
                             recording = {};
 
                         recording.name = record.name;
                         recording.channels = record.channels;
-                        for(var channelIndex = 0; channelIndex < recording.channels.length; channelIndex++)
+                        for(let channelIndex = 0; channelIndex < recording.channels.length; channelIndex++)
                         {
                             recording.channels[channelIndex].messages = getMessageData(recording.channels[channelIndex].messages);
                         }
