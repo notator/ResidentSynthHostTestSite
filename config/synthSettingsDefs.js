@@ -1,40 +1,39 @@
 console.log('load synthSettingsDefs.js');
 
-// This file can be omitted by applications that don't use custom settings.
-// It defines the `ResSynth.synthSettingsDefs` array, containing the definitions of settings
-// for the _ResidentSynth_ that can be used to override the default channel settings which are
-// otherwise set in the synth's 16 channels.
-// Channels that never change their default settings are omitted in these definitions, but set
-// to their default settings in/by the host (which always provides 16 well-defined channels).
+// The `ResSynth.synthSettingsDefs` array, defines preset settings for the residentSynth, that
+// will be used, in converted form, in the host's settingsSelect control.
 //
-// On loading, the residentSynth converts the information in this file into its (externally visible)
-// synthSettingsArray. This contains only the _changes_ of attributes described in this file, in
-// the order they will appear in the host's settingsSelect control.
+// The lowest level arrays in this synthSettingsDefs definition contain one value per preset
+// setting, in the order the preset settings will appear in the settingsSelect control.
+// On loading, the host converts the information into a _synthSettingsArray_, containing
+// the preset settings in the order they will appear in the host's settingsSelect control.
+// The _synthSettingsArray_ contains only the _changes_ of attributes necessary when the
+// settingsSelect's options are selected in sequence, starting from the default state.
+// The settingsSelect implements both sequential selection, using the trigger key, and
+// random selection using the settingsSelect control itself.
 //
-// (The host stores the residentSynth.synthSettingsArray in its settingsSelect control, and manages
-// the messages needing to be sent to the synth, depending on whether the control is set manually or
-// by using the currently defined trigger key.)
-//
-// In this file, the following synthSettingsDefs attributes are arrays containing values in the order
-// they will be set in the host's settingsSelect control (each array entry provides a value for
-// one option in the settingsSelect control):
+// The following top-level synthSettingsDefs attributes are arrays containing one value
+// per preset setting:
 //   `names` // arbitrary, descriptive strings (default: "default synth settings")
-//   `keyboardSplitIndexes` // values in range 0..n, default 0, where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
-//   `triggerKeys` // values in range 0..127, default 0 -- used by the host, not by the _ResidentSynth_.
+//   `keyboardSplitIndexes` // integers in range 0..n, default 0, where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
+//   `triggerKeys` // integers in range 0..127, default 0
 //
-// The `channelSettingsArray` is an array of up to 16 channelSettings, in order of channel.
-// Channels that never change their (default) state are omitted.
-// (The host sets  all 16 channels to their default values, before applying these channelSettings.)
+// The `channelSettingsArray` is an array of up to 16 objects, one object per channel, in order
+// of channel. Channels that never change their (default) state are omitted here, but set to
+// their default settings by the host (which always provides 16 well-defined channels).
 //
-// Each object in the channelSettingsArray contains attributes that are arrays containing values in the order they will be
-//  set in/by the host's settingsSelect control (each array entry provides an attribute value for one option in the settingsSelect control):
-//
-// The arrays are all of the same length (the length of the above `names` array), and contain integer values as follows:
+// Each object in the `channelSettingsArray` contains attributes that are arrays containing one
+// value per presetSetting. These values are checked for plausibility using the residentSynth's
+// configuration files webAudioFontDef.js, mixtureDefs.js, tuningDefs.js and ornamentDefs.js.
+// These files are located in residentSynth/config.
+// If plausibility checking fails, the user is alerted with a meaningful error message (and an
+// exception is thrown).
+// The array attributes in the channel objects contain values as follows (all integers):
 //     `bankIndex`        // 0..n-1, default 0, where n is the number of banks defined in webAudioFontDef.js
-//     `presetIndex`      // 0..n-1, default 0, where n is the number of presets defined in the bank defined in webAudioFontDef.js
+//     `presetIndex`      // 0..n-1, default 0, where n is the number of presets defined in the current bank
 //     `mixtureIndex`     // 0..n, default 0, where n is the number of mixtures defined in mixtureDefs.js
 //     `tuningGroupIndex` // 0..n, default 0, where n is the number of tuningGroups defined in tuningDefs.js
-//     `tuningIndex`      // 0..n, default 0, where n is the number of tunings in the group defined in tuningDefs.js
+//     `tuningIndex`      // 0..n, default 0, where n is the number of tunings in the current tuningGroup
 //     `semitonesOffset`  // -64..+63, default 0
 //     `centsOffset`      // -50..+50, default 0
 //     `pitchWheel`       // 0..127, default 64 (The value is used for both MSB and LSB)
@@ -44,10 +43,7 @@ console.log('load synthSettingsDefs.js');
 //     `reverberation`    // 0..127, default 0
 //     `pitchWheelSensitivity`    // 0..127, default 2
 //     `velocityPitchSensitivity` // 0..127, default 0
-//     `keyboardOrnamentsArrayIndex` // 0..n, default 0, where n is the number of ornamentPerKeysStrings defined in ornamentDefs.js
-//
-// The residentSynth checks all the given values for plausibility while converting the information to its externally visible synthSettingsArray.
-// If there is an error, the synth alerts the user with a meaningful error message (and throws an exception). 
+//     `keyboardOrnamentsArrayIndex` // 0..n-1, default 0, where n is the number of ornamentPerKeysStrings defined in ornamentDefs.js
 
 var ResSynth = ResSynth || {};
 
@@ -65,10 +61,10 @@ ResSynth.synthSettingsDefs =
         [
             {    // channel 0
                 bankIndex: [0, 1, 3],                  // 0..(webAudioFontDef.length - 1), default 0
-                presetIndex: [0, 0, 0],                // 0..(nPresets in Bank - 1), default 0
+                presetIndex: [0, 0, 0],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
                 tuningGroupIndex: [0, 0, 3],           // 0..(tuningDefs.length - 1), default 0
-                tuningIndex: [0, 0, 0],                // 0..(nTunings in TuningsGroup - 1), default 0
+                tuningIndex: [0, 0, 0],                // 0..(nTunings in tuningGroup - 1), default 0
                 semitonesOffset: [0, 0, -2],           // -64..+63, default: 0
                 centsOffset: [0, 0, 10],               // -50..+50, default: 0
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
@@ -83,10 +79,10 @@ ResSynth.synthSettingsDefs =
             },
             {    // channel 1
                 bankIndex: [0, 3, 0],                  // 0..(webAudioFontDef.length - 1), default 0
-                presetIndex: [0, 0, 0],                // 0..(nPresets in Bank - 1), default 0
+                presetIndex: [0, 0, 0],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
                 tuningGroupIndex: [0, 3, 0],           // 0..(tuningDefs.length - 1), default 0
-                tuningIndex: [0, 0, 0],                // 0..(nTunings in TuningsGroup - 1), default 0
+                tuningIndex: [0, 0, 0],                // 0..(nTunings in tuningGroup - 1), default 0
                 semitonesOffset: [0, -2, 0],           // -64..+63, default 0
                 centsOffset: [0, 10, 0],               // -50..+50, default 0
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
@@ -100,10 +96,10 @@ ResSynth.synthSettingsDefs =
             },
             {   // channel 2 (no change between settings 1 and 2)
                 bankIndex: [0, 1, 1],                  // 0..(webAudioFontDef.length - 1), default 0
-                presetIndex: [0, 0, 0],                // 0..(nPresets in Bank - 1), default 0
+                presetIndex: [0, 0, 0],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
                 tuningGroupIndex: [0, 0, 0],           // 0..(tuningDefs.length - 1), default 0
-                tuningIndex: [0, 2, 2],                // 0..(nTunings in TuningsGroup - 1), default 0
+                tuningIndex: [0, 2, 2],                // 0..(nTunings in tuningGroup - 1), default 0
                 semitonesOffset: [0, 0, 0],            // -64..+63, default 0
                 centsOffset: [0, 50, 50],              // -50..+50, default 0
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
@@ -117,10 +113,10 @@ ResSynth.synthSettingsDefs =
             },
             {   // channel 3  (no change between settings 1 and 2)
                 bankIndex: [0, 3, 3],                  // 0..(webAudioFontDef.length - 1), default 0
-                presetIndex: [0, 3, 3],                // 0..(nPresets in Bank - 1), default 0
+                presetIndex: [0, 3, 3],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
                 tuningGroupIndex: [0, 0, 0],           // 0..(tuningDefs.length - 1), default 0
-                tuningIndex: [0, 0, 0],                // 0..(nTunings in TuningsGroup - 1), default 0
+                tuningIndex: [0, 0, 0],                // 0..(nTunings in tuningGroup - 1), default 0
                 semitonesOffset: [0, 0, 0],            // -64..+63, default 0
                 centsOffset: [0, -50, -50],            // -50..+50, default 0
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
