@@ -12,7 +12,6 @@ ResSynth.recordings =
                         "channel": 0,
                         "channelSettings":
                         {
-                            "name": "horn mixture etc.",
                             "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
@@ -26,9 +25,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -61,7 +58,6 @@ ResSynth.recordings =
                         "channel": 0,
                         "channelSettings":
                         {
-                            "name": "horn mixture etc.",
                             "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
@@ -75,9 +71,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -104,7 +98,6 @@ ResSynth.recordings =
                         "channel": 1,
                         "channelSettings":
                         {
-                            "name": "preset 1 Tuba",
                             "bankIndex": 0,
                             "presetIndex": 1,
                             "mixtureIndex": 0,
@@ -118,9 +111,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -143,7 +134,6 @@ ResSynth.recordings =
                         "channel": 0,
                         "channelSettings":
                         {
-                            "name": "horn mixture etc.",
                             "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
@@ -157,9 +147,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -196,7 +184,6 @@ ResSynth.recordings =
                         "channel": 1,
                         "channelSettings":
                         {
-                            "name": "preset 1 Tuba",
                             "bankIndex": 0,
                             "presetIndex": 1,
                             "mixtureIndex": 0,
@@ -210,9 +197,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -235,7 +220,6 @@ ResSynth.recordings =
                         "channel": 2,
                         "channelSettings":
                         {
-                            "name": "settings 0: (=defaults)",
                             "bankIndex": 0,
                             "presetIndex": 0,
                             "mixtureIndex": 0,
@@ -249,9 +233,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -292,7 +274,6 @@ ResSynth.recordings =
                         "channel": 0,
                         "channelSettings":
                         {
-                            "name": "horn mixture etc.",
                             "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
@@ -306,9 +287,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -450,7 +429,6 @@ ResSynth.recordings =
                         "channel": 0,
                         "channelSettings":
                         {
-                            "name": "horn mixture etc.",
                             "bankIndex": 2,
                             "presetIndex": 0,
                             "mixtureIndex": 4,
@@ -464,9 +442,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -698,7 +674,6 @@ ResSynth.recordings =
                         "channel": 0,
                         "channelSettings":
                         {
-                            "name": "settings 0: (=defaults)",
                             "bankIndex": 0,
                             "presetIndex": 0,
                             "mixtureIndex": 0,
@@ -712,9 +687,7 @@ ResSynth.recordings =
                             "pan": 64,
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
-                            "triggerKey": 36,
                             "velocityPitchSensitivity": 0,
-                            "keyboardSplitIndex": 0,
                             "keyboardOrnamentsArrayIndex": 0
                         },
                         "messages":
@@ -739,7 +712,6 @@ ResSynth.recordings =
                 {
                     "channel": 0,
                     "channelSettings": {
-                        "name": "horn mixture etc.",
                         "bankIndex": 2,
                         "presetIndex": 0,
                         "mixtureIndex": 4,
@@ -753,9 +725,7 @@ ResSynth.recordings =
                         "pan": 64,
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
-                        "triggerKey": 36,
                         "velocityPitchSensitivity": 0,
-                        "keyboardSplitIndex": 0,
                         "keyboardOrnamentsArrayIndex": 0
                     },
                     "messages": [
@@ -780,7 +750,6 @@ ResSynth.recordings =
                 {
                     "channel": 1,
                     "channelSettings": {
-                        "name": "preset 1 Tuba",
                         "bankIndex": 0,
                         "presetIndex": 1,
                         "mixtureIndex": 0,
@@ -794,9 +763,7 @@ ResSynth.recordings =
                         "pan": 64,
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
-                        "triggerKey": 36,
                         "velocityPitchSensitivity": 0,
-                        "keyboardSplitIndex": 0,
                         "keyboardOrnamentsArrayIndex": 0
                     },
                     "messages": [
@@ -811,7 +778,6 @@ ResSynth.recordings =
                 {
                     "channel": 3,
                     "channelSettings": {
-                        "name": "settings 0: (=defaults)",
                         "bankIndex": 0,
                         "presetIndex": 0,
                         "mixtureIndex": 0,
@@ -825,9 +791,7 @@ ResSynth.recordings =
                         "pan": 64,
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
-                        "triggerKey": 36,
                         "velocityPitchSensitivity": 0,
-                        "keyboardSplitIndex": 0,
                         "keyboardOrnamentsArrayIndex": 0
                     },
                     "messages": [
@@ -851,7 +815,6 @@ ResSynth.recordings =
                 {
                     "channel": 0,
                     "channelSettings": {
-                        "name": "settings 1: font=Study 2,  semitonesOffset=-1.9",
                         "bankIndex": 3,
                         "presetIndex": 0,
                         "mixtureIndex": 0,
@@ -865,9 +828,7 @@ ResSynth.recordings =
                         "pan": 64,
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
-                        "triggerKey": 36,
                         "velocityPitchSensitivity": 0,
-                        "keyboardSplitIndex": 0,
                         "keyboardOrnamentsArrayIndex": 1
                     },
                     "messages": [

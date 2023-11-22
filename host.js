@@ -765,7 +765,7 @@ ResSynth.host = (function(document)
                 {
                     let CMD = ResSynth.constants.COMMAND,
                         CTL = ResSynth.constants.CONTROL,
-                        cmdControl = CMD.CONTROL_CHANGE + channel
+                        cmdControl = CMD.CONTROL_CHANGE + channel,
                         bankSelect = getElem("bankSelect"),
                         semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
                         centsOffsetNumberInput = getElem("centsOffsetNumberInput"),
@@ -815,9 +815,6 @@ ResSynth.host = (function(document)
                     // channelSettings.velocityPitchSensitivity
                     let vpsMsg = new Uint8Array([cmdControl, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity]);
                     sendMessage(vpsMsg);
-                    // channelSettings.keyboardSplitIndex
-                    let ksiMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_SPLIT_ARRAY, channelSettings.keyboardSplitIndex]);
-                    sendMessage(ksiMsg);
                     // channelSettings.keyboardOrnamentsArrayIndex
                     let koaMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, channelSettings.keyboardOrnamentsArrayIndex]);
                     sendMessage(koaMsg);                   
