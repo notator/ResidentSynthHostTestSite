@@ -20,7 +20,7 @@ ResSynth.host = (function(document)
         allLongInputControls = [], // used by AllControllersOff control
         triggerKey,
         recordings = [], // the recordings in recordings.js, converted
-        recording = undefined, // initialized by startRecording(), reset by stopRecording()
+        currentRecording = undefined, // initialized by startRecording(), reset by stopRecording()
         recordingChannelInfo = undefined, // used while recording a channel
         playbackChannelInfos = undefined, // used while playing back or recording a channel
         playbackChannelIndices = [], // used while playing back a recording
@@ -41,7 +41,7 @@ ResSynth.host = (function(document)
         sendMessage = function(msg)
         {
             synth.send(msg);
-            if(recording !== undefined)
+            if(recordingChannelInfo !== undefined)
             {
                 let now = performance.now();
 
@@ -150,11 +150,11 @@ ResSynth.host = (function(document)
                     settingsSelect.previousIndex = settingsSelect.selectedIndex;
 
                     let nextSettingsIndex = settingsSelect.previousIndex + 1;
-                    nextSettingsIndex = (nextSettingsIndex === settingsSelect.options.length) ? 0: nextSettingsIndex;
+                    nextSettingsIndex = (nextSettingsIndex === settingsSelect.options.length) ? 0 : nextSettingsIndex;
 
                     settingsSelect.selectedIndex = nextSettingsIndex;
 
-                    onSettingsSelectChanged();                    
+                    onSettingsSelectChanged();
                 }
 
                 let data = e.data,
@@ -198,7 +198,7 @@ ResSynth.host = (function(document)
                         break;
                 }
 
-                if(recording !== undefined && playbackChannelIndices.includes(currentChannel) && command === CMD.NOTE_ON)
+                if(currentRecording !== undefined && playbackChannelIndices.includes(currentChannel) && command === CMD.NOTE_ON)
                 {
                     cancelPlayback = true;
                 }
@@ -338,8 +338,8 @@ ResSynth.host = (function(document)
 
             enableExportSettingsButton();
 
-            startRecordingButton.value = "start recording channel " + channel.toString();
-            stopRecordingButton.value = "stop recording channel " + channel.toString();
+            startRecordingButton.value = "start recording ch" + channel.toString();
+            stopRecordingButton.value = "stop recording ch" + channel.toString();
         },
 
         // exported
@@ -592,12 +592,12 @@ ResSynth.host = (function(document)
                                     `    setting: ${synthSettings.name}\n` +
                                     `    channel: ${channelSettings.channel}\n` +
                                     `    key: ${key}`;
-                                    
+
                                 alert(errorStr);
                             }
 
                             hostChannelSettings[key] = newValue;
-                        }                        
+                        }
                     }
                 }
 
@@ -680,7 +680,7 @@ ResSynth.host = (function(document)
                 let changedChannelSettingsArray = [],
                     defaultSettings = new ResSynth.channelSettings.ChannelSettings(0);
 
-                defaultSettings.setDefaults();                    ;
+                defaultSettings.setDefaults();;
 
                 for(let channel = 0; channel < 16; channel++)
                 {
@@ -716,7 +716,7 @@ ResSynth.host = (function(document)
                 return changedChannelSettingsArray;
             }
 
-            let hostChannelOptions = getElem("channelSelect").options, 
+            let hostChannelOptions = getElem("channelSelect").options,
                 keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
                 triggerKey = getElem("triggerKeyInput").value,
                 changedChannelSettingsArray = getChangedChannelSettingsArray(hostChannelOptions),
@@ -742,7 +742,7 @@ ResSynth.host = (function(document)
         {
             let triggerKeyInput = getElem("triggerKeyInput");
 
-             // set the global triggerKey variable (for convenience, used in handleInputMessage)
+            // set the global triggerKey variable (for convenience, used in handleInputMessage)
             triggerKey = parseInt(triggerKeyInput.value);
             enableExportSettingsButton();
         },
@@ -820,7 +820,7 @@ ResSynth.host = (function(document)
                     sendMessage(vpsMsg);
                     // channelSettings.keyboardOrnamentsArrayIndex
                     let koaMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, channelSettings.keyboardOrnamentsArrayIndex]);
-                    sendMessage(koaMsg);                   
+                    sendMessage(koaMsg);
                 }
 
                 for(let i = 0; i < playbackChannels.length; i++)
@@ -837,7 +837,7 @@ ResSynth.host = (function(document)
             {
                 // Recordings contain appropriate setOrnament messages, which this function simply relays to the synth.
                 // There is therefore no need to call checkSendSetOrnament(..) before noteOns in this function.
-                async function sendPlaybackChannelMessages(synth, playbackChannelInfo, recordingChannelInfo)
+                async function  sendPlaybackChannelMessages(synth, playbackChannelInfo, recordingChannelInfo)
                 {
                     function wait(delay, cancel)
                     {
@@ -937,11 +937,11 @@ ResSynth.host = (function(document)
                 }
 
                 channelSelect.selectedIndex = hostChannelBeforePlayback; // no need to call onChannelSelectChanged() here!
-                startRecordingButton.value = "start recording channel " + hostChannelBeforePlayback.toString();
-                stopRecordingButton.value = "stop recording channel " + hostChannelBeforePlayback.toString();
+                startRecordingButton.value = "start recording ch" + hostChannelBeforePlayback.toString();
+                stopRecordingButton.value = "stop recording ch" + hostChannelBeforePlayback.toString();
 
                 playbackChannelIndices = []; // playbackChannelIndices is a global variable
-                if(recording === undefined)
+                if(currentRecording === undefined)
                 {
                     // needed in onStopRecordingButtonClicked()
                     playbackChannelInfos = undefined; // playbackChannelInfos is global
@@ -962,20 +962,20 @@ ResSynth.host = (function(document)
             playRecordingButton.style.display = "none";
             cancelPlaybackButton.style.display = "block";
 
+            if(currentRecording !== undefined)
+            {
+                playbackRecording = structuredClone(currentRecording); 
+            }
+
             playbackChannelInfos = playbackRecording.channels; // playbackChannelInfos is global
 
             playbackChannelIndices = getPlaybackChannelIndices(playbackRecording.channels); // playbackChannelIndices is global in host.
 
             setSynthToPlaybackSettings(playbackRecording.channels);
 
-            if(recordingChannelInfo !== undefined)
+            if(currentRecording !== undefined)
             {
-                let playbackChannelInfo = playbackChannelInfos.find(x => x.channel === recordingChannelInfo.channel);
-                if(playbackChannelInfo !== undefined)
-                {
-                    recordingChannelInfo = playbackChannelInfo.clone();
-                    recordingChannelInfo.messages = [];
-                }
+                recordingChannelInfo = undefined;                
             }
 
             let promises = sendMessages(synth, playbackChannelInfos, recordingChannelInfo);
@@ -988,6 +988,7 @@ ResSynth.host = (function(document)
             cancelPlaybackButton.style.display = "none";
             playRecordingButton.style.display = "block";
         },
+        // exported
         onCancelPlaybackButtonClicked = function()
         {
             let playRecordingButton = getElem("playRecordingButton"),
@@ -998,52 +999,41 @@ ResSynth.host = (function(document)
 
             cancelPlayback = true; // global
         },
-        // exported
-        // This application can only record on a single channel.
-        // It can, however play back multi-channel recordings.
-        onStartRecordingButtonClicked = function()
+
+        restoreDivStateAfterRecording = function ()
         {
-            function disableSettingsDiv()
-            {
-                let settingsTitle = getElem("settingsTitle"),
-                    settingsSelect = getElem("settingsSelect"),
-                    exportSettingsButton = getElem("exportSettingsButton"),
-                    triggerKeyTitle = getElem("triggerKeyTitle"),
-                    triggerKeyInput = getElem("triggerKeyInput"),
-                    settingsNameCell = getElem("settingsNameCell");
+            let settingsTitle = getElem("settingsTitle"),
+                settingsSelect = getElem("settingsSelect"),
+                exportSettingsButton = getElem("exportSettingsButton"),
+                triggerKeyTitle = getElem("triggerKeyTitle"),
+                triggerKeyInput = getElem("triggerKeyInput"),
+                settingsNameCell = getElem("settingsNameCell");
 
-                settingsTitle.style.color = "darkgray";
-                settingsSelect.prevState = settingsSelect.disabled;
-                settingsSelect.disabled = true;
-                exportSettingsButton.prevState = exportSettingsButton.disabled;
-                exportSettingsButton.disabled = true;
-            }
+            settingsTitle.style.color = "black";
+            settingsSelect.disabled = settingsSelect.prevState;
+            settingsSelect.prevState = undefined;
+            exportSettingsButton.disabled = exportSettingsButton.prevState;
+            exportSettingsButton.prevState = undefined;
 
-            let startRecordingButton = getElem("startRecordingButton"),
-                stopRecordingButton = getElem("stopRecordingButton"),
-                channelSelect = getElem("channelSelect"),
-                channel = channelSelect.selectedIndex,
-                hostChannelSettings = channelSelect.options[channel].hostSettings;
+            triggerKeyTitle.style.color = "black";
+            triggerKeyInput.disabled = false;
+            settingsNameCell.style.color = "black";
 
-            // can't change channel while recording
-            channelSelect.disabled = true;
-            disableSettingsDiv();
+            getElem("channelSelect").disabled = false;
+            getElem("playRecordingButton").value = "play selected recording";
+            getElem("playRecordingButton").style.background = "none";
+            getElem("stopRecordingButton").style.display = "none";
+            getElem("saveRecordingButton").style.display = "none";
+            getElem("discardRecordingButton").style.display = "none";
+            getElem("startRecordingButton").style.display = "block";
 
-            recordingChannelInfo = {}; // is global
-            recordingChannelInfo.channel = channel;
-            recordingChannelInfo.channelSettings = hostChannelSettings.clone(); // a single channelSettings clone
-            recordingChannelInfo.messages = [];
-
-            recording = {}; // global in host
-            recording.name = ""; // is finally set in onStopRecordingButtonClicked()
-            recording.channels = [];
-            recording.channels.push(recordingChannelInfo);
-
-            startRecordingButton.style.display = "none";
-            stopRecordingButton.style.display = "block";
+            currentRecording = undefined;
+            playbackChannelInfos = undefined;
+            recordingChannelInfo = undefined;
+            cancelPlayback = false;
         },
         // exported
-        onStopRecordingButtonClicked = function()
+        onSaveRecordingButtonClicked = function()
         {
             function getStringArray(messages)
             {
@@ -1061,26 +1051,6 @@ ResSynth.host = (function(document)
                     rval.push(str);
                 }
                 return rval;
-            }
-
-            function restoreSettingsDivState()
-            {
-                let settingsTitle = getElem("settingsTitle"),
-                    settingsSelect = getElem("settingsSelect"),
-                    exportSettingsButton = getElem("exportSettingsButton"),
-                    triggerKeyTitle = getElem("triggerKeyTitle"),
-                    triggerKeyInput = getElem("triggerKeyInput"),
-                    settingsNameCell = getElem("settingsNameCell");
-
-                settingsTitle.style.color = "black";
-                settingsSelect.disabled = settingsSelect.prevState;
-                settingsSelect.prevState = undefined;
-                exportSettingsButton.disabled = exportSettingsButton.prevState;
-                exportSettingsButton.prevState = undefined;
-
-                triggerKeyTitle.style.color = "black";
-                triggerKeyInput.disabled = false;
-                settingsNameCell.style.color = "black";
             }
 
             function getFileName(channels)
@@ -1155,48 +1125,114 @@ ResSynth.host = (function(document)
                 return channelInfos;
             }
 
-            let channelSelect = getElem("channelSelect"),
-                startRecordingButton = getElem("startRecordingButton"),
-                stopRecordingButton = getElem("stopRecordingButton"),
-                rec = recording;
+            let rec = currentRecording;
 
+            rec.channels = getAgglommeratedChannelInfos(playbackChannelInfos, recordingChannelInfo);
+
+            let fileName = getFileName(rec.channels);
+            rec.name = fileName;
+
+            setMsPosReRecording(rec.channels);
+
+            for(let cIndex = 0; cIndex < rec.channels.length; cIndex++)
+            {
+                let channelsInfo = rec.channels[cIndex];
+                channelsInfo.messages = getStringArray(channelsInfo.messages);
+            }
+
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, "\t")], {
+                type: "text/plain"
+            }));
+            a.setAttribute("download", fileName);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            restoreDivStateAfterRecording();
+        },
+        // exported
+        onDiscardRecordingButtonClicked = function()
+        {
+            restoreDivStateAfterRecording();
+        },
+        // exported
+        // This application can only record on a single channel.
+        // It can, however play back multi-channel recordings.
+        onStartRecordingButtonClicked = function()
+        {
+            function disableSettingsDiv()
+            {
+                let settingsTitle = getElem("settingsTitle"),
+                    settingsSelect = getElem("settingsSelect"),
+                    exportSettingsButton = getElem("exportSettingsButton"),
+                    triggerKeyTitle = getElem("triggerKeyTitle"),
+                    triggerKeyInput = getElem("triggerKeyInput"),
+                    settingsNameCell = getElem("settingsNameCell");
+
+                settingsTitle.style.color = "darkgray";
+                settingsSelect.prevState = settingsSelect.disabled;
+                settingsSelect.disabled = true;
+                exportSettingsButton.prevState = exportSettingsButton.disabled;
+                exportSettingsButton.disabled = true;
+            }
+
+            let startRecordingButton = getElem("startRecordingButton"),
+                stopRecordingButton = getElem("stopRecordingButton"),
+                channelSelect = getElem("channelSelect"),
+                channel = channelSelect.selectedIndex,
+                hostChannelSettings = channelSelect.options[channel].hostSettings;
+
+            // can't change channel while recording
+            channelSelect.disabled = true;
+            disableSettingsDiv();
+
+            recordingChannelInfo = {}; // is global
+            recordingChannelInfo.channel = channel;
+            recordingChannelInfo.channelSettings = hostChannelSettings.clone(); // a single channelSettings clone
+            recordingChannelInfo.messages = [];
+
+            currentRecording = {}; // global in host
+            currentRecording.name = ""; // is finally set in onStopRecordingButtonClicked()
+            currentRecording.channels = [];
+            currentRecording.channels.push(recordingChannelInfo);
+
+            startRecordingButton.style.display = "none";
+            stopRecordingButton.style.display = "block";
+        },
+        // exported
+        onStopRecordingButtonClicked = function()
+        {
             console.assert(recordingChannelInfo !== undefined);
+
+            let messages = recordingChannelInfo.messages;
+
+            let msPositionReRecording = messages[0].now;
+            for(var i = 0; i < messages.length; i++)
+            {
+                let message = messages[i];
+
+                message.msPositionReRecording = message.now - msPositionReRecording;
+                delete message.now;
+            }
 
             if(cancelPlayback === false && recordingChannelInfo.messages.length > 0)
             {
-                rec.channels = getAgglommeratedChannelInfos(playbackChannelInfos, recordingChannelInfo);
+                let playRecordingButton = getElem("playRecordingButton"),
+                    startRecordingButton = getElem("startRecordingButton"),
+                    stopRecordingButton = getElem("stopRecordingButton"),
+                    saveRecordingButton = getElem("saveRecordingButton"),
+                    discardRecordingButton = getElem("discardRecordingButton");
 
-                let fileName = getFileName(rec.channels);
-                rec.name = fileName;
+                playRecordingButton.value = "play current recording";
+                playRecordingButton.style.background = "#DFD";
 
-                setMsPosReRecording(rec.channels);
+                startRecordingButton.style.display = "none";
+                stopRecordingButton.style.display = "none";
 
-                for(let cIndex = 0; cIndex < rec.channels.length; cIndex++)
-                {
-                    let channelsInfo = rec.channels[cIndex];
-                    channelsInfo.messages = getStringArray(channelsInfo.messages);
-                }
-
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, "\t")], {
-                    type: "text/plain"
-                }));
-                a.setAttribute("download", fileName);
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                discardRecordingButton.style.display = "block";
+                saveRecordingButton.style.display = "block";
             }
-
-            stopRecordingButton.style.display = "none";
-            startRecordingButton.style.display = "block";
-
-            restoreSettingsDivState()
-            channelSelect.disabled = false;
-
-            recording = undefined;
-            playbackChannelInfos = undefined;
-            recordingChannelInfo = undefined;
-            cancelPlayback = false;
         },
 
         normalizedLongInputString = function(str)
@@ -2701,6 +2737,8 @@ ResSynth.host = (function(document)
             onCancelPlaybackButtonClicked: onCancelPlaybackButtonClicked,
             onStartRecordingButtonClicked: onStartRecordingButtonClicked,
             onStopRecordingButtonClicked: onStopRecordingButtonClicked,
+            onSaveRecordingButtonClicked: onSaveRecordingButtonClicked,
+            onDiscardRecordingButtonClicked: onDiscardRecordingButtonClicked,
 
             onKeyOrnamentsSelectChanged: onOrnamentsSelectChanged,
 

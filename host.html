@@ -182,22 +182,30 @@
             <hr />
             <table width="660px">
                 <colgroup>
-                    <col width="344" />
-                    <col width="216" />
-                    <col width="100" />
+                    <col width="63" />
+                    <col width="225" />
+                    <col width="132" />
+                    <col width="120" />
+                    <col width="120" />
                 </colgroup>
                 <tr>
                     <td>
-                        <span class="boldSubtitle">recordings: </span>
+                        <span class="boldSubtitle">recordings:</span>
+                    </td>
+                    <td>
                         <select id="recordingSelect" class="recordingSelect" />
                     </td>
                     <td>
-                        <input id="playRecordingButton" type="button" class="playRecordingButton" value="play recording" onclick="ResSynth.host.onPlayRecordingButtonClicked()" />
+                        <input id="playRecordingButton" type="button" class="playRecordingButton" value="play selected recording" onclick="ResSynth.host.onPlayRecordingButtonClicked()" />
                         <input id="cancelPlaybackButton" type="button" class="cancelPlaybackButton" value="cancel playback" onclick="ResSynth.host.onCancelPlaybackButtonClicked()" />
                     </td>
+                    <td>                        
+                        <input id="discardRecordingButton" type="button" class="discardRecordingButton" value="discard recording" onclick="ResSynth.host.onDiscardRecordingButtonClicked()" />
+                    </td>
                     <td align="right">
-                        <input id="startRecordingButton" type="button" class="startRecordingButton" value="start recording channel" onclick="ResSynth.host.onStartRecordingButtonClicked()" />
-                        <input id="stopRecordingButton" type="button" class="stopRecordingButton" value="stop recording channel" onclick="ResSynth.host.onStopRecordingButtonClicked()" />
+                        <input id="saveRecordingButton" type="button" class="saveRecordingButton" value="save recording" onclick="ResSynth.host.onSaveRecordingButtonClicked()" />
+                        <input id="startRecordingButton" type="button" class="startRecordingButton" value="start recording ch" onclick="ResSynth.host.onStartRecordingButtonClicked()" />
+                        <input id="stopRecordingButton" type="button" class="stopRecordingButton" value="stop recording ch" onclick="ResSynth.host.onStopRecordingButtonClicked()" />
                     </td>
                 </tr>
             </table>

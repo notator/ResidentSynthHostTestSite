@@ -13,7 +13,7 @@ div.background
     width: 660px; 
     margin: 0;
     padding: 25px;
-    background-color: #EEEEEE;
+    background: #EEEEEE;
     border: 1px solid black;
 }
 
@@ -21,7 +21,7 @@ hr
 {
     border-style: none;
     height: 4px;
-    background-color: #AAA;
+    background: #AAA;
 }
 
 .boldTitle
@@ -124,15 +124,6 @@ hr
 	margin-left: 0;
 	margin-right: 0;
 }
-/***
-.settingsSelect
-{
-	font-size: 11px;
-	width: 390px;
-	height: 18px;
-	margin-left: 0;
-}
-***/
 
 .exportSettingsButton
 {
@@ -198,41 +189,71 @@ hr
 .recordingSelect
 {
 	font-size: 11px;
-	width: 250px;
+	width: 225px;
 	height: 18px;
-	margin-left: 3px;
-	margin-right: 0px;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .playRecordingButton
 {
 	font-size: 11px;
 	height: 18px;
-	margin-left: 0px;
+	width: 130px;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .cancelPlaybackButton
 {
 	font-size: 11px;
 	height: 18px;
-	margin-left: 0px;
-	background-color: #DDF;
+	width: 130px;
+	margin-left: 0;
+	margin-right: 0;
+	background: #DDF;
 	display: none;
 }
 
 .startRecordingButton
 {
 	font-size: 11px;
-	width: 140px;
+	width: 110px;
 	height: 18px;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .stopRecordingButton
 {
 	font-size: 11px;
-	width: 140px;
+	width: 110px;
 	height: 18px;
-	background-color: #DFD;
+	margin-left: 0;
+	margin-right: 0;
+	background: #DFD;
+	display: none;
+}
+
+.saveRecordingButton
+{
+	font-size: 11px;
+	width: 110px;
+	height: 18px;
+	margin-left: 0;
+	margin-right: 2px;
+	background: #DDF;
+	display: none;
+}
+
+.discardRecordingButton
+{
+	font-size: 11px;
+	width: 110px;
+	height: 18px;
+	margin-left: 0;
+	margin-right: 0;
+	background: #FDD;
 	display: none;
 }
 
