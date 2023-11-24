@@ -247,10 +247,10 @@ ResSynth.host = (function(document)
 
         // exported
         // See: https://developer.chrome.com/blog/audiocontext-setsinkid/
-        onAudioOutputSelectChanged = function()
+        onAudioDeviceSelectChanged = function()
         {
-            let audioOutputSelect = getElem("audioOutputSelect"),
-                option = audioOutputSelect.options[audioOutputSelect.selectedIndex],
+            let audioDeviceSelect = getElem("audioDeviceSelect"),
+                option = audioDeviceSelect.options[audioDeviceSelect.selectedIndex],
                 deviceId = (option.deviceId === "default") ? "" : option.deviceId;
 
             synth.setAudioOutputDevice(deviceId);
@@ -578,14 +578,7 @@ ResSynth.host = (function(document)
                             let key = keys[keyIndex],
                                 newValue = channelSettings[key];
 
-                            if(key === "channel")
-                            {
-                                if(newValue !== hostChannelSettings[key])
-                                {
-                                    throw "error";
-                                }
-                            }
-                            else if(newValue === hostChannelSettings[key])
+                            if(newValue === hostChannelSettings[key])
                             {
                                 let errorStr = `Warning:\n` +
                                     `Redundant attribute setting in the synthSettingsDefs.\n` +
@@ -1000,38 +993,61 @@ ResSynth.host = (function(document)
             cancelPlayback = true; // global
         },
 
-        restoreDivStateAfterRecording = function ()
+        restoreStateAfterRecording = function ()
         {
-            let settingsTitle = getElem("settingsTitle"),
-                settingsSelect = getElem("settingsSelect"),
-                exportSettingsButton = getElem("exportSettingsButton"),
-                triggerKeyTitle = getElem("triggerKeyTitle"),
-                triggerKeyInput = getElem("triggerKeyInput"),
-                settingsNameCell = getElem("settingsNameCell");
+            function restoreGUI()
+            {
+                function restoreSettingsDiv()
+                {
+                    let triggerKeyTitle = getElem("triggerKeyTitle"),
+                        triggerKeyInput = getElem("triggerKeyInput"),
+                        keyboardSplitTitle = getElem("keyboardSplitTitle"),
+                        keyboardSplitSelect = getElem("keyboardSplitSelect"),
+                        settingsTitle = getElem("settingsTitle"),
+                        settingsSelect = getElem("settingsSelect"),
+                        exportSettingsButton = getElem("exportSettingsButton");
 
-            settingsTitle.style.color = "black";
-            settingsSelect.disabled = settingsSelect.prevState;
-            settingsSelect.prevState = undefined;
-            exportSettingsButton.disabled = exportSettingsButton.prevState;
-            exportSettingsButton.prevState = undefined;
 
-            triggerKeyTitle.style.color = "black";
-            triggerKeyInput.disabled = false;
-            settingsNameCell.style.color = "black";
+                    keyboardSplitTitle.style.color = "black";
+                    keyboardSplitSelect.disabled = false;
+                    triggerKeyTitle.style.color = "black";
+                    triggerKeyInput.disabled = false;
 
-            getElem("channelSelect").disabled = false;
-            getElem("playRecordingButton").value = "play selected recording";
-            getElem("playRecordingButton").style.background = "none";
-            getElem("stopRecordingButton").style.display = "none";
-            getElem("saveRecordingButton").style.display = "none";
-            getElem("discardRecordingButton").style.display = "none";
-            getElem("startRecordingButton").style.display = "block";
+                    settingsTitle.style.color = "black";
+                    settingsSelect.disabled = settingsSelect.prevState;
+                    settingsSelect.prevState = undefined;
+                    exportSettingsButton.disabled = exportSettingsButton.prevState;
+                    exportSettingsButton.prevState = undefined;
+                }
 
+                function restoreRecordingsGUI()
+                {
+                    getElem("recordingTitle").style.color = "black";
+                    getElem("recordingSelect").disabled = false;
+                    getElem("playRecordingButton").value = "play selected recording";
+                    getElem("playRecordingButton").style.background = "none";
+                    getElem("stopRecordingButton").style.display = "none";
+                    getElem("saveRecordingButton").style.display = "none";
+                    getElem("discardRecordingButton").style.display = "none";
+                    getElem("startRecordingButton").style.display = "block";
+                }
+
+                getElem("channelSelect").disabled = false;
+
+                restoreSettingsDiv();
+
+                restoreRecordingsGUI(); 
+            }
+
+            restoreGUI();
+
+            // global variables
             currentRecording = undefined;
             playbackChannelInfos = undefined;
             recordingChannelInfo = undefined;
             cancelPlayback = false;
         },
+
         // exported
         onSaveRecordingButtonClicked = function()
         {
@@ -1149,12 +1165,12 @@ ResSynth.host = (function(document)
             a.click();
             document.body.removeChild(a);
 
-            restoreDivStateAfterRecording();
+            restoreStateAfterRecording();
         },
         // exported
         onDiscardRecordingButtonClicked = function()
         {
-            restoreDivStateAfterRecording();
+            restoreStateAfterRecording();
         },
         // exported
         // This application can only record on a single channel.
@@ -1163,18 +1179,31 @@ ResSynth.host = (function(document)
         {
             function disableSettingsDiv()
             {
-                let settingsTitle = getElem("settingsTitle"),
-                    settingsSelect = getElem("settingsSelect"),
-                    exportSettingsButton = getElem("exportSettingsButton"),
-                    triggerKeyTitle = getElem("triggerKeyTitle"),
+                let triggerKeyTitle = getElem("triggerKeyTitle"),
                     triggerKeyInput = getElem("triggerKeyInput"),
-                    settingsNameCell = getElem("settingsNameCell");
+                    keyboardSplitTitle = getElem("keyboardSplitTitle"),
+                    keyboardSplitSelect = getElem("keyboardSplitSelect"),
+                    settingsTitle = getElem("settingsTitle"),
+                    settingsSelect = getElem("settingsSelect"),
+                    exportSettingsButton = getElem("exportSettingsButton");
 
+
+                keyboardSplitTitle.style.color = "darkgray";
+                keyboardSplitSelect.disabled = true;
+                triggerKeyTitle.style.color = "darkgray";
+                triggerKeyInput.disabled = true;
                 settingsTitle.style.color = "darkgray";
                 settingsSelect.prevState = settingsSelect.disabled;
                 settingsSelect.disabled = true;
                 exportSettingsButton.prevState = exportSettingsButton.disabled;
                 exportSettingsButton.disabled = true;
+            }
+
+            function disablePresetRecordingsControls()
+            {
+                getElem("recordingTitle").style.color = "darkgray";
+                getElem("recordingSelect").disabled = true;
+                getElem("playRecordingButton").disabled = true;
             }
 
             let startRecordingButton = getElem("startRecordingButton"),
@@ -1186,6 +1215,7 @@ ResSynth.host = (function(document)
             // can't change channel while recording
             channelSelect.disabled = true;
             disableSettingsDiv();
+            disablePresetRecordingsControls();
 
             recordingChannelInfo = {}; // is global
             recordingChannelInfo.channel = channel;
@@ -1224,6 +1254,7 @@ ResSynth.host = (function(document)
                     saveRecordingButton = getElem("saveRecordingButton"),
                     discardRecordingButton = getElem("discardRecordingButton");
 
+                playRecordingButton.disabled = false;
                 playRecordingButton.value = "play current recording";
                 playRecordingButton.style.background = "#DFD";
 
@@ -1233,22 +1264,6 @@ ResSynth.host = (function(document)
                 discardRecordingButton.style.display = "block";
                 saveRecordingButton.style.display = "block";
             }
-        },
-
-        normalizedLongInputString = function(str)
-        {
-            let lastIndex = str.lastIndexOf(";");
-
-            str = str.trim();
-            if(lastIndex === str.length - 1)
-            {
-                str = str.substring(0, lastIndex);
-            }
-
-            str = str.replace(/;/g, "; ");
-            str = str.replace(/  /g, " ");
-
-            return str;
         },
 
         onKeyboardSplitSelectChanged = function()
@@ -2594,7 +2609,7 @@ ResSynth.host = (function(document)
                 navigator.requestMIDIAccess().then(onSuccessCallback, onErrorCallback);
             }
 
-            async function setAudioOutputDeviceSelect()
+            async function setAudioDeviceSelect()
             {
                 const permission = await navigator.permissions.query({name: "microphone"});
                 if(permission.state == "prompt")
@@ -2607,14 +2622,14 @@ ResSynth.host = (function(document)
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const AudioOutputDevices = devices.filter(device => device.kind == "audiooutput");
 
-                let audioOutputSelect = getElem("audioOutputSelect");
+                let audioDeviceSelect = getElem("audioDeviceSelect");
                 for(let i = 0; i < AudioOutputDevices.length; i++)  
                 {
                     let audioDev = AudioOutputDevices[i]
                     let option = document.createElement("option");
                     option.text = audioDev.label;
                     option.deviceId = audioDev.deviceId;
-                    audioOutputSelect.add(option, null);
+                    audioDeviceSelect.add(option, null);
                 }
             }
 
@@ -2703,7 +2718,7 @@ ResSynth.host = (function(document)
             }
 
             setupInputDevice();
-            setAudioOutputDeviceSelect();
+            setAudioDeviceSelect();
             recordings = getRecordings();  // loads definitions from recordings.js.
             synth = new ResSynth.residentSynth.ResidentSynth(); // loads definitions from files in residentSynth/config.
             setInitialDivsDisplay();
@@ -2712,7 +2727,7 @@ ResSynth.host = (function(document)
         publicAPI =
         {
             onInputDeviceSelectChanged: onInputDeviceSelectChanged,
-            onAudioOutputSelectChanged: onAudioOutputSelectChanged,
+            onAudioDeviceSelectChanged: onAudioDeviceSelectChanged,
 
             onContinueAtStartClicked: onContinueAtStartClicked,
 

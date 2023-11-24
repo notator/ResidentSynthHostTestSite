@@ -13,14 +13,14 @@
     <div class="background">
         <div id="topDiv" style="text-align:center">
             <span class="boldTitle">ResidentSynth Host</span><br />
-            <span class="subtitle">live performance of the GUI-less ResidentSynth</span>
+            <span class="subtitle">live performance and recording of the GUI-less ResidentSynth</span>
             <div style="padding-top:3px">
-                <span class="boldSubtitle">Input Device:</span>
+                <span id="inputDeviceTitle" class="boldSubtitle">Input Device:</span>
                 <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
 
                 <span>
-                    <span class="boldSubtitle">Audio Output:</span>
-                    <select id="audioOutputSelect" class="outputDeviceSelect" onchange="ResSynth.host.onAudioOutputSelectChanged()"></select>
+                    <span id="audioDeviceTitle"class="boldSubtitle">Audio Output:</span>
+                    <select id="audioDeviceSelect" class="audioDeviceSelect" onchange="ResSynth.host.onAudioDeviceSelectChanged()"></select>
                 </span>
             </div>
         </div>
@@ -62,9 +62,8 @@
                             <option value="15">15</option>
                         </select>
                     </td>
-                    <td align="right">
-                        <span class="boldSubtitle">keyboard split: </span>
-                        <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
+                    <td>
+
                     </td>
                 </tr>
             </table>
@@ -136,9 +135,15 @@
         <div id="ornamentsDiv" style="display:none;">
             <hr />
             <table width="660px">
+                <colgroup>
+                    <col width="66" />
+                    <col width="594" />
+                </colgroup>
                 <tr>
                     <td>
-                        <span id="ornamentsTitle" class="boldSubtitle">ornaments: </span>
+                        <span id="ornamentsTitle" class="boldSubtitle">ornaments:</span>
+                    </td>
+                    <td>
                         <select id="ornamentsSelect" class="ornamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
                     </td>
                 </tr>
@@ -148,32 +153,41 @@
             <hr />
             <table width="660px">
                 <colgroup>
+                    <col width="66" />
+                    <col width="100" />
+                    <col width="109" />
+                    <col width="385" />
+                </colgroup>
+                <tr>
+                    <td>
+                        <span id="triggerKeyTitle" class="boldSubtitle">trigger key:</span>
+                    </td>
+                    <td>
+                        <input id="triggerKeyInput" type="number" class="triggerKeyNumber" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
+                    </td>
+                    <td align="right">
+                        <span id="keyboardSplitTitle" class="boldSubtitle">keyboard split:</span>
+                    </td>
+                    <td>
+                        <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
+                    </td>
+                </tr>
+            </table>
+            <table width="660px">
+                <colgroup>
                     <col width="93" />
                     <col width="442" />
                     <col width="130" />
                 </colgroup>
                 <tr>
-                    <td align="right">
-                        <span id="settingsTitle" class="boldSubtitle">preset settings: </span>
+                    <td>
+                        <span id="settingsTitle" class="boldSubtitle">preset settings:</span>
                     </td>
-                    <td align="left">
+                    <td>
                         <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
                     </td>
                     <td align="right">
                         <input id="exportSettingsButton" type="button" class="exportSettingsButton" value="export current settings" onclick="ResSynth.host.onExportSettingsButtonClicked()" disabled />
-                    </td>
-                </tr>
-            </table>
-            <table>
-                <tr>
-                    <td>
-                        <span id="triggerKeyTitle" class="boldSubtitle">trigger key: </span>
-                    </td>
-                    <td>
-                        <input id="triggerKeyInput" type="number" class="triggerKeyNumber" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
-                    </td>
-                    <td id="settingsNameCell">
-                        <!-- settings name -->
                     </td>
                 </tr>
             </table>
@@ -182,15 +196,15 @@
             <hr />
             <table width="660px">
                 <colgroup>
-                    <col width="63" />
-                    <col width="225" />
+                    <col width="66" />
+                    <col width="222" />
                     <col width="132" />
                     <col width="120" />
                     <col width="120" />
                 </colgroup>
                 <tr>
                     <td>
-                        <span class="boldSubtitle">recordings:</span>
+                        <span id="recordingTitle" class="boldSubtitle">recordings:</span>
                     </td>
                     <td>
                         <select id="recordingSelect" class="recordingSelect" />
@@ -199,7 +213,7 @@
                         <input id="playRecordingButton" type="button" class="playRecordingButton" value="play selected recording" onclick="ResSynth.host.onPlayRecordingButtonClicked()" />
                         <input id="cancelPlaybackButton" type="button" class="cancelPlaybackButton" value="cancel playback" onclick="ResSynth.host.onCancelPlaybackButtonClicked()" />
                     </td>
-                    <td>                        
+                    <td align="right">                        
                         <input id="discardRecordingButton" type="button" class="discardRecordingButton" value="discard recording" onclick="ResSynth.host.onDiscardRecordingButtonClicked()" />
                     </td>
                     <td align="right">

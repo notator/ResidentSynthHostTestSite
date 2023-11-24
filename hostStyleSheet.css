@@ -60,7 +60,7 @@ hr
 	margin-left: 0;
 }
 
-.outputDeviceSelect
+.audioDeviceSelect
 {
 	font-size: 11px;
 	width: 190px;
@@ -114,12 +114,13 @@ hr
 	width: 385px;
 	height: 18px;
 	margin-left: 0;
+	margin-right: 0;
 }
 
 .ornamentsSelect
 {
 	font-size: 11px;
-	width: 589px;
+	width: 590px;
 	height: 18px;
 	margin-left: 0;
 	margin-right: 0;
@@ -161,7 +162,7 @@ hr
 	font-size: 11px;
 	width: 35px;
 	margin-left: 0;
-	margin-right: 4px;
+	margin-right: 0;
 }
 
 .number
@@ -189,7 +190,7 @@ hr
 .recordingSelect
 {
 	font-size: 11px;
-	width: 225px;
+	width: 222px;
 	height: 18px;
 	margin-left: 0;
 	margin-right: 0;
