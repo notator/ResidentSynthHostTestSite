@@ -950,21 +950,25 @@ ResSynth.host = (function(document)
                 cancelPlaybackButton = getElem("cancelPlaybackButton"),
                 recordingSelect = getElem("recordingSelect"),
                 recordingIndex = recordingSelect.selectedIndex,
-                playbackRecording = ResSynth.recordings[recordingIndex];
+                playRecording = undefined;
 
             playRecordingButton.style.display = "none";
             cancelPlaybackButton.style.display = "block";
 
-            if(currentRecording !== undefined)
+            if(currentRecording === undefined)
             {
-                playbackRecording = structuredClone(currentRecording); 
+                playRecording = ResSynth.recordings[recordingIndex];
+            }
+            else
+            {
+                playRecording = structuredClone(currentRecording); 
             }
 
-            playbackChannelInfos = playbackRecording.channels; // playbackChannelInfos is global
+            playbackChannelInfos = playRecording.channels; // playbackChannelInfos is global
 
-            playbackChannelIndices = getPlaybackChannelIndices(playbackRecording.channels); // playbackChannelIndices is global in host.
+            playbackChannelIndices = getPlaybackChannelIndices(playRecording.channels); // playbackChannelIndices is global in host.
 
-            setSynthToPlaybackSettings(playbackRecording.channels);
+            setSynthToPlaybackSettings(playRecording.channels);
 
             if(currentRecording !== undefined)
             {
@@ -1024,11 +1028,15 @@ ResSynth.host = (function(document)
                 {
                     getElem("recordingTitle").style.color = "black";
                     getElem("recordingSelect").disabled = false;
+                    
                     getElem("playRecordingButton").value = "play selected recording";
                     getElem("playRecordingButton").style.background = "none";
+                    getElem("playRecordingButton").disabled = false;
+
                     getElem("stopRecordingButton").style.display = "none";
                     getElem("saveRecordingButton").style.display = "none";
                     getElem("discardRecordingButton").style.display = "none";
+
                     getElem("startRecordingButton").style.display = "block";
                 }
 
@@ -1089,28 +1097,6 @@ ResSynth.host = (function(document)
                 return fileName;
             }
 
-            function setMsPosReRecording(recChannels)
-            {
-                let startNow = Number.MAX_VALUE;
-                for(let chIndex = 0; chIndex < recChannels.length; chIndex++)
-                {
-                    let firstChannelMessageNow = recChannels[chIndex].messages[0].now;
-
-                    startNow = (startNow < firstChannelMessageNow) ? startNow : firstChannelMessageNow;
-                }
-                for(let cIndex = 0; cIndex < recChannels.length; cIndex++)
-                {
-                    let messages = recChannels[cIndex].messages;
-
-                    for(let i = 0; i < messages.length; i++)
-                    {
-                        let msgNow = messages[i].now;
-
-                        messages[i].msPositionReRecording = Math.round(msgNow - startNow);
-                    }
-                }
-            }
-
             function getAgglommeratedChannelInfos(playbackChannelInfos, recordingChannelInfo)
             {
                 let channelInfos = [];
@@ -1143,12 +1129,12 @@ ResSynth.host = (function(document)
 
             let rec = currentRecording;
 
+            playbackChannelInfos = currentRecording.channels; // playbackChannelInfos is global
+
             rec.channels = getAgglommeratedChannelInfos(playbackChannelInfos, recordingChannelInfo);
 
             let fileName = getFileName(rec.channels);
             rec.name = fileName;
-
-            setMsPosReRecording(rec.channels);
 
             for(let cIndex = 0; cIndex < rec.channels.length; cIndex++)
             {
@@ -1199,13 +1185,6 @@ ResSynth.host = (function(document)
                 exportSettingsButton.disabled = true;
             }
 
-            function disablePresetRecordingsControls()
-            {
-                getElem("recordingTitle").style.color = "darkgray";
-                getElem("recordingSelect").disabled = true;
-                getElem("playRecordingButton").disabled = true;
-            }
-
             let startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
                 channelSelect = getElem("channelSelect"),
@@ -1215,7 +1194,6 @@ ResSynth.host = (function(document)
             // can't change channel while recording
             channelSelect.disabled = true;
             disableSettingsDiv();
-            disablePresetRecordingsControls();
 
             recordingChannelInfo = {}; // is global
             recordingChannelInfo.channel = channel;
@@ -1237,32 +1215,39 @@ ResSynth.host = (function(document)
 
             let messages = recordingChannelInfo.messages;
 
-            let msPositionReRecording = messages[0].now;
-            for(var i = 0; i < messages.length; i++)
+            if(messages.length > 0)
             {
-                let message = messages[i];
+                let startNow = messages[0].now;
+                for(var i = 0; i < messages.length; i++)
+                {
+                    let message = messages[i];
 
-                message.msPositionReRecording = message.now - msPositionReRecording;
-                delete message.now;
+                    message.msPositionReRecording = Math.round(message.now - startNow);
+                    delete message.now;
+                }
+
+                if(cancelPlayback === false && recordingChannelInfo.messages.length > 0)
+                {
+                    let playRecordingButton = getElem("playRecordingButton"),
+                        startRecordingButton = getElem("startRecordingButton"),
+                        stopRecordingButton = getElem("stopRecordingButton"),
+                        saveRecordingButton = getElem("saveRecordingButton"),
+                        discardRecordingButton = getElem("discardRecordingButton");
+
+                    playRecordingButton.disabled = false;
+                    playRecordingButton.value = "play current recording";
+                    playRecordingButton.style.background = "#DFD";
+
+                    startRecordingButton.style.display = "none";
+                    stopRecordingButton.style.display = "none";
+
+                    discardRecordingButton.style.display = "block";
+                    saveRecordingButton.style.display = "block";
+                }
             }
-
-            if(cancelPlayback === false && recordingChannelInfo.messages.length > 0)
+            else
             {
-                let playRecordingButton = getElem("playRecordingButton"),
-                    startRecordingButton = getElem("startRecordingButton"),
-                    stopRecordingButton = getElem("stopRecordingButton"),
-                    saveRecordingButton = getElem("saveRecordingButton"),
-                    discardRecordingButton = getElem("discardRecordingButton");
-
-                playRecordingButton.disabled = false;
-                playRecordingButton.value = "play current recording";
-                playRecordingButton.style.background = "#DFD";
-
-                startRecordingButton.style.display = "none";
-                stopRecordingButton.style.display = "none";
-
-                discardRecordingButton.style.display = "block";
-                saveRecordingButton.style.display = "block";
+                restoreStateAfterRecording();
             }
         },
 
