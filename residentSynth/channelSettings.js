@@ -79,46 +79,47 @@ ResSynth.channelSettings = (function()
         return rval;
     };
 
-    // Returns a complete clone of the calling ChannelSettings, including
-    // all control attribute values, and the .channel .name and.keyboardSplitIndex.
-    // Only attributes that really exist are cloned.
-    ChannelSettings.prototype.clone = function()
-    {
-        let clone = new ResSynth.channelSettings.ChannelSettings(this.channel);
+    //// use structuredClone(channelsettings) instead!
+    //// Returns a complete clone of the calling ChannelSettings, including
+    //// all control attribute values, and the .channel .name and.keyboardSplitIndex.
+    //// Only attributes that really exist are cloned.
+    //ChannelSettings.prototype.clone = function()
+    //{
+    //    let clone = new ResSynth.channelSettings.ChannelSettings(this.channel);
 
-        if(this.bankIndex !== undefined)
-            clone.bankIndex = this.bankIndex;
-        if(this.presetIndex !== undefined)
-            clone.presetIndex = this.presetIndex;
-        if(this.mixtureIndex !== undefined)
-            clone.mixtureIndex = this.mixtureIndex;
-        if(this.tuningGroupIndex !== undefined)
-            clone.tuningGroupIndex = this.tuningGroupIndex;
-        if(this.tuningIndex !== undefined)
-            clone.tuningIndex = this.tuningIndex;
-        if(this.semitonesOffset !== undefined)
-            clone.semitonesOffset = this.semitonesOffset;
-        if(this.centsOffset !== undefined)
-            clone.centsOffset = this.centsOffset;
-        if(this.pitchWheel !== undefined)
-            clone.pitchWheel = this.pitchWheel;
-        if(this.modWheel !== undefined)
-            clone.modWheel = this.modWheel;
-        if(this.volume !== undefined)
-            clone.volume = this.volume;
-        if(this.pan !== undefined)
-            clone.pan = this.pan;
-        if(this.reverberation !== undefined)
-            clone.reverberation = this.reverberation;
-        if(this.pitchWheelSensitivity !== undefined)
-            clone.pitchWheelSensitivity = this.pitchWheelSensitivity;
-        if(this.velocityPitchSensitivity !== undefined)
-            clone.velocityPitchSensitivity = this.velocityPitchSensitivity;
-        if(this.keyboardOrnamentsArrayIndex !== undefined)
-            clone.keyboardOrnamentsArrayIndex = this.keyboardOrnamentsArrayIndex;
+    //    if(this.bankIndex !== undefined)
+    //        clone.bankIndex = this.bankIndex;
+    //    if(this.presetIndex !== undefined)
+    //        clone.presetIndex = this.presetIndex;
+    //    if(this.mixtureIndex !== undefined)
+    //        clone.mixtureIndex = this.mixtureIndex;
+    //    if(this.tuningGroupIndex !== undefined)
+    //        clone.tuningGroupIndex = this.tuningGroupIndex;
+    //    if(this.tuningIndex !== undefined)
+    //        clone.tuningIndex = this.tuningIndex;
+    //    if(this.semitonesOffset !== undefined)
+    //        clone.semitonesOffset = this.semitonesOffset;
+    //    if(this.centsOffset !== undefined)
+    //        clone.centsOffset = this.centsOffset;
+    //    if(this.pitchWheel !== undefined)
+    //        clone.pitchWheel = this.pitchWheel;
+    //    if(this.modWheel !== undefined)
+    //        clone.modWheel = this.modWheel;
+    //    if(this.volume !== undefined)
+    //        clone.volume = this.volume;
+    //    if(this.pan !== undefined)
+    //        clone.pan = this.pan;
+    //    if(this.reverberation !== undefined)
+    //        clone.reverberation = this.reverberation;
+    //    if(this.pitchWheelSensitivity !== undefined)
+    //        clone.pitchWheelSensitivity = this.pitchWheelSensitivity;
+    //    if(this.velocityPitchSensitivity !== undefined)
+    //        clone.velocityPitchSensitivity = this.velocityPitchSensitivity;
+    //    if(this.keyboardOrnamentsArrayIndex !== undefined)
+    //        clone.keyboardOrnamentsArrayIndex = this.keyboardOrnamentsArrayIndex;
 
-        return clone;
-    };
+    //    return clone;
+    //};
 
     return API;
 }());
