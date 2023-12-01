@@ -23,7 +23,6 @@ ResSynth.host = (function(document)
 
         currentRecording = undefined, // initialized by startRecording(), reset by stopRecording()
         userInputRecordingChannelInfo = undefined,  // initialized by startRecording(), reset by stopRecording()
-        recordedMessages = undefined, // inside currentRecording, used while recording a channel. Used by host.sendMessage(...)
         recordingChannelIndices = undefined, // initialized by onPlayRecordingButtonClick(), reset by restoreStateAfterRecording()
         hostChannelBeforePlayback = undefined, 
         allowRecording = true, // false while a currentRecording is being played back
@@ -45,11 +44,11 @@ ResSynth.host = (function(document)
         sendMessage = function(msg, channelIndex)
         {
             synth.send(msg);
-            if(recordedMessages !== undefined && allowRecording)
+            if(currentRecording !== undefined && allowRecording)
             {
                 let msPositionReRecording = performance.now();
 
-                recordedMessages[channelIndex].push({msg, msPositionReRecording});
+                currentRecording.channels[channelIndex].messages.push({msg, msPositionReRecording});
             }
         },
 
@@ -1085,7 +1084,6 @@ ResSynth.host = (function(document)
             {
                 currentRecording = undefined;
                 userInputRecordingChannelInfo = undefined;
-                recordedMessages = undefined;
                 recordingChannelIndices = undefined;
                 hostChannelBeforePlayback = undefined;
                 allowRecording = true;
@@ -1222,28 +1220,21 @@ ResSynth.host = (function(document)
             currentRecording.channels = [];
             currentRecording.channels.push(userInputRecordingChannelInfo);
 
-            //global 
-            recordedMessages = [];
-            for(var channelIndex = 0; channelIndex < 16; channelIndex++)
-            {
-                recordedMessages.push([]);
-            }
-
             startRecordingButton.style.display = "none";
             stopRecordingButton.style.display = "block";
         },
         // exported
         onStopRecordingButtonClicked = function()
         {
-            function recordedMessagesExist(recordedMessages)
+            function recordedMessagesExist(currentRecording)
             {
                 let theyExist = false;
 
-                if(recordedMessages !== undefined)
+                if(currentRecording !== undefined)
                 {
                     for(let channelIndex = 0; channelIndex < 16; channelIndex++)
                     {
-                        if(recordedMessages[channelIndex].length > 0)
+                        if(currentRecording.channels[channelIndex].messages.length > 0)
                         {
                             theyExist = true;
                             break;
@@ -1258,7 +1249,9 @@ ResSynth.host = (function(document)
             // Truncates each channel, so that the final message is a NoteOff (i.e removes trailing control messages)
             function normalizeMsPositionReRecordingValues(channelInfos)
             {
-                let timeOrigin = Number.MAX_VALUE;
+                let NOTE_ON = ResSynth.constants.COMMAND.NOTE_ON,
+                    NOTE_OFF = ResSynth.constants.COMMAND.NOTE_OFF,
+                    timeOrigin = Number.MAX_VALUE;
 
                 for(let i = 0; i < channelInfos.length; i++)
                 {
@@ -1271,6 +1264,20 @@ ResSynth.host = (function(document)
                 {
                     let messages = channelInfos[i].messages;
 
+                    for(var msgIndex = messages.length - 1; msgIndex >= 0; msgIndex--)
+                    {
+                        let command = messages[msgIndex].msg[0] & 0xF0;
+
+                        if(command === NOTE_ON || command === NOTE_OFF)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            messages.pop();
+                        }
+                    }
+
                     for(var messageIndex = 0; messageIndex < messages.length; messageIndex++)
                     {
                         let message = messages[messageIndex];
@@ -1282,22 +1289,8 @@ ResSynth.host = (function(document)
                 return channelInfos;
             }
 
-            if(cancelPlayback === false && recordedMessagesExist(recordedMessages))
+            if(cancelPlayback === false && recordedMessagesExist(currentRecording))
             {
-                for(let channelIndex = 0; channelIndex < 16; channelIndex++)
-                {
-                    let messages = structuredClone(recordedMessages[channelIndex]);
-                    if(messages.length > 0)
-                    {
-                        currentRecording.channels[channelIndex].messages = messages;
-                    }
-                }
-
-                for(let channelIndex = 0; channelIndex < recordedMessages.length; channelIndex++)
-                {
-                    recordedMessages[channelIndex].length = 0; // allows over-over-dubbing...;
-                }
-
                 normalizeMsPositionReRecordingValues(currentRecording.channels);
 
                 let playRecordingButton = getElem("playRecordingButton"),
