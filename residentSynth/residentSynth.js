@@ -1267,14 +1267,18 @@ ResSynth.residentSynth = (function(window)
 
         allSoundOff = function()
         {
-            for(let i = 0; i < currentMasterNotes.length; ++i)
+            for(let i = currentMasterNotes.length - 1; i >= 0; i--)
             {
                 let allNotes = getAllResidentSynthNotes(currentMasterNotes[i]);
-                for(var j = 0; j < allNotes.length; j++)
+                for(var j = allNotes.length - 1; j >= 0; j--)
                 {
-                    allNotes[j].noteOff()
+                    let note = allNotes[j]
+                    note.noteOff();
+                    allNotes.pop();
                 }
+                currentMasterNotes.pop();
             }
+            console.assert(currentMasterNotes.length === 0);
         },
 
         midiVal = function(value)
