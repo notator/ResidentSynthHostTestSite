@@ -761,6 +761,25 @@ ResSynth.host = (function(document)
         // exported
         onPlayRecordingButtonClicked = async function()
         {
+            function getHostChannelState()
+            {
+                let channelSelect = getElem("channelSelect"),
+                    channelIndex = channelSelect.selectedIndex,
+                    hostChannelState = {};
+
+                hostChannelState.channelIndex = channelIndex;
+
+                return hostChannelState;
+            }
+
+            function restoreHostAndSynthChannelState(hostChannelState)
+            {
+                let channelSelect = getElem("channelSelect");
+
+                channelSelect.selectedIndex = hostChannelState.channelIndex;
+                onChannelSelectChanged();
+            }
+
             function getRecordingChannelIndices(currentRecording, presetRecording)
             {
                 let recordingChannelIndices = [],
@@ -771,6 +790,7 @@ ResSynth.host = (function(document)
                     currentRecordingChannel = currentRecording.channels[0].channel;
                     recordingChannelIndices.push(currentRecordingChannel);
                 }
+
                 if(presetRecording !== undefined)
                 {
                     let channelInfos = presetRecording.channels;
@@ -788,76 +808,6 @@ ResSynth.host = (function(document)
 
                 return recordingChannelIndices;
             }
-            // This function only sends messages to the synth, not to the recording.
-            function setSynthToRecordingSettings(channelInfos)
-            {
-                // This function only sends messages to the synth, not to the recording.
-                function setSynthChannelToSettings(channel, channelSettings)
-                {
-                    let CMD = ResSynth.constants.COMMAND,
-                        CTL = ResSynth.constants.CONTROL,
-                        cmdControl = CMD.CONTROL_CHANGE + channel,
-                        semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
-                        centsOffsetNumberInput = getElem("centsOffsetNumberInput");
-
-                    // channelSettings.bankIndex
-                    let bankIndexMsg = new Uint8Array([cmdControl, CTL.BANK, channelSettings.bankIndex]);
-                    synth.send(bankIndexMsg, channel);
-                    // channelSettings.presetIndex
-                    let presetMsg = new Uint8Array([CMD.PRESET + channel, channelSettings.presetIndex]);
-                    synth.send(presetMsg, channel);
-                    // channelSettings.mixtureIndex
-                    let mixtureMessage = new Uint8Array([cmdControl, CTL.MIXTURE_INDEX, channelSettings.mixtureIndex]);
-                    synth.send(mixtureMessage, channel);
-                    // channelSettings.tuningGroupIndex
-                    let tuningGroupIndexMsg = new Uint8Array([cmdControl, CTL.TUNING_GROUP_INDEX, channelSettings.tuningGroupIndex]);
-                    synth.send(tuningGroupIndexMsg, channel);
-                    // channelSettings.tuningIndex
-                    let tuningIndexMsg = new Uint8Array([cmdControl, CTL.TUNING_INDEX, channelSettings.tuningIndex]);
-                    synth.send(tuningIndexMsg, channel);
-                    // channelSettings.semitonesOffset
-                    let sMidiValue = semitonesOffsetNumberInput.midiValue(channelSettings.semitonesOffset);
-                    let semitonesOffsetMsg = new Uint8Array([cmdControl, CTL.SEMITONES_OFFSET, sMidiValue]);
-                    synth.send(semitonesOffsetMsg, channel);
-                    // channelSettings.centsOffset
-                    let cMidiValue = centsOffsetNumberInput.midiValue(channelSettings.centsOffset);
-                    let centsOffsetMsg = new Uint8Array([cmdControl, CTL.CENTS_OFFSET, cMidiValue]);
-                    synth.send(centsOffsetMsg, channel);
-                    // channelSettings.pitchWheel
-                    let pitchWheelMsg = new Uint8Array([CMD.PITCHWHEEL + channel, channelSettings.pitchWheel, channelSettings.pitchWheel]);
-                    synth.send(pitchWheelMsg, channel);
-                    // channelSettings.modWheel
-                    let modWheelMsg = new Uint8Array([cmdControl, CTL.MODWHEEL, channelSettings.modWheel]);
-                    synth.send(modWheelMsg, channel);
-                    // channelSettings.volume
-                    let volMsg = new Uint8Array([cmdControl, CTL.VOLUME, channelSettings.volume]);
-                    synth.send(volMsg, channel);
-                    // channelSettings.pan
-                    let panMsg = new Uint8Array([cmdControl, CTL.PAN, channelSettings.pan]);
-                    synth.send(panMsg, channel);
-                    // channelSettings.reverberation 
-                    let reverbMsg = new Uint8Array([cmdControl, CTL.REVERBERATION, channelSettings.reverberation]);
-                    synth.send(reverbMsg, channel);
-                    // channelSettings.pitchWheelSensitivity
-                    let pwsMsg = new Uint8Array([cmdControl, CTL.PITCH_WHEEL_SENSITIVITY, channelSettings.pitchWheelSensitivity]);
-                    synth.send(pwsMsg, channel);
-                    // channelSettings.velocityPitchSensitivity
-                    let vpsMsg = new Uint8Array([cmdControl, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity]);
-                    synth.send(vpsMsg, channel);
-                    // channelSettings.keyboardOrnamentsArrayIndex
-                    let koaMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, channelSettings.keyboardOrnamentsArrayIndex]);
-                    synth.send(koaMsg, channel);
-                }
-
-                for(let i = 0; i < channelInfos.length; i++)
-                {
-                    let channelInfo = channelInfos[i],
-                        channel = channelInfo.channel,
-                        channelSettings = channelInfo.channelSettings;
-
-                    setSynthChannelToSettings(channel, channelSettings);
-                }
-            }
 
             function sendMessages(recording)
             {
@@ -866,6 +816,64 @@ ResSynth.host = (function(document)
                 // There is therefore no need to call checkSendSetOrnament(..) before noteOns in this function.
                 async function sendChannelMessages(channelInfos, infoIndex)
                 {
+                    // This function only sends messages to the synth, not to the recording.
+                    function setSynthChannelToSettings(channel, channelSettings)
+                    {
+                        let CMD = ResSynth.constants.COMMAND,
+                            CTL = ResSynth.constants.CONTROL,
+                            cmdControl = CMD.CONTROL_CHANGE + channel,
+                            semitonesOffsetNumberInput = getElem("semitonesOffsetNumberInput"),
+                            centsOffsetNumberInput = getElem("centsOffsetNumberInput");
+
+                        // channelSettings.bankIndex
+                        let bankIndexMsg = new Uint8Array([cmdControl, CTL.BANK, channelSettings.bankIndex]);
+                        synth.send(bankIndexMsg, channel);
+                        // channelSettings.presetIndex
+                        let presetMsg = new Uint8Array([CMD.PRESET + channel, channelSettings.presetIndex]);
+                        synth.send(presetMsg, channel);
+                        // channelSettings.mixtureIndex
+                        let mixtureMessage = new Uint8Array([cmdControl, CTL.MIXTURE_INDEX, channelSettings.mixtureIndex]);
+                        synth.send(mixtureMessage, channel);
+                        // channelSettings.tuningGroupIndex
+                        let tuningGroupIndexMsg = new Uint8Array([cmdControl, CTL.TUNING_GROUP_INDEX, channelSettings.tuningGroupIndex]);
+                        synth.send(tuningGroupIndexMsg, channel);
+                        // channelSettings.tuningIndex
+                        let tuningIndexMsg = new Uint8Array([cmdControl, CTL.TUNING_INDEX, channelSettings.tuningIndex]);
+                        synth.send(tuningIndexMsg, channel);
+                        // channelSettings.semitonesOffset
+                        let sMidiValue = semitonesOffsetNumberInput.midiValue(channelSettings.semitonesOffset);
+                        let semitonesOffsetMsg = new Uint8Array([cmdControl, CTL.SEMITONES_OFFSET, sMidiValue]);
+                        synth.send(semitonesOffsetMsg, channel);
+                        // channelSettings.centsOffset
+                        let cMidiValue = centsOffsetNumberInput.midiValue(channelSettings.centsOffset);
+                        let centsOffsetMsg = new Uint8Array([cmdControl, CTL.CENTS_OFFSET, cMidiValue]);
+                        synth.send(centsOffsetMsg, channel);
+                        // channelSettings.pitchWheel
+                        let pitchWheelMsg = new Uint8Array([CMD.PITCHWHEEL + channel, channelSettings.pitchWheel, channelSettings.pitchWheel]);
+                        synth.send(pitchWheelMsg, channel);
+                        // channelSettings.modWheel
+                        let modWheelMsg = new Uint8Array([cmdControl, CTL.MODWHEEL, channelSettings.modWheel]);
+                        synth.send(modWheelMsg, channel);
+                        // channelSettings.volume
+                        let volMsg = new Uint8Array([cmdControl, CTL.VOLUME, channelSettings.volume]);
+                        synth.send(volMsg, channel);
+                        // channelSettings.pan
+                        let panMsg = new Uint8Array([cmdControl, CTL.PAN, channelSettings.pan]);
+                        synth.send(panMsg, channel);
+                        // channelSettings.reverberation 
+                        let reverbMsg = new Uint8Array([cmdControl, CTL.REVERBERATION, channelSettings.reverberation]);
+                        synth.send(reverbMsg, channel);
+                        // channelSettings.pitchWheelSensitivity
+                        let pwsMsg = new Uint8Array([cmdControl, CTL.PITCH_WHEEL_SENSITIVITY, channelSettings.pitchWheelSensitivity]);
+                        synth.send(pwsMsg, channel);
+                        // channelSettings.velocityPitchSensitivity
+                        let vpsMsg = new Uint8Array([cmdControl, CTL.VELOCITY_PITCH_SENSITIVITY, channelSettings.velocityPitchSensitivity]);
+                        synth.send(vpsMsg, channel);
+                        // channelSettings.keyboardOrnamentsArrayIndex
+                        let koaMsg = new Uint8Array([cmdControl, CTL.SET_KEYBOARD_ORNAMENT_DEFS, channelSettings.keyboardOrnamentsArrayIndex]);
+                        synth.send(koaMsg, channel);
+                    }
+
                     function wait(delay, cancel)
                     {
                         if(!cancel)
@@ -876,8 +884,12 @@ ResSynth.host = (function(document)
 
                     let prevMsPos = 0,
                         channelInfo = channelInfos[infoIndex],
+                        channel = channelInfo.channel,
+                        channelSettings = channelInfo.channelSettings,
                         channelMessages = channelInfo.messages,
                         channelIndex = channelInfo.channel;
+
+                    setSynthChannelToSettings(channel, channelSettings);
 
                     for(let mIndex = 0; mIndex < channelMessages.length; mIndex++)
                     {
@@ -919,13 +931,15 @@ ResSynth.host = (function(document)
             let playRecordingButton = getElem("playRecordingButton"),
                 cancelPlaybackButton = getElem("cancelPlaybackButton"),
                 presetRecording = presetRecordings[getElem("recordingSelect").selectedIndex],
+                recordingInProgress = getElem("stopRecordingButton").style.display === "block",
+                hostChannelState = getHostChannelState(),
+                // currentRecording only exists after clicking onStopRecordingButton.
                 recordingToPlay = (currentRecording === undefined) ? presetRecording : currentRecording;
 
             playRecordingButton.style.display = "none";
-            cancelPlaybackButton.style.display = "block";         
+            cancelPlaybackButton.style.display = "block";     
 
-            setSynthToRecordingSettings(recordingToPlay.channels);
-            recordingChannelIndices = getRecordingChannelIndices(recordingToPlay); // recordingChannelIndices is global            
+            recordingChannelIndices = getRecordingChannelIndices(currentRecording, presetRecording); // recordingChannelIndices is global            
 
             let promises = sendMessages(recordingToPlay);
 
@@ -952,13 +966,16 @@ ResSynth.host = (function(document)
                 cancelPlayback = false;
             }
 
-            if(recordingToPlay === presetRecording)
+            if(recordingInProgress)
             {
-                setPlayPresetRecordingGUIState();
+                // we are recording
+                setContinueRecordingGUIState();
             }
             else
             {
-                setPlayCurrentRecordingGUIState();
+                // we are not recording
+                restoreHostAndSynthChannelState(hostChannelState);
+                setPlayPresetRecordingGUIState();
             }
         },
 
@@ -1107,7 +1124,11 @@ ResSynth.host = (function(document)
         setPlayPresetRecordingGUIState = function()
         {
             let playRecordingButton = getElem("playRecordingButton"),
-                cancelPlaybackButton = getElem("cancelPlaybackButton");
+                cancelPlaybackButton = getElem("cancelPlaybackButton"),
+                startRecordingButton = getElem("startRecordingButton"),
+                stopRecordingButton = getElem("stopRecordingButton"),
+                saveRecordingButton = getElem("saveRecordingButton"),
+                discardRecordingButton = getElem("discardRecordingButton");
 
             playRecordingButton.style.display = "block";
             playRecordingButton.value = "play selected recording";
@@ -1138,9 +1159,30 @@ ResSynth.host = (function(document)
 
             startRecordingButton.style.display = "none";
             stopRecordingButton.style.display = "none";
-            
+
             discardRecordingButton.style.display = "block";
             saveRecordingButton.style.display = "block";
+        },
+
+        setContinueRecordingGUIState = function()
+        {
+            let playRecordingButton = getElem("playRecordingButton"),
+                cancelPlaybackButton = getElem("cancelPlaybackButton"),
+                startRecordingButton = getElem("startRecordingButton"),
+                stopRecordingButton = getElem("stopRecordingButton"),
+                saveRecordingButton = getElem("saveRecordingButton"),
+                discardRecordingButton = getElem("discardRecordingButton");
+
+            playRecordingButton.style.display = "block";
+            playRecordingButton.value = "play selected recording";
+            playRecordingButton.style.background = "none";
+            cancelPlaybackButton.style.display = "none";
+
+            startRecordingButton.style.display = "none";
+            stopRecordingButton.style.display = "block";
+
+            discardRecordingButton.style.display = "none";
+            saveRecordingButton.style.display = "none";
         },
 
         // exported
