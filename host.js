@@ -772,6 +772,38 @@ ResSynth.host = (function(document)
                 return hostChannelState;
             }
 
+            function setInitialRecordingButtonState(b)
+            {
+                if(b.startRecordingButton.style.display === "block")
+                {
+                    setPerformanceGUIState2();
+                }
+                else if(b.stopRecordingButton.style.display === "block")
+                {
+                    setPerformanceGUIState4();
+                }
+                else if(b.saveRecordingButton.style.display === "block")
+                {
+                    setPerformanceGUIState6();
+                }
+            }
+
+            function setFinalRecordingButtonState(b)
+            {
+                if(b.startRecordingButton.style.display === "block")
+                {
+                    setPerformanceGUIState1();
+                }
+                else if(b.stopRecordingButton.style.display === "block")
+                {
+                    setPerformanceGUIState3();
+                }
+                else
+                {
+                    setPerformanceGUIState5();
+                }
+            }
+
             function restoreHostAndSynthChannelState(hostChannelState)
             {
                 let channelSelect = getElem("channelSelect");
@@ -928,16 +960,13 @@ ResSynth.host = (function(document)
                 return promises;
             }
 
-            let playRecordingButton = getElem("playRecordingButton"),
-                cancelPlaybackButton = getElem("cancelPlaybackButton"),
-                presetRecording = presetRecordings[getElem("recordingSelect").selectedIndex],
-                recordingInProgress = getElem("stopRecordingButton").style.display === "block",
+            let presetRecording = presetRecordings[getElem("recordingSelect").selectedIndex],
                 hostChannelState = getHostChannelState(),
+                b = getRecordingButtons(),
                 // currentRecording only exists after clicking onStopRecordingButton.
                 recordingToPlay = (currentRecording === undefined) ? presetRecording : currentRecording;
 
-            playRecordingButton.style.display = "none";
-            cancelPlaybackButton.style.display = "block";     
+            setInitialRecordingButtonState(b);
 
             recordingChannelIndices = getRecordingChannelIndices(currentRecording, presetRecording); // recordingChannelIndices is global            
 
@@ -953,8 +982,11 @@ ResSynth.host = (function(document)
                 if(recordingNoteOnError)
                 {
                     alert("Recording Aborted:\n\n" +
-                        "Cannot record noteOns in an existing channel.\n" +
-                        "Only commands and controls can be overdubbed in an existing channel.");
+                        "Either:\n" +
+                        "    The 'cancel playback' button was clicked.\n" +
+                        "Or:\n" +
+                        "    An attempt was made to record noteOns in an existing channel.\n" +
+                        "    Only commands and controls can be overdubbed in an existing channel.\n");
 
                     onStopRecordingButtonClicked();
                 }
@@ -966,29 +998,28 @@ ResSynth.host = (function(document)
                 cancelPlayback = false;
             }
 
-            if(recordingInProgress)
-            {
-                // we are recording
-                setContinueRecordingGUIState();
-            }
-            else
-            {
-                // we are not recording
-                restoreHostAndSynthChannelState(hostChannelState);
-                setPlayPresetRecordingGUIState();
-            }
+            setFinalRecordingButtonState(b);
+
+            restoreHostAndSynthChannelState(hostChannelState);
         },
 
         // exported
         onCancelPlaybackButtonClicked = function()
         {
-            let playRecordingButton = getElem("playRecordingButton"),
-                cancelPlaybackButton = getElem("cancelPlaybackButton");
-
-            cancelPlaybackButton.style.display = "none";
-            playRecordingButton.style.display = "block";
-
             cancelPlayback = true; // global
+
+            if(getElem("startRecordingButton").style.display === "block")
+            {
+                setPerformanceGUIState1();
+            }
+            else if(getElem("stopRecordingButton").style.display === "block")
+            {
+                setPerformanceGUIState3();
+            }
+            else
+            {
+                setPerformanceGUIState5();
+            }
         },
 
         restoreStateAfterRecording = function()
@@ -1017,21 +1048,10 @@ ResSynth.host = (function(document)
 
             function restoreRecordingsDiv()
             {
-                let startRecordingButton = getElem("startRecordingButton"),
-                    stopRecordingButton = getElem("stopRecordingButton");
-
-                startRecordingButton.style.display = "block";
-                stopRecordingButton.style.display = "none";
-
                 getElem("recordingTitle").style.color = "black";
                 getElem("recordingSelect").disabled = false;
 
-                getElem("playRecordingButton").value = "play selected recording";
-                getElem("playRecordingButton").style.background = "none";
-                getElem("playRecordingButton").disabled = false;
-
-                getElem("saveRecordingButton").style.display = "none";
-                getElem("discardRecordingButton").style.display = "none";               
+                setPerformanceGUIState1();
             }
 
             function restoreHostAndSynthSettings()
@@ -1048,7 +1068,7 @@ ResSynth.host = (function(document)
                         onChannelSelectChanged(); // reloads the host settings and sets the synth (without recording the sent messages)
                     }
                 }
-            } 
+            }
 
             function restoreHostGlobalRecordingVariables()
             {
@@ -1057,7 +1077,7 @@ ResSynth.host = (function(document)
                 recordedMessages = undefined; // array of 16 messages arrays 
 
                 // set by stopRecording(), undefined by saveRecording(), discardRecording()
-                currentRecording = undefined; 
+                currentRecording = undefined;
 
                 // set by onPlayRecording()
                 recordingChannelIndices = undefined;
@@ -1069,7 +1089,7 @@ ResSynth.host = (function(document)
 
             restoreHostAndSynthSettings();
 
-            restoreHostGlobalRecordingVariables(); 
+            restoreHostGlobalRecordingVariables();
         },
 
         // exported
@@ -1112,77 +1132,136 @@ ResSynth.host = (function(document)
             a.click();
             document.body.removeChild(a);
 
-            restoreStateAfterRecording();
+            restoreStateAfterRecording(); // calls setPerformanceGUIState1();
         },
 
         // exported
         onDiscardRecordingButtonClicked = function()
         {
-            restoreStateAfterRecording();
+            restoreStateAfterRecording(); // calls setPerformanceGUIState1();
         },
 
-        setPlayPresetRecordingGUIState = function()
+        getRecordingButtons = function()
         {
             let playRecordingButton = getElem("playRecordingButton"),
                 cancelPlaybackButton = getElem("cancelPlaybackButton"),
                 startRecordingButton = getElem("startRecordingButton"),
                 stopRecordingButton = getElem("stopRecordingButton"),
                 saveRecordingButton = getElem("saveRecordingButton"),
-                discardRecordingButton = getElem("discardRecordingButton");
+                discardRecordingButton = getElem("discardRecordingButton"),
+                buttons = {};
 
-            playRecordingButton.style.display = "block";
-            playRecordingButton.value = "play selected recording";
-            playRecordingButton.style.background = "none"; 
-            cancelPlaybackButton.style.display = "none";
+            buttons.playRecordingButton = playRecordingButton;
+            buttons.cancelPlaybackButton = cancelPlaybackButton;
+            buttons.startRecordingButton = startRecordingButton;
+            buttons.stopRecordingButton = stopRecordingButton;
+            buttons.saveRecordingButton = saveRecordingButton;
+            buttons.discardRecordingButton = discardRecordingButton;
 
-            startRecordingButton.style.display = "block";
-            stopRecordingButton.style.display = "none";
-
-            discardRecordingButton.style.display = "none";
-            saveRecordingButton.style.display = "none";
+            return buttons;
         },
 
-        setPlayCurrentRecordingGUIState = function()
+        // State 1 = The initial state
+        // (playSelectedRecording, startRecording)
+        setPerformanceGUIState1 = function()
         {
-            let playRecordingButton = getElem("playRecordingButton"),
-                cancelPlaybackButton = getElem("cancelPlaybackButton"),
-                startRecordingButton = getElem("startRecordingButton"),
-                stopRecordingButton = getElem("stopRecordingButton"),
-                saveRecordingButton = getElem("saveRecordingButton"),
-                discardRecordingButton = getElem("discardRecordingButton");
+            let b = getRecordingButtons();
 
-            playRecordingButton.disabled = false;
-            playRecordingButton.style.display = "block";
-            playRecordingButton.value = "play current recording";
-            playRecordingButton.style.background = "#DFD";
-            cancelPlaybackButton.style.display = "none";
+            b.cancelPlaybackButton.style.display = "none";
+            b.discardRecordingButton.style.display = "none";
+            b.stopRecordingButton.style.display = "none";
+            b.saveRecordingButton.style.display = "none";
 
-            startRecordingButton.style.display = "none";
-            stopRecordingButton.style.display = "none";
-
-            discardRecordingButton.style.display = "block";
-            saveRecordingButton.style.display = "block";
+            b.playRecordingButton.style.display = "block";
+            b.playRecordingButton.value = "play selected recording";
+            b.playRecordingButton.style.background = "none";            
+            b.startRecordingButton.style.display = "block";
+            b.startRecordingButton.disabled = false;
         },
 
-        setContinueRecordingGUIState = function()
+        // State 2 = State 1 + playRecordingButton clicked
+        // ("cancelPlayback, startRecording disabled")
+        setPerformanceGUIState2 = function()
         {
-            let playRecordingButton = getElem("playRecordingButton"),
-                cancelPlaybackButton = getElem("cancelPlaybackButton"),
-                startRecordingButton = getElem("startRecordingButton"),
-                stopRecordingButton = getElem("stopRecordingButton"),
-                saveRecordingButton = getElem("saveRecordingButton"),
-                discardRecordingButton = getElem("discardRecordingButton");
+            let b = getRecordingButtons();
 
-            playRecordingButton.style.display = "block";
-            playRecordingButton.value = "play selected recording";
-            playRecordingButton.style.background = "none";
-            cancelPlaybackButton.style.display = "none";
+            b.playRecordingButton.style.display = "none";
+            b.discardRecordingButton.style.display = "none";
+            b.stopRecordingButton.style.display = "none";
+            b.saveRecordingButton.style.display = "none";
 
-            startRecordingButton.style.display = "none";
-            stopRecordingButton.style.display = "block";
+            b.cancelPlaybackButton.style.display = "block";
+            b.startRecordingButton.style.display = "block";
+            b.startRecordingButton.disabled = true;
+        },
+        // State 3 = State 1 + startRecordingButton clicked
+        // (playSelected, stopRecording)
+        setPerformanceGUIState3 = function()
+        {
+            let b = getRecordingButtons();
 
-            discardRecordingButton.style.display = "none";
-            saveRecordingButton.style.display = "none";
+            b.cancelPlaybackButton.style.display = "none";
+            b.discardRecordingButton.style.display = "none";
+            b.startRecordingButton.style.display = "none";
+            b.saveRecordingButton.style.display = "none";
+
+            b.playRecordingButton.style.display = "block";
+            b.playRecordingButton.value = "play selected recording";
+            b.playRecordingButton.style.background = "none";
+            b.stopRecordingButton.style.display = "block";
+            b.stopRecordingButton.disabled = false;
+        },
+
+        // State 4 = State 3 + playRecordingButton clicked
+        // (cancelPlayback, stopRecording disabled)
+        setPerformanceGUIState4 = function()
+        {
+            let b = getRecordingButtons();
+
+            b.playRecordingButton.style.display = "none";
+            b.discardRecordingButton.style.display = "none";
+            b.startRecordingButton.style.display = "none";
+            b.saveRecordingButton.style.display = "none";
+
+            b.cancelPlaybackButton.style.display = "block";
+            b.stopRecordingButton.style.display = "block";
+            b.stopRecordingButton.disabled = true;
+        },
+
+        // State 5 = State 3 + stopRecordingButton clicked
+        // (playCurrent, discardRecording, saveRecording)
+        setPerformanceGUIState5 = function()
+        {
+            let b = getRecordingButtons();
+
+            b.cancelPlaybackButton.style.display = "none";
+            b.startRecordingButton.style.display = "none";
+            b.stopRecordingButton.style.display = "none";
+
+            b.playRecordingButton.style.display = "block";
+            b.playRecordingButton.value = "play current recording";
+            b.playRecordingButton.style.background = "#DFD";
+            b.discardRecordingButton.style.display = "block";
+            b.discardRecordingButton.disabled = false;
+            b.saveRecordingButton.style.display = "block";
+            b.saveRecordingButton.disabled = false;
+        },
+
+        // State 6 = State 5 + playRecordingButton clicked
+        // ("cancelPlayback, discardRecording disabled, saveRecording disabled")
+        setPerformanceGUIState6 = function()
+        {
+            let b = getRecordingButtons();
+
+            b.playRecordingButton.style.display = "none";
+            b.startRecordingButton.style.display = "none";
+            b.stopRecordingButton.style.display = "none";
+
+            b.cancelPlaybackButton.style.display = "block";
+            b.discardRecordingButton.style.display = "block";
+            b.discardRecordingButton.disabled = true;
+            b.saveRecordingButton.style.display = "block";
+            b.saveRecordingButton.disabled = true;
         },
 
         // exported
@@ -1247,8 +1326,7 @@ ResSynth.host = (function(document)
             channelSelect.disabled = true;
             disableTriggersDiv();
 
-            getElem("startRecordingButton").style.display = "none";
-            getElem("stopRecordingButton").style.display = "block";
+            setPerformanceGUIState3();
         },
 
         // exported
@@ -1394,11 +1472,11 @@ ResSynth.host = (function(document)
                 settingsBeforeRecording = undefined;
                 recordedMessages = undefined;
 
-                setPlayCurrentRecordingGUIState();
+                setPerformanceGUIState5();
             }
             else
             {
-                restoreStateAfterRecording();
+                restoreStateAfterRecording(); // calls setPerformanceGUIState1()
             }
         },
 
@@ -2541,6 +2619,8 @@ ResSynth.host = (function(document)
                     triggersDiv.style.display = "block";
                     recordingDiv.style.display = "block";
                     simpleInputDiv.style.display = "block";
+
+                    setPerformanceGUIState1();
                 }
 
                 let
