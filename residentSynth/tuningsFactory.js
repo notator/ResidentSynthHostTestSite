@@ -136,7 +136,7 @@ ResSynth.tuningsFactory = (function()
     //
     // This function is used for Pythagorean and other mean-tone tunings.
     // The "wolf fifth" is placed in the interval A#-Eb when the root is C.
-    TuningsFactory.prototype.getTuningFromConstantFactor = function(rootKey, factorBase)
+    TuningsFactory.prototype.getTuningFromConstantFifthFactor = function(rootKey, factorBase)
     {
         function getTuningOffsets(rootKey, factorBase)
         {
@@ -199,6 +199,57 @@ ResSynth.tuningsFactory = (function()
             tuning = getTuningFromETOffsets(c0tuningOffsets);
 
         transposeTuningForA4Frequency(tuning, 440);
+
+        finalizeTuning(tuning);
+
+        return tuning;
+    };
+
+    // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighboring keys.
+    // Keys that are keysPerOctave apart, sound an octave apart. 
+    // Argument restrictions:
+    //     keysPerOctave is an integer that determines the number of keyboard keys in a sounding octave.
+    TuningsFactory.prototype.getTuningFromKeysPerOctave = function(keysPerOctave)
+    {
+        function getTuningForA4(keysPerOctave)
+        {
+            let factor = Math.pow(2, (1.0 / keysPerOctave)),
+                midiA4 = 69,
+                frequencies = [];
+
+            frequencies[midiA4] = 440; // A4 = 440Hz
+
+            for(let i = 1; i < keysPerOctave; i++)
+            {
+                let midiKey = midiA4 + i;
+                frequencies[midiKey] = frequencies[midiKey - 1] * factor;
+            }
+
+            let upper = midiA4 + keysPerOctave;
+            while(upper < 128)
+            {
+                frequencies[upper] = frequencies[upper - keysPerOctave] * 2;
+                upper++;
+            }
+            let lower = midiA4 - 1;
+            while(lower >= 0)
+            {
+                frequencies[lower] = frequencies[lower + keysPerOctave] / 2;
+                lower--;
+            }
+
+            let tuning = [];
+            for(let i = 0; i < frequencies.length; i++)
+            {
+                tuning.push(midiA4 + (getCents(frequencies[i] / 440) / 100));
+            }
+
+            return tuning;
+        }
+
+        console.assert(keysPerOctave > 1);
+
+        let tuning = getTuningForA4(keysPerOctave);
 
         finalizeTuning(tuning);
 

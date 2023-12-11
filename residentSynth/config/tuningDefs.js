@@ -20,18 +20,19 @@ var ResSynth = ResSynth || {};
 
 ResSynth.tuningType =
 {
-	CONSTANT_FACTOR: 0,
-	HARMONIC: 1,
-	WARPED_OCTAVES: 2,
-	WARPED_GAMUT: 3,
-	PARTCH: 4,
-	BAROQUE: 5
+	CONSTANT_FIFTH_FACTOR: 0,
+	CONSTANT_MIDI_KEY_FACTOR: 1,
+	HARMONIC: 2,
+	WARPED_OCTAVES: 3,
+	WARPED_GAMUT: 4,
+	PARTCH: 5,
+	BAROQUE: 6
 };
 
 // All tunings are initially related to standard A4=440Hz.
 ResSynth.tuningDefs =
 	[
-		// Constant factor tunings
+		// constant fifths tunings (A4=440Hz)
 		{
 			// This tuning group uses the following constructor:
 			//   tuning = getTuningFromConstantFactor(root, factor);
@@ -41,8 +42,8 @@ ResSynth.tuningDefs =
 			//    1. The 'factor' is first applied recursively to define 11 chromatic intervals from the base 1.
 			//    2. Each interval is then transposed into each available octave (128 MIDI pitches)
 			//    3. The tuning is transposed so that the pitch at midiKey[root] is root.
-			ctor: ResSynth.tuningType.CONSTANT_FACTOR,
-			name: "constant factor tunings (A4=440Hz)",
+			ctor: ResSynth.tuningType.CONSTANT_FIFTH_FACTOR,
+			name: "constant fifths tunings (A4=440Hz)",
 			tunings:
 				[
 					{
@@ -89,6 +90,108 @@ ResSynth.tuningDefs =
 					}
 				]
 		},
+		// constant midi key interval tunings (A4=440Hz)
+		{
+			// This tuning group uses the following constructor:
+			//   tuning = getTuningFromKeysPerOctave(keysPerOctave);
+			ctor: ResSynth.tuningType.CONSTANT_MIDI_KEY_FACTOR,
+			name: "constant midi key interval tunings (A4=440Hz)",
+			tunings:
+				[
+					{
+						name: "keys per octave: 24, factor=2^(1/24)",
+						keysPerOctave: 24
+					},
+					{
+						name: "keys per octave: 23, factor=2^(1/23)",
+						keysPerOctave: 23
+					},
+					{
+						name: "keys per octave: 22, factor=2^(1/22)",
+						keysPerOctave: 22
+					},
+					{
+						name: "keys per octave: 21, factor=2^(1/21)",
+						keysPerOctave: 21
+					},
+					{
+						name: "keys per octave: 20, factor=2^(1/20)",
+						keysPerOctave: 20
+					},
+					{
+						name: "keys per octave: 19, factor=2^(1/19)",
+						keysPerOctave: 19
+					},
+					{
+						name: "keys per octave: 18, factor=2^(1/18)",
+						keysPerOctave: 18
+					},
+					{
+						name: "keys per octave: 17, factor=2^(1/17)",
+						keysPerOctave: 17
+					},
+					{
+						name: "keys per octave: 16, factor=2^(1/16)",
+						keysPerOctave: 16
+					},
+					{
+						name: "keys per octave: 15, factor=2^(1/15)",
+						keysPerOctave: 15
+					},
+					{
+						name: "keys per octave: 14, factor=2^(1/14)",
+						keysPerOctave: 14
+					},
+					{
+						name: "keys per octave: 13, factor=2^(1/13)",
+						keysPerOctave: 13
+					},
+					{
+						name: "keys per octave: 12, factor=2^(1/12)",
+						keysPerOctave: 12
+					},
+					{
+						name: "keys per octave: 11, factor=2^(1/11)",
+						keysPerOctave: 11
+					},
+					{
+						name: "keys per octave: 10, factor=2^(1/10)",
+						keysPerOctave: 10
+					},
+					{
+						name: "keys per octave: 9, factor=2^(1/9)",
+						keysPerOctave: 9
+					},
+					{
+						name: "keys per octave: 8, factor=2^(1/8)",
+						keysPerOctave: 8
+					},
+					{
+						name: "keys per octave: 7, factor=2^(1/7)",
+						keysPerOctave: 7
+					},
+					{
+						name: "keys per octave: 6, factor=2^(1/6)",
+						keysPerOctave: 6
+					},
+					{
+						name: "keys per octave: 5, factor=2^(1/5)",
+						keysPerOctave: 5
+					},
+					{
+						name: "keys per octave: 4, factor=2^(1/4)", //
+						keysPerOctave: 4
+					},
+					{
+						name: "keys per octave: 3, factor=2^(1/3)",
+						keysPerOctave: 3
+					},
+					{
+						name: "keys per octave: 2, factor=2^(1/2)",
+						keysPerOctave: 2
+					}
+				]
+			},	
 		// Harmonic tunings
 		{		
 		// Constructor:   tunings = getHarmonicTunings();

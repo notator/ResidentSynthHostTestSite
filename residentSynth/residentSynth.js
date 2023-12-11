@@ -692,14 +692,27 @@ ResSynth.residentSynth = (function(window)
 
                     switch(tuningGroupDef.ctor)
                     {
-                        case tuningType.CONSTANT_FACTOR:
+                        case tuningType.CONSTANT_FIFTH_FACTOR:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
                                     let tuningDef = tuningDefs[k],
                                         root = tuningDef.root,
                                         factor = tuningDef.factor,
-                                        tuning = tuningsFactory.getTuningFromConstantFactor(root, factor);
+                                        tuning = tuningsFactory.getTuningFromConstantFifthFactor(root, factor);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        case tuningType.CONSTANT_MIDI_KEY_FACTOR:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        keysPerOctave = tuningDef.keysPerOctave,
+                                        tuning = tuningsFactory.getTuningFromKeysPerOctave(keysPerOctave);
 
                                     tuning.name = tuningDef.name;
                                     tuningGroup.push(tuning);
