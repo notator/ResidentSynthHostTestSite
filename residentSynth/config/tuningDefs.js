@@ -35,38 +35,32 @@ ResSynth.tuningDefs =
 		// constant fifths tunings (A4=440Hz)
 		{
 			// This tuning group uses the following constructor:
-			//   tuning = getTuningFromConstantFactor(root, factor);
+			//   tuning = getTuningFromConstantFifthFactor(root, factor);
 			//
 			// The 'factor' argument is the ratio between the frequencies at the top and bottom of a sounding 'fifth'.
-			// The algorithm is (approximately) as follows:
-			//    1. The 'factor' is first applied recursively to define 11 chromatic intervals from the base 1.
-			//    2. Each interval is then transposed into each available octave (128 MIDI pitches)
-			//    3. The tuning is transposed so that the pitch at midiKey[root] is root.
 			ctor: ResSynth.tuningType.CONSTANT_FIFTH_FACTOR,
 			name: "constant fifths tunings (A4=440Hz)",
 			tunings:
 				[
 					{
-						name: "Equal Temperament, root=0, factor=2^(1/12)",
+						name: "Equal Temperament, factor=(2^(1/12))^7",
 						root: 0,
 						factor: 1.498307 // Math.pow(Math.pow(2, (1.0 / 12)), 7) i.e. 7 equal temperament semitones
 					},
 					{
 						// The 'wolf fifth' is at G#-Eb for root=0 (C).
-						name: "Pythagorean, root=0 (C), factor=(3/2)",
+						name: "Pythagorean, factor=(3/2), root=C, wolf fifth:G#-Eb",
 						root: 0,
 						factor: 1.5
 					},
 					{
 						// According to https://en.xen.wiki/w/1/4_syntonic_comma_meantone
-						// The 1/4 comma meantone fifth is 696.578 cents in size, which according to
-						// http://www.sengpielaudio.com/calculator-centsratio.htm corresponds to a
-						// frequency ratio (=factor) of 1.495348.
+						// The 1/4 comma meantone fifth is the ratio 5^(1/4) (= 1.495349)
 						//
-						// The 'wolf fifth' is at G#-Eb for root=0.
-						name: "1/4 comma meantone, root=0 (C), factor=1.495348",
+						// The 'wolf fifth' is at G#-Eb for root=0 (=C).
+						name: "1/4 comma meantone, factor=5^(1/4), root=C, wolf fifth:G#-Eb",
 						root: 0,
-						factor: 1.495348 // Math.pow(5, (1.0 / 4))
+						factor: 1.495349 // Math.pow(5, (1.0 / 4))
 					},
 					{
 						// According to https://en.xen.wiki/w/1/3_syntonic_comma_meantone
@@ -74,17 +68,17 @@ ResSynth.tuningDefs =
 						// http://www.sengpielaudio.com/calculator-centsratio.htm corresponds to a
 						// frequency ratio (=factor) of 1.493801.
 						// The 'wolf fifth' is at G#-Eb
-						name: "1/3 comma meantone, root=0 (C), factor=1.493801",
+						name: "1/3 comma meantone, factor=1.493801, root=C, wolf fifth:G#-Eb",
 						root: 0,
 						factor: 1.493801
 					},
 					{
-						// factor calculated as follows:
+						// factor is calculated as follows:
 						// 10 fifths reach the 7th harmonic (Bb from C) 3 octaves above the base pitch,
 						// so 'factor' is the 10th root of (7 * (2^3)).
 						// This is very close to the factor for 1/4 comma meantone.
 						// The 'wolf fifth' is at G#-Eb
-						name: "Perfect 7th harmonic, root=0 (C), factor=1.495612",
+						name: "Perfect 7th harmonic, factor=(7*8)^(0.1), root=C, wolf fifth:G#-Eb",
 						root: 0,
 						factor: 1.495612 // Math.pow((7 * 8), 0.1)
 					}
@@ -95,11 +89,11 @@ ResSynth.tuningDefs =
 			// This tuning group uses the following constructor:
 			//   tuning = getTuningFromKeysPerOctave(keysPerOctave);
 			ctor: ResSynth.tuningType.CONSTANT_MIDI_KEY_FACTOR,
-			name: "constant midi key interval tunings (A4=440Hz)",
+			name: "other constant interval tunings (A4=440Hz)",
 			tunings:
 				[
 					{
-						name: "keys per octave: 24, factor=2^(1/24)",
+						name: "keys per octave: 24, factor=2^(1/24) [standard ET quartertones]",
 						keysPerOctave: 24
 					},
 					{
@@ -147,7 +141,7 @@ ResSynth.tuningDefs =
 						keysPerOctave: 13
 					},
 					{
-						name: "keys per octave: 12, factor=2^(1/12)",
+						name: "keys per octave: 12, factor=2^(1/12) [standard ET semitones]",
 						keysPerOctave: 12
 					},
 					{
@@ -209,7 +203,9 @@ ResSynth.tuningDefs =
 		// Note 1: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
 		//         In other octaves, _all_ tunings are such that tuning[midiKey][rootKey] equals tuning[0][rootKey].
 		// Note 2: Internally, MidiPitches are simple floating point values: Here, for convenience, they are rounded
-		//         to the nearest cent.
+			//         to the nearest cent.
+			// Note 3: Each root key is tuned to the pitch it has in the C tuning. For example: in the F# tuning, at y=6
+		
 		//
 		//                                                   midiKey
 		//                     C     C#    D     D#    E     F     F#    G     G#    A     A#     B
@@ -252,7 +248,7 @@ ResSynth.tuningDefs =
 		//
 		// =====================================================================================================================================
 		ctor: ResSynth.tuningType.HARMONIC,
-		name: "harmonic tunings",
+		name: "harmonic tunings (see documentation)",
 		tunings:
 			[
 				{
@@ -470,55 +466,55 @@ ResSynth.tuningDefs =
 			// This tuning group uses the following constructor:
 			//   tuning = getPartchTuning(root);
 			ctor: ResSynth.tuningType.PARTCH,
-			name: "Partch tunings  (A4=440Hz)",
+			name: "Partch tunings (all with A4=440Hz)",
 			tunings:
 				[
 					{
-						name: "Partch C, root=0",
+						name: "Partch root C",
 						root: 0
 					},
 					{
-						name: "Partch C#, root=1",
+						name: "Partch root C#",
 						root: 1
 					},
 					{
-						name: "Partch D, root=2",
+						name: "Partch root D",
 						root: 2
 					},
 					{
-						name: "Partch D#, root=3",
+						name: "Partch root D#",
 						root: 3
 					},
 					{
-						name: "Partch E, root=4",
+						name: "Partch root E",
 						root: 4
 					},
 					{
-						name: "Partch F, root=5",
+						name: "Partch root F",
 						root: 5
 					},
 					{
-						name: "Partch F#, root=6",
+						name: "Partch root F#",
 						root: 6
 					},
 					{
-						name: "Partch G, root=7",
+						name: "Partch root G",
 						root: 7
 					},
 					{
-						name: "Partch G#, root=8",
+						name: "Partch root G#",
 						root: 8
 					},
 					{
-						name: "Partch A, root=9",
+						name: "Partch root A",
 						root: 9
 					},
 					{
-						name: "Partch A#, root=10",
+						name: "Partch root A#",
 						root: 10
 					},
 					{
-						name: "Partch B, root=11",
+						name: "Partch root B",
 						root: 11
 					}
 				]
