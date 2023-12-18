@@ -1,7 +1,12 @@
 console.log('load synthSettingsDefs.js');
 
 // The `ResSynth.synthSettingsDefs` array, defines preset settings for the residentSynth, that
-// will be used, in converted form, in the host's settingsSelect control.
+// will be used in the host's settingsSelect control.
+//
+// _comment attributes at the top and bottom levels in this file are completely ignored when
+// it is loaded into the host, so they can be freely added, removed and edited.
+// Similar _comment attributes are created automatically in exported settings when the host's
+// exportSettingsButton is clicked.
 //
 // The lowest level arrays in this synthSettingsDefs definition contain one value per preset
 // setting, in the order the preset settings will appear in the settingsSelect control.
@@ -14,7 +19,7 @@ console.log('load synthSettingsDefs.js');
 //
 // The following top-level synthSettingsDefs attributes are arrays containing one value
 // per preset setting:
-//   `names` // arbitrary, descriptive strings (default: "default synth settings")
+//   `names` // arbitrary, descriptive strings that will be used in the settingSelect GUI.
 //   `keyboardSplitIndexes` // integers in range 0..n, default 0, where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
 //   `triggerKeys` // integers in range 0..127, default 0
 //
@@ -28,7 +33,7 @@ console.log('load synthSettingsDefs.js');
 // These files are located in residentSynth/config.
 // If plausibility checking fails, the user is alerted with a meaningful error message (and an
 // exception is thrown).
-// The array attributes in the channel objects contain values as follows (all integers):
+// The (non-_comment) array attributes in the channel objects contain values as follows (all integers):
 //     `bankIndex`        // 0..n-1, default 0, where n is the number of banks defined in webAudioFontDef.js
 //     `presetIndex`      // 0..n-1, default 0, where n is the number of presets defined in the current bank
 //     `mixtureIndex`     // 0..n, default 0, where n is the number of mixtures defined in mixtureDefs.js
@@ -57,9 +62,11 @@ ResSynth.synthSettingsDefs =
         ],
     keyboardSplitIndexes: [0, 0, 3], // 0..(keyboardSplitDefs.length - 1), default 0
     triggerKeys: [36, 36, 36],       // 0..127, default 0
+    _comment: "Channels 4..15 are always set to the default settings.",
     channelSettingsArray:
         [
-            {    // channel 0
+            {
+                _comment : "channel 0",
                 bankIndex: [0, 1, 3],                  // 0..(webAudioFontDef.length - 1), default 0
                 presetIndex: [0, 0, 0],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
@@ -77,7 +84,8 @@ ResSynth.synthSettingsDefs =
                 keyboardOrnamentsArrayIndex: [0, 0, 1] // 0..(ornamentDefs.length - 1), default 0
      
             },
-            {    // channel 1
+            {
+                _comment: "channel 1",
                 bankIndex: [0, 3, 0],                  // 0..(webAudioFontDef.length - 1), default 0
                 presetIndex: [0, 0, 0],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
@@ -94,7 +102,8 @@ ResSynth.synthSettingsDefs =
                 velocityPitchSensitivity: [0, 0, 0],   // 0..127, default 0
                 keyboardOrnamentsArrayIndex: [0, 1, 0] // 0..(ornamentDefs.length - 1), default 0
             },
-            {   // channel 2 (no change between settings 1 and 2)
+            {
+                _comment: "channel 2 (no change between settings 1 and 2)",
                 bankIndex: [0, 1, 1],                  // 0..(webAudioFontDef.length - 1), default 0
                 presetIndex: [0, 0, 0],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
@@ -111,7 +120,8 @@ ResSynth.synthSettingsDefs =
                 velocityPitchSensitivity: [0, 0, 0],   // 0..127, default 0
                 keyboardOrnamentsArrayIndex: [0, 2, 2] // 0..(ornamentDefs.length - 1), default 0   
             },
-            {   // channel 3  (no change between settings 1 and 2)
+            {     
+                _comment: "channel 3 (no change between settings 1 and 2)",
                 bankIndex: [0, 3, 3],                  // 0..(webAudioFontDef.length - 1), default 0
                 presetIndex: [0, 3, 3],                // 0..(nPresets in bank - 1), default 0
                 mixtureIndex: [0, 0, 0],               // 0..(mixtureDefs.length - 1), default 0
