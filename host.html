@@ -19,7 +19,7 @@
                 <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
 
                 <span>
-                    <span id="audioDeviceTitle"class="boldSubtitle">Audio Output:</span>
+                    <span id="audioDeviceTitle" class="boldSubtitle">Audio Output:</span>
                     <select id="audioDeviceSelect" class="audioDeviceSelect" onchange="ResSynth.host.onAudioDeviceSelectChanged()"></select>
                 </span>
             </div>
@@ -33,128 +33,118 @@
                 <input class="largeButton" type="button" value="continue" onclick="ResSynth.host.onContinueAtStartClicked()" />
             </div>
         </div>
-        <div id="channelsDiv" style="display:none;">
-            <hr />
-            <table width="660px">
-                <colgroup>
-                    <col width="180" />
-                    <col width="480" />
-                </colgroup>
-                <tr>
-                    <td>
-                        <span class="boldSubtitle">edit channel</span>
-                        <select id="channelSelect" class="channelSelect" onchange="ResSynth.host.onChannelSelectChanged()">
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                            <option value="13">13</option>
-                            <option value="14">14</option>
-                            <option value="15">15</option>
-                        </select>
-                    </td>
-                    <td>
+        <div id="synthSettingsDiv" class="synthSettingsDiv" style="display:none;">
+            <div style="text-align:center">
+                <span class="subtitle">ResidentSynth Controls</span><br />
+                <span class="boldSubtitle">channel</span>
+                <select id="channelSelect" class="channelSelect" onchange="ResSynth.host.onChannelSelectChanged()">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
 
-                    </td>
-                </tr>
-            </table>
+            <div id="webAudioFontDiv" style="display:none">
+                <hr />
+                <table>
+                    <tr>
+                        <td>
+                            <span class="boldSubtitle">bank: </span>
+                        </td>
+                        <td>
+                            <span class="boldSubtitle">preset: </span>
+                        </td>
+                        <td>
+                            <span class="boldSubtitle">mixture: </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="bankSelect" class="bankSelect" onchange="ResSynth.host.onBankSelectChanged()" />
+                        </td>
+                        <td id="presetSelectCell">
+                            <select id="presetSelect" class="presetSelect" onchange="ResSynth.host.onPresetSelectChanged()" />
+                        </td>
+                        <td id="mixtureSelectCell">
+                            <select id="mixtureSelect" class="mixtureSelect" onchange="ResSynth.host.onMixtureSelectChanged()" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="tuningDiv" style="display:none">
+                <hr />
+                <table>
+                    <tr>
+                        <td>
+                            <span class="boldSubtitle">tuning group: </span>
+                        </td>
+                        <td>
+                            <span class="boldSubtitle">tuning: </span>
+                        </td>
+                        <td>
+                            <span class="boldSubtitle">+semi</span>
+                        </td>
+                        <td>
+                            <span class="boldSubtitle">+cent</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="tuningGroupSelect" class="tuningGroupSelect" onchange="ResSynth.host.onTuningGroupSelectChanged()" />
+                        </td>
+                        <td id="tuningSelectCell">
+                            <!--
+                        <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
+                        sendAgainButton
+                    -->
+                        </td>
+                        <td>
+                            <input id="semitonesOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
+                        </td>
+                        <td>
+                            <input id="centsOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-50" max="50" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="commandsAndControlsDiv" style="display:none">
+                <hr />
+                <span class="boldSubtitle">commands and controls:</span>
+                <table id="commandsAndControlsTable" class="midiMessagesTable"></table>
+            </div>
+            <div id="ornamentsDiv" style="display:none;">
+                <hr />
+                <table width="660px">
+                    <colgroup>
+                        <col width="66" />
+                        <col width="594" />
+                    </colgroup>
+                    <tr>
+                        <td>
+                            <span id="ornamentsTitle" class="boldSubtitle">ornaments:</span>
+                        </td>
+                        <td>
+                            <select id="ornamentsSelect" class="ornamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
-        <div id="webAudioFontDiv" style="display:none">
-            <hr />
-            <table>
-                <tr>
-                    <td>
-                        <span class="boldSubtitle">bank: </span>
-                    </td>
-                    <td>
-                        <span class="boldSubtitle">preset: </span>
-                    </td>
-                    <td>
-                        <span class="boldSubtitle">mixture: </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <select id="bankSelect" class="bankSelect" onchange="ResSynth.host.onBankSelectChanged()" />
-                    </td>
-                    <td id="presetSelectCell">
-                        <select id="presetSelect" class="presetSelect" onchange="ResSynth.host.onPresetSelectChanged()" />
-                    </td>
-                    <td id="mixtureSelectCell">
-                        <select id="mixtureSelect" class="mixtureSelect" onchange="ResSynth.host.onMixtureSelectChanged()" />
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div id="tuningDiv" style="display:none">
-            <hr />
-            <table>
-                <tr>
-                    <td>
-                        <span class="boldSubtitle">tuning group: </span>
-                    </td>
-                    <td>
-                        <span class="boldSubtitle">tuning: </span>
-                    </td>
-                    <td>
-                        <span class="boldSubtitle">+semi</span>
-                    </td>
-                    <td>
-                        <span class="boldSubtitle">+cent</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <select id="tuningGroupSelect" class="tuningGroupSelect" onchange="ResSynth.host.onTuningGroupSelectChanged()" />
-                    </td>
-                    <td id="tuningSelectCell">
-                        <!--
-                            <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
-                            sendAgainButton
-                        -->
-                    </td>
-                    <td>
-                        <input id="semitonesOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
-                    </td>
-                    <td>
-                        <input id="centsOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-50" max="50" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div id="commandsAndControlsDiv" style="display:none">
-            <hr />
-            <span class="boldSubtitle">commands and controls:</span>
-            <table id="commandsAndControlsTable" class="midiMessagesTable"></table>
-        </div>
-        <div id="ornamentsDiv" style="display:none;">
-            <hr />
-            <table width="660px">
-                <colgroup>
-                    <col width="66" />
-                    <col width="594" />
-                </colgroup>
-                <tr>
-                    <td>
-                        <span id="ornamentsTitle" class="boldSubtitle">ornaments:</span>
-                    </td>
-                    <td>
-                        <select id="ornamentsSelect" class="ornamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div id="triggersDiv" style="display:none">
-            <hr />
+        <div id="hostSettingsDiv" class="hostSettingsDiv" style="display:none">
+            <div class="subtitle" style="text-align:center">Host Controls</div>
             <table width="660px">
                 <colgroup>
                     <col width="66" />
@@ -195,71 +185,72 @@
                     </td>
                 </tr>
             </table>
-        </div>
-        <div id="recordingDiv" style="display: none">
-            <hr />
-            <table width="660px">
-                <colgroup>
-                    <col width="66" />
-                    <col width="222" />
-                    <col width="132" />
-                    <col width="120" />
-                    <col width="120" />
-                </colgroup>
-                <tr>
-                    <td>
-                        <span id="recordingTitle" class="boldSubtitle">recordings:</span>
-                    </td>
-                    <td>
-                        <select id="recordingSelect" class="recordingSelect" />
-                    </td>
-                    <td>
-                        <input id="playRecordingButton" type="button" class="playRecordingButton" value="play selected recording" onclick="ResSynth.host.onPlayRecordingButtonClicked()" />
-                        <input id="cancelPlaybackButton" type="button" class="cancelPlaybackButton" value="cancel playback" onclick="ResSynth.host.onCancelPlaybackButtonClicked()" />
-                    </td>
-                    <td align="right">                        
-                        <input id="discardRecordingButton" type="button" class="discardRecordingButton" value="discard recording" onclick="ResSynth.host.onDiscardRecordingButtonClicked()" />
-                    </td>
-                    <td align="right">
-                        <input id="saveRecordingButton" type="button" class="saveRecordingButton" value="save recording" onclick="ResSynth.host.onSaveRecordingButtonClicked()" />
-                        <input id="startRecordingButton" type="button" class="startRecordingButton" value="start recording ch" onclick="ResSynth.host.onStartRecordingButtonClicked()" />
-                        <input id="stopRecordingButton" type="button" class="stopRecordingButton" value="stop recording ch" onclick="ResSynth.host.onStopRecordingButtonClicked()" />
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div id="simpleInputDiv" style="display:none;">
-            <hr />
-            <table width="660px">
-                <colgroup>
-                    <col style="width:170px" />
-                    <col style="width:320px" />
-                    <col style="width:170px" />
-                </colgroup>
-                <tr>
-                    <td valign="top">
-                        <span class="boldSubtitle">simple input:</span>
-                    </td>
-                    <td>
-                        <span>note</span>
-                        <input id="notesDivIndexInput1" type="number" name="value" class="number" min="0" max="127" value="68" />
-                        <span>velocity</span>
-                        <input id="notesDivVelocityInput1" type="number" name="value" class="number" min="0" max="127" value="100" />
-                        <input type="checkbox" id="sendNote1Checkbox" style="vertical-align:middle" onclick="ResSynth.host.noteCheckboxClicked()" />
-                        <br />
-                        <span>note</span>
-                        <input id="notesDivIndexInput2" type="number" name="value" class="number" min="0" max="127" value="64" />
-                        <span>velocity</span>
-                        <input id="notesDivVelocityInput2" type="number" name="value" class="number" min="0" max="127" value="100" />
-                        <input type="checkbox" id="sendNote2Checkbox" style="vertical-align:middle" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
-                        <input id="sendButton" type="button" class="sendButton" value="send" onmousedown="ResSynth.host.doNotesOn()" onmouseup="ResSynth.host.doNotesOff()" />
-                        <label><input type="checkbox" id="holdCheckbox" value="hold" style="vertical-align:middle" onclick="ResSynth.host.holdCheckboxClicked()" />hold</label>
-                    </td>
-                    <td>
-                        <span>&nbsp;</span>
-                    </td>
-                </tr>
-            </table>
+
+            <div id="recordingDiv" style="display: none">
+                <hr />
+                <table width="660px">
+                    <colgroup>
+                        <col width="66" />
+                        <col width="222" />
+                        <col width="132" />
+                        <col width="120" />
+                        <col width="120" />
+                    </colgroup>
+                    <tr>
+                        <td>
+                            <span id="recordingTitle" class="boldSubtitle">recordings:</span>
+                        </td>
+                        <td>
+                            <select id="recordingSelect" class="recordingSelect" />
+                        </td>
+                        <td>
+                            <input id="playRecordingButton" type="button" class="playRecordingButton" value="play selected recording" onclick="ResSynth.host.onPlayRecordingButtonClicked()" />
+                            <input id="cancelPlaybackButton" type="button" class="cancelPlaybackButton" value="cancel playback" onclick="ResSynth.host.onCancelPlaybackButtonClicked()" />
+                        </td>
+                        <td align="right">
+                            <input id="discardRecordingButton" type="button" class="discardRecordingButton" value="discard recording" onclick="ResSynth.host.onDiscardRecordingButtonClicked()" />
+                        </td>
+                        <td align="right">
+                            <input id="saveRecordingButton" type="button" class="saveRecordingButton" value="save recording" onclick="ResSynth.host.onSaveRecordingButtonClicked()" />
+                            <input id="startRecordingButton" type="button" class="startRecordingButton" value="start recording ch" onclick="ResSynth.host.onStartRecordingButtonClicked()" />
+                            <input id="stopRecordingButton" type="button" class="stopRecordingButton" value="stop recording ch" onclick="ResSynth.host.onStopRecordingButtonClicked()" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="simpleInputDiv" style="display: none;">
+                <hr />
+                <table width="660px">
+                    <colgroup>
+                        <col style="width:170px" />
+                        <col style="width:320px" />
+                        <col style="width:170px" />
+                    </colgroup>
+                    <tr>
+                        <td valign="top">
+                            <span class="boldSubtitle">simple input:</span>
+                        </td>
+                        <td>
+                            <span>note</span>
+                            <input id="notesDivIndexInput1" type="number" name="value" class="number" min="0" max="127" value="68" />
+                            <span>velocity</span>
+                            <input id="notesDivVelocityInput1" type="number" name="value" class="number" min="0" max="127" value="100" />
+                            <input type="checkbox" id="sendNote1Checkbox" style="vertical-align:middle" onclick="ResSynth.host.noteCheckboxClicked()" />
+                            <br />
+                            <span>note</span>
+                            <input id="notesDivIndexInput2" type="number" name="value" class="number" min="0" max="127" value="64" />
+                            <span>velocity</span>
+                            <input id="notesDivVelocityInput2" type="number" name="value" class="number" min="0" max="127" value="100" />
+                            <input type="checkbox" id="sendNote2Checkbox" style="vertical-align:middle" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
+                            <input id="sendButton" type="button" class="sendButton" value="send" onmousedown="ResSynth.host.doNotesOn()" onmouseup="ResSynth.host.doNotesOff()" />
+                            <label><input type="checkbox" id="holdCheckbox" value="hold" style="vertical-align:middle" onclick="ResSynth.host.holdCheckboxClicked()" />hold</label>
+                        </td>
+                        <td>
+                            <span>&nbsp;</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 

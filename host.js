@@ -2633,21 +2633,21 @@ ResSynth.host = (function(document)
 
                 function displayAllPage2Divs()
                 {
-                    let channelsDiv = getElem("channelsDiv"),
+                    let synthSettingsDiv = getElem("synthSettingsDiv"),
                         webAudioFontDiv = getElem("webAudioFontDiv"),
                         tuningDiv = getElem("tuningDiv"),
                         commandsAndControlsDiv = getElem("commandsAndControlsDiv"),
                         ornamentsDiv = getElem("ornamentsDiv"),
-                        triggersDiv = getElem("triggersDiv"),
+                        hostSettingsDiv = getElem("hostSettingsDiv"),
                         recordingDiv = getElem("recordingDiv"),
                         simpleInputDiv = getElem("simpleInputDiv");
 
-                    channelsDiv.style.display = "block";
+                    synthSettingsDiv.style.display = "block";
                     webAudioFontDiv.style.display = "block";
                     tuningDiv.style.display = "block";
                     commandsAndControlsDiv.style.display = "block";
                     ornamentsDiv.style.display = "block";
-                    triggersDiv.style.display = "block";
+                    hostSettingsDiv.style.display = "block";
                     recordingDiv.style.display = "block";
                     simpleInputDiv.style.display = "block";
 
@@ -2931,21 +2931,21 @@ ResSynth.host = (function(document)
             {
                 function hideAllPage2Divs()
                 {
-                    let channelsDiv = getElem("channelsDiv"),
+                    let synthSettingsDiv = getElem("synthSettingsDiv"),
                         webAudioFontDiv = getElem("webAudioFontDiv"),
                         tuningDiv = getElem("tuningDiv"),
                         commandsAndControlsDiv = getElem("commandsAndControlsDiv"),
                         ornamentsDiv = getElem("ornamentsDiv"),
-                        triggersDiv = getElem("triggersDiv"),
+                        hostSettingsDiv = getElem("hostSettingsDiv"),
                         recordingDiv = getElem("recordingDiv"),
                         simpleInputDiv = getElem("simpleInputDiv");
 
-                    channelsDiv.style.display = "none";
+                    synthSettingsDiv.style.display = "none";
                     webAudioFontDiv.style.display = "none";
                     tuningDiv.style.display = "none";
                     commandsAndControlsDiv.style.display = "none";
                     ornamentsDiv.style.display = "none";
-                    triggersDiv.style.display = "none";
+                    hostSettingsDiv.style.display = "none";
                     recordingDiv.style.display = "none";
                     simpleInputDiv.style.display = "none";
                 }

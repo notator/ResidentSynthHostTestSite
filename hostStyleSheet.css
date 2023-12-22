@@ -3,24 +3,43 @@ body
 {
     font-family: Lucida Sans Unicode, Verdana, Arial, Geneva, Sans-Serif;
     font-size: 11px;
-    width: 660px;
+    width: 692px;
     margin: 25px auto 0 auto;
     padding: 0;
 }
 
 div.background
 {
-    width: 660px; 
+    width: 692px; 
     margin: 0;
-    padding: 25px;
-    background: #EEEEEE;
+    padding: 15px;
+    background: #EEE;
     border: 1px solid black;
+}
+
+div.synthSettingsDiv
+{
+	width: 660px;
+	margin: 6px 0 0 1px;
+	padding: 6px 15px 8px 15px;
+	background: #DEDEDE;
+	border: 1px solid #555;
+}
+
+div.hostSettingsDiv
+{
+	width: 660px;
+	margin: 6px 0 0 0px;
+	padding: 5px 15px 5px 15px;
+	background: #EEE;
+	border: 2px solid #333;
+
 }
 
 hr
 {
     border-style: none;
-    height: 4px;
+    height: 2px;
     background: #AAA;
 }
 
