@@ -2633,23 +2633,8 @@ ResSynth.host = (function(document)
 
                 function displayAllPage2Divs()
                 {
-                    let synthSettingsDiv = getElem("synthSettingsDiv"),
-                        webAudioFontDiv = getElem("webAudioFontDiv"),
-                        tuningDiv = getElem("tuningDiv"),
-                        commandsAndControlsDiv = getElem("commandsAndControlsDiv"),
-                        ornamentsDiv = getElem("ornamentsDiv"),
-                        hostSettingsDiv = getElem("hostSettingsDiv"),
-                        recordingDiv = getElem("recordingDiv"),
-                        simpleInputDiv = getElem("simpleInputDiv");
-
-                    synthSettingsDiv.style.display = "block";
-                    webAudioFontDiv.style.display = "block";
-                    tuningDiv.style.display = "block";
-                    commandsAndControlsDiv.style.display = "block";
-                    ornamentsDiv.style.display = "block";
-                    hostSettingsDiv.style.display = "block";
-                    recordingDiv.style.display = "block";
-                    simpleInputDiv.style.display = "block";
+                    getElem("synthSettingsDiv").style.display = "block";
+                    getElem("hostSettingsDiv").style.display = "block";
 
                     setPerformanceGUIState1();
                 }
@@ -2660,7 +2645,7 @@ ResSynth.host = (function(document)
                     mixtureSelect = getElem("mixtureSelect"),
                     tuningGroupSelect = getElem("tuningGroupSelect");
 
-                console.assert(synth.name === "ResidentSynth", "Error: this app only uses the ResidentSynth");
+                console.assert(synth.name === "ResidentSynth", "Error: this application only uses the ResidentSynth");
 
                 setChannelsDiv();
 
@@ -2929,31 +2914,10 @@ ResSynth.host = (function(document)
 
             function setInitialDivsDisplay()
             {
-                function hideAllPage2Divs()
-                {
-                    let synthSettingsDiv = getElem("synthSettingsDiv"),
-                        webAudioFontDiv = getElem("webAudioFontDiv"),
-                        tuningDiv = getElem("tuningDiv"),
-                        commandsAndControlsDiv = getElem("commandsAndControlsDiv"),
-                        ornamentsDiv = getElem("ornamentsDiv"),
-                        hostSettingsDiv = getElem("hostSettingsDiv"),
-                        recordingDiv = getElem("recordingDiv"),
-                        simpleInputDiv = getElem("simpleInputDiv");
-
-                    synthSettingsDiv.style.display = "none";
-                    webAudioFontDiv.style.display = "none";
-                    tuningDiv.style.display = "none";
-                    commandsAndControlsDiv.style.display = "none";
-                    ornamentsDiv.style.display = "none";
-                    hostSettingsDiv.style.display = "none";
-                    recordingDiv.style.display = "none";
-                    simpleInputDiv.style.display = "none";
-                }
-
                 getElem("loadingMsgDiv").style.display = "none";
+                getElem("synthSettingsDiv").style.display = "none";
+                getElem("hostSettingsDiv").style.display = "none";
                 getElem("continueAtStartButtonDiv").style.display = "block";
-
-                hideAllPage2Divs();
             }
 
             setupInputDevice();
