@@ -1,4 +1,4 @@
-## ResidentSynthHost and ResidentSynth
+## ResidentSynth and ResidentSynth Host
 The _ResidentSynthHost_ is a [Web Audio application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html), written in HTML5 and Javascript, that hosts a GUI-less _ResidentSynth_ synthesizer.   
 This repository contains two major branches:  
 &nbsp;&nbsp;&nbsp;&nbsp;**main**: the current stable version, which can be used [here](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html).  
@@ -302,8 +302,7 @@ See the file residentSynth/constants.js
     BANK (CC 0, 0x0)  
 	MODWHEEL (CC 1, 0x1)  
 	VOLUME (CC 7, 0x7)  
-	PAN (CC 10, 0xA)  
-	EXPRESSION (CC 11, 0xB)  
+	PAN (CC 10, 0xA)    
 	ALL_SOUND_OFF (CC 120, 0x78)  
 	ALL_CONTROLLERS_OFF (CC 121, 0x79)
 
