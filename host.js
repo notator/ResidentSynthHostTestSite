@@ -18,6 +18,8 @@ ResSynth.host = (function(document)
         inputDevice = null,
         currentChannel = 0,
         allLongInputControls = [], // used by AllControllersOff control
+        globalChannelPressureType = "disabled", // set by channelPressureSelect
+        globalChannelPressureSensitivity = 0, // set by channelPressureSensitivityLongControl
         triggerKey,
         presetRecordings = [], // the recordings in recordings.js, converted
 
@@ -195,6 +197,40 @@ ResSynth.host = (function(document)
                         updateGUI_CommandsTable(command, data[2]);
                         //console.log("pitchWheel: value=" + data[2]);
                         break;
+                    case 0xD0: // Host ChannelPressure (Residentsynth does not implement ChannelPressure)
+                    {
+                        switch(globalChannelPressureType)
+                        {
+                            case "disabled":
+                            {
+                                break;
+                            }
+                            case "pitchWheel":
+                            {
+                                break;
+                            }
+                            case "modWheel":
+                            {
+                                break;
+                            }
+                            case "volume":
+                            { 
+                                break;
+                            }
+                            case "panLeft":
+                            {
+                                break;
+                            }
+                            case "panRight":
+                            {
+                                break;
+                            }
+                            case "reverberation":
+                            {
+                                break;
+                            }
+                        }
+                    }
                     default:
                         // Neither the residentSynth nor the residentSynthHost process
                         // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages
@@ -1509,6 +1545,13 @@ ResSynth.host = (function(document)
                 setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE, constants.CONTROL.SET_KEYBOARD_SPLIT_ARRAY, keyboardSplitIndex]);
 
             synth.send(setKeyboardSplitIndexMsg); // this message updates all channels (it ignores the channel bits in the message)
+        },
+
+        onChannelPressureSelectChanged = function()
+        {
+            let channelPressureSelect = getElem("channelPressureSelect");
+
+            globalChannelPressureType = channelPressureSelect.options[channelPressureSelect.selectedIndex].value;
         },
 
         onOrnamentsSelectChanged = function()
@@ -2937,7 +2980,6 @@ ResSynth.host = (function(document)
             webAudioFontWebsiteButtonClick: webAudioFontWebsiteButtonClick,
 
             onChannelSelectChanged: onChannelSelectChanged,
-            onKeyboardSplitSelectChanged: onKeyboardSplitSelectChanged,
 
             onBankSelectChanged: onBankSelectChanged,
             onPresetSelectChanged: onPresetSelectChanged,
@@ -2959,6 +3001,9 @@ ResSynth.host = (function(document)
             onDiscardRecordingButtonClicked: onDiscardRecordingButtonClicked,
 
             onKeyOrnamentsSelectChanged: onOrnamentsSelectChanged,
+
+            onKeyboardSplitSelectChanged: onKeyboardSplitSelectChanged,
+            onChannelPressureSelectChanged, onChannelPressureSelectChanged,
 
             noteCheckboxClicked: noteCheckboxClicked,
             holdCheckboxClicked: holdCheckboxClicked,

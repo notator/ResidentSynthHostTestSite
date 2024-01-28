@@ -56,7 +56,6 @@
                     <option value="15">15</option>
                 </select>
             </div>
-
             <div id="webAudioFontDiv">
                 <hr />
                 <table>
@@ -145,6 +144,22 @@
         </div>
         <div id="hostSettingsDiv" class="hostSettingsDiv" style="display:none">
             <div class="subtitle" style="text-align:center">Host Controls</div>
+            <div style="padding:0 0 0 3px">
+                <span class="boldSubtitle">channel pressure:</span>
+                <select id="channelPressureSelect" class="channelPressureSelect" onchange="ResSynth.host.onChannelPressureSelectChanged()">
+                    <option value="pitchWheel">disabled</option>
+                    <option value="pitchWheel">pitchWheel</option>
+                    <option value="modWheel">modWheel</option>
+                    <option value="volume">volume</option>
+                    <option value="panLeft">panLeft</option>
+                    <option value="panRight">panRight</option>
+                    <option value="reverberation">reverberation</option>
+                </select>
+                <div id="channelPressureSensitivityLongControlDiv">
+                    <br /><select id="dummy" class="channelPressureSelect"></select>
+                </div>
+                <hr />
+            </div>
             <table width="660px">
                 <colgroup>
                     <col width="66" />
