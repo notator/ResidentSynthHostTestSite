@@ -105,10 +105,6 @@
                             <select id="tuningGroupSelect" class="tuningGroupSelect" onchange="ResSynth.host.onTuningGroupSelectChanged()" />
                         </td>
                         <td id="tuningSelectCell">
-                            <!--
-                        <select id="tuningSelect" class="tuningSelect" onchange="ResSynth.host.onTuningSelectChanged()" />
-                        sendAgainButton
-                    -->
                         </td>
                         <td>
                             <input id="semitonesOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
@@ -144,24 +140,28 @@
         </div>
         <div id="hostSettingsDiv" class="hostSettingsDiv" style="display:none">
             <div class="subtitle" style="text-align:center">Host Controls</div>
-            <div style="padding:0 0 0 3px">
-                <span class="boldSubtitle">channel pressure:</span>
-                <select id="channelPressureSelect" class="channelPressureSelect" onchange="ResSynth.host.onChannelPressureSelectChanged()">
-                    <option value="disabled">disabled</option>
-                    <option value="pitchWheelUp">pitchWheelUp</option>
-                    <option value="pitchWheelDown">pitchWheelDown</option>
-                    <option value="modWheelUp">modWheelUp</option>
-                    <option value="modWheelDown">modWheelDown</option>
-                    <option value="volumeUp">volumeUp</option>
-                    <option value="volumeDown">volumeDown</option>
-                    <option value="panLeft">panLeft</option>
-                    <option value="panRight">panRight</option>
-                    <option value="reverberationUp">reverberationUp</option>
-                    <option value="reverberationDown">reverberationDown</option>
-                </select>
-                <div id="channelPressureSensitivityLongControlDiv">
-                    <br /><select id="dummy" class="channelPressureSelect"></select>
-                </div>
+            <div>
+                <table style="border-collapse:collapse">
+                    <tr id="channelPressureTR" style="padding:0">
+                        <td style="padding:0 10px 0 3px">
+                            <span class="boldSubtitle">channel pressure</span><span> (CMD 208)</span><span class="boldSubtitle">:</span>
+                            <select id="channelPressureSelect" class="channelPressureSelect" onchange="ResSynth.host.onChannelPressureSelectChanged()">
+                                <option value="unused">unused</option>
+                                <option value="pitchWheelUp">pitchWheelUp</option>
+                                <option value="pitchWheelDown">pitchWheelDown</option>
+                                <option value="modWheelUp">modWheelUp</option>
+                                <option value="modWheelDown">modWheelDown</option>
+                                <option value="volumeUp">volumeUp</option>
+                                <option value="volumeDown">volumeDown</option>
+                                <option value="panLeft">panLeft</option>
+                                <option value="panRight">panRight</option>
+                                <option value="reverberationUp">reverberationUp</option>
+                                <option value="reverberationDown">reverberationDown</option>
+                            </select>
+                        </td>
+                        <!-- ChannelPressure sensitivityLongControl will be added here. -->
+                    </tr>
+                </table>
                 <hr />
             </div>
             <table width="660px">

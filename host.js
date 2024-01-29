@@ -18,8 +18,8 @@ ResSynth.host = (function(document)
         inputDevice = null,
         currentChannel = 0,
         allLongInputControls = [], // used by AllControllersOff control
-        globalChannelPressureType = "disabled", // set by channelPressureSelect
-        globalChannelPressureSensitivity = 0, // set by channelPressureSensitivityLongControl
+        globalChannelPressureType = "unused", // set by channelPressureSelect
+        globalChannelPressureFactor = 0, // fraction set by channelPressureSensitivityLongControl
         triggerKey,
         presetRecordings = [], // the recordings in recordings.js, converted
 
@@ -205,95 +205,96 @@ ResSynth.host = (function(document)
                         updateGUI_CommandsTable(command, data[2]);
                         //console.log("pitchWheel: value=" + data[2]);
                         break;
-                    case HOST_CMD_CHANNEL_PRESSURE: // Host ChannelPressure (Residentsynth does not implement ChannelPressure)
+                    case HOST_CMD_CHANNEL_PRESSURE: // Host ChannelPressure (ResidentSynth does not implement ChannelPressure)
                         {
-                            let CTL = ResSynth.constants.CONTROL,
-                                hostChannelSettings = getElem("channelSelect").options[currentChannel].hostSettings,
-                                channelPressure = data[1];
-                            // The residentSynth does not process CHANNEL_PRESSURE messages.
-                            // They are ignored or converted here.
-                            switch(globalChannelPressureType)
+                            if(globalChannelPressureType === "unused")
                             {
-                                case "disabled":
-                                    {
-                                        return;
-                                    }
-                                case "pitchWheelUp":
-                                    {
-                                        msg[0] = CMD.PITCHWHEEL + currentChannel;
-                                        msg[1] = midiValue(hostChannelSettings.pitchWheel + channelPressure);
-                                        msg[2] = msg[1];
-                                        break;
-                                    }
-                                case "pitchWheelDown":
-                                    {
-                                        msg[0] = CMD.PITCHWHEEL + currentChannel;
-                                        msg[1] = midiValue(hostChannelSettings.pitchWheel - channelPressure);
-                                        msg[2] = msg[1];
-                                        break;
-                                    }
-                                case "modWheelUp":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.MODWHEEL;
-                                        msg[2] = midiValue(hostChannelSettings.modWheel + channelPressure);
-                                        break;
-                                    }
-                                case "modWheelDown":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.MODWHEEL;
-                                        msg[2] = midiValue(hostChannelSettings.modWheel - channelPressure);
-                                        break;
-                                    }
-                                case "volumeUp":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.VOLUME;
-                                        msg[2] = midiValue(hostChannelSettings.volume + channelPressure);
-                                        break;
-                                    }
-                                case "volumeDown":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.VOLUME;
-                                        msg[2] = midiValue(hostChannelSettings.volume - channelPressure);
-                                        break;
-                                    }
-                                case "panLeft":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.PAN;
-                                        msg[2] = midiValue(hostChannelSettings.pan - channelPressure);
-                                        break;
-                                    }
-                                case "panRight":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.PAN;
-                                        msg[2] = midiValue(hostChannelSettings.pan + channelPressure);
-                                        break;
-                                    }
-                                case "reverberationUp":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.REVERBERATION;
-                                        msg[2] = midiValue(hostChannelSettings.reverberation + channelPressure);
-                                        break;
-                                    }
-                                case "reverberationDown":
-                                    {
-                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
-                                        msg[1] = CTL.REVERBERATION;
-                                        msg[2] = midiValue(hostChannelSettings.reverberation - channelPressure);
-                                        break;
-                                    }
+                                return
                             }
-                            break;
+                            else
+                            {
+                                let CTL = ResSynth.constants.CONTROL,
+                                    channel = currentChannel,
+                                    hostChannelSettings = getElem("channelSelect").options[currentChannel].hostSettings,
+                                    channelPressureComponent = Math.round(data[1] * globalChannelPressureFactor);
+
+                                // The residentSynth does not process CHANNEL_PRESSURE messages.
+                                // They are ignored or converted here.
+                                switch(globalChannelPressureType)
+                                {
+                                    case "pitchWheelUp":
+                                        {
+                                            msg[0] = CMD.PITCHWHEEL + channel;
+                                            msg[1] = midiValue(hostChannelSettings.pitchWheel + channelPressureComponent);
+                                            msg[2] = msg[1];
+                                            break;
+                                        }
+                                    case "pitchWheelDown":
+                                        {
+                                            msg[0] = CMD.PITCHWHEEL + channel;
+                                            msg[1] = midiValue(hostChannelSettings.pitchWheel - channelPressureComponent);
+                                            msg[2] = msg[1];
+                                            break;
+                                        }
+                                    case "modWheelUp":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.MODWHEEL;
+                                            msg[2] = midiValue(hostChannelSettings.modWheel + channelPressureComponent);
+                                            break;
+                                        }
+                                    case "modWheelDown":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.MODWHEEL;
+                                            msg[2] = midiValue(hostChannelSettings.modWheel - channelPressureComponent);
+                                            break;
+                                        }
+                                    case "volumeUp":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.VOLUME;
+                                            msg[2] = midiValue(hostChannelSettings.volume + channelPressureComponent);
+                                            break;
+                                        }
+                                    case "volumeDown":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.VOLUME;
+                                            msg[2] = midiValue(hostChannelSettings.volume - channelPressureComponent);
+                                            break;
+                                        }
+                                    case "panLeft":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.PAN;
+                                            msg[2] = midiValue(hostChannelSettings.pan - channelPressureComponent);
+                                            break;
+                                        }
+                                    case "panRight":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.PAN;
+                                            msg[2] = midiValue(hostChannelSettings.pan + channelPressureComponent);
+                                            break;
+                                        }
+                                    case "reverberationUp":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.REVERBERATION;
+                                            msg[2] = midiValue(hostChannelSettings.reverberation + channelPressureComponent);
+                                            break;
+                                        }
+                                    case "reverberationDown":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.REVERBERATION;
+                                            msg[2] = midiValue(hostChannelSettings.reverberation - channelPressureComponent);
+                                            break;
+                                        }
+                                }
+                            }
                         }
-                    default:
-                        throw "The residentSynth does not process SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages"
-                        break;
                 }
 
                 if(recordedMessages !== undefined
@@ -1630,6 +1631,84 @@ ResSynth.host = (function(document)
         {
             function setPage2Display(synth)
             {
+                // called by both commands and CCs
+                function getBasicLongInputControl(tr, name, defaultValue, infoString)
+                {
+                    function getLongControlValue()
+                    {
+                        return this.rangeInputElem.valueAsNumber;
+                    }
+
+                    function getInputElemValue()
+                    {
+                        return this.valueAsNumber;
+                    }
+
+                    // sets synth and channel GUI state
+                    function setLongControlValue(value)
+                    {
+                        this.rangeInputElem.value = value;
+                        this.numberInputElem.value = value;
+
+                        setHostSettingsFromLongControl(this, value);
+
+                        this.numberInputElem.onchange();
+                    }
+
+                    let nameStrTD = document.createElement("td");
+                    tr.appendChild(nameStrTD);
+                    nameStrTD.className = "left";
+                    nameStrTD.innerHTML = name;
+
+                    // this td contains the slider, number and button inputs
+                    let longControlTD = document.createElement("td");
+                    longControlTD.id = name + "LongControl";
+                    tr.appendChild(longControlTD);
+
+                    let rangeInputElem = document.createElement("input"),
+                        numberInputElem = document.createElement("input");
+
+                    rangeInputElem.getValue = getInputElemValue;
+                    //rangeInputElem.onchange = "ResSynth.host.onLongControlComponentChanged()"; -- is set later
+                    numberInputElem.getValue = getInputElemValue;
+                    //numberInputElem.onchange = "ResSynth.host.onLongControlComponentChanged()"; -- is set later
+
+                    longControlTD.appendChild(rangeInputElem);
+                    longControlTD.appendChild(numberInputElem);
+
+                    longControlTD.rangeInputElem = rangeInputElem;
+                    longControlTD.numberInputElem = numberInputElem;
+
+                    longControlTD.getValue = getLongControlValue;
+                    longControlTD.setValue = setLongControlValue;
+
+                    // slider input                        
+                    rangeInputElem.type = "range";
+                    rangeInputElem.className = "midiSlider";
+                    //rangeInputElem.id = name + "RangeInput";
+                    rangeInputElem.twinInputElem = numberInputElem;
+                    rangeInputElem.value = defaultValue;
+                    rangeInputElem.defaultValue = defaultValue;
+                    rangeInputElem.min = 0;
+                    rangeInputElem.max = 127;
+
+                    // number input                        
+                    numberInputElem.type = "number";
+                    numberInputElem.className = "number";
+                    // numberInputElem.id = name + "NumberInput";
+                    numberInputElem.twinInputElem = rangeInputElem;
+                    numberInputElem.value = defaultValue;
+                    numberInputElem.defaultValue = defaultValue;
+                    numberInputElem.min = 0;
+                    numberInputElem.max = 127;
+
+                    let infoTD = document.createElement("td");
+                    tr.appendChild(infoTD);
+                    infoTD.innerHTML = infoString;
+
+                    return longControlTD;
+                }
+
                 function setChannelsDiv()
                 {
                     let channelSelect = getElem("channelSelect"),
@@ -1851,93 +1930,6 @@ ResSynth.host = (function(document)
 
                 function setCommandsAndControlsDivs()
                 {
-                    // called by both commands and CCs
-                    function getBasicLongInputControl(tr, name, defaultValue, infoString)
-                    {
-                        function getLongControlValue()
-                        {
-                            return this.rangeInputElem.valueAsNumber;
-                        }
-
-                        function getInputElemValue()
-                        {
-                            return this.valueAsNumber;
-                        }
-
-                        // sets synth and channel GUI state
-                        function setLongControlValue(value)
-                        {
-                            this.rangeInputElem.value = value;
-                            this.numberInputElem.value = value;
-
-                            setHostSettingsFromLongControl(this, value);
-
-                            this.numberInputElem.onchange();
-                        }
-
-                        let nameStrTD = document.createElement("td");
-                        tr.appendChild(nameStrTD);
-                        nameStrTD.className = "left";
-                        nameStrTD.innerHTML = name;
-
-                        // this td contains the slider, number and button inputs
-                        let longControlTD = document.createElement("td");
-                        longControlTD.id = name + "LongControl";
-                        tr.appendChild(longControlTD);
-
-                        let rangeInputElem = document.createElement("input"),
-                            numberInputElem = document.createElement("input"),
-                            buttonInputElem = document.createElement("input");
-
-                        rangeInputElem.getValue = getInputElemValue;
-                        //rangeInputElem.onchange = "ResSynth.host.onLongControlComponentChanged()"; -- is set later
-                        numberInputElem.getValue = getInputElemValue;
-                        //numberInputElem.onchange = "ResSynth.host.onLongControlComponentChanged()"; -- is set later
-
-                        longControlTD.appendChild(rangeInputElem);
-                        longControlTD.appendChild(numberInputElem);
-                        longControlTD.appendChild(buttonInputElem);
-
-                        longControlTD.rangeInputElem = rangeInputElem;
-                        longControlTD.numberInputElem = numberInputElem;
-                        longControlTD.buttonInputElem = buttonInputElem;
-
-                        longControlTD.getValue = getLongControlValue;
-                        longControlTD.setValue = setLongControlValue;
-
-                        // slider input                        
-                        rangeInputElem.type = "range";
-                        rangeInputElem.className = "midiSlider";
-                        //rangeInputElem.id = name + "RangeInput";
-                        rangeInputElem.twinInputElem = numberInputElem;
-                        rangeInputElem.value = defaultValue;
-                        rangeInputElem.defaultValue = defaultValue;
-                        rangeInputElem.min = 0;
-                        rangeInputElem.max = 127;
-
-                        // number input                        
-                        numberInputElem.type = "number";
-                        numberInputElem.className = "number";
-                        // numberInputElem.id = name + "NumberInput";
-                        numberInputElem.twinInputElem = rangeInputElem;
-                        numberInputElem.value = defaultValue;
-                        numberInputElem.defaultValue = defaultValue;
-                        numberInputElem.min = 0;
-                        numberInputElem.max = 127;
-
-                        // button input
-                        buttonInputElem.type = "button";
-                        buttonInputElem.className = "sendAgainButton";
-                        buttonInputElem.value = "send again";
-                        buttonInputElem.numberInputElem = numberInputElem;
-
-                        let infoTD = document.createElement("td");
-                        tr.appendChild(infoTD);
-                        infoTD.innerHTML = infoString;
-
-                        return longControlTD;
-                    }
-
                     function setCommandsAndControlsTable()
                     {
                         function getCommandRows()
@@ -2030,7 +2022,6 @@ ResSynth.host = (function(document)
                                 longInputControlTD.numberInputElem.cmdIndex = cmdIndex;
                                 longInputControlTD.rangeInputElem.onchange = onCommandInputChanged;
                                 longInputControlTD.numberInputElem.onchange = onCommandInputChanged;
-                                longInputControlTD.buttonInputElem.onchange = onSendCommandAgainButtonClick;
 
                                 allLongInputControls.push(longInputControlTD);
                             }
@@ -2072,15 +2063,6 @@ ResSynth.host = (function(document)
                                     sendLongControl(ccIndex, value);
                                 }
 
-                                function onSendControlAgainButtonClick(event)
-                                {
-                                    var numberInputElem = event.currentTarget.numberInputElem,
-                                        ccIndex = numberInputElem.ccIndex,
-                                        value = numberInputElem.valueAsNumber;
-
-                                    sendLongControl(ccIndex, value);
-                                }
-
                                 let longInputControlTD = getBasicLongInputControl(tr, name, defaultValue, ccString);
 
                                 console.assert(ccIndex !== undefined);
@@ -2091,7 +2073,6 @@ ResSynth.host = (function(document)
 
                                 longInputControlTD.rangeInputElem.onchange = onControlInputChanged;
                                 longInputControlTD.numberInputElem.onchange = onControlInputChanged;
-                                longInputControlTD.buttonInputElem.onclick = onSendControlAgainButtonClick;
 
                                 allLongInputControls.push(longInputControlTD);
                             }
@@ -2251,482 +2232,512 @@ ResSynth.host = (function(document)
 
                     setKeyOrnamentsSelect();
                 }
-                function setSettingsSelect()
+
+                function setHostSettingsDiv()
                 {
-                    // Converts the information in synthSettingsDefs.js into the (private) settingsChangePerSection.
-                    // Returns an array of sectionSettings, each of which contains an array of channelSettings (one per used channel).
-                    // The first sectionSettings object contains channelSettings that contain a full set of attributes.
-                    // ChannelSettings in subsequent sections contain only the attributes and values that differ from
-                    // the corresponding channelSetting in the previous section.
-                    // N.B. _comment attributes in the synthSettingsDefs.js file are completely ignored by the host,
-                    // so can be added and freely edited as required.
-                    // The exportSettingsButtonClick() function writes similar _comment attributes automatically.
-                    function getSettingsChangePerSection(synthSettingsDefs)
+                    function setChannelPressureTable()
                     {
-                        function checkArray(attributeName, array, length)
+                        // see onControlInputChanged() in setLongControlRow(...) below
+                        function onChannelPressureSensitivityLongControlChanged(event)
                         {
-                            if(!Array.isArray(array) || (array.length !== length))
+                            var target = (event === undefined) ? this : event.currentTarget,
+                                value = target.valueAsNumber;
+
+                            target.twinInputElem.value = value;
+
+                            globalChannelPressureFactor = value / 127;
+                        }
+
+                        let tr = getElem("channelPressureTR"),
+                            channelPressureSensitivityLongControl = getBasicLongInputControl(tr, "sensitivity", 64, "");
+
+                        channelPressureSensitivityLongControl.rangeInputElem.style.width = "250px";
+                        tr.removeChild(tr.lastChild);
+
+                        channelPressureSensitivityLongControl.rangeInputElem.onchange = onChannelPressureSensitivityLongControlChanged;
+                        channelPressureSensitivityLongControl.numberInputElem.onchange = onChannelPressureSensitivityLongControlChanged;
+                    }
+                    function setKeyboardSplitSelect()
+                    {
+                        let keyboardSplitSelect = getElem("keyboardSplitSelect");
+
+                        // this option is always added by default to index 0
+                        let option = new Option();
+                        option.innerHTML = "no split (messages will be sent on the current channel)";
+                        keyboardSplitSelect.options.add(option);
+
+                        if(ResSynth.keyboardSplitDefs !== undefined)
+                        {
+                            let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
+
+                            for(let i = 0; i < keyboardSplitDefs.length; i++)
                             {
-                                let errorString = `Error in synthSettingsDefs.js:\n` +
-                                    `synthSettingsDefs.${attributeName} must be defined, and must have the same length as\n` +
-                                    `the "names" attribute (${length}).`;
-                                throwError(errorString);
+                                let keyboardSplitDef = keyboardSplitDefs[i],
+                                    option = new Option();
+
+                                option.innerHTML = keyboardSplitDef;
+                                keyboardSplitSelect.options.add(option);
                             }
                         }
 
-                        function checkTopLevelAttributes(names, keyboardSplitIndexes, triggerKeys)
+                        keyboardSplitSelect.selectedIndex = 0;
+                    }
+                    function setSettingsSelect()
+                    {
+                        // Converts the information in synthSettingsDefs.js into the (private) settingsChangePerSection.
+                        // Returns an array of sectionSettings, each of which contains an array of channelSettings (one per used channel).
+                        // The first sectionSettings object contains channelSettings that contain a full set of attributes.
+                        // ChannelSettings in subsequent sections contain only the attributes and values that differ from
+                        // the corresponding channelSetting in the previous section.
+                        // N.B. _comment attributes in the synthSettingsDefs.js file are completely ignored by the host,
+                        // so can be added and freely edited as required.
+                        // The exportSettingsButtonClick() function writes similar _comment attributes automatically.
+                        function getSettingsChangePerSection(synthSettingsDefs)
                         {
-                            function checkNames(names, arrayLength)
-                            {
-                                checkArray("names", names, arrayLength);
-
-                                for(let i = 0; i < names.length; i++)
-                                {
-                                    let name = names[i];
-                                    if((typeof name === 'string' || name instanceof String) === false)
-                                    {
-                                        throwError("All synthSettingsDefs.names must be strings.")
-                                    }
-                                }
-                            }
-
-                            function checkKeyboardSplitIndexValues(keyboardSplitIndexes, arrayLength)
-                            {
-                                let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
-
-                                checkArray("keyboardSplitIndexes", keyboardSplitIndexes, arrayLength);
-
-                                for(let i = 0; i < keyboardSplitIndexes.length; i++)
-                                {
-                                    let keyboardSplitIndex = keyboardSplitIndexes[i];
-
-                                    if(!Number.isInteger(keyboardSplitIndex) || (keyboardSplitIndex < 0) || (keyboardSplitIndex >= keyboardSplitDefs.length))
-                                    {
-                                        throwError(`All synthSettingsDefs.keyboardSplitIndexes must be integers in range 0..${keyboardSplitDefs.length} (keyboardSplitDefs length)`);
-                                    }
-                                }
-                            }
-
-                            function checkTriggerKeyValues(triggerKeys, arrayLength)
-                            {
-                                checkArray("triggerKeys", triggerKeys, arrayLength);
-
-                                for(let i = 0; i < triggerKeys.length; i++)
-                                {
-                                    let triggerKey = triggerKeys[i];
-                                    if((triggerKey < 0 || triggerKey > 127))
-                                    {
-                                        throwError("All synthSettingsDefs.triggerKeys must be in range 0..127.");
-                                    }
-                                }
-                            }
-
-                            let arrayLength = names.length;
-
-                            checkNames(names, arrayLength);
-                            checkKeyboardSplitIndexValues(keyboardSplitIndexes, arrayLength);
-                            checkTriggerKeyValues(triggerKeys, arrayLength);
-                        }
-
-                        function checkChannelSettingsArray(channelSettingsArray, arrayLength)
-                        {
-                            function checkChannelAttributeArray(channel, attributeName, array, length)
+                            function checkArray(attributeName, array, length)
                             {
                                 if(!Array.isArray(array) || (array.length !== length))
                                 {
-                                    let errorString = `Error in synthSettingsDefs.js\n` +
-                                        `Channel ${channel} ${attributeName} must be defined, and must have the same length as\n` +
+                                    let errorString = `Error in synthSettingsDefs.js:\n` +
+                                        `synthSettingsDefs.${attributeName} must be defined, and must have the same length as\n` +
                                         `the "names" attribute (${length}).`;
-
                                     throwError(errorString);
                                 }
                             }
 
-                            for(let channel = 0; channel < channelSettingsArray.length; channel++)
+                            function checkTopLevelAttributes(names, keyboardSplitIndexes, triggerKeys)
                             {
-                                let channelSettings = channelSettingsArray[channel];
+                                function checkNames(names, arrayLength)
+                                {
+                                    checkArray("names", names, arrayLength);
 
-                                checkChannelAttributeArray(channel, "bankIndex", channelSettings.bankIndex, arrayLength);
-                                checkChannelAttributeArray(channel, "presetIndex", channelSettings.presetIndex, arrayLength);
-                                checkChannelAttributeArray(channel, "mixtureIndex", channelSettings.mixtureIndex, arrayLength);
-                                checkChannelAttributeArray(channel, "tuningGroupIndex", channelSettings.tuningGroupIndex, arrayLength);
-                                checkChannelAttributeArray(channel, "tuningIndex", channelSettings.tuningIndex, arrayLength);
-                                checkChannelAttributeArray(channel, "semitonesOffset", channelSettings.semitonesOffset, arrayLength);
-                                checkChannelAttributeArray(channel, "centsOffset", channelSettings.centsOffset, arrayLength);
-                                checkChannelAttributeArray(channel, "pitchWheel", channelSettings.pitchWheel, arrayLength);
-                                checkChannelAttributeArray(channel, "modWheel", channelSettings.modWheel, arrayLength);
-                                checkChannelAttributeArray(channel, "volume", channelSettings.volume, arrayLength);
-                                checkChannelAttributeArray(channel, "pan", channelSettings.pan, arrayLength);
-                                checkChannelAttributeArray(channel, "reverberation", channelSettings.reverberation, arrayLength);
-                                checkChannelAttributeArray(channel, "pitchWheelSensitivity", channelSettings.pitchWheelSensitivity, arrayLength);
-                                checkChannelAttributeArray(channel, "velocityPitchSensitivity", channelSettings.velocityPitchSensitivity, arrayLength);
-                                checkChannelAttributeArray(channel, "keyboardOrnamentsArrayIndex", channelSettings.keyboardOrnamentsArrayIndex, arrayLength);
+                                    for(let i = 0; i < names.length; i++)
+                                    {
+                                        let name = names[i];
+                                        if((typeof name === 'string' || name instanceof String) === false)
+                                        {
+                                            throwError("All synthSettingsDefs.names must be strings.")
+                                        }
+                                    }
+                                }
+
+                                function checkKeyboardSplitIndexValues(keyboardSplitIndexes, arrayLength)
+                                {
+                                    let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
+
+                                    checkArray("keyboardSplitIndexes", keyboardSplitIndexes, arrayLength);
+
+                                    for(let i = 0; i < keyboardSplitIndexes.length; i++)
+                                    {
+                                        let keyboardSplitIndex = keyboardSplitIndexes[i];
+
+                                        if(!Number.isInteger(keyboardSplitIndex) || (keyboardSplitIndex < 0) || (keyboardSplitIndex >= keyboardSplitDefs.length))
+                                        {
+                                            throwError(`All synthSettingsDefs.keyboardSplitIndexes must be integers in range 0..${keyboardSplitDefs.length} (keyboardSplitDefs length)`);
+                                        }
+                                    }
+                                }
+
+                                function checkTriggerKeyValues(triggerKeys, arrayLength)
+                                {
+                                    checkArray("triggerKeys", triggerKeys, arrayLength);
+
+                                    for(let i = 0; i < triggerKeys.length; i++)
+                                    {
+                                        let triggerKey = triggerKeys[i];
+                                        if((triggerKey < 0 || triggerKey > 127))
+                                        {
+                                            throwError("All synthSettingsDefs.triggerKeys must be in range 0..127.");
+                                        }
+                                    }
+                                }
+
+                                let arrayLength = names.length;
+
+                                checkNames(names, arrayLength);
+                                checkKeyboardSplitIndexValues(keyboardSplitIndexes, arrayLength);
+                                checkTriggerKeyValues(triggerKeys, arrayLength);
                             }
-                        }
 
-                        function checkChannelSettingsValues(channelSettingsArray)
-                        {
-                            function getChannelSettingsPerSectionArray(channelSettingsArray)
+                            function checkChannelSettingsArray(channelSettingsArray, arrayLength)
                             {
-                                let channelSettingsPerSectionArray = [];
+                                function checkChannelAttributeArray(channel, attributeName, array, length)
+                                {
+                                    if(!Array.isArray(array) || (array.length !== length))
+                                    {
+                                        let errorString = `Error in synthSettingsDefs.js\n` +
+                                            `Channel ${channel} ${attributeName} must be defined, and must have the same length as\n` +
+                                            `the "names" attribute (${length}).`;
+
+                                        throwError(errorString);
+                                    }
+                                }
 
                                 for(let channel = 0; channel < channelSettingsArray.length; channel++)
                                 {
-                                    let channelAttributesObject = channelSettingsArray[channel],
-                                        nSections = channelAttributesObject.bankIndex.length,
-                                        channelSections = [];
+                                    let channelSettings = channelSettingsArray[channel];
 
-                                    for(let section = 0; section < nSections; section++)
-                                    {
-                                        let channelSectionSettings = {};
-
-                                        channelSectionSettings.bankIndex = channelAttributesObject.bankIndex[section];
-                                        channelSectionSettings.presetIndex = channelAttributesObject.presetIndex[section];
-                                        channelSectionSettings.mixtureIndex = channelAttributesObject.mixtureIndex[section];
-                                        channelSectionSettings.tuningGroupIndex = channelAttributesObject.tuningGroupIndex[section];
-                                        channelSectionSettings.tuningIndex = channelAttributesObject.tuningIndex[section];
-                                        channelSectionSettings.semitonesOffset = channelAttributesObject.semitonesOffset[section];
-                                        channelSectionSettings.centsOffset = channelAttributesObject.centsOffset[section];
-                                        channelSectionSettings.pitchWheel = channelAttributesObject.pitchWheel[section];
-                                        channelSectionSettings.modWheel = channelAttributesObject.modWheel[section];
-                                        channelSectionSettings.volume = channelAttributesObject.volume[section];
-                                        channelSectionSettings.pan = channelAttributesObject.pan[section];
-                                        channelSectionSettings.reverberation = channelAttributesObject.reverberation[section];
-                                        channelSectionSettings.pitchWheelSensitivity = channelAttributesObject.pitchWheelSensitivity[section];
-                                        channelSectionSettings.velocityPitchSensitivity = channelAttributesObject.velocityPitchSensitivity[section];
-                                        channelSectionSettings.keyboardOrnamentsArrayIndex = channelAttributesObject.keyboardOrnamentsArrayIndex[section];
-
-                                        channelSections.push(channelSectionSettings)
-                                    }
-
-                                    channelSettingsPerSectionArray.push(channelSections);
+                                    checkChannelAttributeArray(channel, "bankIndex", channelSettings.bankIndex, arrayLength);
+                                    checkChannelAttributeArray(channel, "presetIndex", channelSettings.presetIndex, arrayLength);
+                                    checkChannelAttributeArray(channel, "mixtureIndex", channelSettings.mixtureIndex, arrayLength);
+                                    checkChannelAttributeArray(channel, "tuningGroupIndex", channelSettings.tuningGroupIndex, arrayLength);
+                                    checkChannelAttributeArray(channel, "tuningIndex", channelSettings.tuningIndex, arrayLength);
+                                    checkChannelAttributeArray(channel, "semitonesOffset", channelSettings.semitonesOffset, arrayLength);
+                                    checkChannelAttributeArray(channel, "centsOffset", channelSettings.centsOffset, arrayLength);
+                                    checkChannelAttributeArray(channel, "pitchWheel", channelSettings.pitchWheel, arrayLength);
+                                    checkChannelAttributeArray(channel, "modWheel", channelSettings.modWheel, arrayLength);
+                                    checkChannelAttributeArray(channel, "volume", channelSettings.volume, arrayLength);
+                                    checkChannelAttributeArray(channel, "pan", channelSettings.pan, arrayLength);
+                                    checkChannelAttributeArray(channel, "reverberation", channelSettings.reverberation, arrayLength);
+                                    checkChannelAttributeArray(channel, "pitchWheelSensitivity", channelSettings.pitchWheelSensitivity, arrayLength);
+                                    checkChannelAttributeArray(channel, "velocityPitchSensitivity", channelSettings.velocityPitchSensitivity, arrayLength);
+                                    checkChannelAttributeArray(channel, "keyboardOrnamentsArrayIndex", channelSettings.keyboardOrnamentsArrayIndex, arrayLength);
                                 }
-
-                                return channelSettingsPerSectionArray;
                             }
 
-                            function checkValues(channelSettings, sectionIndex)
+                            function checkChannelSettingsValues(channelSettingsArray)
                             {
-                                function getErrorString(errorString, errorCondition, errorMessage)
+                                function getChannelSettingsPerSectionArray(channelSettingsArray)
                                 {
-                                    errorString = (errorCondition) ? errorString.concat(errorMessage, "\n") : errorString;
-                                    return errorString;
+                                    let channelSettingsPerSectionArray = [];
+
+                                    for(let channel = 0; channel < channelSettingsArray.length; channel++)
+                                    {
+                                        let channelAttributesObject = channelSettingsArray[channel],
+                                            nSections = channelAttributesObject.bankIndex.length,
+                                            channelSections = [];
+
+                                        for(let section = 0; section < nSections; section++)
+                                        {
+                                            let channelSectionSettings = {};
+
+                                            channelSectionSettings.bankIndex = channelAttributesObject.bankIndex[section];
+                                            channelSectionSettings.presetIndex = channelAttributesObject.presetIndex[section];
+                                            channelSectionSettings.mixtureIndex = channelAttributesObject.mixtureIndex[section];
+                                            channelSectionSettings.tuningGroupIndex = channelAttributesObject.tuningGroupIndex[section];
+                                            channelSectionSettings.tuningIndex = channelAttributesObject.tuningIndex[section];
+                                            channelSectionSettings.semitonesOffset = channelAttributesObject.semitonesOffset[section];
+                                            channelSectionSettings.centsOffset = channelAttributesObject.centsOffset[section];
+                                            channelSectionSettings.pitchWheel = channelAttributesObject.pitchWheel[section];
+                                            channelSectionSettings.modWheel = channelAttributesObject.modWheel[section];
+                                            channelSectionSettings.volume = channelAttributesObject.volume[section];
+                                            channelSectionSettings.pan = channelAttributesObject.pan[section];
+                                            channelSectionSettings.reverberation = channelAttributesObject.reverberation[section];
+                                            channelSectionSettings.pitchWheelSensitivity = channelAttributesObject.pitchWheelSensitivity[section];
+                                            channelSectionSettings.velocityPitchSensitivity = channelAttributesObject.velocityPitchSensitivity[section];
+                                            channelSectionSettings.keyboardOrnamentsArrayIndex = channelAttributesObject.keyboardOrnamentsArrayIndex[section];
+
+                                            channelSections.push(channelSectionSettings)
+                                        }
+
+                                        channelSettingsPerSectionArray.push(channelSections);
+                                    }
+
+                                    return channelSettingsPerSectionArray;
                                 }
 
-                                function midiRangeError(value)
+                                function checkValues(channelSettings, sectionIndex)
                                 {
-                                    return (value < 0 || value > 127) ? true : false;
-                                }
+                                    function getErrorString(errorString, errorCondition, errorMessage)
+                                    {
+                                        errorString = (errorCondition) ? errorString.concat(errorMessage, "\n") : errorString;
+                                        return errorString;
+                                    }
 
-                                function midiErrorMsg(ctlString, value)
-                                {
-                                    return `${ctlString} out of range [0..127] (${ctlString}=${value})`;
-                                }
+                                    function midiRangeError(value)
+                                    {
+                                        return (value < 0 || value > 127) ? true : false;
+                                    }
 
-                                let webAudioFontDef = ResSynth.webAudioFontDef,
-                                    mixtureDefs = ResSynth.mixtureDefs,
-                                    tuningDefs = ResSynth.tuningDefs,
-                                    ornamentDefs = ResSynth.ornamentDefs,
-                                    bankIndex = channelSettings.bankIndex,
-                                    presetIndex = channelSettings.presetIndex,
-                                    mixtureIndex = channelSettings.mixtureIndex,
-                                    tuningGroupIndex = channelSettings.tuningGroupIndex,
-                                    tuningIndex = channelSettings.tuningIndex,
-                                    semitonesOffset = channelSettings.semitonesOffset,
-                                    centsOffset = channelSettings.centsOffset,
-                                    pitchWheel = channelSettings.pitchWheel,
-                                    modWheel = channelSettings.modWheel,
-                                    volume = channelSettings.volume,
-                                    pan = channelSettings.pan,
-                                    reverberation = channelSettings.reverberation,
-                                    pitchWheelSensitivity = channelSettings.pitchWheelSensitivity,
-                                    velocityPitchSensitivity = channelSettings.velocityPitchSensitivity,
-                                    keyboardOrnamentsArrayIndex = channelSettings.keyboardOrnamentsArrayIndex,
-                                    errorString = "";
+                                    function midiErrorMsg(ctlString, value)
+                                    {
+                                        return `${ctlString} out of range [0..127] (${ctlString}=${value})`;
+                                    }
 
-                                // N.B. "noMixtures", "noTuningGroup" and "noOrnament" options are inserted before the definitions given in
-                                // ResSynth.mixtureDefs, ResSynth.tuningDefs and ResSynth.ornamentDefs, so the corresponding allowed indexes
-                                // can be as large as the lengths of each of these definitions.
-                                errorString = getErrorString(errorString, webAudioFontDef === undefined, `webAudioFont must be defined.`);
-                                if(bankIndex !== undefined)
-                                    errorString = getErrorString(errorString, bankIndex < 0 || bankIndex >= webAudioFontDef.length, `bankIndex out of range (0..${webAudioFontDef.length - 1}).`);
-                                if(presetIndex !== undefined)
-                                    errorString = getErrorString(errorString, presetIndex < 0 || presetIndex >= webAudioFontDef[bankIndex].presets.length, `preset out of range in webAudioFontDef bank (bankIndex=${bankIndex}, presetIndex=${presetIndex})`);
-                                if(mixtureIndex !== undefined)
-                                {
-                                    errorString = getErrorString(errorString, mixtureIndex < 0, `mixtureIndex must be >= 0`);
-                                    errorString = getErrorString(errorString, mixtureDefs === undefined, `mixtureIndex must be >= 0`);
-                                    errorString = getErrorString(errorString, mixtureDefs === undefined && mixtureIndex > 0, `mixtureIndex must be 0 if mixtureDefs are not defined.`);
-                                    errorString = getErrorString(errorString, mixtureDefs !== undefined && mixtureIndex >= mixtureDefs.length + 1, `mixtureIndex out of range (0..${mixtureDefs.length}): (mixtureIndex=${mixtureIndex})`);
-                                }
-                                if(tuningGroupIndex !== undefined)
-                                {
-                                    errorString = getErrorString(errorString, tuningGroupIndex < 0, `tuningGroupIndex must be >= 0`);
-                                    errorString = getErrorString(errorString, tuningDefs === undefined && tuningGroupIndex > 0, `tuningGroupIndex must be 0 if tuningDefs are not defined.`);
-                                    errorString = getErrorString(errorString, tuningDefs !== undefined && tuningGroupIndex >= tuningDefs.length + 1, `tuningGroupIndex out of range (0..${tuningDefs.length}): (tuningGroupIndex=${tuningGroupIndex})`);
-                                }
-                                if(tuningIndex !== undefined)
-                                {
-                                    errorString = getErrorString(errorString, tuningIndex < 0, `tuningIndex must be >= 0`);
+                                    let webAudioFontDef = ResSynth.webAudioFontDef,
+                                        mixtureDefs = ResSynth.mixtureDefs,
+                                        tuningDefs = ResSynth.tuningDefs,
+                                        ornamentDefs = ResSynth.ornamentDefs,
+                                        bankIndex = channelSettings.bankIndex,
+                                        presetIndex = channelSettings.presetIndex,
+                                        mixtureIndex = channelSettings.mixtureIndex,
+                                        tuningGroupIndex = channelSettings.tuningGroupIndex,
+                                        tuningIndex = channelSettings.tuningIndex,
+                                        semitonesOffset = channelSettings.semitonesOffset,
+                                        centsOffset = channelSettings.centsOffset,
+                                        pitchWheel = channelSettings.pitchWheel,
+                                        modWheel = channelSettings.modWheel,
+                                        volume = channelSettings.volume,
+                                        pan = channelSettings.pan,
+                                        reverberation = channelSettings.reverberation,
+                                        pitchWheelSensitivity = channelSettings.pitchWheelSensitivity,
+                                        velocityPitchSensitivity = channelSettings.velocityPitchSensitivity,
+                                        keyboardOrnamentsArrayIndex = channelSettings.keyboardOrnamentsArrayIndex,
+                                        errorString = "";
+
+                                    // N.B. "noMixtures", "noTuningGroup" and "noOrnament" options are inserted before the definitions given in
+                                    // ResSynth.mixtureDefs, ResSynth.tuningDefs and ResSynth.ornamentDefs, so the corresponding allowed indexes
+                                    // can be as large as the lengths of each of these definitions.
+                                    errorString = getErrorString(errorString, webAudioFontDef === undefined, `webAudioFont must be defined.`);
+                                    if(bankIndex !== undefined)
+                                        errorString = getErrorString(errorString, bankIndex < 0 || bankIndex >= webAudioFontDef.length, `bankIndex out of range (0..${webAudioFontDef.length - 1}).`);
+                                    if(presetIndex !== undefined)
+                                        errorString = getErrorString(errorString, presetIndex < 0 || presetIndex >= webAudioFontDef[bankIndex].presets.length, `preset out of range in webAudioFontDef bank (bankIndex=${bankIndex}, presetIndex=${presetIndex})`);
+                                    if(mixtureIndex !== undefined)
+                                    {
+                                        errorString = getErrorString(errorString, mixtureIndex < 0, `mixtureIndex must be >= 0`);
+                                        errorString = getErrorString(errorString, mixtureDefs === undefined, `mixtureIndex must be >= 0`);
+                                        errorString = getErrorString(errorString, mixtureDefs === undefined && mixtureIndex > 0, `mixtureIndex must be 0 if mixtureDefs are not defined.`);
+                                        errorString = getErrorString(errorString, mixtureDefs !== undefined && mixtureIndex >= mixtureDefs.length + 1, `mixtureIndex out of range (0..${mixtureDefs.length}): (mixtureIndex=${mixtureIndex})`);
+                                    }
                                     if(tuningGroupIndex !== undefined)
                                     {
-                                        errorString = getErrorString(errorString, tuningDefs !== undefined && tuningIndex >= tuningDefs[tuningGroupIndex].tunings.length, `tuningIndex out of range (0..${tuningDefs[tuningGroupIndex].tunings.length - 1}): (tuningIndex=${tuningIndex})`);
+                                        errorString = getErrorString(errorString, tuningGroupIndex < 0, `tuningGroupIndex must be >= 0`);
+                                        errorString = getErrorString(errorString, tuningDefs === undefined && tuningGroupIndex > 0, `tuningGroupIndex must be 0 if tuningDefs are not defined.`);
+                                        errorString = getErrorString(errorString, tuningDefs !== undefined && tuningGroupIndex >= tuningDefs.length + 1, `tuningGroupIndex out of range (0..${tuningDefs.length}): (tuningGroupIndex=${tuningGroupIndex})`);
                                     }
-                                }
-                                if(keyboardOrnamentsArrayIndex !== undefined)
-                                {
-                                    errorString = getErrorString(errorString, keyboardOrnamentsArrayIndex < 0, `keyboardOrnamentsArrayIndex must be >= 0`);
-                                    errorString = getErrorString(errorString, ornamentDefs === undefined && keyboardOrnamentsArrayIndex > 0, `keyboardOrnamentsArrayIndex must be 0 if ornamentDefs are not defined.`);
-                                    errorString = getErrorString(errorString, ornamentDefs !== undefined && keyboardOrnamentsArrayIndex >= ornamentDefs.length + 1, `keyboardOrnamentsArrayIndex out of range (0..${ornamentDefs.length}): (keyboardOrnamentsArrayIndex=${keyboardOrnamentsArrayIndex})`);
-                                }
-                                if(semitonesOffset !== undefined)
-                                    errorString = getErrorString(errorString, semitonesOffset < -64 || semitonesOffset > 63, `semitonesOffset out of range [-64..+63] (semitonesOffset=${semitonesOffset})`);
-                                if(centsOffset !== undefined)
-                                    errorString = getErrorString(errorString, centsOffset < -50 || centsOffset > 50, `centsOffset out of range [-50..+50] (centsOffset=${centsOffset})`);
-                                if(pitchWheel !== undefined)
-                                    errorString = getErrorString(errorString, midiRangeError(pitchWheel), midiErrorMsg("pitchWheel", pitchWheel));
-                                if(modWheel !== undefined)
-                                    errorString = getErrorString(errorString, midiRangeError(modWheel), midiErrorMsg("modWheel", modWheel));
-                                if(volume !== undefined)
-                                    errorString = getErrorString(errorString, midiRangeError(volume), midiErrorMsg("volume", volume));
-                                if(pan !== undefined)
-                                    errorString = getErrorString(errorString, midiRangeError(pan), midiErrorMsg("pan", pan));
-                                if(reverberation !== undefined)
-                                    errorString = getErrorString(errorString, midiRangeError(reverberation), midiErrorMsg("reverberation", reverberation));
-                                if(pitchWheelSensitivity !== undefined)
-                                    errorString = getErrorString(errorString, midiRangeError(pitchWheelSensitivity), midiErrorMsg("pitchWheelSensitivity", pitchWheelSensitivity));
-                                if(velocityPitchSensitivity !== undefined)
-                                    errorString = getErrorString(errorString, midiRangeError(velocityPitchSensitivity), midiErrorMsg("velocityPitchSensitivity", velocityPitchSensitivity));
-
-                                if(errorString.length > 0)
-                                {
-                                    errorString = `Error in synthSettingsDefs.js channelSettingsArray:\n` +
-                                        `section index: ${sectionIndex} \n\n` + errorString;
-                                    throwError(errorString);
-                                }
-                            }
-
-                            let channelSettingsPerSectionArray = getChannelSettingsPerSectionArray(channelSettingsArray),
-                                nChannels = channelSettingsPerSectionArray.length,
-                                nSections = channelSettingsPerSectionArray[0].length;
-
-                            for(let channel = 0; channel < nChannels; channel++)
-                            {
-                                let channelSettingsPerSection = channelSettingsPerSectionArray[channel];
-
-                                for(let sectionIndex = 0; sectionIndex < nSections; sectionIndex++)
-                                {
-                                    let channelSettings = channelSettingsPerSection[sectionIndex];
-
-                                    checkValues(channelSettings, sectionIndex);
-                                }
-                            }
-                        }
-
-                        // See the comment on the surrounding function above.
-                        function getSettingsChangePerSect(names, keyboardSplitIndexes, triggerKeys, channelSettingsArray)
-                        {
-                            // returns undefined if the attribute does not need to be set,
-                            // otherwise returns valuesArray[settingsIndex].
-                            function getNewAttributeValue(attributeValuesArray, sectionIndex)
-                            {
-                                let value = attributeValuesArray[sectionIndex];
-                                if(sectionIndex > 0)
-                                {
-                                    let prevValue = attributeValuesArray[sectionIndex - 1];
-
-                                    if(value === prevValue)
+                                    if(tuningIndex !== undefined)
                                     {
-                                        value = undefined;
-                                    }
-                                }
-                                return value;
-                            }
-
-                            function getChangedChannelSettings(channelSettingsArray, sectionIndex)
-                            {
-                                // If sectionIndex === 0, returns a full set of settings,
-                                // otherwise, the returned object contains only the attributes and values
-                                // that are different in the previous section.
-                                function getChangedChanSettings(inChannelSettingsArrays, sectionIndex)
-                                {
-                                    function setNewAttributeValue(newChannelSettings, inChannelSettingsArray, attrName, sectionIndex)
-                                    {
-                                        let attributeValuesArray = inChannelSettingsArray[attrName],
-                                            value = getNewAttributeValue(attributeValuesArray, sectionIndex);
-
-                                        // override value in the following two cases
-                                        if(attrName === "presetIndex" && newChannelSettings["bankIndex"] !== undefined)
-                                        {   // always define presetIndex value, if bankIndex is defined 
-                                            value = attributeValuesArray[sectionIndex];
-                                        }
-                                        else if(attrName === "tuningIndex" && newChannelSettings["tuningGroupIndex"] !== undefined)
-                                        {   // always define tuningIndex value, if tuningGroupIndex is defined
-                                            value = attributeValuesArray[sectionIndex];
-                                        }
-
-                                        if(value !== undefined)
+                                        errorString = getErrorString(errorString, tuningIndex < 0, `tuningIndex must be >= 0`);
+                                        if(tuningGroupIndex !== undefined)
                                         {
-                                            newChannelSettings[attrName] = value;
+                                            errorString = getErrorString(errorString, tuningDefs !== undefined && tuningIndex >= tuningDefs[tuningGroupIndex].tunings.length, `tuningIndex out of range (0..${tuningDefs[tuningGroupIndex].tunings.length - 1}): (tuningIndex=${tuningIndex})`);
                                         }
                                     }
+                                    if(keyboardOrnamentsArrayIndex !== undefined)
+                                    {
+                                        errorString = getErrorString(errorString, keyboardOrnamentsArrayIndex < 0, `keyboardOrnamentsArrayIndex must be >= 0`);
+                                        errorString = getErrorString(errorString, ornamentDefs === undefined && keyboardOrnamentsArrayIndex > 0, `keyboardOrnamentsArrayIndex must be 0 if ornamentDefs are not defined.`);
+                                        errorString = getErrorString(errorString, ornamentDefs !== undefined && keyboardOrnamentsArrayIndex >= ornamentDefs.length + 1, `keyboardOrnamentsArrayIndex out of range (0..${ornamentDefs.length}): (keyboardOrnamentsArrayIndex=${keyboardOrnamentsArrayIndex})`);
+                                    }
+                                    if(semitonesOffset !== undefined)
+                                        errorString = getErrorString(errorString, semitonesOffset < -64 || semitonesOffset > 63, `semitonesOffset out of range [-64..+63] (semitonesOffset=${semitonesOffset})`);
+                                    if(centsOffset !== undefined)
+                                        errorString = getErrorString(errorString, centsOffset < -50 || centsOffset > 50, `centsOffset out of range [-50..+50] (centsOffset=${centsOffset})`);
+                                    if(pitchWheel !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(pitchWheel), midiErrorMsg("pitchWheel", pitchWheel));
+                                    if(modWheel !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(modWheel), midiErrorMsg("modWheel", modWheel));
+                                    if(volume !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(volume), midiErrorMsg("volume", volume));
+                                    if(pan !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(pan), midiErrorMsg("pan", pan));
+                                    if(reverberation !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(reverberation), midiErrorMsg("reverberation", reverberation));
+                                    if(pitchWheelSensitivity !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(pitchWheelSensitivity), midiErrorMsg("pitchWheelSensitivity", pitchWheelSensitivity));
+                                    if(velocityPitchSensitivity !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(velocityPitchSensitivity), midiErrorMsg("velocityPitchSensitivity", velocityPitchSensitivity));
 
-                                    let newChannelSettings = {};
-
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "bankIndex", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "presetIndex", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "mixtureIndex", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningGroupIndex", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningIndex", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "semitonesOffset", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "centsOffset", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheel", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "modWheel", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "volume", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pan", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "reverberation", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheelSensitivity", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "velocityPitchSensitivity", sectionIndex),
-                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "keyboardOrnamentsArrayIndex", sectionIndex);
-
-                                    return newChannelSettings;
+                                    if(errorString.length > 0)
+                                    {
+                                        errorString = `Error in synthSettingsDefs.js channelSettingsArray:\n` +
+                                            `section index: ${sectionIndex} \n\n` + errorString;
+                                        throwError(errorString);
+                                    }
                                 }
 
-                                let newChannelSettingsArray = [],
-                                    nChannels = channelSettingsArray.length;
+                                let channelSettingsPerSectionArray = getChannelSettingsPerSectionArray(channelSettingsArray),
+                                    nChannels = channelSettingsPerSectionArray.length,
+                                    nSections = channelSettingsPerSectionArray[0].length;
 
                                 for(let channel = 0; channel < nChannels; channel++)
                                 {
-                                    let inChannelSettingsArrays = channelSettingsArray[channel],
-                                        newChannelSettings = getChangedChanSettings(inChannelSettingsArrays, sectionIndex);
+                                    let channelSettingsPerSection = channelSettingsPerSectionArray[channel];
 
-                                    newChannelSettingsArray.push(newChannelSettings);
+                                    for(let sectionIndex = 0; sectionIndex < nSections; sectionIndex++)
+                                    {
+                                        let channelSettings = channelSettingsPerSection[sectionIndex];
+
+                                        checkValues(channelSettings, sectionIndex);
+                                    }
                                 }
-
-                                return newChannelSettingsArray;
                             }
 
-                            let sectionSettingsArray = [];
-
-                            let nSections = channelSettingsArray[0].bankIndex.length;
-
-                            for(let sectionIndex = 0; sectionIndex < nSections; sectionIndex++)
+                            // See the comment on the surrounding function above.
+                            function getSettingsChangePerSect(names, keyboardSplitIndexes, triggerKeys, channelSettingsArray)
                             {
-                                let sectionSettings = {},
-                                    name = names[sectionIndex],
-                                    keyboardSplitIndex = getNewAttributeValue(keyboardSplitIndexes, sectionIndex),
-                                    triggerKey = getNewAttributeValue(triggerKeys, sectionIndex),
-                                    channelSettings = getChangedChannelSettings(channelSettingsArray, sectionIndex);
-
-                                sectionSettings.name = name;
-
-                                if(keyboardSplitIndex !== undefined)
+                                // returns undefined if the attribute does not need to be set,
+                                // otherwise returns valuesArray[settingsIndex].
+                                function getNewAttributeValue(attributeValuesArray, sectionIndex)
                                 {
-                                    sectionSettings.keyboardSplitIndex = keyboardSplitIndex;
+                                    let value = attributeValuesArray[sectionIndex];
+                                    if(sectionIndex > 0)
+                                    {
+                                        let prevValue = attributeValuesArray[sectionIndex - 1];
+
+                                        if(value === prevValue)
+                                        {
+                                            value = undefined;
+                                        }
+                                    }
+                                    return value;
                                 }
 
-                                if(triggerKey !== undefined)
+                                function getChangedChannelSettings(channelSettingsArray, sectionIndex)
                                 {
-                                    sectionSettings.triggerKey = triggerKey;
+                                    // If sectionIndex === 0, returns a full set of settings,
+                                    // otherwise, the returned object contains only the attributes and values
+                                    // that are different in the previous section.
+                                    function getChangedChanSettings(inChannelSettingsArrays, sectionIndex)
+                                    {
+                                        function setNewAttributeValue(newChannelSettings, inChannelSettingsArray, attrName, sectionIndex)
+                                        {
+                                            let attributeValuesArray = inChannelSettingsArray[attrName],
+                                                value = getNewAttributeValue(attributeValuesArray, sectionIndex);
+
+                                            // override value in the following two cases
+                                            if(attrName === "presetIndex" && newChannelSettings["bankIndex"] !== undefined)
+                                            {   // always define presetIndex value, if bankIndex is defined 
+                                                value = attributeValuesArray[sectionIndex];
+                                            }
+                                            else if(attrName === "tuningIndex" && newChannelSettings["tuningGroupIndex"] !== undefined)
+                                            {   // always define tuningIndex value, if tuningGroupIndex is defined
+                                                value = attributeValuesArray[sectionIndex];
+                                            }
+
+                                            if(value !== undefined)
+                                            {
+                                                newChannelSettings[attrName] = value;
+                                            }
+                                        }
+
+                                        let newChannelSettings = {};
+
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "bankIndex", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "presetIndex", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "mixtureIndex", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningGroupIndex", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningIndex", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "semitonesOffset", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "centsOffset", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheel", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "modWheel", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "volume", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pan", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "reverberation", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheelSensitivity", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "velocityPitchSensitivity", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "keyboardOrnamentsArrayIndex", sectionIndex);
+
+                                        return newChannelSettings;
+                                    }
+
+                                    let newChannelSettingsArray = [],
+                                        nChannels = channelSettingsArray.length;
+
+                                    for(let channel = 0; channel < nChannels; channel++)
+                                    {
+                                        let inChannelSettingsArrays = channelSettingsArray[channel],
+                                            newChannelSettings = getChangedChanSettings(inChannelSettingsArrays, sectionIndex);
+
+                                        newChannelSettingsArray.push(newChannelSettings);
+                                    }
+
+                                    return newChannelSettingsArray;
                                 }
 
-                                sectionSettings.channelSettings = channelSettings;
+                                let sectionSettingsArray = [];
 
-                                sectionSettingsArray.push(sectionSettings);
+                                let nSections = channelSettingsArray[0].bankIndex.length;
+
+                                for(let sectionIndex = 0; sectionIndex < nSections; sectionIndex++)
+                                {
+                                    let sectionSettings = {},
+                                        name = names[sectionIndex],
+                                        keyboardSplitIndex = getNewAttributeValue(keyboardSplitIndexes, sectionIndex),
+                                        triggerKey = getNewAttributeValue(triggerKeys, sectionIndex),
+                                        channelSettings = getChangedChannelSettings(channelSettingsArray, sectionIndex);
+
+                                    sectionSettings.name = name;
+
+                                    if(keyboardSplitIndex !== undefined)
+                                    {
+                                        sectionSettings.keyboardSplitIndex = keyboardSplitIndex;
+                                    }
+
+                                    if(triggerKey !== undefined)
+                                    {
+                                        sectionSettings.triggerKey = triggerKey;
+                                    }
+
+                                    sectionSettings.channelSettings = channelSettings;
+
+                                    sectionSettingsArray.push(sectionSettings);
+                                }
+
+                                return sectionSettingsArray;
                             }
 
-                            return sectionSettingsArray;
+                            let settingsChangePerSection = [];
+
+                            if(synthSettingsDefs !== undefined)
+                            {
+                                let names = synthSettingsDefs.names,
+                                    keyboardSplitIndexes = synthSettingsDefs.keyboardSplitIndexes,
+                                    triggerKeys = synthSettingsDefs.triggerKeys,
+                                    channelSettingsArray = synthSettingsDefs.channelSettingsArray;
+
+                                checkTopLevelAttributes(names, keyboardSplitIndexes, triggerKeys);
+                                checkChannelSettingsArray(channelSettingsArray, names.length);
+                                checkChannelSettingsValues(channelSettingsArray);
+
+                                settingsChangePerSection = getSettingsChangePerSect(names, keyboardSplitIndexes, triggerKeys, channelSettingsArray);
+                            }
+
+                            return settingsChangePerSection;
                         }
 
-                        let settingsChangePerSection = [];
+                        let settingsSelect = getElem("settingsSelect"),
+                            settingsChangePerSection = getSettingsChangePerSection(ResSynth.synthSettingsDefs);
 
-                        if(synthSettingsDefs !== undefined)
-                        {
-                            let names = synthSettingsDefs.names,
-                                keyboardSplitIndexes = synthSettingsDefs.keyboardSplitIndexes,
-                                triggerKeys = synthSettingsDefs.triggerKeys,
-                                channelSettingsArray = synthSettingsDefs.channelSettingsArray;
+                        console.assert(settingsChangePerSection.length < 127);
 
-                            checkTopLevelAttributes(names, keyboardSplitIndexes, triggerKeys);
-                            checkChannelSettingsArray(channelSettingsArray, names.length);
-                            checkChannelSettingsValues(channelSettingsArray);
-
-                            settingsChangePerSection = getSettingsChangePerSect(names, keyboardSplitIndexes, triggerKeys, channelSettingsArray);
-                        }
-
-                        return settingsChangePerSection;
-                    }
-
-                    let settingsSelect = getElem("settingsSelect"),
-                        settingsChangePerSection = getSettingsChangePerSection(ResSynth.synthSettingsDefs);
-
-                    console.assert(settingsChangePerSection.length < 127);
-
-                    for(let sectionIndex = 0; sectionIndex < settingsChangePerSection.length; sectionIndex++)
-                    {
-                        let option = new Option();
-
-                        option.innerHTML = settingsChangePerSection[sectionIndex].name;
-                        settingsSelect.options.add(option);
-                    }
-
-                    settingsSelect.settingsChangePerSection = settingsChangePerSection;
-                    settingsSelect.selectedIndex = 0;
-                    settingsSelect.previousIndex = Number.MAX_VALUE;
-                }
-                function setKeyboardSplitSelect()
-                {
-                    let keyboardSplitSelect = getElem("keyboardSplitSelect");
-
-                    // this option is always added by default to index 0
-                    let option = new Option();
-                    option.innerHTML = "no split (messages will be sent on the current channel)";
-                    keyboardSplitSelect.options.add(option);
-
-                    if(ResSynth.keyboardSplitDefs !== undefined)
-                    {
-                        let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
-
-                        for(let i = 0; i < keyboardSplitDefs.length; i++)
-                        {
-                            let keyboardSplitDef = keyboardSplitDefs[i],
-                                option = new Option();
-
-                            option.innerHTML = keyboardSplitDef;
-                            keyboardSplitSelect.options.add(option);
-                        }
-                    }
-
-                    keyboardSplitSelect.selectedIndex = 0;
-                }
-
-                function setRecordingSelect()
-                {
-                    let recordingSelect = getElem("recordingSelect"),
-                        playRecordingButton = getElem("playRecordingButton");
-
-                    // recordings is a global array (has been retrieved from recordings.js)
-                    if(presetRecordings.length > 0)
-                    {
-                        for(let i = 0; i < presetRecordings.length; i++)
+                        for(let sectionIndex = 0; sectionIndex < settingsChangePerSection.length; sectionIndex++)
                         {
                             let option = new Option();
-                            option.innerHTML = presetRecordings[i].name;
-                            recordingSelect.options.add(option);
+
+                            option.innerHTML = settingsChangePerSection[sectionIndex].name;
+                            settingsSelect.options.add(option);
                         }
-                        recordingSelect.disabled = false;
-                        playRecordingButton.disabled = false;
+
+                        settingsSelect.settingsChangePerSection = settingsChangePerSection;
+                        settingsSelect.selectedIndex = 0;
+                        settingsSelect.previousIndex = Number.MAX_VALUE;
                     }
-                    else
+                    function setRecordingSelect()
                     {
-                        let option = new Option();
-                        option.innerHTML = "no recordings have been defined (see docs)";
-                        recordingSelect.options.add(option);
-                        recordingSelect.disabled = true;
-                        playRecordingButton.disabled = true;
+                        let recordingSelect = getElem("recordingSelect"),
+                            playRecordingButton = getElem("playRecordingButton");
+
+                        // recordings is a global array (has been retrieved from recordings.js)
+                        if(presetRecordings.length > 0)
+                        {
+                            for(let i = 0; i < presetRecordings.length; i++)
+                            {
+                                let option = new Option();
+                                option.innerHTML = presetRecordings[i].name;
+                                recordingSelect.options.add(option);
+                            }
+                            recordingSelect.disabled = false;
+                            playRecordingButton.disabled = false;
+                        }
+                        else
+                        {
+                            let option = new Option();
+                            option.innerHTML = "no recordings have been defined (see docs)";
+                            recordingSelect.options.add(option);
+                            recordingSelect.disabled = true;
+                            playRecordingButton.disabled = true;
+                        }
+
+                        recordingSelect.selectedIndex = 0;
                     }
 
-                    recordingSelect.selectedIndex = 0;
+                    setChannelPressureTable();
+                    setKeyboardSplitSelect();
+                    setSettingsSelect();
+                    setRecordingSelect();
                 }
 
                 function displayAllPage2Divs()
@@ -2757,9 +2768,8 @@ ResSynth.host = (function(document)
 
                 setCommandsAndControlsDivs();
                 setOrnamentsDiv();
-                setSettingsSelect();
-                setKeyboardSplitSelect();
-                setRecordingSelect();
+
+                setHostSettingsDiv();
 
                 onSettingsSelectChanged();
 
