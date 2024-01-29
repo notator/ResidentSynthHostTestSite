@@ -147,13 +147,17 @@
             <div style="padding:0 0 0 3px">
                 <span class="boldSubtitle">channel pressure:</span>
                 <select id="channelPressureSelect" class="channelPressureSelect" onchange="ResSynth.host.onChannelPressureSelectChanged()">
-                    <option value="pitchWheel">disabled</option>
-                    <option value="pitchWheel">pitchWheel</option>
-                    <option value="modWheel">modWheel</option>
-                    <option value="volume">volume</option>
+                    <option value="disabled">disabled</option>
+                    <option value="pitchWheelUp">pitchWheelUp</option>
+                    <option value="pitchWheelDown">pitchWheelDown</option>
+                    <option value="modWheelUp">modWheelUp</option>
+                    <option value="modWheelDown">modWheelDown</option>
+                    <option value="volumeUp">volumeUp</option>
+                    <option value="volumeDown">volumeDown</option>
                     <option value="panLeft">panLeft</option>
                     <option value="panRight">panRight</option>
-                    <option value="reverberation">reverberation</option>
+                    <option value="reverberationUp">reverberationUp</option>
+                    <option value="reverberationDown">reverberationDown</option>
                 </select>
                 <div id="channelPressureSensitivityLongControlDiv">
                     <br /><select id="dummy" class="channelPressureSelect"></select>

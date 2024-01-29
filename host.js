@@ -166,8 +166,16 @@ ResSynth.host = (function(document)
                     onSettingsSelectChanged();
                 }
 
-                let data = e.data,
+                function midiValue(arg)
+                {
+                    arg = (arg < 0) ? 0 : arg;
+                    arg = (arg > 127) ? 127 : arg;
+                    return arg;
+                }
+
+                let HOST_CMD_CHANNEL_PRESSURE = 0xD0,
                     CMD = ResSynth.constants.COMMAND,
+                    data = e.data,
                     command = data[0] & 0xF0,
                     msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]);
 
@@ -197,47 +205,94 @@ ResSynth.host = (function(document)
                         updateGUI_CommandsTable(command, data[2]);
                         //console.log("pitchWheel: value=" + data[2]);
                         break;
-                    case 0xD0: // Host ChannelPressure (Residentsynth does not implement ChannelPressure)
-                    {
-                        switch(globalChannelPressureType)
+                    case HOST_CMD_CHANNEL_PRESSURE: // Host ChannelPressure (Residentsynth does not implement ChannelPressure)
                         {
-                            case "disabled":
+                            let CTL = ResSynth.constants.CONTROL,
+                                hostChannelSettings = getElem("channelSelect").options[currentChannel].hostSettings,
+                                channelPressure = data[1];
+                            // The residentSynth does not process CHANNEL_PRESSURE messages.
+                            // They are ignored or converted here.
+                            switch(globalChannelPressureType)
                             {
-                                break;
+                                case "disabled":
+                                    {
+                                        return;
+                                    }
+                                case "pitchWheelUp":
+                                    {
+                                        msg[0] = CMD.PITCHWHEEL + currentChannel;
+                                        msg[1] = midiValue(hostChannelSettings.pitchWheel + channelPressure);
+                                        msg[2] = msg[1];
+                                        break;
+                                    }
+                                case "pitchWheelDown":
+                                    {
+                                        msg[0] = CMD.PITCHWHEEL + currentChannel;
+                                        msg[1] = midiValue(hostChannelSettings.pitchWheel - channelPressure);
+                                        msg[2] = msg[1];
+                                        break;
+                                    }
+                                case "modWheelUp":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.MODWHEEL;
+                                        msg[2] = midiValue(hostChannelSettings.modWheel + channelPressure);
+                                        break;
+                                    }
+                                case "modWheelDown":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.MODWHEEL;
+                                        msg[2] = midiValue(hostChannelSettings.modWheel - channelPressure);
+                                        break;
+                                    }
+                                case "volumeUp":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.VOLUME;
+                                        msg[2] = midiValue(hostChannelSettings.volume + channelPressure);
+                                        break;
+                                    }
+                                case "volumeDown":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.VOLUME;
+                                        msg[2] = midiValue(hostChannelSettings.volume - channelPressure);
+                                        break;
+                                    }
+                                case "panLeft":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.PAN;
+                                        msg[2] = midiValue(hostChannelSettings.pan - channelPressure);
+                                        break;
+                                    }
+                                case "panRight":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.PAN;
+                                        msg[2] = midiValue(hostChannelSettings.pan + channelPressure);
+                                        break;
+                                    }
+                                case "reverberationUp":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.REVERBERATION;
+                                        msg[2] = midiValue(hostChannelSettings.reverberation + channelPressure);
+                                        break;
+                                    }
+                                case "reverberationDown":
+                                    {
+                                        msg[0] = CMD.CONTROL_CHANGE + currentChannel;
+                                        msg[1] = CTL.REVERBERATION;
+                                        msg[2] = midiValue(hostChannelSettings.reverberation - channelPressure);
+                                        break;
+                                    }
                             }
-                            case "pitchWheel":
-                            {
-                                break;
-                            }
-                            case "modWheel":
-                            {
-                                break;
-                            }
-                            case "volume":
-                            { 
-                                break;
-                            }
-                            case "panLeft":
-                            {
-                                break;
-                            }
-                            case "panRight":
-                            {
-                                break;
-                            }
-                            case "reverberation":
-                            {
-                                break;
-                            }
+                            break;
                         }
-                    }
                     default:
-                        // Neither the residentSynth nor the residentSynthHost process
-                        // SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages
-                        // so the input device (the keyboard or Assistant Performer)
-                        // should not send them (at performance time)
-                        // These commands will be sent to the ResidentSynth, but flagged
-                        // as errors there.
+                        throw "The residentSynth does not process SYSEX, AFTERTOUCH or CHANNEL_PRESSURE messages"
                         break;
                 }
 
@@ -469,7 +524,7 @@ ResSynth.host = (function(document)
         {
             let channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
-                hostChannelSettings = channelSelect.options[channel].hostSettings,                
+                hostChannelSettings = channelSelect.options[channel].hostSettings,
                 tuningGroupSelect = getElem("tuningGroupSelect"),
                 tuningSelect = getElem("tuningSelect"),
                 selectedTuningGroupOption = tuningGroupSelect[tuningGroupSelect.selectedIndex],
@@ -691,7 +746,7 @@ ResSynth.host = (function(document)
                                 newValue = channelSettings[attributeName];
 
                             updateAttribute(attributeName, newValue);
-                        }                      
+                        }
                     }
 
                     channelSelect.selectedIndex = savedChannel;
@@ -718,7 +773,7 @@ ResSynth.host = (function(document)
             setGlobalSettingsInHost(settingsSelect, settingsSelect.settingsChangePerSection);
             setChannelSettingsInHostAndSynth(settingsSelect, settingsSelect.settingsChangePerSection);
 
-            settingsSelect.previousIndex = settingsSelect.selectedIndex;           
+            settingsSelect.previousIndex = settingsSelect.selectedIndex;
         },
 
         // exported
@@ -1235,7 +1290,7 @@ ResSynth.host = (function(document)
 
             b.playRecordingButton.style.display = "block";
             b.playRecordingButton.value = "play selected recording";
-            b.playRecordingButton.style.background = "none";            
+            b.playRecordingButton.style.background = "none";
             b.startRecordingButton.style.display = "block";
             b.startRecordingButton.disabled = false;
         },
@@ -1599,17 +1654,17 @@ ResSynth.host = (function(document)
                                 presets = bank.presets,
                                 presetOptionsArray = [];
 
-                                for(let presetIndex = 0; presetIndex < presets.length; presetIndex++)
-                                {
-                                    let preset = presets[presetIndex],
-                                        presetOption = new Option("presetOption");
+                            for(let presetIndex = 0; presetIndex < presets.length; presetIndex++)
+                            {
+                                let preset = presets[presetIndex],
+                                    presetOption = new Option("presetOption");
 
-                                    presetOption.innerHTML = preset.name;
-                                    presetOption.preset = preset;
-                                    presetOption.preset.mixtureIndex = 0;
+                                presetOption.innerHTML = preset.name;
+                                presetOption.preset = preset;
+                                presetOption.preset.mixtureIndex = 0;
 
-                                    presetOptionsArray.push(presetOption);
-                                }
+                                presetOptionsArray.push(presetOption);
+                            }
 
 
                             option.innerHTML = bank.name;
@@ -1698,14 +1753,14 @@ ResSynth.host = (function(document)
                             {
                                 let tuningGroupSelect = getElem("tuningGroupSelect");
 
-                                tuningGroupOption.innerHTML = "no tuning groups defined";                                
-                                tuningGroupSelect.disabled = true;                                
+                                tuningGroupOption.innerHTML = "no tuning groups defined";
+                                tuningGroupSelect.disabled = true;
                             }
                             else
                             {
                                 tuningGroupOption.innerHTML = tuningGroup.name;
                             }
-                            
+
                             tuningGroupOption.tuningGroup = tuningGroup;
                             tuningGroupOption.tuningOptionsArray = tuningOptionsArray; // used to set the tuningSelect
 
@@ -2179,7 +2234,7 @@ ResSynth.host = (function(document)
 
                         option.innerHTML = "none";
                         ornamentsSelect.options.add(option);
- 
+
                         if(ornamentPerKeysStrings !== undefined)
                         {
                             for(let i = 0; i < ornamentPerKeysStrings.length; i++)
@@ -2519,20 +2574,20 @@ ResSynth.host = (function(document)
                                     let newChannelSettings = {};
 
                                     setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "bankIndex", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "presetIndex", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "mixtureIndex", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningGroupIndex", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningIndex", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "semitonesOffset", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "centsOffset", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheel", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "modWheel", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "volume", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pan", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "reverberation", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheelSensitivity", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "velocityPitchSensitivity", sectionIndex),
-                                    setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "keyboardOrnamentsArrayIndex", sectionIndex);          
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "presetIndex", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "mixtureIndex", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningGroupIndex", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "tuningIndex", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "semitonesOffset", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "centsOffset", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheel", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "modWheel", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "volume", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pan", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "reverberation", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheelSensitivity", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "velocityPitchSensitivity", sectionIndex),
+                                        setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "keyboardOrnamentsArrayIndex", sectionIndex);
 
                                     return newChannelSettings;
                                 }
@@ -2648,7 +2703,7 @@ ResSynth.host = (function(document)
                 function setRecordingSelect()
                 {
                     let recordingSelect = getElem("recordingSelect"),
-                        playRecordingButton = getElem("playRecordingButton"); 
+                        playRecordingButton = getElem("playRecordingButton");
 
                     // recordings is a global array (has been retrieved from recordings.js)
                     if(presetRecordings.length > 0)
@@ -2694,7 +2749,7 @@ ResSynth.host = (function(document)
 
                 setBankSelect(bankSelect);
                 setPresetSelect(presetSelect, bankSelect);
-                setMixtureSelect(mixtureSelect);                
+                setMixtureSelect(mixtureSelect);
 
                 setTuningGroupSelect(tuningGroupSelect);
                 setTuningSelect();
@@ -2710,7 +2765,7 @@ ResSynth.host = (function(document)
 
                 displayAllPage2Divs();
             }
-            
+
             getElem("continueAtStartButtonDiv").style.display = "none";
 
             setInputDeviceEventListener(getElem("inputDeviceSelect"));
