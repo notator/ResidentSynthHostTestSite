@@ -2235,7 +2235,7 @@ ResSynth.host = (function(document)
 
                 function setHostSettingsDiv()
                 {
-                    function setChannelPressureTable()
+                    function setChannelPressureDiv()
                     {
                         // see onControlInputChanged() in setLongControlRow(...) below
                         function onChannelPressureSensitivityLongControlChanged(event)
@@ -2251,13 +2251,14 @@ ResSynth.host = (function(document)
                         let tr = getElem("channelPressureTR"),
                             channelPressureSensitivityLongControl = getBasicLongInputControl(tr, "sensitivity", 64, "");
 
-                        channelPressureSensitivityLongControl.rangeInputElem.style.width = "250px";
+                        channelPressureSensitivityLongControl.rangeInputElem.style.width = "256px";
                         tr.removeChild(tr.lastChild);
+                        tr.lastChild.style.paddingRight = "0";
 
                         channelPressureSensitivityLongControl.rangeInputElem.onchange = onChannelPressureSensitivityLongControlChanged;
                         channelPressureSensitivityLongControl.numberInputElem.onchange = onChannelPressureSensitivityLongControlChanged;
                     }
-                    function setKeyboardSplitSelect()
+                    function setKeyboardSplitDiv()
                     {
                         let keyboardSplitSelect = getElem("keyboardSplitSelect");
 
@@ -2282,7 +2283,7 @@ ResSynth.host = (function(document)
 
                         keyboardSplitSelect.selectedIndex = 0;
                     }
-                    function setSettingsSelect()
+                    function setPresetSettingsDiv()
                     {
                         // Converts the information in synthSettingsDefs.js into the (private) settingsChangePerSection.
                         // Returns an array of sectionSettings, each of which contains an array of channelSettings (one per used channel).
@@ -2705,7 +2706,7 @@ ResSynth.host = (function(document)
                         settingsSelect.selectedIndex = 0;
                         settingsSelect.previousIndex = Number.MAX_VALUE;
                     }
-                    function setRecordingSelect()
+                    function setRecordingDiv()
                     {
                         let recordingSelect = getElem("recordingSelect"),
                             playRecordingButton = getElem("playRecordingButton");
@@ -2734,10 +2735,10 @@ ResSynth.host = (function(document)
                         recordingSelect.selectedIndex = 0;
                     }
 
-                    setChannelPressureTable();
-                    setKeyboardSplitSelect();
-                    setSettingsSelect();
-                    setRecordingSelect();
+                    setPresetSettingsDiv();
+                    setChannelPressureDiv();                    
+                    setKeyboardSplitDiv();
+                    setRecordingDiv();
                 }
 
                 function displayAllPage2Divs()

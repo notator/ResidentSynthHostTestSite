@@ -8,6 +8,25 @@ body
     padding: 0;
 }
 
+hr
+{
+	border-style: none;
+	height: 2px;
+	background: #AAA;
+}
+
+hr.host
+{
+	margin: 8px 0 8px 0;
+}
+
+table
+{
+	border-collapse:collapse;
+	padding:0;
+	margin:0;
+}
+
 div.background
 {
     width: 692px; 
@@ -34,13 +53,6 @@ div.hostSettingsDiv
 	background: #EEE;
 	border: 2px solid #333;
 
-}
-
-hr
-{
-    border-style: none;
-    height: 2px;
-    background: #AAA;
 }
 
 .boldTitle
@@ -127,10 +139,38 @@ hr
 	margin: 0 0 auto auto;
 }
 
-.keyboardSplitSelect, .settingsSelect
+.settingsSelect
 {
 	font-size: 11px;
-	width: 385px;
+	width: 310px;
+	height: 18px;
+	padding: 0;
+	margin-left: 0;
+	margin-right: 10px;
+}
+
+.triggerKeyNumber
+{
+	font-size: 11px;
+	width: 35px;
+	padding: 0;
+	margin-left: 0;
+	margin-right: 23px;
+}
+
+.exportSettingsButton
+{
+	font-size: 11px;
+	width:120px;
+	height: 18px;
+	padding:0;
+	margin:0;
+}
+
+.keyboardSplitSelect
+{
+	font-size: 11px;
+	width: 300px;
 	height: 18px;
 	margin-left: 0;
 	margin-right: 0;
@@ -139,7 +179,7 @@ hr
 .channelPressureSelect
 {
 	font-size: 11px;
-	width: 120px;
+	width: 118px;
 	height: 18px;
 	margin-left: 0;
 	margin-right: 0;
@@ -153,12 +193,6 @@ hr
 	height: 18px;
 	margin-left: 0;
 	margin-right: 0;
-}
-
-.exportSettingsButton
-{
-	font-size: 11px;
-	height: 18px;
 }
 
 .triggerActionSelect
@@ -182,14 +216,6 @@ hr
 {
 	font-size: 11px;
 	width: 34px;
-	margin-left: 0;
-	margin-right: 0;
-}
-
-.triggerKeyNumber
-{
-	font-size: 11px;
-	width: 35px;
 	margin-left: 0;
 	margin-right: 0;
 }

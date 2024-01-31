@@ -1,20 +1,21 @@
 ﻿<!DOCTYPE HTML>
 <html lang="en"
-	  xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>ResidentSynthHost</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="data:;base64,iVBORwOKGO=" /> <!-- workaround to prevent "favicon not found" exceptions in Chrome.-->
+    <link rel="icon" href="data:;base64,iVBORwOKGO=" />
+    <!-- workaround to prevent "favicon not found" exceptions in Chrome.-->
     <link href="sliderStyleSheet.css" media="all" rel="stylesheet" type="text/css" />
     <link href="hostStyleSheet.css" media="all" rel="stylesheet" type="text/css" />
     <!-- Javascript files are included at the end of the body element -->
 </head>
 <body>
     <div class="background">
-        <div id="topDiv" style="text-align:center">
+        <div id="topDiv" style="text-align: center">
             <span class="boldTitle">ResidentSynth Host</span><br />
             <span class="subtitle">live performance and recording of the GUI-less ResidentSynth</span>
-            <div style="padding-top:3px">
+            <div style="padding-top: 3px">
                 <span id="inputDeviceTitle" class="boldSubtitle">Input Device:</span>
                 <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
 
@@ -26,16 +27,16 @@
         </div>
 
         <div id="startupDivs">
-            <div id="loadingMsgDiv" style="text-align:center; margin-top: 15px;">
+            <div id="loadingMsgDiv" style="text-align: center; margin-top: 15px;">
                 <span>configuring synthesizer...</span>
             </div>
-            <div id="continueAtStartButtonDiv" style="text-align:center; display:none;">
+            <div id="continueAtStartButtonDiv" style="text-align: center; display: none;">
                 <input class="largeButton" type="button" value="continue" onclick="ResSynth.host.onContinueAtStartClicked()" />
             </div>
         </div>
-        <div id="synthSettingsDiv" class="synthSettingsDiv" style="display:none;">
-            <div style="text-align:center">
-                <div class="subtitle" style="margin-bottom:3px">ResidentSynth Controls</div>
+        <div id="synthSettingsDiv" class="synthSettingsDiv" style="display: none;">
+            <div style="text-align: center">
+                <div class="subtitle" style="margin-bottom: 3px">ResidentSynth Controls</div>
                 <span class="boldSubtitle">channel</span>
                 <select id="channelSelect" class="channelSelect" onchange="ResSynth.host.onChannelSelectChanged()">
                     <option value="0">0</option>
@@ -104,8 +105,7 @@
                         <td>
                             <select id="tuningGroupSelect" class="tuningGroupSelect" onchange="ResSynth.host.onTuningGroupSelectChanged()" />
                         </td>
-                        <td id="tuningSelectCell">
-                        </td>
+                        <td id="tuningSelectCell"></td>
                         <td>
                             <input id="semitonesOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
                         </td>
@@ -138,12 +138,30 @@
                 </table>
             </div>
         </div>
-        <div id="hostSettingsDiv" class="hostSettingsDiv" style="display:none">
-            <div class="subtitle" style="text-align:center">Host Controls</div>
-            <div>
-                <table style="border-collapse:collapse">
-                    <tr id="channelPressureTR" style="padding:0">
-                        <td style="padding:0 10px 0 3px">
+        <div id="hostSettingsDiv" class="hostSettingsDiv" style="display: none">
+            <div class="subtitle" style="text-align: center; margin-bottom:4px">Host Controls</div>
+            <div id="presetSettingsDiv">
+                <table>
+                    <tr>
+                        <td>
+                            <span id="settingsTitle" class="boldSubtitle">preset settings:</span>
+                            <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
+                        </td>
+                        <td>
+                            <span id="triggerKeyTitle" class="boldSubtitle">trigger key:</span>
+                            <input id="triggerKeyInput" type="number" class="triggerKeyNumber" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
+                        </td>
+                        <td>
+                            <input id="exportSettingsButton" type="button" class="exportSettingsButton" value="export current settings" onclick="ResSynth.host.onExportSettingsButtonClicked()" />
+                        </td>
+                    </tr>
+                </table>
+                <hr class="host"/>
+            </div>
+            <div id="channelPressureDiv">
+                <table>
+                    <tr id="channelPressureTR">
+                        <td style="padding: 0 10px 0 0">
                             <span class="boldSubtitle">channel pressure</span><span> (CMD 208)</span><span class="boldSubtitle">:</span>
                             <select id="channelPressureSelect" class="channelPressureSelect" onchange="ResSynth.host.onChannelPressureSelectChanged()">
                                 <option value="unused">unused</option>
@@ -159,54 +177,23 @@
                                 <option value="reverberationDown">reverberationDown</option>
                             </select>
                         </td>
-                        <!-- ChannelPressure sensitivityLongControl will be added here. -->
+                        <!-- ChannelPressure sensitivityLongControl <td>s will be added here. -->
                     </tr>
                 </table>
-                <hr />
+                <hr class="host"/>
             </div>
-            <table width="660px">
-                <colgroup>
-                    <col width="66" />
-                    <col width="100" />
-                    <col width="109" />
-                    <col width="385" />
-                </colgroup>
-                <tr>
-                    <td>
-                        <span id="triggerKeyTitle" class="boldSubtitle">trigger key:</span>
-                    </td>
-                    <td>
-                        <input id="triggerKeyInput" type="number" class="triggerKeyNumber" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
-                    </td>
-                    <td align="right">
-                        <span id="keyboardSplitTitle" class="boldSubtitle">keyboard split:</span>
-                    </td>
-                    <td>
-                        <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
-                    </td>
-                </tr>
-            </table>
-            <table width="660px">
-                <colgroup>
-                    <col width="93" />
-                    <col width="442" />
-                    <col width="130" />
-                </colgroup>
-                <tr>
-                    <td>
-                        <span id="settingsTitle" class="boldSubtitle">preset settings:</span>
-                    </td>
-                    <td>
-                        <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
-                    </td>
-                    <td align="right">
-                        <input id="exportSettingsButton" type="button" class="exportSettingsButton" value="export current settings" onclick="ResSynth.host.onExportSettingsButtonClicked()" />
-                    </td>
-                </tr>
-            </table>
-
+            <div id="keyboardSplitDiv">
+                <table>
+                    <tr>
+                        <td>
+                            <span id="keyboardSplitTitle" class="boldSubtitle">keyboardSplit:</span>
+                            <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
+                        </td>
+                    </tr>
+                </table>
+                <hr class="host"/>
+            </div>
             <div id="recordingDiv">
-                <hr />
                 <table width="660px">
                     <colgroup>
                         <col width="66" />
@@ -236,14 +223,14 @@
                         </td>
                     </tr>
                 </table>
+                <hr class="host"/>
             </div>
             <div id="simpleInputDiv">
-                <hr />
                 <table width="660px">
                     <colgroup>
-                        <col style="width:170px" />
-                        <col style="width:320px" />
-                        <col style="width:170px" />
+                        <col style="width: 170px" />
+                        <col style="width: 320px" />
+                        <col style="width: 170px" />
                     </colgroup>
                     <tr>
                         <td valign="top">
@@ -254,15 +241,16 @@
                             <input id="notesDivIndexInput1" type="number" name="value" class="number" min="0" max="127" value="68" />
                             <span>velocity</span>
                             <input id="notesDivVelocityInput1" type="number" name="value" class="number" min="0" max="127" value="100" />
-                            <input type="checkbox" id="sendNote1Checkbox" style="vertical-align:middle" onclick="ResSynth.host.noteCheckboxClicked()" />
+                            <input type="checkbox" id="sendNote1Checkbox" style="vertical-align: middle" onclick="ResSynth.host.noteCheckboxClicked()" />
                             <br />
                             <span>note</span>
                             <input id="notesDivIndexInput2" type="number" name="value" class="number" min="0" max="127" value="64" />
                             <span>velocity</span>
                             <input id="notesDivVelocityInput2" type="number" name="value" class="number" min="0" max="127" value="100" />
-                            <input type="checkbox" id="sendNote2Checkbox" style="vertical-align:middle" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
+                            <input type="checkbox" id="sendNote2Checkbox" style="vertical-align: middle" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
                             <input id="sendButton" type="button" class="sendButton" value="send" onmousedown="ResSynth.host.doNotesOn()" onmouseup="ResSynth.host.doNotesOff()" />
-                            <label><input type="checkbox" id="holdCheckbox" value="hold" style="vertical-align:middle" onclick="ResSynth.host.holdCheckboxClicked()" />hold</label>
+                            <label>
+                                <input type="checkbox" id="holdCheckbox" value="hold" style="vertical-align: middle" onclick="ResSynth.host.holdCheckboxClicked()" />hold</label>
                         </td>
                         <td>
                             <span>&nbsp;</span>
