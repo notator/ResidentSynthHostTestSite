@@ -1132,7 +1132,7 @@ ResSynth.residentSynth = (function(window)
         // also sets channelPresets[channel] and channelControl.presetIndex to 0.
         updateBankIndex = function(channel, bankIndex)
         {
-            channelPresets[channel] = channelPresets.webAudioFont[bankIndex].presets; // global
+            channelPresets[channel] = channelPresets.webAudioFont[bankIndex].presets; // throws an exception if bankIndex is out of range
 
             channelControls[channel].bankIndex = bankIndex;
             channelControls[channel].presetIndex = 0;
@@ -1148,7 +1148,7 @@ ResSynth.residentSynth = (function(window)
                 tuningGroupIndex = chanControls.tuningGroupIndex;
 
             chanControls.tuningIndex = tuningIndex;
-            chanControls.tuning = tuningGroups[tuningGroupIndex][tuningIndex];
+            chanControls.tuning = tuningGroups[tuningGroupIndex][tuningIndex]; // throws an exception if tunngGroupIndex and/or tuningIndex is out of range
         },
 
         // sets chanControl.tuning to the first tuning in the group
@@ -1275,7 +1275,7 @@ ResSynth.residentSynth = (function(window)
 
         updateInKeyOrnamentDefs = function(channel, inKeyOrnamentDefsIndex)
         {
-            channelControls[channel].inKeyOrnamentDefs = inKeyOrnamentDefsArrays[inKeyOrnamentDefsIndex];
+            channelControls[channel].inKeyOrnamentDefs = inKeyOrnamentDefsArrays[inKeyOrnamentDefsIndex]; // throws exception if inKeyOrnamentDefsIndex is out of range
         },
 
         allSoundOff = function()
@@ -1367,7 +1367,7 @@ ResSynth.residentSynth = (function(window)
 
             function doMixture(masterNote, midi, mixtureIndex)
             {
-                let mixture = mixtures[mixtureIndex],
+                let mixture = mixtures[mixtureIndex], // throws exception if out of range
                     extraNotes = mixture.extraNotes,
                     exceptKeyMixtureIndex = mixture.except.find(x => x[0] === inKey);
 
