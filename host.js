@@ -1142,25 +1142,30 @@ ResSynth.host = (function(document)
             }
         },
 
+        setDivDisabled = function(div, disabled)
+        {
+            let nodes = div.getElementsByTagName('*');
+            for(let i = 0; i < nodes.length; i++)
+            {
+                nodes[i].disabled = disabled;
+            }
+        },
+
         restoreStateAfterRecording = function()
         {
-            function restoreTriggersDiv()
+
+            function restoreOtherHostControlDivs()
             {
-                let triggerKeyTitle = getElem("triggerKeyTitle"),
-                    triggerKeyInput = getElem("triggerKeyInput"),
-                    keyboardSplitTitle = getElem("keyboardSplitTitle"),
-                    keyboardSplitSelect = getElem("keyboardSplitSelect"),
-                    settingsTitle = getElem("settingsTitle"),
+                let presetSettingsDiv = getElem("presetSettingsDiv"),
+                    channelPressureDiv = getElem("channelPressureDiv"),
+                    keyboardSplitDiv = getElem("keyboardSplitDiv"),
+                    simpleInputDiv = getElem("simpleInputDiv"),
                     settingsSelect = getElem("settingsSelect");
 
-                keyboardSplitTitle.style.color = "black";
-                keyboardSplitSelect.disabled = false;
-                triggerKeyTitle.style.color = "black";
-                triggerKeyInput.disabled = false;
-
-                settingsTitle.style.color = "black";
-                settingsSelect.disabled = settingsSelect.prevState;
-                settingsSelect.prevState = undefined;
+                setDivDisabled(presetSettingsDiv, false);
+                setDivDisabled(channelPressureDiv, false);
+                setDivDisabled(keyboardSplitDiv, false);
+                setDivDisabled(simpleInputDiv, false);
             }
 
             function restoreRecordingsDiv()
@@ -1200,7 +1205,7 @@ ResSynth.host = (function(document)
                 recordingChannelIndices = undefined;
             }
 
-            restoreTriggersDiv();
+            restoreOtherHostControlDivs();
 
             restoreRecordingsDiv();
 
@@ -1411,23 +1416,18 @@ ResSynth.host = (function(document)
                 return emptyRecordedMessages;
             }
 
-            function disableTriggersDiv()
+            function disableOtherHostControlDivs()
             {
-                let triggerKeyTitle = getElem("triggerKeyTitle"),
-                    triggerKeyInput = getElem("triggerKeyInput"),
-                    keyboardSplitTitle = getElem("keyboardSplitTitle"),
-                    keyboardSplitSelect = getElem("keyboardSplitSelect"),
-                    settingsTitle = getElem("settingsTitle"),
+                let presetSettingsDiv = getElem("presetSettingsDiv"),
+                    channelPressureDiv = getElem("channelPressureDiv"),
+                    keyboardSplitDiv = getElem("keyboardSplitDiv"),
+                    simpleInputDiv = getElem("simpleInputDiv"),
                     settingsSelect = getElem("settingsSelect");
 
-
-                keyboardSplitTitle.style.color = "darkgray";
-                keyboardSplitSelect.disabled = true;
-                triggerKeyTitle.style.color = "darkgray";
-                triggerKeyInput.disabled = true;
-                settingsTitle.style.color = "darkgray";
-                settingsSelect.prevState = settingsSelect.disabled;
-                settingsSelect.disabled = true;
+                setDivDisabled(presetSettingsDiv, true);
+                setDivDisabled(channelPressureDiv, true);
+                setDivDisabled(keyboardSplitDiv, true);
+                setDivDisabled(simpleInputDiv, true);
             }
 
             let channelSelect = getElem("channelSelect");
@@ -1438,7 +1438,7 @@ ResSynth.host = (function(document)
 
             // can't change channel manually while recording
             channelSelect.disabled = true;
-            disableTriggersDiv();
+            disableOtherHostControlDivs();
 
             setPerformanceGUIState3();
         },
