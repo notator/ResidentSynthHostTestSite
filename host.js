@@ -18,6 +18,8 @@ ResSynth.host = (function(document)
         inputDevice = null,
         currentChannel = 0,
         allLongInputControls = [], // used by AllControllersOff control
+        channelPerKeyArrays = [], // initialized by getChannelPerKeyArrays(). This array has elements in range 0..15. Its length can be either 0 or 128.
+        currentChannelPerKeyArray,
         globalChannelPressureType = "unused", // set by channelPressureSelect
         globalChannelPressureFactor = 0, // fraction set by channelPressureSensitivityLongControl
         triggerKey,
@@ -177,7 +179,10 @@ ResSynth.host = (function(document)
                     CMD = ResSynth.constants.COMMAND,
                     data = e.data,
                     command = data[0] & 0xF0,
-                    msg = new Uint8Array([((command + currentChannel) & 0xFF), data[1], data[2]]);
+                    channel = (currentChannelPerKeyArray.length > 0) ? currentChannelPerKeyArray[data[1]] : data[0] & 0xF,
+                    msg = new Uint8Array([((command + channel) & 0xFF), data[1], data[2]]);
+
+                currentChannel = channel;
 
                 switch(command)
                 {
@@ -1596,11 +1601,9 @@ ResSynth.host = (function(document)
 
         onKeyboardSplitSelectChanged = function()
         {
-            const constants = ResSynth.constants;
-            let keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
-                setKeyboardSplitIndexMsg = new Uint8Array([constants.COMMAND.CONTROL_CHANGE, constants.CONTROL.SET_KEYBOARD_SPLIT_ARRAY, keyboardSplitIndex]);
+            let keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex;
 
-            synth.send(setKeyboardSplitIndexMsg); // this message updates all channels (it ignores the channel bits in the message)
+            currentChannelPerKeyArray = channelPerKeyArrays[keyboardSplitIndex];
         },
 
         onChannelPressureSelectChanged = function()
@@ -2966,6 +2969,142 @@ ResSynth.host = (function(document)
                 }
             }
 
+            function getChannelPerKeyArrays()
+            {
+                // See comments in keyboardSplitDefs.js and ornamentDefs.js.
+                // Further checking is done in setPrivateChannelPerKeyArrays() and setPrivateOrnamentPerKeyArrays().
+                // Throws an exception if an error is found in the keyboardSplitDefs.
+                function checkKeyValuesStrings(keyValuesStringsArray)
+                {
+                    // A RegExp for checking that a string contains zero or more "intVal1:intVal2;" strings separated by whitespace.
+                    // Both intVal1 and intVal2 must be in range 0..127. The final ";" is optional.
+                    const longInputStringRegex = new RegExp('^((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7])); ?)*((\\d{1,2}|(1[0-1]\\d|12[0-7])):(\\d{1,2}|(1[0-1]\\d|12[0-7]));? ?)?$');
+
+                    // channelPerKeyArrays[0] is allocated automatically. Indices 1..127 are then allocated from keyboardSplitDefs.js.
+                    // The index in channelPerKeyArrays is sent as part of the SET_KEYBOARD_SPLIT_ARRAY midi message, so cant be greater than 127.
+                    if(keyValuesStringsArray.length > 126)
+                    {
+                        throw `keyboardSplitDefs.js: There may not be more than 126 keyboardSplit definition strings in the array.`;
+                    }
+                    else
+                    {
+                        for(let i = 0; i < keyValuesStringsArray.length; i++) 
+                        {
+                            let keyValuesString = keyValuesStringsArray[i];
+
+                            if(keyValuesString.length === 0)
+                            {
+                                throw `Illegal zero-length keyboardSplitString.: Definition index: ${i}`;
+                            }
+
+                            if(longInputStringRegex.test(keyValuesString) === false)
+                            {
+                                throw `Illegal keyboardSplitString: ${keyValuesString}\nDefinition index: ${i}`;
+                            }
+                        }
+                    }
+                }
+
+                // Returns an array of 128 channel indices, one per key index.
+                // Throws an exception if keys are not unique and in ascending order, or a channel or key is out of range.
+                // 01.09.2023: Interestingly, this function was partly optimized in a dialog with ChatGPT.
+                // ChatGPT uses some constructs that I should adopt: (const etc.)
+                function getChannelPerKeyArray(keyboardSplitDefs, defIndex)
+                {
+                    function check(keyChannelPairs, keyValuesString) 
+                    {
+                        if(keyChannelPairs[0].key !== 0)
+                        {
+                            const errorString = `Illegal keyboardSplitString: the first key in the string must be 0`;
+                            alert(errorString);
+                            throw errorString;
+                        }
+
+                        for(let i = 0, previousKey = -1; i < keyChannelPairs.length; i++)
+                        {
+                            let kvp = keyChannelPairs[i],
+                                key = kvp.key,
+                                channel = kvp.value;
+
+                            if(key <= previousKey || channel < 0 || channel > 15 || key < 0 || key > 127)
+                            {
+                                const errorString = `Illegal keyboardSplitString: ${keyValuesString}\n<key:channel> component index: ${i}`;
+                                alert(errorString);
+                                throw errorString;
+                            }
+
+                            previousKey = key;
+                        }
+                    }
+
+                    const keyboardSplitDef = keyboardSplitDefs[defIndex],
+                        arraySize = 128,
+                        keyChannelPairs = getKeyIntValuePairs(keyboardSplitDef),
+                        channelPerKeyArray = (keyChannelPairs.length > 0) ? Array(arraySize).fill(0) : [];
+
+                    check(keyChannelPairs, keyboardSplitDef);
+
+                    for(let i = 0; i < keyChannelPairs.length; i++)
+                    {
+                        let kvp = keyChannelPairs[i],
+                            key = kvp.key,
+                            channel = kvp.value,
+                            nextKey = (i < keyChannelPairs.length - 1) ? keyChannelPairs[i + 1].key : arraySize;
+
+                        for(let j = key; j < nextKey; j++)
+                        {
+                            channelPerKeyArray[j] = channel;
+                        }
+                    }
+
+                    return channelPerKeyArray;
+                }
+
+                function getKeyIntValuePairs(keyValuesString)
+                {
+                    console.assert(keyValuesString.length > 0);
+
+                    const keyValuePairs = [],
+                        components = keyValuesString.split(";");
+
+                    for(const component of components)
+                    {
+                        const [keyStr, valueStr] = component.trim().split(":");
+                        const key = parseInt(keyStr);
+                        const value = parseInt(valueStr);
+
+                        keyValuePairs.push({key, value});
+                    }
+
+                    return keyValuePairs;
+                }
+
+                let keyboardSplitDefs = ResSynth.keyboardSplitDefs;
+
+                channelPerKeyArrays.push([]); // an empty array means use the incoming message channel (channelPerKeyArrays[0] always has this value.)
+
+                if(keyboardSplitDefs !== undefined)
+                {
+                    try
+                    {
+                        checkKeyValuesStrings(keyboardSplitDefs);
+
+                        for(var i = 0; i < keyboardSplitDefs.length; i++)
+                        {
+                            let channelPerKeyArray = getChannelPerKeyArray(keyboardSplitDefs, i);  // can return an empty array (meaning use the incoming message channel)
+                            channelPerKeyArrays.push(channelPerKeyArray);
+                        }
+                    }
+                    catch(msg)
+                    {
+                        msg = "Error in keyboardSplitDefs.js\n" + msg;
+                        channelPerKeyArrays.length = 0;
+                        channelPerKeyArrays.push([]);
+                        console.assert(false, msg);
+                    }
+                }
+            }
+
             // returns an array of recordings
             // Each recording object has three attributes:
             //   name -- the recording's name
@@ -3031,6 +3170,7 @@ ResSynth.host = (function(document)
 
             setupInputDevice();
             setAudioDeviceSelect();
+            getChannelPerKeyArrays(); // loads channelPerKeyArrays using ResSynth.keyboardSplitDefs from keyboardSplitDefs.js
             presetRecordings = getRecordings();  // loads definitions from recordings.js.
             synth = new ResSynth.residentSynth.ResidentSynth(); // loads definitions from files in residentSynth/config.
             setInitialDivsDisplay();
