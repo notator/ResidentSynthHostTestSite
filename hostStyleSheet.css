@@ -104,12 +104,11 @@ div.hostSettingsDiv
 .presetSelect
 {
 	width: 290px;
-	margin: 0 0 auto auto;
 }
 
 .mixtureSelect
 {
-	width: 135px;
+	width: 142px;
 }
 
 .tuningGroupSelect
@@ -119,8 +118,7 @@ div.hostSettingsDiv
 
 .tuningSelect
 {
-	width: 338px;
-	margin: 0 0 auto auto;
+	width: 350px;
 }
 
 .settingsSelect
