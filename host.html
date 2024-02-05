@@ -11,19 +11,38 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <!-- Javascript files are included at the end of the body element -->
 </head>
 <body>
-    <div class="background">
-        <div id="topDiv" style="text-align: center">
-            <span class="boldTitle">ResidentSynth Host</span><br />
-            <span class="subtitle">live performance and recording of the GUI-less ResidentSynth</span>
-            <div style="padding-top: 3px">
-                <span id="inputDeviceTitle" class="boldSubtitle">Input Device:</span>
-                <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
+    <div class="background"> <!--width 692px-->
+        <div id="topDiv">
+            <table>
+                <colgroup>
+                    <col width="90px" />
+                    <col width="512px" />
+                    <col width="90px" />
+                </colgroup>
+                <tr>
+                    <td style="vertical-align: top">
+                        <span class="subtitle"><a href="https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html">Documentation</a></span>
+                        
+                    </td>
+                    <td style="text-align: center">
+                        <span class="boldTitle">ResidentSynth Host</span><br />
+                        <span class="subtitle">live performance and recording of the GUI-less ResidentSynth</span>
+                        <div style="padding-top: 3px">
+                            <span id="inputDeviceTitle" class="boldSubtitle">Input Device:</span>
+                            <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
 
-                <span>
-                    <span id="audioDeviceTitle" class="boldSubtitle">Audio Output:</span>
-                    <select id="audioDeviceSelect" class="audioDeviceSelect" onchange="ResSynth.host.onAudioDeviceSelectChanged()"></select>
-                </span>
-            </div>
+                            <span>
+                                <span id="audioDeviceTitle" class="boldSubtitle">Audio Output:</span>
+                                <select id="audioDeviceSelect" class="audioDeviceSelect" onchange="ResSynth.host.onAudioDeviceSelectChanged()"></select>
+                            </span>
+                        </div>
+                    </td>
+                    <td style="vertical-align: top; text-align:right;">
+                        <span class="subtitle"><a href="https://github.com/notator/ResidentSynthHostTestSite">GitHub</a></span>
+                    </td>
+                </tr>
+            </table>
+
         </div>
 
         <div id="startupDivs">
@@ -231,7 +250,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                 <hr class="host"/>
             </div>
             <div id="simpleInputDiv">
-                <table width="660px">
+                <table width="660px" style="line-height:16px;">
                     <colgroup>
                         <col style="width: 170px" />
                         <col style="width: 320px" />
@@ -247,7 +266,16 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                             <span>velocity</span>
                             <input type="number" id="notesDivVelocityInput1" class="numberInput" name="value" min="0" max="127" value="100" />
                             <input type="checkbox" id="sendNote1Checkbox" class="checkBoxInput" onclick="ResSynth.host.noteCheckboxClicked()" />
-                            <br />
+                        </td>
+                        <td>
+                            <span>&nbsp;</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span>&nbsp;</span>
+                        </td>
+                        <td>
                             <span>note</span>
                             <input type="number" id="notesDivIndexInput2" class="numberInput" name="value" min="0" max="127" value="64" />
                             <span>velocity</span>
