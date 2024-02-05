@@ -27,6 +27,14 @@ table
 	margin:0;
 }
 
+select, input
+{
+	font-size: 11px;
+	height: 18px;
+	padding: 0;
+	margin: 0;
+}
+
 div.background
 {
     width: 692px; 
@@ -49,7 +57,7 @@ div.hostSettingsDiv
 {
 	width: 660px;
 	margin: 6px 0 0 0px;
-	padding: 5px 15px 5px 15px;
+	padding: 5px 15px 8px 15px;
 	background: #EEE;
 	border: 2px solid #333;
 
@@ -71,254 +79,162 @@ div.hostSettingsDiv
 	font-weight: bold;
 }
 
-.midiMessagesTable
+.commandAndControlsTable
 {
 	font-size: 11px;
 	margin-left:auto;
 	margin-right:auto;
 }
 
-.left
-{
-	text-align:right;
-}
-
 .inputDeviceSelect
 {
-	font-size: 11px;
 	width: 120px;
-	height: 18px;
-	margin-left: 0;
 }
 
 .audioDeviceSelect
 {
-	font-size: 11px;
 	width: 190px;
-	height: 18px;
-	margin-left: 0;
 }
 
 .bankSelect
 {
-	font-size: 11px;
 	width: 220px;
-	height: 18px;
-	margin: 0;
 }
 
 .presetSelect
 {
-	font-size: 11px;
 	width: 290px;
-	height: 18px;
 	margin: 0 0 auto auto;
 }
 
 .mixtureSelect
 {
-	font-size: 11px;
 	width: 135px;
-	height: 18px;
-	margin: 0;
 }
 
 .tuningGroupSelect
 {
-	font-size: 11px;
 	width: 220px;
-	height: 18px;
-	margin-left: 0;
 }
 
 .tuningSelect
 {
-	font-size: 11px;
 	width: 338px;
-	height: 18px;
 	margin: 0 0 auto auto;
 }
 
 .settingsSelect
 {
-	font-size: 11px;
 	width: 310px;
-	height: 18px;
-	padding: 0;
-	margin-left: 0;
 	margin-right: 10px;
-}
-
-.triggerKeyNumber
-{
-	font-size: 11px;
-	width: 35px;
-	padding: 0;
-	margin-left: 0;
-	margin-right: 23px;
-}
-
-.exportSettingsButton
-{
-	font-size: 11px;
-	width:120px;
-	height: 18px;
-	padding:0;
-	margin:0;
 }
 
 .keyboardSplitSelect
 {
-	font-size: 11px;
 	width: 300px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
 }
 
 .channelPressureSelect
 {
-	font-size: 11px;
 	width: 118px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
 }
-
 
 .ornamentsSelect
 {
-	font-size: 11px;
 	width: 590px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
 }
 
 .triggerActionSelect
 {
-	font-size: 11px;
 	width: 582px;
-	height: 18px;
 	margin: 0 4px auto auto;
 }
 
 .channelSelect
 {
-	font-size: 11px;
 	width: 45px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
-}
-
-.tuningNumber
-{
-	font-size: 11px;
-	width: 34px;
-	margin-left: 0;
-	margin-right: 0;
-}
-
-.number
-{
-	font-size: 11px;
-	width: 41px;
-	margin-left: 0;
-	margin-right: 4px;
-}
-
-.sendButton
-{
-	font-size: 11px;
-	height: 18px;
-	width: 45px;
-	margin-right: 5px;
 }
 
 .recordingSelect
 {
-	font-size: 11px;
 	width: 222px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
 }
 
-.playRecordingButton
+.alignRight
 {
-	font-size: 11px;
-	height: 18px;
-	width: 130px;
-	margin-left: 0;
-	margin-right: 0;
+	text-align:right;
 }
 
-.cancelPlaybackButton
+.numberInput
 {
-	font-size: 11px;
-	height: 18px;
+	width: 35px;
+	height: 14px;
+	padding:0 0 0 1px;
+	margin: 0 3px 0 0;
+}
+
+.sendButtonInput
+{
+	width: 45px;
+	margin: 0 5px 0 2px;
+}
+
+.exportSettingsButtonInput
+{
+	width: 120px;
+	text-align: right;
+}
+
+.playRecordingButtonInput
+{
 	width: 130px;
-	margin-left: 0;
-	margin-right: 0;
+}
+
+.cancelPlaybackButtonInput
+{
+	width: 130px;
 	background: #DDF;
 	display: none;
 }
 
-.startRecordingButton
+.startRecordingButtonInput
 {
-	font-size: 11px;
 	width: 110px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
 }
 
-.stopRecordingButton
+.stopRecordingButtonInput
 {
-	font-size: 11px;
 	width: 110px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
 	background: #DFD;
 	display: none;
 }
 
-.saveRecordingButton
+.saveRecordingButtonInput
 {
-	font-size: 11px;
 	width: 110px;
-	height: 18px;
-	margin-left: 0;
 	margin-right: 2px;
 	background: #DDF;
 	display: none;
 }
 
-.discardRecordingButton
+.discardRecordingButtonInput
 {
-	font-size: 11px;
 	width: 110px;
-	height: 18px;
-	margin-left: 0;
-	margin-right: 0;
 	background: #FDD;
 	display: none;
 }
 
-.smallButton
-{
-	font-size:11px;
-	height:22px;
-}
-
-.largeButton
+.continueAtStartButtonInput
 {
 	font-size:12px;
 	height:24px;
 	width:80px;
 	margin-top:10px;
+}
+
+.checkBoxInput
+{
+	vertical-align:bottom;
 }
 
 

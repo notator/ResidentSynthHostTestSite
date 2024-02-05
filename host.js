@@ -32,7 +32,7 @@ ResSynth.host = (function(document)
         // set by stopRecording(), undefined by saveRecording() or discardRecording()
         currentRecording = undefined,
 
-        recordingChannelIndices = undefined, // initialized by onPlayRecordingButtonClick(), reset by restoreStateAfterRecording()
+        recordingChannelIndices = undefined, // initialized by onplayRecordingButtonInputClick(), reset by restoreStateAfterRecording()
 
         // used while playing back.
         cancelPlayback = false,
@@ -87,10 +87,10 @@ ResSynth.host = (function(document)
         {
             function resetGUILongControllersAndSendButton()
             {
-                let sendButton = getElem("sendButton");
-                if(sendButton.disabled === true)
+                let sendButtonInput = getElem("sendButtonInput");
+                if(sendButtonInput.disabled === true)
                 {
-                    sendButton.disabled = false;
+                    sendButtonInput.disabled = false;
                 }
 
                 for(let i = 0; i < allLongInputControls.length; ++i)
@@ -433,8 +433,8 @@ ResSynth.host = (function(document)
             }
 
             let channelSelect = getElem("channelSelect"),
-                startRecordingButton = getElem("startRecordingButton"),
-                stopRecordingButton = getElem("stopRecordingButton"),
+                startRecordingButtonInput = getElem("startRecordingButtonInput"),
+                stopRecordingButtonInput = getElem("stopRecordingButtonInput"),
                 channel = channelSelect.selectedIndex,
                 hostChannelSettings = channelSelect.options[channel].hostSettings;
 
@@ -447,8 +447,8 @@ ResSynth.host = (function(document)
 
             setAndSendOrnamentsDivControls(hostChannelSettings);
 
-            startRecordingButton.value = "start recording ch" + channel.toString();
-            stopRecordingButton.value = "stop recording ch" + channel.toString();
+            startRecordingButtonInput.value = "start recording ch" + channel.toString();
+            stopRecordingButtonInput.value = "stop recording ch" + channel.toString();
         },
 
         // exported
@@ -884,7 +884,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onPlayRecordingButtonClicked = async function()
+        onplayRecordingButtonInputClicked = async function()
         {
             function getHostChannelState()
             {
@@ -899,15 +899,15 @@ ResSynth.host = (function(document)
 
             function setInitialRecordingButtonState(b)
             {
-                if(b.startRecordingButton.style.display === "block")
+                if(b.startRecordingButtonInput.style.display === "block")
                 {
                     setPerformanceGUIState2();
                 }
-                else if(b.stopRecordingButton.style.display === "block")
+                else if(b.stopRecordingButtonInput.style.display === "block")
                 {
                     setPerformanceGUIState4();
                 }
-                else if(b.saveRecordingButton.style.display === "block")
+                else if(b.saveRecordingButtonInput.style.display === "block")
                 {
                     setPerformanceGUIState6();
                 }
@@ -915,11 +915,11 @@ ResSynth.host = (function(document)
 
             function setFinalRecordingButtonState(b)
             {
-                if(b.startRecordingButton.style.display === "block")
+                if(b.startRecordingButtonInput.style.display === "block")
                 {
                     setPerformanceGUIState1();
                 }
-                else if(b.stopRecordingButton.style.display === "block")
+                else if(b.stopRecordingButtonInput.style.display === "block")
                 {
                     setPerformanceGUIState3();
                 }
@@ -1088,7 +1088,7 @@ ResSynth.host = (function(document)
             let presetRecording = presetRecordings[getElem("recordingSelect").selectedIndex],
                 hostChannelState = getHostChannelState(),
                 b = getRecordingButtons(),
-                // currentRecording only exists after clicking onStopRecordingButton.
+                // currentRecording only exists after clicking onstopRecordingButtonInput.
                 recordingToPlay = (currentRecording === undefined) ? presetRecording : currentRecording;
 
             setInitialRecordingButtonState(b);
@@ -1113,7 +1113,7 @@ ResSynth.host = (function(document)
                         "    An attempt was made to record noteOns in an existing channel.\n" +
                         "    Only commands and controls can be overdubbed in an existing channel.\n");
 
-                    onStopRecordingButtonClicked();
+                    onstopRecordingButtonInputClicked();
                 }
                 else
                 {
@@ -1129,15 +1129,15 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onCancelPlaybackButtonClicked = function()
+        oncancelPlaybackButtonInputClicked = function()
         {
             cancelPlayback = true; // global
 
-            if(getElem("startRecordingButton").style.display === "block")
+            if(getElem("startRecordingButtonInput").style.display === "block")
             {
                 setPerformanceGUIState1();
             }
-            else if(getElem("stopRecordingButton").style.display === "block")
+            else if(getElem("stopRecordingButtonInput").style.display === "block")
             {
                 setPerformanceGUIState3();
             }
@@ -1220,7 +1220,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onSaveRecordingButtonClicked = function()
+        onsaveRecordingButtonInputClicked = function()
         {
             function getStringArray(messages)
             {
@@ -1240,7 +1240,7 @@ ResSynth.host = (function(document)
                 return rval;
             }
 
-            console.assert(currentRecording != undefined); // should be set in onStopRecordingButtonClick()
+            console.assert(currentRecording != undefined); // should be set in onstopRecordingButtonInputClick()
 
             let channelInfos = currentRecording.channels;
 
@@ -1263,27 +1263,27 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onDiscardRecordingButtonClicked = function()
+        ondiscardRecordingButtonInputClicked = function()
         {
             restoreStateAfterRecording(); // calls setPerformanceGUIState1();
         },
 
         getRecordingButtons = function()
         {
-            let playRecordingButton = getElem("playRecordingButton"),
-                cancelPlaybackButton = getElem("cancelPlaybackButton"),
-                startRecordingButton = getElem("startRecordingButton"),
-                stopRecordingButton = getElem("stopRecordingButton"),
-                saveRecordingButton = getElem("saveRecordingButton"),
-                discardRecordingButton = getElem("discardRecordingButton"),
+            let playRecordingButtonInput = getElem("playRecordingButtonInput"),
+                cancelPlaybackButtonInput = getElem("cancelPlaybackButtonInput"),
+                startRecordingButtonInput = getElem("startRecordingButtonInput"),
+                stopRecordingButtonInput = getElem("stopRecordingButtonInput"),
+                saveRecordingButtonInput = getElem("saveRecordingButtonInput"),
+                discardRecordingButtonInput = getElem("discardRecordingButtonInput"),
                 buttons = {};
 
-            buttons.playRecordingButton = playRecordingButton;
-            buttons.cancelPlaybackButton = cancelPlaybackButton;
-            buttons.startRecordingButton = startRecordingButton;
-            buttons.stopRecordingButton = stopRecordingButton;
-            buttons.saveRecordingButton = saveRecordingButton;
-            buttons.discardRecordingButton = discardRecordingButton;
+            buttons.playRecordingButtonInput = playRecordingButtonInput;
+            buttons.cancelPlaybackButtonInput = cancelPlaybackButtonInput;
+            buttons.startRecordingButtonInput = startRecordingButtonInput;
+            buttons.stopRecordingButtonInput = stopRecordingButtonInput;
+            buttons.saveRecordingButtonInput = saveRecordingButtonInput;
+            buttons.discardRecordingButtonInput = discardRecordingButtonInput;
 
             return buttons;
         },
@@ -1294,107 +1294,107 @@ ResSynth.host = (function(document)
         {
             let b = getRecordingButtons();
 
-            b.cancelPlaybackButton.style.display = "none";
-            b.discardRecordingButton.style.display = "none";
-            b.stopRecordingButton.style.display = "none";
-            b.saveRecordingButton.style.display = "none";
+            b.cancelPlaybackButtonInput.style.display = "none";
+            b.discardRecordingButtonInput.style.display = "none";
+            b.stopRecordingButtonInput.style.display = "none";
+            b.saveRecordingButtonInput.style.display = "none";
 
-            b.playRecordingButton.style.display = "block";
-            b.playRecordingButton.value = "play selected recording";
-            b.playRecordingButton.style.background = "none";
-            b.startRecordingButton.style.display = "block";
-            b.startRecordingButton.disabled = false;
+            b.playRecordingButtonInput.style.display = "block";
+            b.playRecordingButtonInput.value = "play selected recording";
+            b.playRecordingButtonInput.style.background = "none";
+            b.startRecordingButtonInput.style.display = "block";
+            b.startRecordingButtonInput.disabled = false;
         },
 
-        // State 2 = State 1 + playRecordingButton clicked
+        // State 2 = State 1 + playRecordingButtonInput clicked
         // ("cancelPlayback, startRecording disabled")
         setPerformanceGUIState2 = function()
         {
             let b = getRecordingButtons();
 
-            b.playRecordingButton.style.display = "none";
-            b.discardRecordingButton.style.display = "none";
-            b.stopRecordingButton.style.display = "none";
-            b.saveRecordingButton.style.display = "none";
+            b.playRecordingButtonInput.style.display = "none";
+            b.discardRecordingButtonInput.style.display = "none";
+            b.stopRecordingButtonInput.style.display = "none";
+            b.saveRecordingButtonInput.style.display = "none";
 
-            b.cancelPlaybackButton.style.display = "block";
-            b.startRecordingButton.style.display = "block";
-            b.startRecordingButton.disabled = true;
+            b.cancelPlaybackButtonInput.style.display = "block";
+            b.startRecordingButtonInput.style.display = "block";
+            b.startRecordingButtonInput.disabled = true;
         },
-        // State 3 = State 1 + startRecordingButton clicked
+        // State 3 = State 1 + startRecordingButtonInput clicked
         // (playSelected, stopRecording)
         setPerformanceGUIState3 = function()
         {
             let b = getRecordingButtons();
 
-            b.cancelPlaybackButton.style.display = "none";
-            b.discardRecordingButton.style.display = "none";
-            b.startRecordingButton.style.display = "none";
-            b.saveRecordingButton.style.display = "none";
+            b.cancelPlaybackButtonInput.style.display = "none";
+            b.discardRecordingButtonInput.style.display = "none";
+            b.startRecordingButtonInput.style.display = "none";
+            b.saveRecordingButtonInput.style.display = "none";
 
-            b.playRecordingButton.style.display = "block";
-            b.playRecordingButton.value = "play selected recording";
-            b.playRecordingButton.style.background = "none";
-            b.stopRecordingButton.style.display = "block";
-            b.stopRecordingButton.disabled = false;
+            b.playRecordingButtonInput.style.display = "block";
+            b.playRecordingButtonInput.value = "play selected recording";
+            b.playRecordingButtonInput.style.background = "none";
+            b.stopRecordingButtonInput.style.display = "block";
+            b.stopRecordingButtonInput.disabled = false;
         },
 
-        // State 4 = State 3 + playRecordingButton clicked
+        // State 4 = State 3 + playRecordingButtonInput clicked
         // (cancelPlayback, stopRecording disabled)
         setPerformanceGUIState4 = function()
         {
             let b = getRecordingButtons();
 
-            b.playRecordingButton.style.display = "none";
-            b.discardRecordingButton.style.display = "none";
-            b.startRecordingButton.style.display = "none";
-            b.saveRecordingButton.style.display = "none";
+            b.playRecordingButtonInput.style.display = "none";
+            b.discardRecordingButtonInput.style.display = "none";
+            b.startRecordingButtonInput.style.display = "none";
+            b.saveRecordingButtonInput.style.display = "none";
 
-            b.cancelPlaybackButton.style.display = "block";
-            b.stopRecordingButton.style.display = "block";
-            b.stopRecordingButton.disabled = true;
+            b.cancelPlaybackButtonInput.style.display = "block";
+            b.stopRecordingButtonInput.style.display = "block";
+            b.stopRecordingButtonInput.disabled = true;
         },
 
-        // State 5 = State 3 + stopRecordingButton clicked
+        // State 5 = State 3 + stopRecordingButtonInput clicked
         // (playCurrent, discardRecording, saveRecording)
         setPerformanceGUIState5 = function()
         {
             let b = getRecordingButtons();
 
-            b.cancelPlaybackButton.style.display = "none";
-            b.startRecordingButton.style.display = "none";
-            b.stopRecordingButton.style.display = "none";
+            b.cancelPlaybackButtonInput.style.display = "none";
+            b.startRecordingButtonInput.style.display = "none";
+            b.stopRecordingButtonInput.style.display = "none";
 
-            b.playRecordingButton.style.display = "block";
-            b.playRecordingButton.value = "play current recording";
-            b.playRecordingButton.style.background = "#DFD";
-            b.discardRecordingButton.style.display = "block";
-            b.discardRecordingButton.disabled = false;
-            b.saveRecordingButton.style.display = "block";
-            b.saveRecordingButton.disabled = false;
+            b.playRecordingButtonInput.style.display = "block";
+            b.playRecordingButtonInput.value = "play current recording";
+            b.playRecordingButtonInput.style.background = "#DFD";
+            b.discardRecordingButtonInput.style.display = "block";
+            b.discardRecordingButtonInput.disabled = false;
+            b.saveRecordingButtonInput.style.display = "block";
+            b.saveRecordingButtonInput.disabled = false;
         },
 
-        // State 6 = State 5 + playRecordingButton clicked
+        // State 6 = State 5 + playRecordingButtonInput clicked
         // ("cancelPlayback, discardRecording disabled, saveRecording disabled")
         setPerformanceGUIState6 = function()
         {
             let b = getRecordingButtons();
 
-            b.playRecordingButton.style.display = "none";
-            b.startRecordingButton.style.display = "none";
-            b.stopRecordingButton.style.display = "none";
+            b.playRecordingButtonInput.style.display = "none";
+            b.startRecordingButtonInput.style.display = "none";
+            b.stopRecordingButtonInput.style.display = "none";
 
-            b.cancelPlaybackButton.style.display = "block";
-            b.discardRecordingButton.style.display = "block";
-            b.discardRecordingButton.disabled = true;
-            b.saveRecordingButton.style.display = "block";
-            b.saveRecordingButton.disabled = true;
+            b.cancelPlaybackButtonInput.style.display = "block";
+            b.discardRecordingButtonInput.style.display = "block";
+            b.discardRecordingButtonInput.disabled = true;
+            b.saveRecordingButtonInput.style.display = "block";
+            b.saveRecordingButtonInput.disabled = true;
         },
 
         // exported
         // This application can only record on a single channel.
         // It can, however play back multi-channel recordings - even while recording.
-        onStartRecordingButtonClicked = function()
+        onstartRecordingButtonInputClicked = function()
         {
             function getCurrentSettings(channelSelectOptions)
             {
@@ -1449,7 +1449,7 @@ ResSynth.host = (function(document)
         },
 
         // exported
-        onStopRecordingButtonClicked = function()
+        onstopRecordingButtonInputClicked = function()
         {
             function recordedMessagesExist(recordedMessages)
             {
@@ -1524,7 +1524,7 @@ ResSynth.host = (function(document)
             }
 
             // Returns the currentRecording in the format used in presetRecordings, so that it can easily be
-            // played by onPlayRecordingButtonClicked() and onSaveRecordingButtonClicked().
+            // played by onplayRecordingButtonInputClicked() and onsaveRecordingButtonInputClicked().
             // Resets the global settingsBeforeRecording and recordedMessages to undefined.
             function getCurrentRecording(settingsBeforeRecording, recordedMessages)
             {
@@ -1660,7 +1660,7 @@ ResSynth.host = (function(document)
 
                     let nameStrTD = document.createElement("td");
                     tr.appendChild(nameStrTD);
-                    nameStrTD.className = "left";
+                    nameStrTD.className = "alignRight";
                     nameStrTD.innerHTML = name;
 
                     // this td contains the slider, number and button inputs
@@ -1687,7 +1687,7 @@ ResSynth.host = (function(document)
 
                     // slider input                        
                     rangeInputElem.type = "range";
-                    rangeInputElem.className = "midiSlider";
+                    rangeInputElem.className = "rangeInput"; // see sliderStyleSheet.css
                     //rangeInputElem.id = name + "RangeInput";
                     rangeInputElem.twinInputElem = numberInputElem;
                     rangeInputElem.value = defaultValue;
@@ -1697,7 +1697,7 @@ ResSynth.host = (function(document)
 
                     // number input                        
                     numberInputElem.type = "number";
-                    numberInputElem.className = "number";
+                    numberInputElem.className = "numberInput";
                     // numberInputElem.id = name + "NumberInput";
                     numberInputElem.twinInputElem = rangeInputElem;
                     numberInputElem.value = defaultValue;
@@ -2008,16 +2008,6 @@ ResSynth.host = (function(document)
                                     baseSendCommand(cmdIndex, value);
                                 }
 
-                                function onSendCommandAgainButtonClick(event)
-                                {
-                                    var target = (event === undefined) ? this : event.currentTarget,
-                                        numberInputElem = target.children[2],
-                                        value = numberInputElem.valueAsNumber,
-                                        cmdIndex = numberInputElem.cmdIndex;
-
-                                    baseSendCommand(cmdIndex, value);
-                                }
-
                                 let longInputControlTD = getBasicLongInputControl(tr, name, defaultValue, cmdString);
 
                                 longInputControlTD.cmdIndex = cmdIndex;
@@ -2093,14 +2083,14 @@ ResSynth.host = (function(document)
                                 }
 
                                 tr.appendChild(td);
-                                td.className = "left";
+                                td.className = "alignRight";
                                 td.innerHTML = name;
 
                                 td = document.createElement("td");
                                 tr.appendChild(td);
                                 button = document.createElement("input");
                                 button.type = "button";
-                                button.className = "sendButton";
+                                button.className = "sendButtonInput";
                                 button.value = "send";
                                 button.ccIndex = ccIndex;
                                 button.onclick = onSendShortControlButtonClick;
@@ -2712,7 +2702,7 @@ ResSynth.host = (function(document)
                     function setRecordingDiv()
                     {
                         let recordingSelect = getElem("recordingSelect"),
-                            playRecordingButton = getElem("playRecordingButton");
+                            playRecordingButtonInput = getElem("playRecordingButtonInput");
 
                         // recordings is a global array (has been retrieved from recordings.js)
                         if(presetRecordings.length > 0)
@@ -2724,7 +2714,7 @@ ResSynth.host = (function(document)
                                 recordingSelect.options.add(option);
                             }
                             recordingSelect.disabled = false;
-                            playRecordingButton.disabled = false;
+                            playRecordingButtonInput.disabled = false;
                         }
                         else
                         {
@@ -2732,7 +2722,7 @@ ResSynth.host = (function(document)
                             option.innerHTML = "no recordings have been defined (see docs)";
                             recordingSelect.options.add(option);
                             recordingSelect.disabled = true;
-                            playRecordingButton.disabled = true;
+                            playRecordingButtonInput.disabled = true;
                         }
 
                         recordingSelect.selectedIndex = 0;
@@ -2824,11 +2814,11 @@ ResSynth.host = (function(document)
                 note2Index = getElem("notesDivIndexInput2").valueAsNumber,
                 note2Velocity = getElem("notesDivVelocityInput2").valueAsNumber,
                 holdCheckbox = getElem("holdCheckbox"),
-                sendButton = getElem("sendButton");
+                sendButtonInput = getElem("sendButtonInput");
 
             if(holdCheckbox.checked === true)
             {
-                sendButton.disabled = true;
+                sendButtonInput.disabled = true;
             }
 
             if(note1Checkbox.checked)
@@ -2889,7 +2879,7 @@ ResSynth.host = (function(document)
 
             if(holdCheckbox.checked === false)
             {
-                getElem("sendButton").disabled = false;
+                getElem("sendButtonInput").disabled = false;
             }
         },
 
@@ -3199,12 +3189,12 @@ ResSynth.host = (function(document)
             onExportSettingsButtonClicked: onExportSettingsButtonClicked,
             onTriggerKeyInputChanged: onTriggerKeyInputChanged,
 
-            onPlayRecordingButtonClicked: onPlayRecordingButtonClicked,
-            onCancelPlaybackButtonClicked: onCancelPlaybackButtonClicked,
-            onStartRecordingButtonClicked: onStartRecordingButtonClicked,
-            onStopRecordingButtonClicked: onStopRecordingButtonClicked,
-            onSaveRecordingButtonClicked: onSaveRecordingButtonClicked,
-            onDiscardRecordingButtonClicked: onDiscardRecordingButtonClicked,
+            onplayRecordingButtonInputClicked: onplayRecordingButtonInputClicked,
+            oncancelPlaybackButtonInputClicked: oncancelPlaybackButtonInputClicked,
+            onstartRecordingButtonInputClicked: onstartRecordingButtonInputClicked,
+            onstopRecordingButtonInputClicked: onstopRecordingButtonInputClicked,
+            onsaveRecordingButtonInputClicked: onsaveRecordingButtonInputClicked,
+            ondiscardRecordingButtonInputClicked: ondiscardRecordingButtonInputClicked,
 
             onKeyOrnamentsSelectChanged: onOrnamentsSelectChanged,
 

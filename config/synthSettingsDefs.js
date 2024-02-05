@@ -6,7 +6,7 @@ console.log('load synthSettingsDefs.js');
 // _comment attributes at the top and bottom levels in this file are completely ignored when
 // it is loaded into the host, so they can be freely added, removed and edited.
 // Similar _comment attributes are created automatically in exported settings when the host's
-// exportSettingsButton is clicked.
+// exportSettingsButtonInput is clicked.
 //
 // The lowest level arrays in this synthSettingsDefs definition contain one value per preset
 // setting, in the order the preset settings will appear in the settingsSelect control.

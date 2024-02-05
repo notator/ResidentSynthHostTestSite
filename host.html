@@ -31,7 +31,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                 <span>configuring synthesizer...</span>
             </div>
             <div id="continueAtStartButtonDiv" style="text-align: center; display: none;">
-                <input class="largeButton" type="button" value="continue" onclick="ResSynth.host.onContinueAtStartClicked()" />
+                <input type="button" class="continueAtStartButtonInput" value="continue" onclick="ResSynth.host.onContinueAtStartClicked()" />
             </div>
         </div>
         <div id="synthSettingsDiv" class="synthSettingsDiv" style="display: none;">
@@ -107,10 +107,10 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         </td>
                         <td id="tuningSelectCell"></td>
                         <td>
-                            <input id="semitonesOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
+                            <input type="number" id="semitonesOffsetNumberInput" class="numberInput" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
                         </td>
                         <td>
-                            <input id="centsOffsetNumberInput" type="number" class="tuningNumber" value="0" min="-50" max="50" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
+                            <input type="number" id="centsOffsetNumberInput" class="numberInput" value="0" min="-50" max="50" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
                         </td>
                     </tr>
                 </table>
@@ -118,7 +118,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
             <div id="commandsAndControlsDiv">
                 <hr />
                 <span class="boldSubtitle">commands and controls:</span>
-                <table id="commandsAndControlsTable" class="midiMessagesTable"></table>
+                <table id="commandsAndControlsTable" class="commandAndControlsTable"></table>
             </div>
             <div id="ornamentsDiv">
                 <hr />
@@ -142,6 +142,11 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
             <div class="subtitle" style="text-align: center; margin-bottom:4px">Host Controls</div>
             <div id="presetSettingsDiv">
                 <table>
+                    <colgroup>
+                        <col width="410px" />
+                        <col width="125px" />
+                        <col width="125px" />
+                    </colgroup>
                     <tr>
                         <td>
                             <span id="settingsTitle" class="boldSubtitle">preset settings:</span>
@@ -149,10 +154,10 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         </td>
                         <td>
                             <span id="triggerKeyTitle" class="boldSubtitle">trigger key:</span>
-                            <input id="triggerKeyInput" type="number" class="triggerKeyNumber" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
+                            <input type="number" id="triggerKeyInput" class="numberInput" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
                         </td>
                         <td>
-                            <input id="exportSettingsButton" type="button" class="exportSettingsButton" value="export current settings" onclick="ResSynth.host.onExportSettingsButtonClicked()" />
+                            <input type="button" id="exportSettingsButtonInput" class="exportSettingsButtonInput" value="export current settings" onclick="ResSynth.host.onExportSettingsButtonClicked()" />
                         </td>
                     </tr>
                 </table>
@@ -210,16 +215,16 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                             <select id="recordingSelect" class="recordingSelect" />
                         </td>
                         <td>
-                            <input id="playRecordingButton" type="button" class="playRecordingButton" value="play selected recording" onclick="ResSynth.host.onPlayRecordingButtonClicked()" />
-                            <input id="cancelPlaybackButton" type="button" class="cancelPlaybackButton" value="cancel playback" onclick="ResSynth.host.onCancelPlaybackButtonClicked()" />
+                            <input type="button" id="playRecordingButtonInput" class="playRecordingButtonInput" value="play selected recording" onclick="ResSynth.host.onplayRecordingButtonInputClicked()" />
+                            <input type="button" id="cancelPlaybackButtonInput" class="cancelPlaybackButtonInput" value="cancel playback" onclick="ResSynth.host.oncancelPlaybackButtonInputClicked()" />
                         </td>
                         <td align="right">
-                            <input id="discardRecordingButton" type="button" class="discardRecordingButton" value="discard recording" onclick="ResSynth.host.onDiscardRecordingButtonClicked()" />
+                            <input type="button" id="discardRecordingButtonInput" class="discardRecordingButtonInput" value="discard recording" onclick="ResSynth.host.ondiscardRecordingButtonInputClicked()" />
                         </td>
                         <td align="right">
-                            <input id="saveRecordingButton" type="button" class="saveRecordingButton" value="save recording" onclick="ResSynth.host.onSaveRecordingButtonClicked()" />
-                            <input id="startRecordingButton" type="button" class="startRecordingButton" value="start recording ch" onclick="ResSynth.host.onStartRecordingButtonClicked()" />
-                            <input id="stopRecordingButton" type="button" class="stopRecordingButton" value="stop recording ch" onclick="ResSynth.host.onStopRecordingButtonClicked()" />
+                            <input type="button" id="saveRecordingButtonInput" class="saveRecordingButtonInput" value="save recording" onclick="ResSynth.host.onsaveRecordingButtonInputClicked()" />
+                            <input type="button" id="startRecordingButtonInput" class="startRecordingButtonInput" value="start recording ch" onclick="ResSynth.host.onstartRecordingButtonInputClicked()" />
+                            <input type="button" id="stopRecordingButtonInput" class="stopRecordingButtonInput" value="stop recording ch" onclick="ResSynth.host.onstopRecordingButtonInputClicked()" />
                         </td>
                     </tr>
                 </table>
@@ -238,19 +243,21 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         </td>
                         <td>
                             <span>note</span>
-                            <input id="notesDivIndexInput1" type="number" name="value" class="number" min="0" max="127" value="68" />
+                            <input type="number" id="notesDivIndexInput1" class="numberInput" name="value" min="0" max="127" value="68" />
                             <span>velocity</span>
-                            <input id="notesDivVelocityInput1" type="number" name="value" class="number" min="0" max="127" value="100" />
-                            <input type="checkbox" id="sendNote1Checkbox" style="vertical-align: middle" onclick="ResSynth.host.noteCheckboxClicked()" />
+                            <input type="number" id="notesDivVelocityInput1" class="numberInput" name="value" min="0" max="127" value="100" />
+                            <input type="checkbox" id="sendNote1Checkbox" class="checkBoxInput" onclick="ResSynth.host.noteCheckboxClicked()" />
                             <br />
                             <span>note</span>
-                            <input id="notesDivIndexInput2" type="number" name="value" class="number" min="0" max="127" value="64" />
+                            <input type="number" id="notesDivIndexInput2" class="numberInput" name="value" min="0" max="127" value="64" />
                             <span>velocity</span>
-                            <input id="notesDivVelocityInput2" type="number" name="value" class="number" min="0" max="127" value="100" />
-                            <input type="checkbox" id="sendNote2Checkbox" style="vertical-align: middle" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
-                            <input id="sendButton" type="button" class="sendButton" value="send" onmousedown="ResSynth.host.doNotesOn()" onmouseup="ResSynth.host.doNotesOff()" />
+                            <input type="number" id="notesDivVelocityInput2" class="numberInput" name="value" min="0" max="127" value="100" />
+                            <input type="checkbox" id="sendNote2Checkbox" class="checkBoxInput" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
+                            <input type="button" id="sendButtonInput" class="sendButtonInput" value="send" onmousedown="ResSynth.host.doNotesOn()" onmouseup="ResSynth.host.doNotesOff()" />
                             <label>
-                                <input type="checkbox" id="holdCheckbox" value="hold" style="vertical-align: middle" onclick="ResSynth.host.holdCheckboxClicked()" />hold</label>
+                                <input type="checkbox" id="holdCheckbox" class="checkBoxInput" value="hold" onclick="ResSynth.host.holdCheckboxClicked()" />
+                                hold
+                            </label>
                         </td>
                         <td>
                             <span>&nbsp;</span>
@@ -342,4 +349,3 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <script src="host.js" type="text/javascript"></script>
 </body>
 </html>
-
