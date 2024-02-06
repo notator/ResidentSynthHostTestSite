@@ -98,17 +98,22 @@ div.hostSettingsDiv
 
 .bankSelect
 {
-	width: 220px;
+	width: 170px;
 }
 
 .presetSelect
 {
-	width: 290px;
+	width: 200px;
 }
 
 .mixtureSelect
 {
-	width: 142px;
+	width: 100px;
+}
+
+.ornamentsSelect
+{
+	width: 180px;
 }
 
 .tuningGroupSelect
@@ -135,11 +140,6 @@ div.hostSettingsDiv
 .channelPressureSelect
 {
 	width: 118px;
-}
-
-.ornamentsSelect
-{
-	width: 590px;
 }
 
 .triggerActionSelect

@@ -76,7 +76,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                     <option value="15">15</option>
                 </select>
             </div>
-            <div id="webAudioFontDiv">
+            <div id="soundsDiv">
                 <hr />
                 <table>
                     <tr>
@@ -89,6 +89,9 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         <td>
                             <span class="boldSubtitle">mixture: </span>
                         </td>
+                        <td>
+                            <span class="boldSubtitle">ornaments: </span>
+                        </td>
                     </tr>
                     <tr>
                         <td>
@@ -99,6 +102,9 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         </td>
                         <td id="mixtureSelectCell">
                             <select id="mixtureSelect" class="mixtureSelect" onchange="ResSynth.host.onMixtureSelectChanged()" />
+                        </td>
+                        <td>
+                            <select id="ornamentsSelect" class="ornamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
                         </td>
                     </tr>
                 </table>
@@ -138,23 +144,6 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                 <hr />
                 <span class="boldSubtitle">commands and controls:</span>
                 <table id="commandsAndControlsTable" class="commandAndControlsTable"></table>
-            </div>
-            <div id="ornamentsDiv">
-                <hr />
-                <table width="660px">
-                    <colgroup>
-                        <col width="66" />
-                        <col width="594" />
-                    </colgroup>
-                    <tr>
-                        <td>
-                            <span id="ornamentsTitle" class="boldSubtitle">ornaments:</span>
-                        </td>
-                        <td>
-                            <select id="ornamentsSelect" class="ornamentsSelect" onchange="ResSynth.host.onKeyOrnamentsSelectChanged()" />
-                        </td>
-                    </tr>
-                </table>
             </div>
         </div>
         <div id="hostSettingsDiv" class="hostSettingsDiv" style="display: none">
