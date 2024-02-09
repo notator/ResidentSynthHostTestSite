@@ -1164,13 +1164,11 @@ ResSynth.host = (function(document)
                 let presetSettingsDiv = getElem("presetSettingsDiv"),
                     channelPressureDiv = getElem("channelPressureDiv"),
                     keyboardSplitDiv = getElem("keyboardSplitDiv"),
-                    simpleInputDiv = getElem("simpleInputDiv"),
                     settingsSelect = getElem("settingsSelect");
 
                 setDivDisabled(presetSettingsDiv, false);
                 setDivDisabled(channelPressureDiv, false);
                 setDivDisabled(keyboardSplitDiv, false);
-                setDivDisabled(simpleInputDiv, false);
             }
 
             function restoreRecordingsDiv()
@@ -1426,13 +1424,11 @@ ResSynth.host = (function(document)
                 let presetSettingsDiv = getElem("presetSettingsDiv"),
                     channelPressureDiv = getElem("channelPressureDiv"),
                     keyboardSplitDiv = getElem("keyboardSplitDiv"),
-                    simpleInputDiv = getElem("simpleInputDiv"),
                     settingsSelect = getElem("settingsSelect");
 
                 setDivDisabled(presetSettingsDiv, true);
                 setDivDisabled(channelPressureDiv, true);
                 setDivDisabled(keyboardSplitDiv, true);
-                setDivDisabled(simpleInputDiv, true);
             }
 
             let channelSelect = getElem("channelSelect");

@@ -3,7 +3,7 @@
 xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>ResidentSynthHost</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
     <!-- workaround to prevent "favicon not found" exceptions in Chrome.-->
     <link href="sliderStyleSheet.css" media="all" rel="stylesheet" type="text/css" />
@@ -11,7 +11,8 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <!-- Javascript files are included at the end of the body element -->
 </head>
 <body>
-    <div class="background"> <!--width 692px-->
+    <div class="background">
+        <!--width 692px-->
         <div id="topDiv">
             <table>
                 <colgroup>
@@ -22,7 +23,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                 <tr>
                     <td style="vertical-align: top">
                         <span class="subtitle"><a href="https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html">Documentation</a></span>
-                        
+
                     </td>
                     <td style="text-align: center">
                         <span class="boldTitle">ResidentSynth Host</span><br />
@@ -37,7 +38,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                             </span>
                         </div>
                     </td>
-                    <td style="vertical-align: top; text-align:right;">
+                    <td style="vertical-align: top; text-align: right;">
                         <span class="subtitle"><a href="https://github.com/notator/ResidentSynthHostTestSite">GitHub</a></span>
                     </td>
                 </tr>
@@ -132,10 +133,10 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         </td>
                         <td id="tuningSelectCell"></td>
                         <td>
-                            <input type="number" id="semitonesOffsetNumberInput" class="numberInput" style="margin:0" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
+                            <input type="number" id="semitonesOffsetNumberInput" class="numberInput" style="margin: 0" value="0" min="-64" max="63" onchange="ResSynth.host.onSemitonesOffsetNumberInputChanged()" />
                         </td>
                         <td>
-                            <input type="number" id="centsOffsetNumberInput" class="numberInput" style="margin:0" value="0" min="-50" max="50" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
+                            <input type="number" id="centsOffsetNumberInput" class="numberInput" style="margin: 0" value="0" min="-50" max="50" onchange="ResSynth.host.onCentsOffsetNumberInputChanged()" />
                         </td>
                     </tr>
                 </table>
@@ -147,7 +148,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
             </div>
         </div>
         <div id="hostSettingsDiv" class="hostSettingsDiv" style="display: none">
-            <div class="subtitle" style="text-align: center; margin-bottom:4px">Host Controls</div>
+            <div class="subtitle" style="text-align: center; margin-bottom: 4px">Host Controls</div>
             <div id="presetSettingsDiv">
                 <table>
                     <colgroup>
@@ -169,7 +170,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         </td>
                     </tr>
                 </table>
-                <hr class="host"/>
+                <hr class="host" />
             </div>
             <div id="channelPressureDiv">
                 <table>
@@ -193,18 +194,52 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         <!-- ChannelPressure sensitivityLongControl <td>s will be added here. -->
                     </tr>
                 </table>
-                <hr class="host"/>
+                <hr class="host" />
             </div>
-            <div id="keyboardSplitDiv">
+            <div id="keyboardSplitDiv" style="line-height: 16px">
                 <table>
+                    <colgroup>
+                        <col width="330px" />
+                        <col width="15px" />
+                        <col width="315px" />
+                    </colgroup>
                     <tr>
-                        <td>
-                            <span id="keyboardSplitTitle" class="boldSubtitle">keyboardSplit:</span>
+                        <td class="rightBorder">
+                            <span id="keyboardSplitTitle" class="boldSubtitle">keyboardSplit:</span><br />
                             <select id="keyboardSplitSelect" class="keyboardSplitSelect" onchange="ResSynth.host.onKeyboardSplitSelectChanged()" />
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <span class="boldSubtitle">simple input:</span>
+                            <div class="simpleInputNotes">
+                                <span>note</span>
+                                <input type="number" id="notesDivIndexInput1" class="numberInput" name="value" min="0" max="127" value="68" />
+                                <span>velocity</span>
+                                <input type="number" id="notesDivVelocityInput1" class="numberInput" name="value" min="0" max="127" value="100" />
+                                <input type="checkbox" id="sendNote1Checkbox" class="checkBoxInput" onclick="ResSynth.host.noteCheckboxClicked()" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="rightBorder">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <div class="simpleInputNotes">
+                                <span>note</span>
+                                <input type="number" id="notesDivIndexInput2" class="numberInput" name="value" min="0" max="127" value="64" />
+                                <span>velocity</span>
+                                <input type="number" id="notesDivVelocityInput2" class="numberInput" name="value" min="0" max="127" value="100" />
+                                <input type="checkbox" id="sendNote2Checkbox" class="checkBoxInput" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
+                                <input type="button" id="sendButtonInput" class="sendButtonInput" value="send" onmousedown="ResSynth.host.doNotesOn()" onmouseup="ResSynth.host.doNotesOff()" />
+                                <label>
+                                    <input type="checkbox" id="holdCheckbox" class="checkBoxInput" value="hold" onclick="ResSynth.host.holdCheckboxClicked()" />
+                                    hold
+                                </label>
+                            </div>
                         </td>
                     </tr>
                 </table>
-                <hr class="host"/>
+                <hr class="host" />
             </div>
             <div id="recordingDiv">
                 <table width="660px">
@@ -233,51 +268,6 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                             <input type="button" id="saveRecordingButtonInput" class="saveRecordingButtonInput" value="save recording" onclick="ResSynth.host.onsaveRecordingButtonInputClicked()" />
                             <input type="button" id="startRecordingButtonInput" class="startRecordingButtonInput" value="start recording ch" onclick="ResSynth.host.onstartRecordingButtonInputClicked()" />
                             <input type="button" id="stopRecordingButtonInput" class="stopRecordingButtonInput" value="stop recording ch" onclick="ResSynth.host.onstopRecordingButtonInputClicked()" />
-                        </td>
-                    </tr>
-                </table>
-                <hr class="host"/>
-            </div>
-            <div id="simpleInputDiv">
-                <table width="660px" style="line-height:16px;">
-                    <colgroup>
-                        <col style="width: 170px" />
-                        <col style="width: 320px" />
-                        <col style="width: 170px" />
-                    </colgroup>
-                    <tr>
-                        <td valign="top">
-                            <span class="boldSubtitle">simple input:</span>
-                        </td>
-                        <td>
-                            <span>note</span>
-                            <input type="number" id="notesDivIndexInput1" class="numberInput" name="value" min="0" max="127" value="68" />
-                            <span>velocity</span>
-                            <input type="number" id="notesDivVelocityInput1" class="numberInput" name="value" min="0" max="127" value="100" />
-                            <input type="checkbox" id="sendNote1Checkbox" class="checkBoxInput" onclick="ResSynth.host.noteCheckboxClicked()" />
-                        </td>
-                        <td>
-                            <span>&nbsp;</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span>&nbsp;</span>
-                        </td>
-                        <td>
-                            <span>note</span>
-                            <input type="number" id="notesDivIndexInput2" class="numberInput" name="value" min="0" max="127" value="64" />
-                            <span>velocity</span>
-                            <input type="number" id="notesDivVelocityInput2" class="numberInput" name="value" min="0" max="127" value="100" />
-                            <input type="checkbox" id="sendNote2Checkbox" class="checkBoxInput" onclick="ResSynth.host.noteCheckboxClicked()" checked="checked" />
-                            <input type="button" id="sendButtonInput" class="sendButtonInput" value="send" onmousedown="ResSynth.host.doNotesOn()" onmouseup="ResSynth.host.doNotesOff()" />
-                            <label>
-                                <input type="checkbox" id="holdCheckbox" class="checkBoxInput" value="hold" onclick="ResSynth.host.holdCheckboxClicked()" />
-                                hold
-                            </label>
-                        </td>
-                        <td>
-                            <span>&nbsp;</span>
                         </td>
                     </tr>
                 </table>
