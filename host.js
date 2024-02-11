@@ -314,12 +314,9 @@ ResSynth.host = (function(document)
                     sendMessage(msg, currentChannel);
                 }
 
-                if(triggerKey !== undefined && command === CMD.NOTE_ON && data[1] === triggerKey)
+                if(triggerKey !== undefined && command === CMD.NOTE_ON && triggerKey !== 0 && data[1] === triggerKey && data[2] !== 0)
                 {
-                    if(data[2] !== 0)
-                    {
-                        doTriggerAction();
-                    }
+                    doTriggerAction();
                 }
             }
 
