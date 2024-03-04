@@ -770,7 +770,8 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case tuningType.HARMONIC:
+                        case tuningType.ODD_HARMONIC:
+                        case tuningType.PRIME_HARMONIC:
                             {
                                 let tunings = tuningsFactory.getHarmonicTunings(tuningGroupDef);
 

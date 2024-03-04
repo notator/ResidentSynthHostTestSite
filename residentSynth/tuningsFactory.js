@@ -496,15 +496,20 @@ ResSynth.tuningsFactory = (function()
     TuningsFactory.prototype.getHarmonicTunings = function(tuningGroupDef)
     {
          // Returns the centDelta values in ascending order from the root key.
-        function getRootCentsDeltasForHarmonicTuning()
+        function getRootCentsDeltasForHarmonicTuning(ctor)
         {
-            const keyFactorArray =
+            // In both keyFactorArrays:
+            //   1. the divisors are such that the resulting fraction will be
+            //      in the range 1 <= value < 2, so that all frequencies will be in one octave.
+            //   2. The keys are arranged so that the frequencies will sort into ascending order.
+            const
+                oddKeyFactorArray =
                 [
-                    [57, 1],      // A
-                    [64, 3 / 2],  // E(5th above A)
-                    [61, 5 / 4],  // C# (3rd above A)
-                    [67, 7 / 4],  // G
-                    [59, 9 / 8],  // B (5th above E)
+                    [57, 1], // A
+                    [64, 3 / 2], // E(5th above A)
+                    [61, 5 / 4], // C# (3rd above A)
+                    [67, 7 / 4], // G
+                    [59, 9 / 8], // B (5th above E)
                     [63, 11 / 8], // D#
                     [66, 13 / 8], // F#
                     [68, 15 / 8], // G# (5th above C#, 3rd above E)
@@ -512,9 +517,25 @@ ResSynth.tuningsFactory = (function()
                     [60, 19 / 16], // C
                     [62, 21 / 16], // D (5th above G)
                     [65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16.
+                ],
+                primeKeyFactorArray =
+                [
+                    [57, 1], // A
+                    [64, 3 / 2], // E(5th above A)
+                    [61, 5 / 4], // C# (3rd above A)
+                    [66, 7 / 4], // F#
+                    [62, 11 / 8], // D
+                    [65, 13 / 8], // F
+                    [58, 17 / 16], // A#
+                    [60, 19 / 16], // C
+                    [63, 23 / 16], // D#
+                    [67, 29 / 16], // G
+                    [68, 31 / 16], // G#
+                    [59, 37 / 32]  // B
                 ];
 
-            let rootKey = keyFactorArray[0][0],
+            let keyFactorArray = (ctor === ResSynth.tuningType.ODD_HARMONIC) ? oddKeyFactorArray: primeKeyFactorArray,
+                rootKey = keyFactorArray[0][0],
                 keyCentsDeltas = [];
 
             for(let i = 0; i < keyFactorArray.length; i++)
@@ -605,7 +626,7 @@ ResSynth.tuningsFactory = (function()
             return diagonalTunings;
         }
 
-        function logHarmonicTuningsInfos(harmonicTunings)
+        function logHarmonicTuningsInfos(harmonicTunings, tuningGroupName)
         {
             // returns a 12x12 array
             function getRootXYArray(harmonicTunings)
@@ -772,20 +793,21 @@ ResSynth.tuningsFactory = (function()
             }
 
             let rootXYArray = getRootXYArray(harmonicTunings); // rootXYArray is a 12x12 array
-            console.log("\n*** harmonic tunings: tunings per key (x) and tuning (y) ***");
+
+            console.log(`\n*** ${tuningGroupName}: tunings per key (x) and tuning (y) ***`);
             logRootXYArray(rootXYArray, 7);
 
             let allPivotKeysArrays = getAllPivotKeysArrays(rootXYArray);
-            console.log("\n*** harmonic tunings: keys having similar pitches in x and y tunings  ***");
+            console.log(`\n*** ${tuningGroupName}: keys having similar pitches in x and y tunings  ***`);
             logAllPivotKeysArrays(allPivotKeysArrays, 10);
         }
 
         let tuningDefs = tuningGroupDef.tunings,
-            rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(),            
+            rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(tuningGroupDef.ctor),            
             rootTunings = getRootTunings(tuningDefs, rootCentsDeltas),
             harmonicTunings = getDiagonalTunings(rootTunings);
 
-        logHarmonicTuningsInfos(harmonicTunings);
+        logHarmonicTuningsInfos(harmonicTunings, tuningGroupDef.name);
 
         return harmonicTunings;
     };
