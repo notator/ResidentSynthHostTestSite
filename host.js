@@ -1681,7 +1681,7 @@ ResSynth.host = (function(document)
                     // slider input                        
                     rangeInputElem.type = "range";
                     rangeInputElem.className = "rangeInput"; // see sliderStyleSheet.css
-                    rangeInputElem.id = name + "RangeInput";
+                    rangeInputElem.id = name + "RangeInput"; // Never reference this id! This definition is just to keep Chrome happy. Only ever use longControlTD.id, defined above.
                     rangeInputElem.twinInputElem = numberInputElem;
                     rangeInputElem.value = defaultValue;
                     rangeInputElem.defaultValue = defaultValue;
@@ -1691,7 +1691,7 @@ ResSynth.host = (function(document)
                     // number input                        
                     numberInputElem.type = "number";
                     numberInputElem.className = "numberInput";
-                    numberInputElem.id = name + "NumberInput";
+                    numberInputElem.id = name + "NumberInput"; // Never reference this id! This definition is just to keep Chrome happy. Only ever use longControlTD.id, defined above.
                     numberInputElem.twinInputElem = rangeInputElem;
                     numberInputElem.value = defaultValue;
                     numberInputElem.defaultValue = defaultValue;
