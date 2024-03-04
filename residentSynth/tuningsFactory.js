@@ -135,7 +135,7 @@ ResSynth.tuningsFactory = (function()
     //     C0 = 12, C1 = 24, C2 = 36, C3 = 48, C4 = 60, C5 = 72, C6 = 84, C7 = 96, C8 = 108, C9 = 120
     //
     // This function is used for Pythagorean and other mean-tone tunings.
-    // The "wolf fifth" is placed in the interval A#-Eb when the root is C.
+    // The "wolf fifth" is placed in the interval G#-Eb when the root is C.
     TuningsFactory.prototype.getTuningFromConstantFifthFactor = function(rootKey, factorBase)
     {
         function getTuningOffsets(rootKey, factorBase)
