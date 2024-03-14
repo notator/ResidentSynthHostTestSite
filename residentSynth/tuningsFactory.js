@@ -601,31 +601,6 @@ ResSynth.tuningsFactory = (function()
             return rootTunings;
         }  
 
-        // Returns tunings in which the midiPitch at tuning[midiKey][midiKey] is equal to
-        // the midiPitch at tuning[0][midiKey].
-        function getDiagonalTunings(rootTunings)
-        {
-            let rootTuning0 = rootTunings[0],
-                diagonalTunings = [];
-
-            for(let tuningIndex = 0; tuningIndex < rootTunings.length; tuningIndex++)
-            {
-                let rootTuning = rootTunings[tuningIndex],
-                    diagonalTuning = [],
-                    delta = rootTuning0[tuningIndex] - tuningIndex;
-
-                diagonalTuning.name = rootTuning.name;
-                for(var midiKey = 0; midiKey < rootTuning.length; midiKey++)
-                {
-                    diagonalTuning.push(rootTuning[midiKey] + delta);
-                }
-
-                diagonalTunings.push(diagonalTuning);
-
-            }
-            return diagonalTunings;
-        }
-
         function logHarmonicTuningsInfos(harmonicTunings, tuningGroupName)
         {
             // returns a 12x12 array
@@ -803,9 +778,8 @@ ResSynth.tuningsFactory = (function()
         }
 
         let tuningDefs = tuningGroupDef.tunings,
-            rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(tuningGroupDef.ctor),            
-            rootTunings = getRootTunings(tuningDefs, rootCentsDeltas),
-            harmonicTunings = getDiagonalTunings(rootTunings);
+            rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(tuningGroupDef.ctor),
+            harmonicTunings = getRootTunings(tuningDefs, rootCentsDeltas);
 
         logHarmonicTuningsInfos(harmonicTunings, tuningGroupDef.name);
 
