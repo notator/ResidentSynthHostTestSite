@@ -47,10 +47,15 @@ ResSynth.tuningsFactory = (function()
             coerce(tuning);
         },
 
-        // Returns the number of cents equivalent to the frequencyRatio
-        getCents = function(frequencyRatio)
+        // Returns the (floating point) number of Equal Temperament semitones
+        // between the two frequencies.
+        // The result will be positive if frequency1 >= frequency2,
+        // and negative if frequency1 < frequency2.
+        getSemitones = function(frequency1, frequency2)
         {
-            return 1200 * Math.log2(frequencyRatio);
+            let frequencyRatio = frequency1 / frequency2;
+
+            return 12 * Math.log2(frequencyRatio);
         },
 
         getFrequency = function(midiPitch)
@@ -65,8 +70,8 @@ ResSynth.tuningsFactory = (function()
         transposeTuningForA4Frequency = function(tuning, a4Frequency)
         {
             let currentA4Frequency = getFrequency(tuning[69]),
-                semitonesDiff = getCents(a4Frequency / currentA4Frequency) / 100;
-
+                semitonesDiff = getSemitones(currentA4Frequency, a4Frequency);
+ 
             for(let i = 0; i < 128; i++)
             {
                 tuning[i] = tuning[i] + semitonesDiff; // will be coerced to 0..<128 later
@@ -173,7 +178,7 @@ ResSynth.tuningsFactory = (function()
             let tuningOffsets = [];
             for(let i = 0; i < factors.length; i++)
             {
-                let centsOffset = getCents(factors[i]) - (i * 100);
+                let centsOffset = (getSemitones(factors[i], 1) - i) * 100;
                 tuningOffsets.push(centsOffset);
             }
 
@@ -241,7 +246,7 @@ ResSynth.tuningsFactory = (function()
             let tuning = [];
             for(let i = 0; i < frequencies.length; i++)
             {
-                tuning.push(midiA4 + (getCents(frequencies[i] / 440) / 100));
+                tuning.push(midiA4 + getSemitones(frequencies[i], 440));
             }
 
             return tuning;
@@ -281,7 +286,8 @@ ResSynth.tuningsFactory = (function()
             let tuningOffsets = [];
             for(let i = 0; i < partchFundamentals.length; ++i)
             {
-                let centsOffset = getCents(partchFundamentals[i]) - (i * 100);
+                let centsOffset = (getSemitones(partchFundamentals[i], 1) - i )* 100;
+
                 tuningOffsets.push(centsOffset);
             }
 
@@ -311,7 +317,7 @@ ResSynth.tuningsFactory = (function()
     // Returns a new 128-note tuning containing octave tunings. (A4 can be tuned to any value.)
     // The keyValuesArray is an array of arrays, each of which contains a [key, value] pair.
     // There must be more than 1 [key, value] array in the keyValuesArray.
-    // Both the keys and tha values must be strictly in ascending order in the keyValuesArray.
+    // Both the keys and the values must be strictly in ascending order in the keyValuesArray.
     // The keys must be integers.
     // The values are floating point (Midi.Cent above C0).
     // Both key and value values must:
@@ -543,7 +549,7 @@ ResSynth.tuningsFactory = (function()
                 let keyFactor = keyFactorArray[i],
                     key = keyFactor[0],
                     factor = keyFactor[1],
-                    semitonesAboveA4 = getCents(factor) / 100,
+                    semitonesAboveA4 = getSemitones(factor, 1),
                     floorSemitonesAboveA4 = Math.floor(semitonesAboveA4),
                     centsDelta = semitonesAboveA4 - floorSemitonesAboveA4;
 
@@ -694,9 +700,13 @@ ResSynth.tuningsFactory = (function()
                 function getKeysString(pivotKeysArray)
                 {
                     let rval = "";
-                    if(pivotKeysArray.length === 0)
+                    if(pivotKeysArray.length === 12)
                     {
                         rval = "ALL";
+                    }
+                    else if(pivotKeysArray.length === 0)
+                    {
+                        rval = "-";
                     }
                     else
                     {
@@ -738,18 +748,15 @@ ResSynth.tuningsFactory = (function()
 
                     for(let targetTuningIndex = 0; targetTuningIndex < rootXYArray.length; targetTuningIndex++)
                     {
-                        if(targetTuningIndex !== initialTuningIndex)
+                        let targetTuning = rootXYArray[targetTuningIndex];
+
+                        for(let keyIndex = 0; keyIndex < rootXYArray[0].length; keyIndex++)
                         {
-                            let targetTuning = rootXYArray[targetTuningIndex];
+                            let diff = targetTuning[keyIndex] - initialTuning[keyIndex];
 
-                            for(let keyIndex = 0; keyIndex < rootXYArray[0].length; keyIndex++)
+                            if((Math.abs(diff) <= 0.05))
                             {
-                                let diff = targetTuning[keyIndex] - initialTuning[keyIndex];
-
-                                if((Math.abs(diff) <= 0.05))
-                                {
-                                    pivotKeyArrays[targetTuningIndex].push(keyIndex);
-                                }
+                                pivotKeyArrays[targetTuningIndex].push(keyIndex);
                             }
                         }
                     }
