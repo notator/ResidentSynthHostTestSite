@@ -195,37 +195,35 @@ ResSynth.tuningDefs =
             // _odd-numbered_natural_harmonics_ to return 12 128 - note tunings, on 12 different root MidiKeys.
             //
             // The MidiPitches in the tuning at tuning index 0 begin with MidiPitch 0.00 at (root) MidiKey 0 (MIDI C).
-            // Each further tuning is constructed by rotating tuning[0] (horizontally in the diagram below) so that its
-            // root MidiPitch is at each MidiKey in turn, then transposing it bodily by a few cents so that its root
-            // midiPitch is equal to the midiPitch of the root key in tuning[0]. For example, the root MidiPitch in
-            // tuning[5] is at MidiKey 5, and has MidiPitch 4.71 (= MidiPitch of tuning[0][5])
-            // Each tuning continues to have _perfect_ harmonic intervals with respect to its root.
+            // Each further tuning is constructed by rotating tuning[0] (horizontally in the diagram below) so that
+            // tuning[rootKey][rootMidiKey] is always rootMidiPitch, where rootMidiPitch is rootKey + 0.00.
+            // For example, the root MidiPitch of tuning[5] is at MidiKey 5.
+            // Each tuning continues to have _perfect_ harmonic intervals with respect to its rootKey.
             // ________________________________________________________________________________________________________
             //
             //                   --- midiPitches per key (x) per tuning (y) (diagonal tunings) ---
             // Note 1: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
-            //         In other octaves, _all_ tunings are such that tuning[midiKey][rootKey] equals tuning[0][rootKey].
+            //         In other octaves, _all_ tunings are such that tuning[rootKey][rootMidiKey] equals rootMidiKey + 0.00.
             // Note 2: Internally, MidiPitches are simple floating point values: Here, for convenience, they are rounded
             //         to the nearest cent.
-            // Note 3: Each root key is tuned to the pitch it has in the C tuning. For example: in the F# tuning, at y=6
-
+            // Note 3: In accordance with the above definitions, integral midiPitches have standard equal temperament frequencies.
             //
             //                                                   midiKey
             //                     C     C#    D     D#    E     F     F#    G     G#    A     A#     B
-            //                     0     1     2     3     4     5     6     7     8     9     10    11
-            //                 ---------------------------------------------------------------------------
-            //            C   0|   0.00  1.05  2.04  2.98  3.86  4.71  5.51  7.02  7.73  8.41  9.69  10.88
-            //            C#  1|  -0.07  1.05  2.10  3.09  4.02  4.91  5.76  6.56  8.07  8.78  9.45  10.74
-            //            D   2|  -0.27  0.92  2.04  3.09  4.08  5.01  5.90  6.75  7.55  9.06  9.77  10.44
-            //            D#  3|  -0.62  0.66  1.86  2.98  4.02  5.01  5.95  6.84  7.68  8.49  9.99  10.70
-            //   tuning   E   4|  -0.41  0.27  1.55  2.75  3.86  4.91  5.90  6.84  7.73  8.57  9.38  10.88
-            // (root key) F   5|  -0.27  0.43  1.11  2.40  3.59  4.71  5.76  6.75  7.68  8.57  9.42  10.22
-            //            F#  6|  -0.97  0.53  1.24  1.92  3.20  4.40  5.51  6.56  7.55  8.49  9.38  10.22
-            //            G   7|  -0.27  0.53  2.04  2.75  3.42  4.71  5.90  7.02  8.07  9.06  9.99  10.88
-            //            G#  8|  -0.41  0.43  1.24  2.75  3.45  4.13  5.41  6.61  7.73  8.78  9.77  10.70
-            //            A   9|  -0.62  0.27  1.11  1.92  3.42  4.13  4.81  6.09  7.29  8.41  9.45  10.44
-            //            A# 10|  -0.27  0.66  1.55  2.40  3.20  4.71  5.41  6.09  7.38  8.57  9.69  10.74
-            //            B  11|  -0.07  0.92  1.86  2.75  3.59  4.40  5.90  6.61  7.29  8.57  9.77  10.88
+            //                     0     1     2     3     4     5     6     7     8     9     10     11
+            //                 ----------------------------------------------------------------------------
+            //            C   0|   0     1.05  2.04  2.98  3.86  4.71  5.51  7.02  7.73  8.41   9.69  10.88
+            //            C#  1|  -0.12  1     2.05  3.04  3.98  4.86  5.71  6.51  8.02  8.73   9.41  10.69
+            //            D   2|  -0.31  0.88  2     3.05  4.04  4.98  5.86  6.71  7.51  9.02   9.73  10.41
+            //            D#  3|  -0.59  0.69  1.88  3     4.05  5.04  5.98  6.86  7.71  8.51  10.02  10.73
+            //   tuning   E   4|  -0.27  0.41  1.69  2.88  4     5.05  6.04  6.98  7.86  8.71   9.51  11.02
+            //  (rootKey) F   5|   0.02  0.73  1.41  2.69  3.88  5     6.05  7.04  7.98  8.86   9.71  10.51
+            //            F#  6|  -0.49  1.02  1.73  2.41  3.69  4.88  6     7.05  8.04  8.98   9.86  10.71
+            //            G   7|  -0.29  0.51  2.02  2.73  3.41  4.69  5.88  7     8.05  9.04   9.98  10.86
+            //            G#  8|  -0.14  0.71  1.51  3.02  3.73  4.41  5.69  6.88  8     9.05  10.04  10.98
+            //            A   9|  -0.02  0.86  1.71  2.51  4.02  4.73  5.41  6.69  7.88  9     10.05  11.04
+            //            A# 10|   0.04  0.98  1.86  2.71  3.51  5.02  5.73  6.41  7.69  8.88  10     11.05
+            //            B  11|   0.05  1.04  1.98  2.86  3.71  4.51  6.02  6.73  7.41  8.69   9.88  11
             // _____________________________________________________________________________________________________________________________________
             //
             //                                 --- pivot keys: keys whose tuning difference is <= 0.05 in tunings x and y. ---
@@ -233,21 +231,21 @@ ResSynth.tuningDefs =
             // Note 2: The _key_ values in this table are also _absolute_, i.e.: 0=C, 1=C#, 2=D, 3=D#, 4=E, 5=F, 6=F#, 7=G, 8=G#, 9=A, 10=A#, 11=B.
             //
             //                                                                   target tuning
-            //                  C         C#        D         D#        E         F         F#        G         G#        A        A#        B
-            //                  0         1         2         3         4         5         6         7         8         9        10        11
+            //                  C         C#        D         D#        E         F         F#        G         G#        A         A#        B
+            //                  0         1         2         3         4         5         6         7         8         9         10        11
             //              ------------------------------------------------------------------------------------------------------------------------
-            //         C   0|   ALL       1         2         3,8       4,8,11    5,8       6         2,5,7,11  8         9         5,10    11
-            //         C#  1|   1         ALL       3         4,11      5         6,10      7         8         7,9,11   10        11        0,7
-            //         D   2|   2         3         ALL       5,6       6         0,7       8         0,2,6,9  10        11         0        1,6,10
-            //         D#  3|   3,8       4,11      5,6       ALL       6,7,8     8         9         6,10      8,11      0         1,11     2,6
-            //         E   4|   4,8,11    5         6         6,7,8     ALL       8,9,10   10         3,6,11    0,3,8     1         2,9      3,6,9,11
-            // initial F   5|   5,8       6,10      0,7       8         8,9,10    ALL      10,11      0,5       1,8       2,10      0,3,5,9  4,9
-            //  tuning F#  6|   6         7         8         9        10        10,11      ALL       1         2,7       3         4        5,7
-            //         G   7|   2,5,7,11  8         0,2,6,9   6,10      3,6,11    0,5       1         ALL       3,4       4         0,5      3,6,11
-            //         G#  8|   8         7,9,11   10         8,11      0,3,8     1,8       2,7       3,4       ALL       4,5       6,11     3,7,10
-            //         A   9|   9        10        11         0         1         2,10      3         4         4,5       ALL       7        8
-            //         A# 10|   5,10     11         0         1,11      2,9       0,3,5,9   4         0,5       6,11      7         ALL      9
-            //         B  11|   11        0,7       1,6,10    2,6       3,6,9,11  4,9       5,7       3,6,11    3,7,10    8         9        ALL
+            //         C   0|   ALL       1,2       2,10      3,8       7         0,4,7,10  1,7       2,5,7,11  3         0,5       0,8       0,1
+            //         C#  1|   1,2       ALL       2,3       3,11      4,9       8         1,5,8,11  2,8       0,3,6,8   4         1,6       1,9
+            //         D   2|   2,10      2,3       ALL       3,4       0,4       5,10      9         0,2,6,9   3,9       1,4,7,9   5         2,7
+            //         D#  3|   3,8       3,11      3,4       ALL       4,5       1,5       6,11      10        1,3,7,10  4,10      2,5,8,10  6
+            //         E   4|   7         4,9       0,4       4,5       ALL       5,6       2,6       0,7       11        2,4,8,11  5,11      3,6,9,11
+            // initial F   5|   0,4,7,10  8         5,10      1,5       5,6       ALL       6,7       3,7       1,8       0         0,3,5,9   0,6
+            //  tuning F#  6|   1,7       1,5,8,11  9         6,11      2,6       6,7       ALL       7,8       4,8       2,9       1         1,4,6,10
+            //         G   7|   2,5,7,11  2,8       0,2,6,9   10        0,7       3,7       7,8       ALL       8,9       5,9       3,10      2
+            //         G#  8|   3         0,3,6,8   3,9       1,3,7,10  11        1,8       4,8       8,9       ALL       9,10      6,10      4,11
+            //         A   9|   0,5       4         1,4,7,9   4,10      2,4,8,11  0         2,9       5,9       9,10      ALL       10,11     7,11
+            //         A# 10|   0,8       1,6       5         2,5,8,10  5,11      0,3,5,9   1         3,10      6,10      10,11     ALL       0,11
+            //         B  11|   0,1       1,9       2,7       6         3,6,9,11  0,6       1,4,6,10  2         4,11      7,11      0,11      ALL      
             //
             // =====================================================================================================================================
             ctor: ResSynth.tuningType.ODD_HARMONIC,
@@ -259,7 +257,7 @@ ResSynth.tuningDefs =
                         root: 48 // C key
                     },
                     {
-                        name: "Db || Perfect Major Triads:  Db-F-Ab, Ab-C-Eb, F-A-C; Perfect Fifth: B-F#",
+                        name: "C# || Perfect Major Triads:  C#-F-G#, G#-C-D#, F-A-C; Perfect Fifth: B-F#",
                         root: 49 // C# key
                     },
                     {
@@ -268,18 +266,18 @@ ResSynth.tuningDefs =
                     },
                     {
                         name: "Eb || Perfect Major Triads: Eb-G-Bb, Bb-D-F, G-B-D; Perfect Fifth: Db-Ab",
-                        root: 51 // D# key
+                        root: 51 // Eb key
                     },
                     {
                         name: "E&emsp;|| Perfect Major Triads: E-G#-B, B-D#-F#, Ab-C-Eb, ; Perfect Fifth: D-A",
                         root: 52 // E key
                     },
                     {
-                        name: "F&emsp;|| Perfect Major Triads: F-A-C, C-E-G, A-C#-E; Perfect Fifth: Eb-Bb",
+                        name: "F&emsp;|| Perfect Major Triads: F-A-C, C-E-G, A-C#-E; Perfect Fifth: D#-A#",
                         root: 53 // F key
                     },
                     {
-                        name: "Gb || Perfect Major Triads: Gb-Bb-Db, Db-F-Ab, Bb-D-F; Perfect Fifth: E-B",
+                        name: "F# || Perfect Major Triads: F#-A#-C#, Db-F-Ab, Bb-D-F; Perfect Fifth: E-B",
                         root: 54 // F# key
                     },
                     {
@@ -287,8 +285,8 @@ ResSynth.tuningDefs =
                         root: 55 // G key
                     },
                     {
-                        name: "Ab || Perfect Major Triads: Ab-C-Eb, Eb-G-Bb, C-E-G; Perfect Fifth: F#-C#",
-                        root: 56 // G# key
+                        name: "Ab || Perfect Major Triads: Ab-C-Eb, Eb-G-Bb, C-E-G; Perfect Fifth: Gb-Db",
+                        root: 56 // Ab key
                     },
                     {
                         name: "A&emsp;|| Perfect Major Triads: A-C#-E, E-G#-B, Db-F-Ab; Perfect Fifth: G-D",
@@ -296,7 +294,7 @@ ResSynth.tuningDefs =
                     },
                     {
                         name: "Bb || Perfect Major Triads: Bb-D-F, F-A-C, D-F#-A, ; Perfect Fifth: Ab-Eb",
-                        root: 58 // A# key
+                        root: 58 // Bb key
                     },
                     {
                         name: "B&emsp;|| Perfect Major Triads: B-D#-F#, F#-A#-C#, Eb-G-Bb; Perfect Fifth: A-E",
@@ -313,36 +311,35 @@ ResSynth.tuningDefs =
             // on 12 different root MidiKeys. (The primes used are: 1,3,5,7,11,13,17,19,23,29,31,37.)
             //
             // The MidiPitches in the tuning at tuning index 0 begin with MidiPitch 0.00 at (root) MidiKey 0 (MIDI C).
-            // Each further tuning is constructed by rotating tuning[0] (horizontally in the diagram below) so that its
-            // root MidiPitch is at each MidiKey in turn, then transposing it bodily by a few cents so that its root
-            // midiPitch is equal to the midiPitch of the root key in tuning[0]. For example, the root MidiPitch in
-            // tuning[5] is at MidiKey 5, and has MidiPitch 4.71 (= MidiPitch of tuning[0][5])
-            // Each tuning continues to have _perfect_ harmonic intervals with respect to its root.
+            // Each further tuning is constructed by rotating tuning[0] (horizontally in the diagram below) so that
+            // tuning[rootKey][rootMidiKey] is always rootMidiPitch, where rootMidiPitch is rootKey + 0.00.
+            // For example, the root MidiPitch of tuning[5] is at MidiKey 5.
+            // Each tuning continues to have _perfect_ harmonic intervals with respect to its rootKey.
             // ________________________________________________________________________________________________________
             //
             //                   --- midiPitches per key (x) per tuning (y) (diagonal tunings) ---
             // Note 1: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
-            //         In other octaves, _all_ tunings are such that tuning[midiKey][rootKey] equals tuning[0][rootKey].
+            //         In other octaves, _all_ tunings are such that tuning[rootKey][rootMidiKey] equals rootMidiKey + 0.00.
             // Note 2: Internally, MidiPitches are simple floating point values: Here, for convenience, they are rounded
             //         to the nearest cent.
-            // Note 3: Each root key is tuned to the pitch it has in the C tuning. For example: in the F# tuning, at y=6
+            // Note 3: In accordance with the above definitions, integral midiPitches have standard equal temperament frequencies.
             //
             //                                                   midiKey
-            //                    C     C#    D     D#    E     F     F#    G     G#    A     A#      B
+            //                    C     C#    D     D#    E     F     F#    G     G#    A     A#     B
             //                    0     1     2     3     4     5     6     7     8     9     10     11
             //                 ---------------------------------------------------------------------------
-            //            C   0|  0.00  1.05  2.51  2.98  3.86  5.51  6.28  7.02  8.41  9.69  10.30  11.45
-            //            C#  1|  0.50  1.05  2.10  3.56  4.02  4.91  6.56  7.33  8.07  9.45  10.74  11.35
-            //            D   2|  0.81  1.96  2.51  3.56  5.03  5.49  6.38  8.03  8.80  9.53  10.92  12.20
-            //            D#  3|  0.66  1.27  2.43  2.98  4.02  5.49  5.95  6.84  8.49  9.26   9.99  11.38
-            //   tuning   E   4|  0.27  1.55  2.16  3.31  3.86  4.91  6.38  6.84  7.73  9.38  10.15  10.88
-            // (root key) F   5|  0.53  1.92  3.20  3.81  4.96  5.51  6.56  8.03  8.49  9.38  11.03  11.80
-            //            F#  6|  0.57  1.30  2.69  3.97  4.58  5.73  6.28  7.33  8.80  9.26  10.15  11.80
-            //            G   7|  0.53  1.30  2.04  3.42  4.71  5.32  6.47  7.02  8.07  9.53   9.99  10.88
-            //            G#  8|  0.27  1.92  2.69  3.42  4.81  6.09  6.70  7.86  8.41  9.45  10.92  11.38
-            //            A   9|  0.66  1.55  3.20  3.97  4.71  6.09  7.38  7.98  9.14  9.69  10.74  12.20
-            //            A# 10|  0.81  1.27  2.16  3.81  4.58  5.32  6.70  7.98  8.59  9.75  10.30  11.35
-            //            B  11|  0.50  1.96  2.43  3.31  4.96  5.73  6.47  7.86  9.14  9.75  10.90  11.45
+            //            C   0|  0     1.05  2.51  2.98  3.86  5.51  6.28  7.02  8.41  9.69  10.3   11.45
+            //            C#  1|  0.45  1     2.05  3.51  3.98  4.86  6.51  7.28  8.02  9.41  10.69  11.3
+            //            D   2|  0.3   1.45  2     3.05  4.51  4.98  5.86  7.51  8.28  9.02  10.41  11.69
+            //            D#  3|  0.69  1.3   2.45  3     4.05  5.51  5.98  6.86  8.51  9.28  10.02  11.41
+            //   tuning   E   4|  0.41  1.69  2.3   3.45  4     5.05  6.51  6.98  7.86  9.51  10.28  11.02
+            // (root key) F   5|  0.02  1.41  2.69  3.3   4.45  5     6.05  7.51  7.98  8.86  10.51  11.28
+            //            F#  6|  0.28  1.02  2.41  3.69  4.3   5.45  6     7.05  8.51  8.98   9.86  11.51
+            //            G   7|  0.51  1.28  2.02  3.41  4.69  5.3   6.45  7     8.05  9.51   9.98  10.86
+            //            G#  8| -0.14  1.51  2.28  3.02  4.41  5.69  6.3   7.45  8     9.05  10.51  10.98
+            //            A   9| -0.02  0.86  2.51  3.28  4.02  5.41  6.69  7.3   8.45  9     10.05  11.51
+            //            A# 10|  0.51  0.98  1.86  3.51  4.28  5.02  6.41  7.69  8.3   9.45  10     11.05
+            //            B  11|  0.05  1.51  1.98  2.86  4.51  5.28  6.02  7.41  8.69  9.3   10.45  11
             // _____________________________________________________________________________________________________________________________________
             //
             //                                 --- pivot keys: keys whose tuning difference is <= 0.05 in tunings x and y. ---
@@ -352,19 +349,19 @@ ResSynth.tuningDefs =
             //                                                                   target tuning
             //                  C         C#        D         D#        E         F         F#        G         G#        A        A#       B
             //                  0         1         2         3         4         5         6         7         8         9        10       11
-            //              -----------------------------------------------------------------------------------------------------------------------
-            //         C   0|   ALL       1         2,5       3,5       4         5         6         7         8         9        10       11
-            //         C#  1|   1         ALL       3         4,11      5         0,6       7         0,8       9,11      10       11       0
-            //         D   2|   2,5       3         ALL       5         6         1,5,7     8         9         1,10      7,11     0,7      1,10
-            //         D#  3|   3,5       4,11      5         ALL       7         5,8       1,9       1,10      11        0        1,11     2
-            //         E   4|   4         5         6         7         ALL       9         10        11        0         1        2        3
-            // initial F   5|   5         0,6       1,5,7     5,8       9         ALL       0,11      0         1         2,7      3,7      0,1,4
-            //  tuning F#  6|   6         7         8         1,9       10        0,11      ALL       0,1       2         3        1,4      5
-            //         G   7|   7         0,8       9         1,10      11        0         0,1       ALL       3         4        1,5      0,6
-            //         G#  8|   8         9,11      1,10      11        0         1         2         3         ALL       5        6,11     1,7,10
-            //         A   9|   9         10        7,11      0         1         2,7       3         4         5         ALL      7        8
-            //         A# 10|   10        11        0,7       1,11      2         3,7       1,4       1,5       6,11      7        ALL      9
-            //         B  11|   11        0         1,10      2         3         0,1,4     5         0,6       1,7,10    8        9        ALL
+            //              ----------------------------------------------------------------------------------------------------------------------
+            //         C   0|   ALL       1         -         3,5,11    7,10      0         1,7       7         3,6       0,2,8     -         0
+            //         C#  1|   1         ALL       2         -         0,4,6     8,11      1         2,8       8         4,7       1,3,9     -
+            //         D   2|   -         2         ALL       3         -         1,5,7     0,9       2         3,9       9         5,8       2,4,10
+            //         D#  3|   3,5,11    -         3         ALL       4         -         2,6,8     1,10      3         4,10      10        6,9
+            //         E   4|   7,10      0,4,6     -         4         ALL       5         -         3,7,9     2,11      4         5,11      11
+            // initial F   5|   0         8,11      1,5,7     -         5         ALL       6         -         4,8,10    0,3       5         0,6
+            //  tuning F#  6|   1,7       1         0,9       2,6,8     -         6         ALL       7         -         5,9,11    1,4       6
+            //         G   7|   7         2,8       2         1,10      3,7,9     -         7         ALL       8         -         0,6,10    2,5
+            //         G#  8|   3,6       8         3,9       3         2,11      4,8,10    -         8         ALL       9         -         1,7,11
+            //         A   9|   0,2,8     4,7       9         4,10      4         0,3       5,9,11    -         9         ALL       10        -
+            //         A# 10|   -         1,3,9     5,8       10        5,11      5         1,4       0,6,10    -         10        ALL       11
+            //         B  11|   0         -         2,4,10    6,9       11        0,6       6         2,5       1,7,11    -         11        ALL     
             //
             // =====================================================================================================================================
             ctor: ResSynth.tuningType.PRIME_HARMONIC,
@@ -396,7 +393,7 @@ ResSynth.tuningDefs =
                         root: 53 // F key
                     },
                     {
-                        name: "Gb || Perfect Major Triad Gb-Bb-Db",
+                        name: "F# || Perfect Major Triad F#-A#-C#",
                         root: 54 // F# key
                     },
                     {
@@ -405,7 +402,7 @@ ResSynth.tuningDefs =
                     },
                     {
                         name: "Ab || Perfect Major Triad Ab-C-Eb",
-                        root: 56 // G# key
+                        root: 56 // Ab key
                     },
                     {
                         name: "A&emsp;|| Perfect Major Triad A-C#-E",
@@ -413,7 +410,7 @@ ResSynth.tuningDefs =
                     },
                     {
                         name: "Bb || Perfect Major Triad Bb-D-F",
-                        root: 58 // A# key
+                        root: 58 // Bb key
                     },
                     {
                         name: "B&emsp;|| Perfect Major Triad B-D#-F#",
@@ -602,7 +599,7 @@ ResSynth.tuningDefs =
                         root: 2
                     },
                     {
-                        name: "Partch root D#",
+                        name: "Partch root Eb",
                         root: 3
                     },
                     {
@@ -630,7 +627,7 @@ ResSynth.tuningDefs =
                         root: 9
                     },
                     {
-                        name: "Partch root A#",
+                        name: "Partch root Bb",
                         root: 10
                     },
                     {
