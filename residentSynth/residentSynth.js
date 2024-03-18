@@ -759,6 +759,8 @@ ResSynth.residentSynth = (function(window)
                             }
                         case tuningType.ODD_HARMONIC:
                         case tuningType.PRIME_HARMONIC:
+                        case tuningType.INVERTED_ODD_HARMONIC:
+                        case tuningType.INVERTED_PRIME_HARMONIC:
                             {
                                 let tunings = tuningsFactory.getHarmonicTunings(tuningGroupDef);
 
