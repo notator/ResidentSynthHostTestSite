@@ -26,8 +26,7 @@ ResSynth.tuningType =
     PRIME_HARMONIC: 3,
     WARPED_OCTAVES: 4,
     WARPED_GAMUT: 5,
-    PARTCH: 6,
-    BAROQUE: 7
+    BAROQUE: 6
 };
 
 // All tunings are initially related to standard A4=440Hz.
@@ -250,6 +249,21 @@ ResSynth.tuningDefs =
             // =====================================================================================================================================
             ctor: ResSynth.tuningType.ODD_HARMONIC,
             name: "odd harmonic tunings",
+            keyFactorArray: 
+                [
+                    [57, 1], // A
+                    [64, 3 / 2], // E(5th above A)
+                    [61, 5 / 4], // C# (3rd above A)
+                    [67, 7 / 4], // G
+                    [59, 9 / 8], // B (5th above E)
+                    [63, 11 / 8], // D#
+                    [66, 13 / 8], // F#
+                    [68, 15 / 8], // G# (5th above C#, 3rd above E)
+                    [58, 17 / 16], // A#
+                    [60, 19 / 16], // C
+                    [62, 21 / 16], // D (5th above G)
+                    [65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16.
+                ],
             tunings:
                 [
                     {
@@ -366,6 +380,21 @@ ResSynth.tuningDefs =
             // =====================================================================================================================================
             ctor: ResSynth.tuningType.PRIME_HARMONIC,
             name: "prime harmonic tunings",
+            keyFactorArray:
+                [
+                    [57, 1], // A
+                    [64, 3 / 2], // E(5th above A)
+                    [61, 5 / 4], // C# (3rd above A)
+                    [66, 7 / 4], // F#
+                    [62, 11 / 8], // D
+                    [65, 13 / 8], // F
+                    [58, 17 / 16], // A#
+                    [60, 19 / 16], // C
+                    [63, 23 / 16], // D#
+                    [67, 29 / 16], // G
+                    [68, 31 / 16], // G#
+                    [59, 37 / 32]  // B
+                ],
             tunings:
                 [
                     {
@@ -575,64 +604,6 @@ ResSynth.tuningDefs =
                                 [72, 72],
                                 [127, 127]
                             ]
-                    }
-                ]
-        },
-        // Partch
-        {
-            // This tuning group uses the following constructor:
-            //   tuning = getPartchTuning(root);
-            ctor: ResSynth.tuningType.PARTCH,
-            name: "Partch tunings (all with A4=440Hz)",
-            tunings:
-                [
-                    {
-                        name: "Partch root C",
-                        root: 0
-                    },
-                    {
-                        name: "Partch root C#",
-                        root: 1
-                    },
-                    {
-                        name: "Partch root D",
-                        root: 2
-                    },
-                    {
-                        name: "Partch root Eb",
-                        root: 3
-                    },
-                    {
-                        name: "Partch root E",
-                        root: 4
-                    },
-                    {
-                        name: "Partch root F",
-                        root: 5
-                    },
-                    {
-                        name: "Partch root F#",
-                        root: 6
-                    },
-                    {
-                        name: "Partch root G",
-                        root: 7
-                    },
-                    {
-                        name: "Partch root G#",
-                        root: 8
-                    },
-                    {
-                        name: "Partch root A",
-                        root: 9
-                    },
-                    {
-                        name: "Partch root Bb",
-                        root: 10
-                    },
-                    {
-                        name: "Partch root B",
-                        root: 11
                     }
                 ]
         },

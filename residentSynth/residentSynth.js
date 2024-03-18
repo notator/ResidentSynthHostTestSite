@@ -718,19 +718,6 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case tuningType.PARTCH:
-                            {
-                                for(let k = 0; k < tuningDefs.length; k++)
-                                {
-                                    let tuningDef = tuningDefs[k],
-                                        root = tuningDef.root,
-                                        tuning = tuningsFactory.getPartchTuning(root);
-
-                                    tuning.name = tuningDef.name;
-                                    tuningGroup.push(tuning);
-                                }
-                                break;
-                            }
                         case tuningType.WARPED_OCTAVES:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)

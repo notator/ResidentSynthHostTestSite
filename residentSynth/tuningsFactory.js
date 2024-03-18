@@ -261,59 +261,6 @@ ResSynth.tuningsFactory = (function()
         return tuning;
     };
 
-    // Returns a 128-note tuning (containing octave tunings) tuned according to Harry Partch's scale with A4 tuned to 440Hz.
-    // The rootKey (which is allocated a MidiPitch of rootKey) is an integer in range [0..11].
-    // Keys below the rootKey are allocated the same MidiPitch value as the rootKey.
-    TuningsFactory.prototype.getPartchTuning = function(rootKey)
-    {
-        function getPartchETTuningOffsets(rootKey)
-        {
-            const partchFundamentals = [
-                1.0 / 1,
-                16.0 / 15,
-                9.0 / 8,
-                6.0 / 5,
-                5.0 / 4,
-                4.0 / 3,
-                7.0 / 5,
-                3.0 / 2,
-                8.0 / 5,
-                5.0 / 3,
-                16.0 / 9,
-                15.0 / 8
-            ];
-
-            let tuningOffsets = [];
-            for(let i = 0; i < partchFundamentals.length; ++i)
-            {
-                let centsOffset = (getSemitones(partchFundamentals[i], 1) - i )* 100;
-
-                tuningOffsets.push(centsOffset);
-            }
-
-            // rotate the tuningOffsets until tuningOffsets[0] (=0) is at newTuningOffsets[rootKey].
-            let rotatedTuningOffsets = [];
-            for(let i = 0; i < 12; i++)
-            {
-                let newIndex = (i + rootKey) % 12;
-                rotatedTuningOffsets[newIndex] = tuningOffsets[i];
-            }
-
-            return rotatedTuningOffsets;
-        }
-
-        console.assert(Number.isInteger(rootKey) && rootKey >= 0 && rootKey < 12);
-
-        let C0_TuningOffsets = getPartchETTuningOffsets(rootKey),
-            tuning = getTuningFromETOffsets(C0_TuningOffsets);
-
-        transposeTuningForA4Frequency(tuning, 440);
-
-        finalizeTuning(tuning);
-
-        return tuning;
-    };
-
     // Returns a new 128-note tuning containing octave tunings. (A4 can be tuned to any value.)
     // The keyValuesArray is an array of arrays, each of which contains a [key, value] pair.
     // There must be more than 1 [key, value] array in the keyValuesArray.
@@ -501,47 +448,14 @@ ResSynth.tuningsFactory = (function()
     // See comment on Harmonic Tunings in tuningDefs.js
     TuningsFactory.prototype.getHarmonicTunings = function(tuningGroupDef)
     {
-         // Returns the centDelta values in ascending order from the root key.
-        function getRootCentsDeltasForHarmonicTuning(ctor)
+        // Returns the centDelta values in ascending order from the root key.
+        // The keyFactorArray contains arrays of the form [key, fraction] in which:
+        //   1. the divisors are such that the resulting fraction will be
+        //      in the range 1 <= value < 2, so that all frequencies will be in one octave.
+        //   2. The keys are arranged so that the frequencies will sort into ascending order.
+        function getRootCentsDeltasForHarmonicTuning(keyFactorArray)
         {
-            // In both keyFactorArrays:
-            //   1. the divisors are such that the resulting fraction will be
-            //      in the range 1 <= value < 2, so that all frequencies will be in one octave.
-            //   2. The keys are arranged so that the frequencies will sort into ascending order.
-            const
-                oddKeyFactorArray =
-                [
-                    [57, 1], // A
-                    [64, 3 / 2], // E(5th above A)
-                    [61, 5 / 4], // C# (3rd above A)
-                    [67, 7 / 4], // G
-                    [59, 9 / 8], // B (5th above E)
-                    [63, 11 / 8], // D#
-                    [66, 13 / 8], // F#
-                    [68, 15 / 8], // G# (5th above C#, 3rd above E)
-                    [58, 17 / 16], // A#
-                    [60, 19 / 16], // C
-                    [62, 21 / 16], // D (5th above G)
-                    [65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16.
-                ],
-                primeKeyFactorArray =
-                [
-                    [57, 1], // A
-                    [64, 3 / 2], // E(5th above A)
-                    [61, 5 / 4], // C# (3rd above A)
-                    [66, 7 / 4], // F#
-                    [62, 11 / 8], // D
-                    [65, 13 / 8], // F
-                    [58, 17 / 16], // A#
-                    [60, 19 / 16], // C
-                    [63, 23 / 16], // D#
-                    [67, 29 / 16], // G
-                    [68, 31 / 16], // G#
-                    [59, 37 / 32]  // B
-                ];
-
-            let keyFactorArray = (ctor === ResSynth.tuningType.ODD_HARMONIC) ? oddKeyFactorArray: primeKeyFactorArray,
-                rootKey = keyFactorArray[0][0],
+            let rootKey = keyFactorArray[0][0],
                 keyCentsDeltas = [];
 
             for(let i = 0; i < keyFactorArray.length; i++)
@@ -549,11 +463,11 @@ ResSynth.tuningsFactory = (function()
                 let keyFactor = keyFactorArray[i],
                     key = keyFactor[0],
                     factor = keyFactor[1],
-                    semitonesAboveA4 = getSemitones(factor, 1),
-                    floorSemitonesAboveA4 = Math.floor(semitonesAboveA4),
-                    centsDelta = semitonesAboveA4 - floorSemitonesAboveA4;
+                    semitonesAboveRoot = getSemitones(factor, 1),
+                    floorSemitonesAboveRoot = Math.floor(semitonesAboveRoot),
+                    centsDelta = semitonesAboveRoot - floorSemitonesAboveRoot;
 
-                if(floorSemitonesAboveA4 < (key - rootKey))
+                if(floorSemitonesAboveRoot < (key - rootKey))
                 {
                     centsDelta -= 1;
                 }
@@ -785,7 +699,7 @@ ResSynth.tuningsFactory = (function()
         }
 
         let tuningDefs = tuningGroupDef.tunings,
-            rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(tuningGroupDef.ctor),
+            rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(tuningGroupDef.keyFactorArray),
             harmonicTunings = getRootTunings(tuningDefs, rootCentsDeltas);
 
         logHarmonicTuningsInfos(harmonicTunings, tuningGroupDef.name);
