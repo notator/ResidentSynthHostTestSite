@@ -535,51 +535,51 @@ ResSynth.tuningDefs =
             tunings:
                 [
                     {
-                        name: "C&emsp;|| Perfect Minor Triads: F-Ab-C, Bb-Db-F, C#-E-G#; Perfect Fifth: G-D",
+                        name: "C&emsp;|| Perfect Minor Triads: Bb-Db-F, C#-E-G#, F-Ab-C; Perfect Fifth: G-D",
                         root: 48 // C key
                     },
                     {
-                        name: "C# || Perfect Minor Triads: Gb-A-Db, B-D-F#, D-F-A; Perfect Fifth: Ab-Eb",
+                        name: "C# || Perfect Minor Triads: B-D-F#, D-F-A, Gb-A-Db; Perfect Fifth: Ab-Eb",
                         root: 49 // C# key
                     },
                     {
-                        name: "D&emsp;|| Perfect Minor Triads: G-Bb-D, C-Eb-G, Eb-Gb-Bb; Perfect Fifth: A-E",
+                        name: "D&emsp;|| Perfect Minor Triads: C-Eb-G, Eb-Gb-Bb, G-Bb-D; Perfect Fifth: A-E",
                         root: 50 // D key
                     },
                     {
-                        name: "Eb || Perfect Minor Triads: G#-B-D#, C#-E-G#, E-G-B; Perfect Fifth: Bb-F",
+                        name: "Eb || Perfect Minor Triads: C#-E-G#, E-G-B, G#-B-D#; Perfect Fifth: Bb-F",
                         root: 51 // Eb key
                     },
                     {
-                        name: "E&emsp;|| Perfect Minor Triads: A-C-E, D-F-A, F-Ab-C; Perfect Fifth: B-F#",
+                        name: "E&emsp;|| Perfect Minor Triads: D-F-A, F-Ab-C, A-C-E; Perfect Fifth: B-F#",
                         root: 52 // E key
                     },
                     {
-                        name: "F&emsp;|| Perfect Minor Triads: Bb-Db-F, Eb-Gb-Bb, F#-A-C#; Perfect Fifth: C-G",
+                        name: "F&emsp;|| Perfect Minor Triads: Eb-Gb-Bb, F#-A-C#, Bb-Db-F; Perfect Fifth: C-G",
                         root: 53 // F key
                     },
                     {
-                        name: "F# || Perfect Minor Triads: B-D-F#, E-G-B, G-Bb-D; Perfect Fifth: C#-G#",
+                        name: "F# || Perfect Minor Triads: E-G-B, G-Bb-D, B-D-F#; Perfect Fifth: C#-G#",
                         root: 54 // F# key
                     },
                     {
-                        name: "G&emsp;|| Perfect Minor Triads: C-Eb-G, F-Ab-C, G#-B-D#; Perfect Fifth: D-A",
+                        name: "G&emsp;|| Perfect Minor Triads: F-Ab-C, G#-B-D#, C-Eb-G; Perfect Fifth: D-A",
                         root: 55 // G key
                     },
                     {
-                        name: "Ab || Perfect Minor Triads: Db-E-Ab, F#-A-C#, A-C-E; Perfect Fifth: Eb-Bb",
+                        name: "Ab || Perfect Minor Triads: F#-A-C#, A-C-E, Db-E-Ab; Perfect Fifth: Eb-Bb",
                         root: 56 // Ab key
                     },
                     {
-                        name: "A&emsp;|| Perfect Minor Triads: D-F-A, G-Bb-D, Bb-Db-F; Perfect Fifth: E-B",
+                        name: "A&emsp;|| Perfect Minor Triads: G-Bb-D, Bb-Db-F, D-F-A; Perfect Fifth: E-B",
                         root: 57 // A key
                     },
                     {
-                        name: "Bb || Perfect Minor Triads: Eb-Gb-Bb, G#-B-D#, B-D-F#; Perfect Fifth: F-C",
+                        name: "Bb || Perfect Minor Triads: G#-B-D#, B-D-F#, Eb-Gb-Bb; Perfect Fifth: F-C",
                         root: 58 // Bb key
                     },
                     {
-                        name: "B&emsp;|| Perfect Minor Triads: E-G-B, A-C-E, C-Eb-G; Perfect Fifth: Gb-Db",
+                        name: "B&emsp;|| Perfect Minor Triads: A-C-E, C-Eb-G, E-G-B; Perfect Fifth: F#-C#",
                         root: 59 // B key
                     }
                 ]
