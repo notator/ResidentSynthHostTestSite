@@ -53,9 +53,10 @@ ResSynth.tuningsFactory = (function()
         // and negative if frequency1 < frequency2.
         getSemitones = function(frequency1, frequency2)
         {
-            let frequencyRatio = frequency1 / frequency2;
+            let frequencyRatio = frequency1 / frequency2,
+                equalTemperamentSemitones = 12 * Math.log2(frequencyRatio); // log base 2
 
-            return 12 * Math.log2(frequencyRatio);
+            return equalTemperamentSemitones; 
         },
 
         getFrequency = function(midiPitch)
