@@ -22,7 +22,7 @@ ResSynth.tuningType =
 {
     CONSTANT_FIFTH_FACTOR: 0,
     CONSTANT_MIDI_KEY_FACTOR: 1,
-    ODD_HARMONIC: 2,    
+    ODD_HARMONIC: 2,
     PRIME_HARMONIC: 3,
     INVERTED_ODD_HARMONIC: 4,
     INVERTED_PRIME_HARMONIC: 5,
@@ -318,6 +318,140 @@ ResSynth.tuningDefs =
                     }
                 ]
         },
+        // Inverted Odd Harmonic tunings
+        {
+            // Constructor:   tunings = getHarmonicTunings(tuningGroupDef);
+            // All harmonic tuning types use the same constructor, but with different arguments.
+            // The constructor returns 12 128-note tunings, on 12 different root MidiKeys.
+            //
+            // The MidiPitches in the tuning at tuning index 0 begin with MidiPitch 0.00 at (root) MidiKey 0 (MIDI C).
+            // Each further tuning is constructed by rotating tuning[0] (horizontally in the diagram below) so that
+            // tuning[rootKey][rootMidiKey] is always rootMidiPitch, where rootMidiPitch is rootKey + 0.00.
+            // For example, the root MidiPitch of tuning[5] is at MidiKey 5.
+            // Each tuning has _perfect_ harmonic intervals with respect to its rootKey.
+            // --------------------------------------------------------------------------------------------------------
+            // Inverted harmonic tunings are constructed using the first 12 odd-numbered natural harmonics _below_ each root,
+            // as if the harmonic is, in fact, the root: The factors are the reciprocals of the corresponding odd harmonic
+            // factors multiplied by two. The key numbers correspond to the inverted intervals re the root, transposed an
+            // octave higher. (See below.)
+            //
+            //                   --- midiPitches per key (x) per tuning (y) (diagonal tunings) ---
+            // Note 1: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
+            //         In other octaves, _all_ tunings are such that tuning[rootKey][rootMidiKey] equals rootMidiKey + 0.00.
+            // Note 2: Internally, MidiPitches are simple floating point values: Here, for convenience, they are rounded
+            //         to the nearest cent.
+            // Note 3: In accordance with the above definitions, integral midiPitches have standard equal temperament frequencies.
+            //
+            //                                                   midiKey
+            //                     C     C#    D     D#    E     F     F#    G     G#    A     A#     B
+            //                     0     1     2     3     4     5     6     7     8     9     10     11
+            //                 ----------------------------------------------------------------------------
+            //            C   0|  0      1.12  2.31  3.59  4.27  4.98  6.49  7.29  8.14  9.02   9.96  10.95
+            //            C#  1|  -0.05  1     2.12  3.31  4.59  5.27  5.98  7.49  8.29  9.14  10.02  10.96
+            //            D   2|  -0.04  0.95  2     3.12  4.31  5.59  6.27  6.98  8.49  9.29  10.14  11.02
+            //            D#  3|  0.02   0.96  1.95  3     4.12  5.31  6.59  7.27  7.98  9.49  10.29  11.14
+            //   tuning   E   4|  0.14   1.02  1.96  2.95  4     5.12  6.31  7.59  8.27  8.98  10.49  11.29
+            //  (rootKey) F   5|  0.29   1.14  2.02  2.96  3.95  5     6.12  7.31  8.59  9.27   9.98  11.49
+            //            F#  6|  0.49   1.29  2.14  3.02  3.96  4.95  6     7.12  8.31  9.59  10.27  10.98
+            //            G   7|  -0.02  1.49  2.29  3.14  4.02  4.96  5.95  7     8.12  9.31  10.59  11.27
+            //            G#  8|  0.27   0.98  2.49  3.29  4.14  5.02  5.96  6.95  8     9.12  10.31  11.59
+            //            A   9|  0.59   1.27  1.98  3.49  4.29  5.14  6.02  6.96  7.95  9     10.12  11.31
+            //            A# 10|  0.31   1.59  2.27  2.98  4.49  5.29  6.14  7.02  7.96  8.95  10     11.12
+            //            B  11|  0.12   1.31  2.59  3.27  3.98  5.49  6.29  7.14  8.02  8.96   9.95  11
+            // -----------------------------------------------------------------------------------------------------------------------------------
+            //
+            //                                 --- pivot keys: keys whose tuning difference is <= 0.05 in tunings x and y. ---
+            // Note 1: The key values are mirrored along the "ALL" diagonal. (Either the x or y tuning can be thought of as the target).
+            // Note 2: The _key_ values in this table are also _absolute_, i.e.: 0=C, 1=C#, 2=D, 3=D#, 4=E, 5=F, 6=F#, 7=G, 8=G#, 9=A, 10=A#, 11=B.
+            //                                                                   target tuning
+            //                  C         C#        D         D#        E         F         F#        G         G#        A         A#        B
+            //                  0         1         2         3         4         5         6         7         8         9         10        11
+            //              ------------------------------------------------------------------------------------------------------------------------
+            //         C   0|   ALL       0,11      0,4       0,7       9         1,5,7,10  5,11      0,2,5,8   5         4,9       2,10      10,11
+            //         C#  1|   0,11      ALL       0,1       1,5       1,8       10        2,6,8,11  0,6       1,3,6,9   6         5,10      3,11
+            //         D   2|   0,4       0,1       ALL       1,2       2,6       2,9       11        0,3,7,9   1,7       2,4,7,10  7         6,11
+            //         D#  3|   0,7       1,5       1,2       ALL       2,3       3,7       3,10      0         1,4,8,10  2,8       3,5,8,11  8
+            //         E   4|   9         1,8       2,6       2,3       ALL       3,4       4,8       4,11      1         2,5,9,11  3,9       0,4,6,9
+            // initial F   5|   1,5,7,10  10        2,9       3,7       3,4       ALL       4,5       5,9       0,5       2         0,3,6,10  4,10
+            //  tuning F#  6|   5,11      2,6,8,11  11        3,10      4,8       4,5       ALL       5,6       6,10      1,6       3         1,4,7,11
+            //         G   7|   0,2,5,8   0,6       0,3,7,9   0         4,11      5,9       5,6       ALL       6,7       7,11      2,7       4
+            //         G#  8|   5         1,3,6,9   1,7       1,4,8,10  1         0,5       6,10      6,7       ALL       7,8       0,8       3,8
+            //         A   9|   4,9       6         2,4,7,10  2,8       2,5,9,11  2         1,6       7,11      7,8       ALL       8,9       1,9
+            //         A# 10|   2,10      5,10      7         3,5,8,11  3,9       0,3,6,10  3         2,7       0,8       8,9       ALL       9,10
+            //         B  11|   10,11     3,11      6,11      8         0,4,6,9   4,10      1,4,7,11  4         3,8       1,9       9,10      ALL     
+            //
+            // =====================================================================================================================================
+            ctor: ResSynth.tuningType.INVERTED_ODD_HARMONIC,
+            name: "inverted odd harmonic tunings",
+            keyFactorArray:
+                [
+                    // These factors are the reciprocals of the corresponding odd harmonic factors multiplied by two.
+                    // The key numbers correspond to the inverted intervals re the root, transposed an octave higher.
+                    [57, 1],       // A                             odd: [57, 1], // A
+                    [62, 4 / 3],   // D(5th below, 4th above A)     odd: [64, 3 / 2], // E(5th above A)
+                    [65, 8 / 5],   // F (3rd below, 6th above A)    odd: [61, 5 / 4], // C# (3rd above A)
+                    [59, 8 / 7],   // B                             odd: [67, 7 / 4], // G
+                    [67, 16 / 9],  // G (5th below, 4th above D)    odd: [59, 9 / 8], // B (5th above E)
+                    [63, 16 / 11], // D#                            odd: [63, 11 / 8], // D#
+                    [60, 16 / 13], // C                             odd: [66, 13 / 8], // F#
+                    [58, 16 / 15], // A# (5th below F, 3rd below D) odd: [68, 15 / 8], // G# (5th above C#, 3rd above E)
+                    [68, 32 / 17], // G#                            odd: [58, 17 / 16], // A#
+                    [66, 32 / 19], // F#                            odd: [60, 19 / 16], // C
+                    [64, 32 / 21], // E (5th below, 4th above B)    odd: [62, 21 / 16], // D (5th above G)
+                    [61, 32 / 25]  // C# (3rd below, 6th above F)   odd: [65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16.
+                ],
+            tunings:
+                [
+                    {
+                        name: "C&emsp;|| Perfect Minor Triads: Bb-Db-F, C#-E-G#, F-Ab-C; Perfect Fifth: G-D",
+                        root: 48 // C key
+                    },
+                    {
+                        name: "C# || Perfect Minor Triads: B-D-F#, D-F-A, Gb-A-Db; Perfect Fifth: Ab-Eb",
+                        root: 49 // C# key
+                    },
+                    {
+                        name: "D&emsp;|| Perfect Minor Triads: C-Eb-G, Eb-Gb-Bb, G-Bb-D; Perfect Fifth: A-E",
+                        root: 50 // D key
+                    },
+                    {
+                        name: "Eb || Perfect Minor Triads: C#-E-G#, E-G-B, G#-B-D#; Perfect Fifth: Bb-F",
+                        root: 51 // Eb key
+                    },
+                    {
+                        name: "E&emsp;|| Perfect Minor Triads: D-F-A, F-Ab-C, A-C-E; Perfect Fifth: B-F#",
+                        root: 52 // E key
+                    },
+                    {
+                        name: "F&emsp;|| Perfect Minor Triads: Eb-Gb-Bb, F#-A-C#, Bb-Db-F; Perfect Fifth: C-G",
+                        root: 53 // F key
+                    },
+                    {
+                        name: "F# || Perfect Minor Triads: E-G-B, G-Bb-D, B-D-F#; Perfect Fifth: C#-G#",
+                        root: 54 // F# key
+                    },
+                    {
+                        name: "G&emsp;|| Perfect Minor Triads: F-Ab-C, G#-B-D#, C-Eb-G; Perfect Fifth: D-A",
+                        root: 55 // G key
+                    },
+                    {
+                        name: "Ab || Perfect Minor Triads: F#-A-C#, A-C-E, Db-E-Ab; Perfect Fifth: Eb-Bb",
+                        root: 56 // Ab key
+                    },
+                    {
+                        name: "A&emsp;|| Perfect Minor Triads: G-Bb-D, Bb-Db-F, D-F-A; Perfect Fifth: E-B",
+                        root: 57 // A key
+                    },
+                    {
+                        name: "Bb || Perfect Minor Triads: G#-B-D#, B-D-F#, Eb-Gb-Bb; Perfect Fifth: F-C",
+                        root: 58 // Bb key
+                    },
+                    {
+                        name: "B&emsp;|| Perfect Minor Triads: A-C-E, C-Eb-G, E-G-B; Perfect Fifth: F#-C#",
+                        root: 59 // B key
+                    }
+                ]
+        },
         // Prime Harmonic tunings
         {
             // Constructor:   tunings = getHarmonicTunings(tuningGroupDef);
@@ -445,141 +579,6 @@ ResSynth.tuningDefs =
                     },
                     {
                         name: "B&emsp;|| Perfect Major Triad B-D#-F#",
-                        root: 59 // B key
-                    }
-                ]
-        },
-        // Inverted Odd Harmonic tunings
-        {
-            // Constructor:   tunings = getHarmonicTunings(tuningGroupDef);
-            // All harmonic tuning types use the same constructor, but with different arguments.
-            // The constructor returns 12 128-note tunings, on 12 different root MidiKeys.
-            //
-            // The MidiPitches in the tuning at tuning index 0 begin with MidiPitch 0.00 at (root) MidiKey 0 (MIDI C).
-            // Each further tuning is constructed by rotating tuning[0] (horizontally in the diagram below) so that
-            // tuning[rootKey][rootMidiKey] is always rootMidiPitch, where rootMidiPitch is rootKey + 0.00.
-            // For example, the root MidiPitch of tuning[5] is at MidiKey 5.
-            // Each tuning has _perfect_ harmonic intervals with respect to its rootKey.
-            // --------------------------------------------------------------------------------------------------------
-            // Inverted harmonic tunings are constructed using the first 12 odd-numbered natural harmonics _below_ each root,
-            // as if the harmonic is, in fact, the root: The factors are the reciprocals of the corresponding odd harmonic
-            // factors multiplied by two. The key numbers correspond to the inverted intervals re the root, transposed an
-            // octave higher. (See below.)
-            //
-            //                   --- midiPitches per key (x) per tuning (y) (diagonal tunings) ---
-            // Note 1: In the lowest octave, all tunings are actually coerced to be greater than or equal to 0.
-            //         In other octaves, _all_ tunings are such that tuning[rootKey][rootMidiKey] equals rootMidiKey + 0.00.
-            // Note 2: Internally, MidiPitches are simple floating point values: Here, for convenience, they are rounded
-            //         to the nearest cent.
-            // Note 3: In accordance with the above definitions, integral midiPitches have standard equal temperament frequencies.
-            //
-            //                                                   midiKey
-            //                     C     C#    D     D#    E     F     F#    G     G#    A     A#     B
-            //                     0     1     2     3     4     5     6     7     8     9     10     11
-            //                 ----------------------------------------------------------------------------
-            //            C   0|   0     1.05  2.04  2.98  3.86  4.71  5.51  7.02  7.73  8.41   9.69  10.88
-            //            C#  1|  -0.12  1     2.05  3.04  3.98  4.86  5.71  6.51  8.02  8.73   9.41  10.69
-            //            D   2|  -0.31  0.88  2     3.05  4.04  4.98  5.86  6.71  7.51  9.02   9.73  10.41
-            //            D#  3|  -0.59  0.69  1.88  3     4.05  5.04  5.98  6.86  7.71  8.51  10.02  10.73
-            //   tuning   E   4|  -0.27  0.41  1.69  2.88  4     5.05  6.04  6.98  7.86  8.71   9.51  11.02
-            //  (rootKey) F   5|   0.02  0.73  1.41  2.69  3.88  5     6.05  7.04  7.98  8.86   9.71  10.51
-            //            F#  6|  -0.49  1.02  1.73  2.41  3.69  4.88  6     7.05  8.04  8.98   9.86  10.71
-            //            G   7|  -0.29  0.51  2.02  2.73  3.41  4.69  5.88  7     8.05  9.04   9.98  10.86
-            //            G#  8|  -0.14  0.71  1.51  3.02  3.73  4.41  5.69  6.88  8     9.05  10.04  10.98
-            //            A   9|  -0.02  0.86  1.71  2.51  4.02  4.73  5.41  6.69  7.88  9     10.05  11.04
-            //            A# 10|   0.04  0.98  1.86  2.71  3.51  5.02  5.73  6.41  7.69  8.88  10     11.05
-            //            B  11|   0.05  1.04  1.98  2.86  3.71  4.51  6.02  6.73  7.41  8.69   9.88  11
-            // -----------------------------------------------------------------------------------------------------------------------------------
-            //
-            //                                 --- pivot keys: keys whose tuning difference is <= 0.05 in tunings x and y. ---
-            // Note 1: The key values are mirrored along the "ALL" diagonal. (Either the x or y tuning can be thought of as the target).
-            // Note 2: The _key_ values in this table are also _absolute_, i.e.: 0=C, 1=C#, 2=D, 3=D#, 4=E, 5=F, 6=F#, 7=G, 8=G#, 9=A, 10=A#, 11=B.
-            //
-            //                                                                   target tuning
-            //                  C         C#        D         D#        E         F         F#        G         G#        A         A#        B
-            //                  0         1         2         3         4         5         6         7         8         9         10        11
-            //              ------------------------------------------------------------------------------------------------------------------------
-            //         C   0|   ALL       1,2       2,10      3,8       7         0,4,7,10  1,7       2,5,7,11  3         0,5       0,8       0,1
-            //         C#  1|   1,2       ALL       2,3       3,11      4,9       8         1,5,8,11  2,8       0,3,6,8   4         1,6       1,9
-            //         D   2|   2,10      2,3       ALL       3,4       0,4       5,10      9         0,2,6,9   3,9       1,4,7,9   5         2,7
-            //         D#  3|   3,8       3,11      3,4       ALL       4,5       1,5       6,11      10        1,3,7,10  4,10      2,5,8,10  6
-            //         E   4|   7         4,9       0,4       4,5       ALL       5,6       2,6       0,7       11        2,4,8,11  5,11      3,6,9,11
-            // initial F   5|   0,4,7,10  8         5,10      1,5       5,6       ALL       6,7       3,7       1,8       0         0,3,5,9   0,6
-            //  tuning F#  6|   1,7       1,5,8,11  9         6,11      2,6       6,7       ALL       7,8       4,8       2,9       1         1,4,6,10
-            //         G   7|   2,5,7,11  2,8       0,2,6,9   10        0,7       3,7       7,8       ALL       8,9       5,9       3,10      2
-            //         G#  8|   3         0,3,6,8   3,9       1,3,7,10  11        1,8       4,8       8,9       ALL       9,10      6,10      4,11
-            //         A   9|   0,5       4         1,4,7,9   4,10      2,4,8,11  0         2,9       5,9       9,10      ALL       10,11     7,11
-            //         A# 10|   0,8       1,6       5         2,5,8,10  5,11      0,3,5,9   1         3,10      6,10      10,11     ALL       0,11
-            //         B  11|   0,1       1,9       2,7       6         3,6,9,11  0,6       1,4,6,10  2         4,11      7,11      0,11      ALL      
-            //
-            // =====================================================================================================================================
-            ctor: ResSynth.tuningType.INVERTED_ODD_HARMONIC,
-            name: "inverted odd harmonic tunings",
-            keyFactorArray:
-                [
-                    // These factors are the reciprocals of the corresponding odd harmonic factors multiplied by two.
-                    // The key numbers correspond to the inverted intervals re the root, transposed an octave higher.
-                    [57, 1],       // A                             odd: [57, 1], // A
-                    [62, 4 / 3],   // D(5th below, 4th above A)     odd: [64, 3 / 2], // E(5th above A)
-                    [65, 8 / 5],   // F (3rd below, 6th above A)    odd: [61, 5 / 4], // C# (3rd above A)
-                    [59, 8 / 7],   // B                             odd: [67, 7 / 4], // G
-                    [67, 16 / 9],  // G (5th below, 4th above D)    odd: [59, 9 / 8], // B (5th above E)
-                    [63, 16 / 11], // D#                            odd: [63, 11 / 8], // D#
-                    [60, 16 / 13], // C                             odd: [66, 13 / 8], // F#
-                    [58, 16 / 15], // A# (5th below F, 3rd below D) odd: [68, 15 / 8], // G# (5th above C#, 3rd above E)
-                    [68, 32 / 17], // G#                            odd: [58, 17 / 16], // A#
-                    [66, 32 / 19], // F#                            odd: [60, 19 / 16], // C
-                    [64, 32 / 21], // E (5th below, 4th above B)    odd: [62, 21 / 16], // D (5th above G)
-                    [61, 32 / 25]  // C# (3rd below, 6th above F)   odd: [65, 25 / 16]  // F (3rd above C#) -- N.B.: 25/16, not 23/16.
-                ],
-            tunings:
-                [
-                    {
-                        name: "C&emsp;|| Perfect Minor Triads: Bb-Db-F, C#-E-G#, F-Ab-C; Perfect Fifth: G-D",
-                        root: 48 // C key
-                    },
-                    {
-                        name: "C# || Perfect Minor Triads: B-D-F#, D-F-A, Gb-A-Db; Perfect Fifth: Ab-Eb",
-                        root: 49 // C# key
-                    },
-                    {
-                        name: "D&emsp;|| Perfect Minor Triads: C-Eb-G, Eb-Gb-Bb, G-Bb-D; Perfect Fifth: A-E",
-                        root: 50 // D key
-                    },
-                    {
-                        name: "Eb || Perfect Minor Triads: C#-E-G#, E-G-B, G#-B-D#; Perfect Fifth: Bb-F",
-                        root: 51 // Eb key
-                    },
-                    {
-                        name: "E&emsp;|| Perfect Minor Triads: D-F-A, F-Ab-C, A-C-E; Perfect Fifth: B-F#",
-                        root: 52 // E key
-                    },
-                    {
-                        name: "F&emsp;|| Perfect Minor Triads: Eb-Gb-Bb, F#-A-C#, Bb-Db-F; Perfect Fifth: C-G",
-                        root: 53 // F key
-                    },
-                    {
-                        name: "F# || Perfect Minor Triads: E-G-B, G-Bb-D, B-D-F#; Perfect Fifth: C#-G#",
-                        root: 54 // F# key
-                    },
-                    {
-                        name: "G&emsp;|| Perfect Minor Triads: F-Ab-C, G#-B-D#, C-Eb-G; Perfect Fifth: D-A",
-                        root: 55 // G key
-                    },
-                    {
-                        name: "Ab || Perfect Minor Triads: F#-A-C#, A-C-E, Db-E-Ab; Perfect Fifth: Eb-Bb",
-                        root: 56 // Ab key
-                    },
-                    {
-                        name: "A&emsp;|| Perfect Minor Triads: G-Bb-D, Bb-Db-F, D-F-A; Perfect Fifth: E-B",
-                        root: 57 // A key
-                    },
-                    {
-                        name: "Bb || Perfect Minor Triads: G#-B-D#, B-D-F#, Eb-Gb-Bb; Perfect Fifth: F-C",
-                        root: 58 // Bb key
-                    },
-                    {
-                        name: "B&emsp;|| Perfect Minor Triads: A-C-E, C-Eb-G, E-G-B; Perfect Fifth: F#-C#",
                         root: 59 // B key
                     }
                 ]
