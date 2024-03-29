@@ -95,6 +95,14 @@ ResSynth.tuningDefs =
             tunings:
                 [
                     {
+                        name: "keys per octave: 38, factor=2^(1/38) [ 2 x 19 ]",
+                        keysPerOctave: 38
+                    },
+                    {
+                        name: "keys per octave: 36, factor=2^(1/36) [standard ET sixthtones]",
+                        keysPerOctave: 36
+                    },
+                    {
                         name: "keys per octave: 24, factor=2^(1/24) [standard ET quartertones]",
                         keysPerOctave: 24
                     },
@@ -115,7 +123,7 @@ ResSynth.tuningDefs =
                         keysPerOctave: 20
                     },
                     {
-                        name: "keys per octave: 19, factor=2^(1/19)",
+                        name: "keys per octave: 19, factor=2^(1/19) [octave at octave+fifth key]",
                         keysPerOctave: 19
                     },
                     {
