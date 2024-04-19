@@ -196,6 +196,166 @@ ResSynth.tuningDefs =
                     }
                 ]
         },
+        // Warped octave tunings
+        {
+            // This tuning group uses the following constructor:
+            //   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "octaves");
+            ctor: ResSynth.tuningType.WARPED_OCTAVES,
+            name: "warped octave tunings",
+            tunings:
+                [
+                    {
+                        name: "White Note Equal Temperament",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [2, (12.0 / 7)],
+                                [4, ((12.0 / 7) * 2)],
+                                [5, ((12.0 / 7) * 3)],
+                                [7, ((12.0 / 7) * 4)],
+                                [9, ((12.0 / 7) * 5)],
+                                [11, ((12.0 / 7) * 6)]
+                            ]
+                    },
+                    {
+                        name: "RWO 1: [[0, 0], [1, 11]]",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [1, 11]
+                            ]
+                    },
+                    {
+                        name: "RWO 2: [[0, 0], [11, 1]]",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [11, 1]
+                            ]
+                    },
+                    {
+                        name: "RWO 3: [[6, 6], [11, 17]]",
+                        keyValuesArray:
+                            [
+                                [6, 6],
+                                [11, 17]
+                            ]
+                    },
+                    {
+                        name: "RWO 4: [[0, 0], [4, 7], [7, 8.3], [11, 11.5]]",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [4, 7],
+                                [7, 8.3],
+                                [11, 11.5]
+                            ]
+                    },
+                    {
+                        name: "RWO 5: [[0, 5], [4, 12], [7, 13.3], [11, 16.5]]",
+                        keyValuesArray:
+                            [
+                                [0, 5],
+                                [4, 12],
+                                [7, 13.3],
+                                [11, 16.5]
+                            ]
+                    },
+                    {
+                        name: "RWO 6: [[0, 0], [6, 3], [7, 4], [9, 7]]",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [6, 3],
+                                [7, 4],
+                                [9, 7]
+                            ]
+                    },
+                    {
+                        name: "RWO 7 (=ET): [[0, 0], [11, 11]]",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [11, 11]
+                            ]
+                    }
+                ]
+        },
+        // Warped gamut tunings
+        {
+            // This tuning group uses the following constructor:
+            //   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "gamut");
+            ctor: ResSynth.tuningType.WARPED_GAMUT,
+            name: "warped gamut tunings",
+            tunings:
+                [
+                    {
+                        name: "Limited Quartertone Tuning [keys 36 to 84, pitches 36 to 60]]",
+                        keyValuesArray:
+                            [
+                                [36, 36],
+                                [84, 60]
+                            ]
+                    },
+                    {
+                        name: "Complete Quartertone Tuning [keys 0 to 127, pitches 24 to 87.5]",
+                        keyValuesArray:
+                            [
+                                [0, 24],
+                                [127, 87.5]
+                            ]
+                    },
+                    {
+                        name: "19 ET pitches per octave [keys 0 to 127]",
+                        keyValuesArray:
+                            [
+                                [0, 12],
+                                [19, 24],
+                                [38, 36],
+                                [57, 48],
+                                [76, 60],
+                                [95, 72],
+                                [114, 84],
+                                [127, 127]
+                            ]
+                    },
+                    {
+                        name: "23 ET pitches per octave [keys 0 to 127]",
+                        keyValuesArray:
+                            [
+                                [0, 12],
+                                [23, 24],
+                                [46, 36],
+                                [69, 48],
+                                [92, 60],
+                                [115, 72],
+                                [127, 127]
+                            ]
+                    },
+                    {
+                        name: "Free Warped Tuning 1 [keys 0 to 127]",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [60, 60],
+                                [65, 79],
+                                [90, 90],
+                                [127, 127]
+                            ]
+                    },
+                    {
+                        name: "Free Warped Tuning 2 [keys 0 to 127]",
+                        keyValuesArray:
+                            [
+                                [0, 0],
+                                [60, 60],
+                                [65, 62.5],
+                                [72, 72],
+                                [127, 127]
+                            ]
+                    }
+                ]
+        },
         // Odd Harmonic tunings
         {
             // Constructor:   tunings = getHarmonicTunings(tuningGroupDef);
@@ -723,166 +883,6 @@ ResSynth.tuningDefs =
                     {
                         name: "B&emsp;|| Perfect Minor Triad E-G-B",
                         root: 59 // B key
-                    }
-                ]
-        },
-        // Warped octave tunings
-        {
-            // This tuning group uses the following constructor:
-            //   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "octaves");
-            ctor: ResSynth.tuningType.WARPED_OCTAVES,
-            name: "warped octave tunings",
-            tunings:
-                [
-                    {
-                        name: "White Note Equal Temperament",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [2, (12.0 / 7)],
-                                [4, ((12.0 / 7) * 2)],
-                                [5, ((12.0 / 7) * 3)],
-                                [7, ((12.0 / 7) * 4)],
-                                [9, ((12.0 / 7) * 5)],
-                                [11, ((12.0 / 7) * 6)]
-                            ]
-                    },
-                    {
-                        name: "RWO 1: [[0, 0], [1, 11]]",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [1, 11]
-                            ]
-                    },
-                    {
-                        name: "RWO 2: [[0, 0], [11, 1]]",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [11, 1]
-                            ]
-                    },
-                    {
-                        name: "RWO 3: [[6, 6], [11, 17]]",
-                        keyValuesArray:
-                            [
-                                [6, 6],
-                                [11, 17]
-                            ]
-                    },
-                    {
-                        name: "RWO 4: [[0, 0], [4, 7], [7, 8.3], [11, 11.5]]",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [4, 7],
-                                [7, 8.3],
-                                [11, 11.5]
-                            ]
-                    },
-                    {
-                        name: "RWO 5: [[0, 5], [4, 12], [7, 13.3], [11, 16.5]]",
-                        keyValuesArray:
-                            [
-                                [0, 5],
-                                [4, 12],
-                                [7, 13.3],
-                                [11, 16.5]
-                            ]
-                    },
-                    {
-                        name: "RWO 6: [[0, 0], [6, 3], [7, 4], [9, 7]]",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [6, 3],
-                                [7, 4],
-                                [9, 7]
-                            ]
-                    },
-                    {
-                        name: "RWO 7 (=ET): [[0, 0], [11, 11]]",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [11, 11]
-                            ]
-                    }
-                ]
-        },
-        // Warped gamut tunings
-        {
-            // This tuning group uses the following constructor:
-            //   tuning = tuningsFactory.getWarpedTuning(keyValuesArray, "gamut");
-            ctor: ResSynth.tuningType.WARPED_GAMUT,
-            name: "warped gamut tunings",
-            tunings:
-                [
-                    {
-                        name: "Limited Quartertone Tuning [keys 36 to 84, pitches 36 to 60]]",
-                        keyValuesArray:
-                            [
-                                [36, 36],
-                                [84, 60]
-                            ]
-                    },
-                    {
-                        name: "Complete Quartertone Tuning [keys 0 to 127, pitches 24 to 87.5]",
-                        keyValuesArray:
-                            [
-                                [0, 24],
-                                [127, 87.5]
-                            ]
-                    },
-                    {
-                        name: "19 ET pitches per octave [keys 0 to 127]",
-                        keyValuesArray:
-                            [
-                                [0, 12],
-                                [19, 24],
-                                [38, 36],
-                                [57, 48],
-                                [76, 60],
-                                [95, 72],
-                                [114, 84],
-                                [127, 127]
-                            ]
-                    },
-                    {
-                        name: "23 ET pitches per octave [keys 0 to 127]",
-                        keyValuesArray:
-                            [
-                                [0, 12],
-                                [23, 24],
-                                [46, 36],
-                                [69, 48],
-                                [92, 60],
-                                [115, 72],
-                                [127, 127]
-                            ]
-                    },
-                    {
-                        name: "Free Warped Tuning 1 [keys 0 to 127]",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [60, 60],
-                                [65, 79],
-                                [90, 90],
-                                [127, 127]
-                            ]
-                    },
-                    {
-                        name: "Free Warped Tuning 2 [keys 0 to 127]",
-                        keyValuesArray:
-                            [
-                                [0, 0],
-                                [60, 60],
-                                [65, 62.5],
-                                [72, 72],
-                                [127, 127]
-                            ]
                     }
                 ]
         },
