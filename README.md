@@ -35,9 +35,8 @@ Many thanks to [Sergey Surikov](https://github.com/surikov):
 
   * The reverberation control is practically a clone of (a possibly old version of) his WebAudioFontReverberator.
 
-The _ResidentSynth_ provides support for different tuning types (see the [documentation](https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html)):
-Many thanks to Paul Poletti, who is the author of a table of Baroque tunings giving the offsets from Equal Temperament of each keyboard key in each tuning.    
- Poletti's table was downloaded from Just-Say-Do.com a few years ago, but the site is no longer available, and I have been unable to contact the author. Any help in finding Prof. Paul Poletti would be very welcome!
+The _ResidentSynth_ provides support for different tuning types (see the [documentation](https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html)):  
+Many thanks to Prof. Paul Poletti, who is the author of a table of Baroque tunings giving the offsets from Equal Temperament of each keyboard key in each tuning. The table was downloaded from Just-Say-Do.com a few years ago, but the site is no longer available, and I have been unable to contact the author. Any help in finding Prof. Poletti would be very welcome!
 
 James Ingram  
 April 2024 
