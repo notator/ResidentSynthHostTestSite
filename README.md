@@ -30,16 +30,15 @@ for end-user hardware. I am intending, for example, also to install it as one of
 Many thanks to [Sergey Surikov](https://github.com/surikov):
 
   * The _ResidentSynth_ uses clones of freeware wavetables (=presets, instruments) found on 
-[his WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organized into a custom WebAudioFont that can have 1-127 banks, each of which can contain 1-127 presets.  
-For illustration and test purposes, the _ResidentSynthHost_ uses a _ResidentSynth_ that is configured to contain multiple banks and a large number of presets. Other installations would typically use less.
+[his WebAudioFont page](https://surikov.github.io/webaudiofontdata/sound/). These are organized into a custom WebAudioFont that can have 1-127 banks, each of which can contain 1-127 presets. For illustration and test purposes, the _ResidentSynthHost_ uses a _ResidentSynth_ that is configured to contain multiple banks and a large number of presets. Other installations would typically use less.
 
   * The code for loading the wavetables is very similar to that found in [his WebAudioFontPlayer](https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js).
 
   * The reverberation control is practically a clone of (a possibly old version of) his WebAudioFontReverberator.
 
-The _ResidentSynth_ provides support for different tunings: Many thanks to Paul Poletti, who is the author of a table of Baroque tunings giving the offsets from Equal Temperament of each keyboard key in each tuning (see the [documentation](https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html)).    
- Poletti's table was downloaded from Just-Say-Do.com a few years ago, but the site is no longer available, and I have been unable to contact the author.  
- Any help in finding Prof. Paul Poletti would be very welcome!
+The _ResidentSynth_ provides support for different tunings (see the [documentation](https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html)):
+Many thanks to Paul Poletti, who is the author of a table of Baroque tunings giving the offsets from Equal Temperament of each keyboard key in each tuning.    
+ Poletti's table was downloaded from Just-Say-Do.com a few years ago, but the site is no longer available, and I have been unable to contact the author. Any help in finding Prof. Paul Poletti would be very welcome!
 
 James Ingram  
 April 2024 
