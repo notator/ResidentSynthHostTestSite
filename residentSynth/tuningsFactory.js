@@ -522,188 +522,188 @@ ResSynth.tuningsFactory = (function()
             return rootTunings;
         }  
 
-        function logHarmonicTuningsInfos(harmonicTunings, tuningGroupName)
-        {
-            // returns a 12x12 array
-            function getRootXYArray(harmonicTunings)
-            {
-                let rootXYArray = [];
+        //function logHarmonicTuningsInfos(harmonicTunings, tuningGroupName)
+        //{
+        //    // returns a 12x12 array
+        //    function getRootXYArray(harmonicTunings)
+        //    {
+        //        let rootXYArray = [];
 
-                for(let y = 0; y < 12; y++)
-                {
-                    let tuningsRow = harmonicTunings[y],
-                        row = [];
-                    for(let x = 12; x < 24; x++)
-                    {
-                        row.push(tuningsRow[x] - 12);
-                    }
-                    rootXYArray.push(row);
-                }
-                return rootXYArray;
-            }
+        //        for(let y = 0; y < 12; y++)
+        //        {
+        //            let tuningsRow = harmonicTunings[y],
+        //                row = [];
+        //            for(let x = 12; x < 24; x++)
+        //            {
+        //                row.push(tuningsRow[x] - 12);
+        //            }
+        //            rootXYArray.push(row);
+        //        }
+        //        return rootXYArray;
+        //    }
 
-            // returns a string of length width,
-            // padded with spaces on the right.
-            function padRight(n, width)
-            {
-                let rval = n.toString();
+        //    // returns a string of length width,
+        //    // padded with spaces on the right.
+        //    function padRight(n, width)
+        //    {
+        //        let rval = n.toString();
 
-                while(rval.length < width)
-                {
-                    rval = rval + " ";
-                }
+        //        while(rval.length < width)
+        //        {
+        //            rval = rval + " ";
+        //        }
 
-                return rval;
-            }
+        //        return rval;
+        //    }
 
-            // returns a string of length width,
-            // padded with spaces on the left.
-            function padLeft(n, width)
-            {
-                let rval = n.toString();
+        //    // returns a string of length width,
+        //    // padded with spaces on the left.
+        //    function padLeft(n, width)
+        //    {
+        //        let rval = n.toString();
 
-                while(rval.length < width)
-                {
-                    rval = " " + rval;
-                }
+        //        while(rval.length < width)
+        //        {
+        //            rval = " " + rval;
+        //        }
 
-                return rval;
-            }
+        //        return rval;
+        //    }
 
-            function logTopNumbers(xLength, columnWidth)
-            {
-                let str = padRight("", columnWidth + 3);
-                for(let z = 0; z < xLength; z++)
-                {
-                    str = str.concat(`${padRight(z, columnWidth)}`);
-                }
-                console.log(str + "\n");
-                let underline = padRight("", columnWidth);
-                while(underline.length < str.length)
-                {
-                    underline = underline + "-";
-                }
-                console.log(underline + "\n");
-            }
+        //    function logTopNumbers(xLength, columnWidth)
+        //    {
+        //        let str = padRight("", columnWidth + 3);
+        //        for(let z = 0; z < xLength; z++)
+        //        {
+        //            str = str.concat(`${padRight(z, columnWidth)}`);
+        //        }
+        //        console.log(str + "\n");
+        //        let underline = padRight("", columnWidth);
+        //        while(underline.length < str.length)
+        //        {
+        //            underline = underline + "-";
+        //        }
+        //        console.log(underline + "\n");
+        //    }
 
-            function logRootXYArray(rootXYArray, columnWidth)
-            {
-                function logRowY(y, xArray, columnWidth)
-                {
-                    let str = `${padLeft(y.toString() + "|  ", columnWidth + 3)}`;
-                    for(let x = 0; x < xArray.length; x++)
-                    {
-                        let value = Math.round(xArray[x] * 100) / 100;
-                        str = str.concat(`${padRight(value, columnWidth)}`);
-                    }
-                    console.log(str + "\n");
-                }
+        //    function logRootXYArray(rootXYArray, columnWidth)
+        //    {
+        //        function logRowY(y, xArray, columnWidth)
+        //        {
+        //            let str = `${padLeft(y.toString() + "|  ", columnWidth + 3)}`;
+        //            for(let x = 0; x < xArray.length; x++)
+        //            {
+        //                let value = Math.round(xArray[x] * 100) / 100;
+        //                str = str.concat(`${padRight(value, columnWidth)}`);
+        //            }
+        //            console.log(str + "\n");
+        //        }
 
-                let ySize = rootXYArray.length,
-                    xSize = rootXYArray[0].length;
+        //        let ySize = rootXYArray.length,
+        //            xSize = rootXYArray[0].length;
 
-                logTopNumbers(xSize, columnWidth);
+        //        logTopNumbers(xSize, columnWidth);
 
-                for(let y = 0; y < ySize; y++)
-                {
-                    logRowY(y, rootXYArray[y], columnWidth);
-                }
-            }
+        //        for(let y = 0; y < ySize; y++)
+        //        {
+        //            logRowY(y, rootXYArray[y], columnWidth);
+        //        }
+        //    }
 
-            function logAllPivotKeysArrays(allPivotKeysArrays, columnWidth)
-            {
-                function getKeysString(pivotKeysArray)
-                {
-                    let rval = "";
-                    if(pivotKeysArray.length === 12)
-                    {
-                        rval = "ALL";
-                    }
-                    else if(pivotKeysArray.length === 0)
-                    {
-                        rval = "-";
-                    }
-                    else
-                    {
-                        for(let i = 0; i < pivotKeysArray.length; i++)
-                        {
-                            rval += `${pivotKeysArray[i]},`;
-                        }
-                        rval = rval.slice(0, -1);
-                    }
-                    return rval;
-                }
+        //    function logAllPivotKeysArrays(allPivotKeysArrays, columnWidth)
+        //    {
+        //        function getKeysString(pivotKeysArray)
+        //        {
+        //            let rval = "";
+        //            if(pivotKeysArray.length === 12)
+        //            {
+        //                rval = "ALL";
+        //            }
+        //            else if(pivotKeysArray.length === 0)
+        //            {
+        //                rval = "-";
+        //            }
+        //            else
+        //            {
+        //                for(let i = 0; i < pivotKeysArray.length; i++)
+        //                {
+        //                    rval += `${pivotKeysArray[i]},`;
+        //                }
+        //                rval = rval.slice(0, -1);
+        //            }
+        //            return rval;
+        //        }
 
-                logTopNumbers(12, columnWidth); // target tuning indexes
+        //        logTopNumbers(12, columnWidth); // target tuning indexes
 
-                for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArrays.length; initialTuningIndex++)
-                {
-                    let xString = "",
-                        pivotKeysArrays = allPivotKeysArrays[initialTuningIndex];
+        //        for(let initialTuningIndex = 0; initialTuningIndex < allPivotKeysArrays.length; initialTuningIndex++)
+        //        {
+        //            let xString = "",
+        //                pivotKeysArrays = allPivotKeysArrays[initialTuningIndex];
 
-                    for(let targetTuningIndex = 0; targetTuningIndex < 12; targetTuningIndex++)
-                    {
-                        let pivotKeysArray = pivotKeysArrays[targetTuningIndex],
-                            keysStr = getKeysString(pivotKeysArray);
+        //            for(let targetTuningIndex = 0; targetTuningIndex < 12; targetTuningIndex++)
+        //            {
+        //                let pivotKeysArray = pivotKeysArrays[targetTuningIndex],
+        //                    keysStr = getKeysString(pivotKeysArray);
 
-                        xString = `${xString}${padRight(keysStr, columnWidth)}`;
-                    }
-                    console.log(`${padLeft(initialTuningIndex, columnWidth)}|  ${xString}`);
-                }
-            }
+        //                xString = `${xString}${padRight(keysStr, columnWidth)}`;
+        //            }
+        //            console.log(`${padLeft(initialTuningIndex, columnWidth)}|  ${xString}`);
+        //        }
+        //    }
 
-            function getAllPivotKeysArrays(rootXYArray)
-            {
-                // The indexth element in the returned array is an array containing the keyIndexes
-                // that pivot from the initialTuning to the indexth tuning.
-                function getPivotKeysFromInitialTuning(initialTuningIndex, rootXYArray)
-                {
-                    let pivotKeyArrays = [[], [], [], [], [], [], [], [], [], [], [], []],
-                        initialTuning = rootXYArray[initialTuningIndex];
+        //    function getAllPivotKeysArrays(rootXYArray)
+        //    {
+        //        // The indexth element in the returned array is an array containing the keyIndexes
+        //        // that pivot from the initialTuning to the indexth tuning.
+        //        function getPivotKeysFromInitialTuning(initialTuningIndex, rootXYArray)
+        //        {
+        //            let pivotKeyArrays = [[], [], [], [], [], [], [], [], [], [], [], []],
+        //                initialTuning = rootXYArray[initialTuningIndex];
 
-                    for(let targetTuningIndex = 0; targetTuningIndex < rootXYArray.length; targetTuningIndex++)
-                    {
-                        let targetTuning = rootXYArray[targetTuningIndex];
+        //            for(let targetTuningIndex = 0; targetTuningIndex < rootXYArray.length; targetTuningIndex++)
+        //            {
+        //                let targetTuning = rootXYArray[targetTuningIndex];
 
-                        for(let keyIndex = 0; keyIndex < rootXYArray[0].length; keyIndex++)
-                        {
-                            let diff = targetTuning[keyIndex] - initialTuning[keyIndex];
+        //                for(let keyIndex = 0; keyIndex < rootXYArray[0].length; keyIndex++)
+        //                {
+        //                    let diff = targetTuning[keyIndex] - initialTuning[keyIndex];
 
-                            if((Math.abs(diff) <= 0.05))
-                            {
-                                pivotKeyArrays[targetTuningIndex].push(keyIndex);
-                            }
-                        }
-                    }
+        //                    if((Math.abs(diff) <= 0.05))
+        //                    {
+        //                        pivotKeyArrays[targetTuningIndex].push(keyIndex);
+        //                    }
+        //                }
+        //            }
 
-                    return pivotKeyArrays;
-                }
+        //            return pivotKeyArrays;
+        //        }
 
-                let allPivotKeysArrays = [];
-                for(let initialTuningIndex = 0; initialTuningIndex < rootXYArray.length; initialTuningIndex++)
-                {
-                    let pivotKeys = getPivotKeysFromInitialTuning(initialTuningIndex, rootXYArray);
+        //        let allPivotKeysArrays = [];
+        //        for(let initialTuningIndex = 0; initialTuningIndex < rootXYArray.length; initialTuningIndex++)
+        //        {
+        //            let pivotKeys = getPivotKeysFromInitialTuning(initialTuningIndex, rootXYArray);
 
-                    allPivotKeysArrays.push(pivotKeys);
-                }
-                return allPivotKeysArrays;
-            }
+        //            allPivotKeysArrays.push(pivotKeys);
+        //        }
+        //        return allPivotKeysArrays;
+        //    }
 
-            let rootXYArray = getRootXYArray(harmonicTunings); // rootXYArray is a 12x12 array
+        //    let rootXYArray = getRootXYArray(harmonicTunings); // rootXYArray is a 12x12 array
 
-            console.log(`\n*** ${tuningGroupName}: tunings per key (x) and tuning (y) ***`);
-            logRootXYArray(rootXYArray, 7);
+        //    console.log(`\n*** ${tuningGroupName}: tunings per key (x) and tuning (y) ***`);
+        //    logRootXYArray(rootXYArray, 7);
 
-            let allPivotKeysArrays = getAllPivotKeysArrays(rootXYArray);
-            console.log(`\n*** ${tuningGroupName}: keys having similar pitches in x and y tunings  ***`);
-            logAllPivotKeysArrays(allPivotKeysArrays, 10);
-        }
+        //    let allPivotKeysArrays = getAllPivotKeysArrays(rootXYArray);
+        //    console.log(`\n*** ${tuningGroupName}: keys having similar pitches in x and y tunings  ***`);
+        //    logAllPivotKeysArrays(allPivotKeysArrays, 10);
+        //}
 
         let tuningDefs = tuningGroupDef.tunings,
             rootCentsDeltas = getRootCentsDeltasForHarmonicTuning(tuningGroupDef.keyFactorArray),
             harmonicTunings = getRootTunings(tuningDefs, rootCentsDeltas);
 
-        logHarmonicTuningsInfos(harmonicTunings, tuningGroupDef.name);
+        // logHarmonicTuningsInfos(harmonicTunings, tuningGroupDef.name);
 
         return harmonicTunings;
     };
