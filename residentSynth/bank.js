@@ -121,8 +121,13 @@ ResSynth.bank = (function()
 
             for(let presetIndex = 0; presetIndex < fontPresets.length; ++presetIndex)
             {
+                if(fontPresets[presetIndex] === undefined)
+                {
+                    continue;
+                }
+
                 let preset = fontPresets[presetIndex],
-                    originalPresetIndex = preset.zones[0].midi; // Surikov's midi attribute (already set for non-percussion)                
+                    originalPresetIndex = preset.zones[0].midi; // Surikov's midi attribute (already set for non-percussion)
 
                 if(preset.isPercussion)
                 {
@@ -140,7 +145,7 @@ ResSynth.bank = (function()
                     checkZoneContiguity(preset.name, originalPresetIndex, preset.zones);
                 }                
 
-                correctedPresets.push(preset);
+                correctedPresets[presetIndex] = preset;
             }
 
             return correctedPresets;
@@ -154,6 +159,11 @@ ResSynth.bank = (function()
 
             for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
             {
+                if(presets[presetIndex] === undefined)
+                {
+                    continue;
+                }
+
                 let zones = presets[presetIndex].zones;
                 for(var zoneIndex = 0; zoneIndex < zones.length; zoneIndex++)
                 {

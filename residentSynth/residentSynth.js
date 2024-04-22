@@ -150,7 +150,13 @@ ResSynth.residentSynth = (function(window)
 
                     for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
                     {
+                        if(presets[presetIndex] === undefined)
+                        {
+                            continue;
+                        }
+
                         let name = presets[presetIndex];
+
                         if(name.includes("_tone_")) // "percussion" presets are decoded below.
                         {
                             decodeAfterLoading(audioContext, name);
@@ -246,6 +252,11 @@ ResSynth.residentSynth = (function(window)
 
                 for(var presetIndex = 0; presetIndex < bankPresetNames.length; presetIndex++)
                 {
+                    if(bankPresetNames[presetIndex] === undefined)
+                    {
+                        continue;
+                    }
+
                     let isPercussion = false,
                         presetName = bankPresetNames[presetIndex],
                         zones;
@@ -266,7 +277,7 @@ ResSynth.residentSynth = (function(window)
                     let originalPresetIndex = zones[0].midi,
                         presetOptionName = getPresetOptionName(presetName, originalPresetIndex, isPercussion);
 
-                    bankPresets.push({name: presetOptionName, originalPresetIndex: originalPresetIndex, zones: zones, isPercussion: isPercussion});
+                    bankPresets[presetIndex] = {name: presetOptionName, originalPresetIndex: originalPresetIndex, zones: zones, isPercussion: isPercussion};
                 }
 
                 return bankPresets;
@@ -530,6 +541,11 @@ ResSynth.residentSynth = (function(window)
 
                 for(var presetIndex = 0; presetIndex < presets.length; presetIndex++)
                 {
+                    if(presets[presetIndex] === undefined)
+                    {
+                        continue;
+                    }
+                    
                     let preset = presets[presetIndex],
                         presetName = preset.name,
                         originalPresetIndex = preset.originalPresetIndex,
