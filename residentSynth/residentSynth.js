@@ -545,7 +545,7 @@ ResSynth.residentSynth = (function(window)
                     {
                         continue;
                     }
-                    
+
                     let preset = presets[presetIndex],
                         presetName = preset.name,
                         originalPresetIndex = preset.originalPresetIndex,
@@ -1091,13 +1091,29 @@ ResSynth.residentSynth = (function(window)
 
             channelControls[channel].modWheel = value; // for new noteOns
         },
+
+        setGain = function(channel, volume, expression)
+        {
+            let gain = (volume / 127) * (expression / 127);
+
+            channelAudioNodes[channel].gainNode.gain.setValueAtTime(gain, audioContext.currentTime);
+        },
         // The volume argument is in range [0..127], meaning muted to as loud as possible.
         updateVolume = function(channel, volume)
         {
-            let volumeFactor = volume / 127;
-
             channelControls[channel].volume = volume;
-            channelAudioNodes[channel].gainNode.gain.setValueAtTime(volumeFactor, audioContext.currentTime);
+
+            if(channelControls[channel].expression !== undefined)
+            {
+                setGain(channel, volume, channelControls[channel].expression);
+            }
+        },
+        // The expression argument is in range [0..127], meaning muted to maximum is volume setting.
+        updateExpression = function(channel, expression)
+        {
+            channelControls[channel].expression = expression;
+
+            setGain(channel, channelControls[channel].volume, expression)
         },
         // The pan argument is in range [0..127], meaning completely left to completely right.
         updatePan = function(channel, pan)
@@ -1504,6 +1520,7 @@ ResSynth.residentSynth = (function(window)
             updatePitchWheel(channel, pitchWheelDefaultValue, pitchWheelDefaultValue);
             updateModWheel(channel, controlDefaultValue(CTL.MODWHEEL));
             updateVolume(channel, controlDefaultValue(CTL.VOLUME));
+            updateExpression(channel, controlDefaultValue(CTL.EXPRESSION));
             updatePan(channel, controlDefaultValue(CTL.PAN));
             updateReverberation(channel, controlDefaultValue(CTL.REVERBERATION));
             updatePitchWheelSensitivity(channel, controlDefaultValue(CTL.PITCH_WHEEL_SENSITIVITY));
@@ -1533,8 +1550,9 @@ ResSynth.residentSynth = (function(window)
                 // standard 3-byte controllers.
                 CTL.BANK,
                 CTL.MODWHEEL,
-                CTL.VOLUME,
+                CTL.VOLUME,                
                 CTL.PAN,
+                CTL.EXPRESSION,
                 CTL.DATA_ENTRY,
                 CTL.REGISTERED_PARAMETER,
                 // standard 2-byte controllers.
@@ -1714,6 +1732,9 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.PAN:
                     updatePan(channel, value);
+                    break;
+                case CTL.EXPRESSION:
+                    updateExpression(channel, value);
                     break;
                 case CTL.REGISTERED_PARAMETER:
                     if(value !== 0)

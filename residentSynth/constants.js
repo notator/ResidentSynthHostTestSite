@@ -168,6 +168,8 @@ ResSynth.constants = (function()
 					return ("volume");
 				case CONTROL.PAN:
 					return ("pan");
+				case CONTROL.EXPRESSION:
+					return ("expression");
 				case CONTROL.REVERBERATION:
 					return ("reverberation");
 				case CONTROL.PITCH_WHEEL_SENSITIVITY:
@@ -209,6 +211,7 @@ ResSynth.constants = (function()
 				case CONTROL.DATA_ENTRY:
 					return (2);
 				case CONTROL.VOLUME:
+				case CONTROL.EXPRESSION:
 					return (100);
 				case CONTROL.PAN:
 					return (64);
@@ -278,6 +281,7 @@ ResSynth.constants = (function()
 	Object.defineProperty(CONTROL, "DATA_ENTRY", {value: 6, writable: false}); // REGISTERED_PARAMETER value 0, data = pitchBendSensitivity
 	Object.defineProperty(CONTROL, "VOLUME", {value: 7, writable: false});
 	Object.defineProperty(CONTROL, "PAN", {value: 10, writable: false});
+	Object.defineProperty(CONTROL, "EXPRESSION", {value: 11, writable: false});
 	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER", {value: 101, writable: false}); // only data = 0 is allowed (DATA_ENTRY data = pitchBendSensitivity)
 	Object.defineProperty(CONTROL, "ALL_SOUND_OFF", {value: 120, writable: false});
 	Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", {value: 121, writable: false});
