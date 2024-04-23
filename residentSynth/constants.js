@@ -174,6 +174,12 @@ ResSynth.constants = (function()
 					return ("pitchWheelSensitivity");
 				case CONTROL.VELOCITY_PITCH_SENSITIVITY:
 					return ("velocityPitchSensitivity");
+
+				case CONTROL.REGISTERED_PARAMETER:
+					return ("registeredParameter");
+				case CONTROL.DATA_ENTRY:
+					return ("dataEntry");
+
 				case CONTROL.ALL_SOUND_OFF:
 					return ("allSoundOff");
 				case CONTROL.ALL_CONTROLLERS_OFF:
@@ -190,6 +196,7 @@ ResSynth.constants = (function()
 			{
 				case CONTROL.BANK:
 				case CONTROL.MODWHEEL:
+				case CONTROL.REGISTERED_PARAMETER:
 				case CONTROL.REVERBERATION:
 				case CONTROL.MIXTURE_INDEX:
 				case CONTROL.TUNING_GROUP_INDEX:
@@ -199,6 +206,7 @@ ResSynth.constants = (function()
 				case CONTROL.VELOCITY_PITCH_SENSITIVITY:
 					return (0);
 				case CONTROL.PITCH_WHEEL_SENSITIVITY:
+				case CONTROL.DATA_ENTRY:
 					return (2);
 				case CONTROL.VOLUME:
 					return (100);
@@ -267,8 +275,10 @@ ResSynth.constants = (function()
 	// CONTROL
 	Object.defineProperty(CONTROL, "BANK", {value: 0, writable: false});
 	Object.defineProperty(CONTROL, "MODWHEEL", {value: 1, writable: false});
+	Object.defineProperty(CONTROL, "DATA_ENTRY", {value: 6, writable: false}); // REGISTERED_PARAMETER value 0, data = pitchBendSensitivity
 	Object.defineProperty(CONTROL, "VOLUME", {value: 7, writable: false});
 	Object.defineProperty(CONTROL, "PAN", {value: 10, writable: false});
+	Object.defineProperty(CONTROL, "REGISTERED_PARAMETER", {value: 101, writable: false}); // only data = 0 is allowed (DATA_ENTRY data = pitchBendSensitivity)
 	Object.defineProperty(CONTROL, "ALL_SOUND_OFF", {value: 120, writable: false});
 	Object.defineProperty(CONTROL, "ALL_CONTROLLERS_OFF", {value: 121, writable: false});
 	// Custom

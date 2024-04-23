@@ -1535,6 +1535,8 @@ ResSynth.residentSynth = (function(window)
                 CTL.MODWHEEL,
                 CTL.VOLUME,
                 CTL.PAN,
+                CTL.DATA_ENTRY,
+                CTL.REGISTERED_PARAMETER,
                 // standard 2-byte controllers.
                 CTL.ALL_CONTROLLERS_OFF,
                 CTL.ALL_SOUND_OFF,
@@ -1713,6 +1715,12 @@ ResSynth.residentSynth = (function(window)
                 case CTL.PAN:
                     updatePan(channel, value);
                     break;
+                case CTL.REGISTERED_PARAMETER:
+                    if(value !== 0)
+                    {
+                        console.warn(`Controller ${control.toString(10)} (0x${control.toString(16)}) must have value 0 (=pitchWheelSensitivity).`)
+                    }
+                    break;
                 case CTL.MIXTURE_INDEX:
                     updateMixtureIndex(channel, value);
                     break;
@@ -1720,6 +1728,7 @@ ResSynth.residentSynth = (function(window)
                     updateReverberation(channel, value);
                     break;
                 case CTL.PITCH_WHEEL_SENSITIVITY:
+                case CTL.DATA_ENTRY: // Can only control pitchWheelSensitivity
                     updatePitchWheelSensitivity(channel, value);
                     break;
                 case CTL.SEMITONES_OFFSET:
