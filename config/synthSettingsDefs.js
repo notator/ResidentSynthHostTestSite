@@ -44,6 +44,7 @@ console.log('load synthSettingsDefs.js');
 //     `pitchWheel`       // 0..127, default 64 (The value is used for both MSB and LSB)
 //     `modWheel`         // 0..127, default 0
 //     `volume`           // 0..127, default 100
+//     `expression`       // 0..127, default 100
 //     `pan`              // 0..127, default 64
 //     `reverberation`    // 0..127, default 0
 //     `pitchWheelSensitivity`    // 0..127, default 2
@@ -77,6 +78,7 @@ ResSynth.synthSettingsDefs =
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
                 modWheel: [0, 0, 0],                   // 0..127, default 0
                 volume: [100, 100, 100],               // 0..127, default 100
+                expression: [100, 100, 100],           // 0..127, default 100
                 pan: [64, 64, 64],                     // 0..127, default 64
                 reverberation: [0, 0, 0],              // 0..127, default 0
                 pitchWheelSensitivity: [2, 2, 2],      // 0..127, default 2
@@ -96,6 +98,7 @@ ResSynth.synthSettingsDefs =
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
                 modWheel: [0, 0, 0],                   // 0..127, default 0
                 volume: [100, 100, 100],               // 0..127, default 100
+                expression: [100, 100, 100],           // 0..127, default 100
                 pan: [64, 64, 64],                     // 0..127, default 64
                 reverberation: [0, 0, 0],              // 0..127, default 0
                 pitchWheelSensitivity: [2, 2, 2],      // 0..127, default 2
@@ -114,6 +117,7 @@ ResSynth.synthSettingsDefs =
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
                 modWheel: [0, 0, 0],                   // 0..127, default 0
                 volume: [100, 100, 100],               // 0..127, default 100
+                expression: [100, 100, 100],           // 0..127, default 100
                 pan: [64, 64, 64],                     // 0..127, default 64
                 reverberation: [0, 0, 0],              // 0..127, default 0
                 pitchWheelSensitivity: [2, 2, 2],      // 0..127, default 2
@@ -132,6 +136,7 @@ ResSynth.synthSettingsDefs =
                 pitchWheel: [64, 64, 64],              // 0..127, default 64
                 modWheel: [0, 0, 0],                   // 0..127, default 0
                 volume: [100, 100, 100],               // 0..127, default 100
+                expression: [100, 100, 100],           // 0..127, default 100
                 pan: [64, 20, 20],                     // 0..127, default 64
                 reverberation: [0, 0, 0],              // 0..127, default 0
                 pitchWheelSensitivity: [2, 2, 2],      // 0..127, default 2

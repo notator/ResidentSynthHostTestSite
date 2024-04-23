@@ -269,6 +269,20 @@ ResSynth.host = (function(document)
                                             msg[2] = midiValue(hostChannelSettings.volume - channelPressureComponent);
                                             break;
                                         }
+                                    case "expressionUp":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.EXPRESSION;
+                                            msg[2] = midiValue(hostChannelSettings.expression + channelPressureComponent);
+                                            break;
+                                        }
+                                    case "expressionDown":
+                                        {
+                                            msg[0] = CMD.CONTROL_CHANGE + channel;
+                                            msg[1] = CTL.EXPRESSION;
+                                            msg[2] = midiValue(hostChannelSettings.expression - channelPressureComponent);
+                                            break;
+                                        }
                                     case "panLeft":
                                         {
                                             msg[0] = CMD.CONTROL_CHANGE + channel;
@@ -407,6 +421,7 @@ ResSynth.host = (function(document)
                 let pitchWheelLC = getElem("pitchWheelLongControl"),
                     modWheelLC = getElem("modWheelLongControl"),
                     volumeLC = getElem("volumeLongControl"),
+                    expressionLC = getElem("expressionLongControl"),
                     panLC = getElem("panLongControl"),
                     reverberationLC = getElem("reverberationLongControl"),
                     pitchWheelSensitivityLC = getElem("pitchWheelSensitivityLongControl"),
@@ -415,6 +430,7 @@ ResSynth.host = (function(document)
                 pitchWheelLC.setValue(hostChannelSettings.pitchWheel);
                 modWheelLC.setValue(hostChannelSettings.modWheel);
                 volumeLC.setValue(hostChannelSettings.volume);
+                expressionLC.setValue(hostChannelSettings.expression);
                 panLC.setValue(hostChannelSettings.pan);
                 reverberationLC.setValue(hostChannelSettings.reverberation);
                 pitchWheelSensitivityLC.setValue(hostChannelSettings.pitchWheelSensitivity);
@@ -700,6 +716,11 @@ ResSynth.host = (function(document)
                                     getElem("volumeLongControl").setValue(value); // also sets synth
                                     break;
                                 }
+                            case "expression":
+                                {
+                                    getElem("expressionLongControl").setValue(value); // also sets synth
+                                    break;
+                                }
                             case "pan":
                                 {
                                     getElem("panLongControl").setValue(value); // also sets synth
@@ -832,6 +853,7 @@ ResSynth.host = (function(document)
                     exportChannelSettings.pitchWheel = hostSettings.pitchWheel;
                     exportChannelSettings.modWheel = hostSettings.modWheel;
                     exportChannelSettings.volume = hostSettings.volume;
+                    exportChannelSettings.expression = hostSettings.expression;
                     exportChannelSettings.pan = hostSettings.pan;
                     exportChannelSettings.reverberation = hostSettings.reverberation;
                     exportChannelSettings.pitchWheelSensitivity = hostSettings.pitchWheelSensitivity;
@@ -1011,6 +1033,9 @@ ResSynth.host = (function(document)
                         // channelSettings.volume
                         let volMsg = new Uint8Array([cmdControl, CTL.VOLUME, channelSettings.volume]);
                         synth.send(volMsg);
+                        // channelSettings.expression
+                        let exprMsg = new Uint8Array([cmdControl, CTL.EXPRESSION, channelSettings.expression]);
+                        synth.send(exprMsg);
                         // channelSettings.pan
                         let panMsg = new Uint8Array([cmdControl, CTL.PAN, channelSettings.pan]);
                         synth.send(panMsg);
@@ -1905,6 +1930,9 @@ ResSynth.host = (function(document)
                             case "volumeLongControl":
                                 hostChannelSettings.volume = value;
                                 break;
+                            case "expressionLongControl":
+                                hostChannelSettings.expression = value;
+                                break;
                             case "panLongControl":
                                 hostChannelSettings.pan = value;
                                 break;
@@ -2111,6 +2139,7 @@ ResSynth.host = (function(document)
                                     ctl = constants.CONTROL,
                                     modWheelData = getStandardControlInfo(constants, ctl.MODWHEEL),
                                     volumeData = getStandardControlInfo(constants, ctl.VOLUME),
+                                    expressionData = getStandardControlInfo(constants, ctl.EXPRESSION),
                                     panData = getStandardControlInfo(constants, ctl.PAN),
                                     reverberationData = getStandardControlInfo(constants, ctl.REVERBERATION),
                                     pitchWheelSensitivityData = getStandardControlInfo(constants, ctl.PITCH_WHEEL_SENSITIVITY),
@@ -2121,6 +2150,7 @@ ResSynth.host = (function(document)
 
                                 controlInfos.push(modWheelData);
                                 controlInfos.push(volumeData);
+                                controlInfos.push(expressionData);
                                 controlInfos.push(panData);
                                 controlInfos.push(reverberationData);
                                 controlInfos.push(pitchWheelSensitivityData);
@@ -2374,6 +2404,7 @@ ResSynth.host = (function(document)
                                     checkChannelAttributeArray(channel, "pitchWheel", channelSettings.pitchWheel, arrayLength);
                                     checkChannelAttributeArray(channel, "modWheel", channelSettings.modWheel, arrayLength);
                                     checkChannelAttributeArray(channel, "volume", channelSettings.volume, arrayLength);
+                                    checkChannelAttributeArray(channel, "expression", channelSettings.expression, arrayLength);
                                     checkChannelAttributeArray(channel, "pan", channelSettings.pan, arrayLength);
                                     checkChannelAttributeArray(channel, "reverberation", channelSettings.reverberation, arrayLength);
                                     checkChannelAttributeArray(channel, "pitchWheelSensitivity", channelSettings.pitchWheelSensitivity, arrayLength);
@@ -2408,6 +2439,7 @@ ResSynth.host = (function(document)
                                             channelSectionSettings.pitchWheel = channelAttributesObject.pitchWheel[section];
                                             channelSectionSettings.modWheel = channelAttributesObject.modWheel[section];
                                             channelSectionSettings.volume = channelAttributesObject.volume[section];
+                                            channelSectionSettings.expression = channelAttributesObject.expression[section];
                                             channelSectionSettings.pan = channelAttributesObject.pan[section];
                                             channelSectionSettings.reverberation = channelAttributesObject.reverberation[section];
                                             channelSectionSettings.pitchWheelSensitivity = channelAttributesObject.pitchWheelSensitivity[section];
@@ -2455,6 +2487,7 @@ ResSynth.host = (function(document)
                                         pitchWheel = channelSettings.pitchWheel,
                                         modWheel = channelSettings.modWheel,
                                         volume = channelSettings.volume,
+                                        expression = channelSettings.expression,
                                         pan = channelSettings.pan,
                                         reverberation = channelSettings.reverberation,
                                         pitchWheelSensitivity = channelSettings.pitchWheelSensitivity,
@@ -2507,6 +2540,8 @@ ResSynth.host = (function(document)
                                         errorString = getErrorString(errorString, midiRangeError(modWheel), midiErrorMsg("modWheel", modWheel));
                                     if(volume !== undefined)
                                         errorString = getErrorString(errorString, midiRangeError(volume), midiErrorMsg("volume", volume));
+                                    if(expression !== undefined)
+                                        errorString = getErrorString(errorString, midiRangeError(expression), midiErrorMsg("expression", expression));
                                     if(pan !== undefined)
                                         errorString = getErrorString(errorString, midiRangeError(pan), midiErrorMsg("pan", pan));
                                     if(reverberation !== undefined)
@@ -2601,6 +2636,7 @@ ResSynth.host = (function(document)
                                             setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheel", sectionIndex),
                                             setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "modWheel", sectionIndex),
                                             setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "volume", sectionIndex),
+                                            setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "expression", sectionIndex),
                                             setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pan", sectionIndex),
                                             setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "reverberation", sectionIndex),
                                             setNewAttributeValue(newChannelSettings, inChannelSettingsArrays, "pitchWheelSensitivity", sectionIndex),
