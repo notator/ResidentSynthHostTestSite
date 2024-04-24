@@ -223,6 +223,8 @@ ResSynth.host = (function(document)
                                     hostChannelSettings = getElem("channelSelect").options[currentChannel].hostSettings,
                                     channelPressureComponent = Math.round(data[1] * globalChannelPressureFactor);
 
+                                // console.log(`channelPressure = ${data[1]}, globalChannelPressureFactor = ${globalChannelPressureFactor}, channelPressureComponent = ${channelPressureComponent}`);
+
                                 // The residentSynth does not process CHANNEL_PRESSURE messages.
                                 // They are ignored or converted here.
                                 switch(globalChannelPressureType)
@@ -2265,7 +2267,10 @@ ResSynth.host = (function(document)
                         }
 
                         let tr = getElem("channelPressureTR"),
-                            channelPressureSensitivityLongControl = getBasicLongInputControl(tr, "sensitivity", 64, "");
+                            defaultValue = 64,
+                            channelPressureSensitivityLongControl = getBasicLongInputControl(tr, "sensitivity", defaultValue, "");
+
+                        globalChannelPressureFactor = defaultValue / 127;
 
                         channelPressureSensitivityLongControl.rangeInputElem.style.width = "256px";
                         tr.removeChild(tr.lastChild);
