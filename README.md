@@ -12,7 +12,7 @@ The **testSite** has been fully merged into the **main** branch in April 2024, a
 
 This project is designed to be an investigation of the concepts involved. It is not intended to be a finished product. Its top-level architecture and _what it does_ is much more important than the code itself (which is rather old-fashioned javascript). Both the host and synth are working _prototypes_ whose actual code could well be improved.
 
-The _ResidentSynth_ does not require Web MIDI support from the browser. It uses the Web Audio API to implement the Web MIDI MIDIOutput interface. The _ResidentSynthHost_, on the other hand, is best used with a MIDI keyboard input device, which _does_ require the Web MIDI API.)
+The _ResidentSynth_ does not require Web MIDI support from the browser. It uses the Web Audio API to implement the Web MIDI MIDIOutput interface. The _ResidentSynthHost_, on the other hand, is best used with a MIDI keyboard input device, which _does_ require the Web MIDI API.
 
 The _ResidentSynth_ is designed to be configured for, and installed with, a web application that knows in advance
   * which MIDI messages it supports. It can, and does, therefore use non-standard MIDI messages.
