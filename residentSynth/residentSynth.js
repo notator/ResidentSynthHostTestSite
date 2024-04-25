@@ -987,15 +987,16 @@ ResSynth.residentSynth = (function(window)
         },
 
         /*****************************************/
-        /* Control Functions */
-
+        /* Preset and Control Functions */
+        updatePresetIndex = function(channel, presetIndex)
+        {
+            channelControls[channel].presetIndex = presetIndex;
+        },        
         // also sets channelPresets[channel] and channelControl.presetIndex to 0.
         updateBankIndex = function(channel, bankIndex)
         {
-            channelPresets[channel] = channelPresets.webAudioFont[bankIndex].presets; // throws an exception if bankIndex is out of range
-
             channelControls[channel].bankIndex = bankIndex;
-            channelControls[channel].presetIndex = 0;
+            channelPresets[channel] = channelPresets.webAudioFont[bankIndex].presets; // throws an exception if bankIndex is out of range            
         },
         updateMixtureIndex = function(channel, mixtureIndex)
         {
@@ -1191,6 +1192,9 @@ ResSynth.residentSynth = (function(window)
                 let midi = {}; 
 
                 midi.preset = chanPresets[chanControls.presetIndex];
+
+                console.assert((midi.preset !== undefined), `preset ${chanControls.presetIndex} is missing, but required.`);
+
                 midi.inKey = inKey;  // the note stops when the inKey's noteOff arrives                
                 midi.inVelocity = inVelocity;
                 midi.midiPitchOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100); // valid throughout a mixture
@@ -1505,7 +1509,8 @@ ResSynth.residentSynth = (function(window)
 
         setFontAndTuningDefaults = function(channel)
         {
-            updateBankIndex(channel, 0); // also sets channelPresets[channel].presets and channelControl.presetIndex to 0.
+            updateBankIndex(channel, 0); // also sets channelPresets[channel].presets.
+            updatePresetIndex(channel, 0);
             updateMixtureIndex(channel, 0);
             updateTuningGroupIndex(channel, 0);
             updateSemitonesOffset(channel, 0); // semitonesOffset will be added to the key's tuning value in NoteOn. 
@@ -1801,7 +1806,7 @@ ResSynth.residentSynth = (function(window)
                 handleControl(channel, control, value);
                 break;
             case CMD.PRESET:
-                channelControls[channel].presetIndex = control;
+                updatePresetIndex(channel, control);
                 break;
             case CMD.PITCHWHEEL:
                 updatePitchWheel(channel, control, value);

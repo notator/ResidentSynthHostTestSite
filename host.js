@@ -474,6 +474,11 @@ ResSynth.host = (function(document)
                 return new Uint8Array([ResSynth.constants.COMMAND.CONTROL_CHANGE + channel, ResSynth.constants.CONTROL.BANK, bankIndex]);
             }
 
+            function getPresetIndexMsg(channel, presetIndex)
+            {
+                return new Uint8Array([ResSynth.constants.COMMAND.PRESET + channel, presetIndex]);
+            }
+
             let bankSelect = getElem("bankSelect"),
                 channelSelect = getElem("channelSelect"),
                 channel = channelSelect.selectedIndex,
@@ -482,9 +487,11 @@ ResSynth.host = (function(document)
                 selectedBankOption = bankSelect[bankSelect.selectedIndex],
                 presetOptionsArray = selectedBankOption.presetOptionsArray,
                 bankIndexMsg = getBankIndexMsg(channel, bankSelect.selectedIndex),
-                hostChannelPresetIndex = (hostChannelSettings.presetIndex < presetOptionsArray.length) ? hostChannelSettings.presetIndex : 0;;
+                hostChannelPresetIndex = (hostChannelSettings.presetIndex < presetOptionsArray.length) ? hostChannelSettings.presetIndex : 0,
+                presetIndexMsg = getPresetIndexMsg(channel, hostChannelPresetIndex);
 
             sendMessage(bankIndexMsg, channel);
+            sendMessage(presetIndexMsg, channel);
 
             setOptions(presetSelect, presetOptionsArray);
 
