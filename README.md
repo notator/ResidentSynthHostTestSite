@@ -3,10 +3,10 @@ The _ResidentSynthHost_ is a Web Audio application, written in HTML5 and Javascr
 These are separate, but related, pieces of code separated by a MIDI interface. They are being developed together here, in this repository. Issues relating to either should be raised here.
 
 The repository has two major branches:  
-&nbsp;&nbsp;&nbsp;&nbsp;**main**: the current [stable application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html).  
-&nbsp;&nbsp;&nbsp;&nbsp;**testSite**: the [unstable development application](https://james-ingram-act-two.de/open-source/ResidentSynthHostTestSite/host.html).
+&nbsp;&nbsp;&nbsp;&nbsp;**stable**: the current [stable application](https://james-ingram-act-two.de/open-source/ResidentSynthHost/host.html).  
+&nbsp;&nbsp;&nbsp;&nbsp;**dev**: the [unstable development application](https://james-ingram-act-two.de/open-source/ResidentSynthHostTestSite/host.html).
 
-The **testSite** has been fully merged into the **main** branch in April 2024, and the two online web applications are identical. There is, however, no guarantee that this state will persist. 
+The **dev** branch was fully merged into the **stable** branch in May 2024, and the two online web applications are identical. There is, however, no guarantee that this state will persist. 
 
 ---
 
