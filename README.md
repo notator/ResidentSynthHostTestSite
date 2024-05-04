@@ -18,7 +18,7 @@ The _ResidentSynth_ is designed to be configured for, and installed with, a web 
   * which MIDI messages it supports. It can, and does, therefore use non-standard MIDI messages.
   * which presets it needs.  Loading time can therefore be minimized by not installing redundant presets.
 
-Software synthesizers like the _ResidentSynth_ can be used by any web application. I am intending, for example, also to install it as one of the available synthesizers in my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformerTestSite), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
+Software synthesizers like the _ResidentSynth_ can be used by any web application. It is, for example, also installed and working with my _AssistantPerformer_ ([repository](https://github.com/notator/AssistantPerformerTestSite), [application](https://james-ingram-act-two.de/open-source/assistantPerformer/assistantPerformer.html)).
 
 **[Detailed documentation for both the ResidentSynth and the Host can be found here](https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html)**.
 
@@ -39,6 +39,6 @@ The _ResidentSynth_ provides support for different tuning types (see the [docume
 Many thanks to Prof. Paul Poletti, who is the author of a table of Baroque tunings giving the offsets from Equal Temperament of each keyboard key in each tuning. The table was downloaded from Just-Say-Do.com a few years ago, but the site is no longer available, and I have been unable to contact the author. Any help in finding Prof. Poletti would be very welcome!
 
 James Ingram  
-April 2024 
+May 2024 
 
 
