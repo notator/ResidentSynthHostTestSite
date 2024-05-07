@@ -18,91 +18,17 @@ ResSynth.bank = (function()
     "use strict";
 
     let
-        getCorrectedPresets = function(fontPresets)
+        getCheckedPresets = function(fontPresets)
         {
-            // This function just corrrects errors in the Bank preset files.
-            function correctWebAudioPresetErrors(originalPresetIndex, zones)
+            function checkPersussionZones(presetName, zones)
             {
-                function removeRedundantBankGeneralUserGSGrandPianoZones(zones)
+                for(var zoneIndex = 0; zoneIndex < zones.length; zoneIndex++)
                 {
-                    let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 88 && z.keyRangeHigh === 90)),
-                        corrected = false;
-
-                    if(zoneIndex > -1)
+                    let zone = zones[zoneIndex];
+                    if( zone !== undefined && zone.keyRangeLow !== zone.keyRangeHigh)
                     {
-                        zones.splice(zoneIndex, 1);
-                        corrected = true;
+                        throw `Error in zone (zoneIndex:${zoneIndex}) in preset ${presetName}`;
                     }
-                    zoneIndex = zones.findIndex(z => (z.keyRangeLow === 61 && z.keyRangeHigh === 61));
-                    if(zoneIndex > -1)
-                    {
-                        zones.splice(zoneIndex, 1);
-                        corrected = true;
-                    }
-                    if(corrected)
-                    {
-                        // console.warn("Bank: corrected GeneralUserGS GrandPiano zones.");
-                    }
-                }
-                function removeRedundantBankGeneralUserGSMusicBoxZones(zones)
-                {
-                    let zoneIndex = zones.findIndex(z => (z.keyRangeLow === 0 && z.keyRangeHigh === 80)),
-                        corrected = false;
-
-                    if(zoneIndex > -1)
-                    {
-                        zones.splice(zoneIndex, 1);
-                        corrected = true;
-                    }
-                    zoneIndex = zones.findIndex(z => (z.keyRangeLow === 81 && z.keyRangeHigh === 113));
-                    if(zoneIndex > -1)
-                    {
-                        zones.splice(zoneIndex, 1);
-                        corrected = true;
-                    }
-                    if(corrected)
-                    {
-                        // console.warn("Bank: corrected GeneralUserGS MusicBox zones.");
-                    }
-                }
-                function resetHighFluidPadZone(zones, padNumber)
-                {
-                    if(zones.length === 2 && zones[1].keyRangeLow === 0)
-                    {
-                        zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
-                        zones[1].keyRangeHigh = 127;
-                        // console.warn("Bank: corrected Fluid Pad " + padNumber + " (top zone).");
-                    }
-                }
-                function correctFluidPad5Zones(zones)
-                {
-                    // remove the middle zone, and make the others contiguous
-                    if(zones.length === 3 && zones[1].keyRangeLow === 0)
-                    {
-                        zones.splice(1, 1);
-                        zones[1].keyRangeLow = zones[0].keyRangeHigh + 1;
-                        zones[1].keyRangeHigh = 127;
-                        // console.warn("Bank: corrected Fluid Pad 5 zones.");
-                    }
-                }
-
-                switch(originalPresetIndex)
-                {
-                    case 0:
-                        removeRedundantBankGeneralUserGSGrandPianoZones(zones);
-                        break;
-                    case 10:
-                        removeRedundantBankGeneralUserGSMusicBoxZones(zones);
-                        break;
-                    case 89:
-                        resetHighFluidPadZone(zones, 2);
-                        break;
-                    case 92:
-                        correctFluidPad5Zones(zones);
-                        break;
-                    case 93:
-                        resetHighFluidPadZone(zones, 6);
-                        break;
                 }
             }
 
@@ -117,7 +43,7 @@ ResSynth.bank = (function()
                 }
             }
 
-            let correctedPresets = [];
+            let checkedPresets = [];
 
             for(let presetIndex = 0; presetIndex < fontPresets.length; ++presetIndex)
             {
@@ -131,24 +57,19 @@ ResSynth.bank = (function()
 
                 if(preset.isPercussion)
                 {
-                    originalPresetIndex = preset.originalPresetIndex; // already set                    
+                    originalPresetIndex = preset.originalPresetIndex; // already set
+                    checkPersussionZones(preset.name, preset.zones);
                 }
                 else
                 {
                     console.assert(preset.originalPresetIndex === originalPresetIndex);
-                }
+                    checkZoneContiguity(preset.name, originalPresetIndex, preset.zones);                    
+                }              
 
-                correctWebAudioPresetErrors(originalPresetIndex, preset.zones);
-
-                if(!preset.isPercussion)
-                {
-                    checkZoneContiguity(preset.name, originalPresetIndex, preset.zones);
-                }                
-
-                correctedPresets[presetIndex] = preset;
+                checkedPresets[presetIndex] = preset;
             }
 
-            return correctedPresets;
+            return checkedPresets;
         },
 
         // Returns true if all the contained zones have a buffer attribute.
@@ -189,7 +110,7 @@ ResSynth.bank = (function()
             }
 
             Object.defineProperty(this, "name", {value: name, writable: false});
-            Object.defineProperty(this, "presets", {value: getCorrectedPresets(fontPresets), writable: false});
+            Object.defineProperty(this, "presets", {value: getCheckedPresets(fontPresets), writable: false});
             Object.defineProperty(this, "isReady", {value: isReady, writable: false});
         },
 

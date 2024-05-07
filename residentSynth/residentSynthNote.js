@@ -102,44 +102,50 @@ ResSynth.residentSynthNote = (function()
 			return bufferSourceNode;
 		}
 
-		let	audioContext = this.audioContext,
-			zone = this.zone,
-			noteGainNode = this.noteGainNode,
-			now = this.audioContext.currentTime;
-
-		this.startTime = now; // used in updatePitchWheel
-
-		this.envelopeDuration = zone.vEnvData.envelopeDuration; // used in setTimeout below, and in updatePitchWheel()
-		this.noteOffReleaseDuration = zone.vEnvData.noteOffReleaseDuration; 
-		setNoteEnvelope(noteGainNode.gain, now, this.velocityFactor, zone.vEnvData);
-
-		this.bufferSourceNode = getBufferSourceNode(audioContext, this.midiPitch, zone);
-		this.updatePitchWheel(this.pitchWheel14Bit);
-		this.bufferSourceNode.onended = function()
+		if(this.zone !== undefined) // percussion presets have undefined zones that play nothing
 		{
-			// see https://stackoverflow.com/questions/46203191/should-i-disconnect-nodes-that-cant-be-used-anymore
-			noteGainNode.disconnect(this.channelInputNode);
-			//console.log("The note's bufferSourceNode has stopped, and its noteGainNode has been disconnected.");
-		};
-		this.bufferSourceNode.connect(noteGainNode);
+			let audioContext = this.audioContext,
+				zone = this.zone,
+				noteGainNode = this.noteGainNode,
+				now = this.audioContext.currentTime;
 
-		// see https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode/start
-		// N.B. zone.delay is defined/set to 0 when loading/adjusting the zone, and never changes.
-		this.bufferSourceNode.start(now, zone.delay, this.envelopeDuration + 0.5);
+			this.startTime = now; // used in updatePitchWheel
+
+			this.envelopeDuration = zone.vEnvData.envelopeDuration; // used in setTimeout below, and in updatePitchWheel()
+			this.noteOffReleaseDuration = zone.vEnvData.noteOffReleaseDuration;
+			setNoteEnvelope(noteGainNode.gain, now, this.velocityFactor, zone.vEnvData);
+
+			this.bufferSourceNode = getBufferSourceNode(audioContext, this.midiPitch, zone);
+			this.updatePitchWheel(this.pitchWheel14Bit);
+			this.bufferSourceNode.onended = function()
+			{
+				// see https://stackoverflow.com/questions/46203191/should-i-disconnect-nodes-that-cant-be-used-anymore
+				noteGainNode.disconnect(this.channelInputNode);
+				//console.log("The note's bufferSourceNode has stopped, and its noteGainNode has been disconnected.");
+			};
+			this.bufferSourceNode.connect(noteGainNode);
+
+			// see https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode/start
+			// N.B. zone.delay is defined/set to 0 when loading/adjusting the zone, and never changes.
+			this.bufferSourceNode.start(now, zone.delay, this.envelopeDuration + 0.5);
+		}
 	};
 
 	ResidentSynthNote.prototype.noteOff = function()
 	{
-		let
-			noteGainNode = this.noteGainNode,
-			stopTime = this.audioContext.currentTime + this.noteOffReleaseDuration;
+		if(this.zone !== undefined) // percussion presets have undefined zones that play nothing
+		{
+			let
+				noteGainNode = this.noteGainNode,
+				stopTime = this.audioContext.currentTime + this.noteOffReleaseDuration;
 
-		noteGainNode.gain.cancelScheduledValues(0);
-		noteGainNode.gain.linearRampToValueAtTime(0, stopTime);
+			noteGainNode.gain.cancelScheduledValues(0);
+			noteGainNode.gain.linearRampToValueAtTime(0, stopTime);
 
-		this.bufferSourceNode.stop(stopTime);
+			this.bufferSourceNode.stop(stopTime);
 
-		return stopTime;
+			return stopTime;
+		}
 	};
 
 	// This function is called when the bufferSourceNode has just been created, and

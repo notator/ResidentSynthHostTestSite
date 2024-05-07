@@ -60,9 +60,61 @@ ResSynth.residentSynth = (function(window)
                         }
                     }
 
-                    // The presetName parameter has only been added for use in console.log when the preset adjustment is complete.
+                    // The presetName parameter has been added for use in messages to the console.
                     function adjustPreset(audioContext, preset, presetName)
                     {
+                        // function added 06.05.2024
+                        // returns an Array of zones in which
+                        //    zones[0].keyRangeLow === 0
+                        //    zones do not overlap, and all keys are assigned
+                        //    zones[zones.length - 1].keyRangeHigh === 127
+                        function getNormalizedZones(zones, presetName)
+                        {
+                            let returnZones = [],
+                                currentLowKey = 128,
+                                currentHighKey = zones[zones.length - 1].keyRangeHigh;
+
+                            for(let i = zones.length - 1; i >= 0; i--)
+                            {
+                                let zone = zones[i],
+                                    lowerZone = (i > 0) ? zones[i - 1] : undefined;                                    ;
+
+                                if(zone.keyRangeHigh >= currentHighKey)
+                                {
+                                    zone.keyRangeHigh = currentHighKey;
+                                    currentLowKey = zone.keyRangeLow;
+
+                                    if(lowerZone !== undefined)
+                                    {
+                                        if(lowerZone.keyRangeHigh < currentHighKey)
+                                        {
+                                            zone.keyRangeLow = lowerZone.keyRangeHigh + 1;
+                                        }
+                                        else
+                                        {
+                                            lowerZone.keyRangeHigh = currentLowKey - 1;
+                                        }
+                                    }
+
+                                    if(zone.keyRangeLow <= zone.keyRangeHigh)
+                                    {
+                                        returnZones.unshift(zone);
+                                    }
+                                    //else
+                                    //{
+                                    //    console.log(`zone omitted in preset ${presetName}`);
+                                    //}
+                                }
+
+                                currentHighKey = zone.keyRangeLow - 1;                                
+                            }
+
+                            returnZones[0].keyRangeLow = 0;
+                            returnZones[returnZones.length - 1].keyRangeHigh = 127;
+
+                            return returnZones;
+                        }
+
                         // 13.01.2020, ji: Added presetName and isLastZone arguments for console.log code
                         function adjustZone(audioContext, zone, presetName, isLastZone)
                         {
@@ -71,7 +123,8 @@ ResSynth.residentSynth = (function(window)
                                 if(typeof aValue === "number")
                                 {
                                     return aValue;
-                                } else
+                                }
+                                else
                                 {
                                     return defValue;
                                 }
@@ -85,7 +138,7 @@ ResSynth.residentSynth = (function(window)
                             if(zone.file)
                             {
                                 // 27.02.2020 -- ji
-                                // Added this nested condition since this code can now be revisited afer creating zone.buffer.
+                                // Added this nested condition since this code can now be revisited after creating zone.buffer.
                                 if(zone.buffer === undefined)
                                 {
                                     // this code sets zone.buffer
@@ -130,6 +183,15 @@ ResSynth.residentSynth = (function(window)
                             // zone.sustain = numValue(zone.originalPitch, 0);
                         }
 
+                        if(presetName.includes("_tone_"))
+                        {
+                            preset.zones = getNormalizedZones(preset.zones, presetName);
+                        }
+                        //else
+                        //{
+                        //    console.log("percussion preset.")
+                        //}
+
                         for(let zoneIndex = 0; zoneIndex < preset.zones.length; zoneIndex++)
                         {
                             let isLastZone = (zoneIndex === (preset.zones.length - 1));
@@ -157,10 +219,7 @@ ResSynth.residentSynth = (function(window)
 
                         let name = presets[presetIndex];
 
-                        if(name.includes("_tone_")) // "percussion" presets are decoded below.
-                        {
-                            decodeAfterLoading(audioContext, name);
-                        }
+                        decodeAfterLoading(audioContext, name);
                     }
                 }
 
@@ -285,30 +344,6 @@ ResSynth.residentSynth = (function(window)
 
             function adjustForResidentSynth(webAudioFont)
             {
-                function setZonesToMaximumRange(presetName, originalPresetIndex, zones)
-                {
-                    let bottomZone = zones[0],
-                        topZone = zones[zones.length - 1],
-                        expanded = false;
-
-                    if(bottomZone.keyRangeLow !== 0)
-                    {
-                        bottomZone.keyRangeLow = 0;
-                        expanded = true;
-                    }
-                    if(topZone.keyRangeHigh !== 127)
-                    {
-                        topZone.keyRangeHigh = 127;
-                        expanded = true;
-                    }
-
-                    if(expanded)
-                    {
-                        let gmName = ResSynth.constants.generalMIDIPresetName(originalPresetIndex);
-                        // console.warn("WAFSynth: extended the pitch range of preset " + presetName + " (" + gmName + ").");
-                    }
-                }
-
                 function deleteZoneAHDSRs(zones)
                 {
                     for(var i = 0; i < zones.length; i++)
@@ -551,7 +586,6 @@ ResSynth.residentSynth = (function(window)
                         originalPresetIndex = preset.originalPresetIndex,
                         zones = preset.zones;
 
-                    setZonesToMaximumRange(presetName, originalPresetIndex, zones);
                     // The residentSynth is going to use the zone.vEnvData attributes
                     //(which are set below) instead of the original zone.ahdsr attributes.
                     // The zone.ahdsr attributes are deleted here to avoid confusion.
@@ -1224,10 +1258,7 @@ ResSynth.residentSynth = (function(window)
                     keyPitchBase = Math.floor(midi.midiPitch);
 
                 zone = preset.zones.find(obj => (obj.keyRangeHigh >= keyPitchBase && obj.keyRangeLow <= keyPitchBase));
-                if(!zone)
-                {
-                    throw "zone  not found";
-                }
+                // N.B. zone can be undefined in percussion presets
 
                 note = new ResSynth.residentSynthNote.ResidentSynthNote(audioContext, zone, midi, chanControls, channelAudioNodes[channel]);
 
