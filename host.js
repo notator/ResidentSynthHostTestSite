@@ -2815,14 +2815,22 @@ ResSynth.host = (function(document)
 
             setInputDeviceEventListener(getElem("inputDeviceSelect"));
 
-            // Its important to call this function after user interaction with the GUI.
-            synth.open()
-                .then(() => {console.log("Opened ResidentSynth");})
-                .catch(() => {console.error("Error opening ResidentSynth");});
-
-            // This function initializes the synth with the (default) values of all the host's controls
-            // by calling the corresponding functions in the synth's public interface.
-            setPage2Display(synth);
+            // Its important to do the following _after_ user interaction with the GUI.
+            synth.close()
+                .then(() =>
+                {
+                    console.log("Closed ResidentSynth");
+                    synth.open()
+                        .then(() =>
+                        {
+                            console.log("Opened ResidentSynth");
+                            // This function initializes the synth with the (default) values of all the host's controls
+                            // by calling the corresponding functions in the synth's public interface.
+                            setPage2Display(synth);
+                        })
+                        .catch(() => {console.error("Error opening ResidentSynth");});
+                })
+                .catch(() => {console.error("Error closing ResidentSynth");});
         },
 
         // exported
