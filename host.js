@@ -336,7 +336,7 @@ ResSynth.host = (function(document)
                 }
             }
 
-            if(inputDevice !== null)
+            if(inputDevice !== null) // 21.06.2024 replace by "if(inputDevice)". (undefined and null are falsy)
             {
                 inputDevice.removeEventListener("midimessage", handleInputMessage, false);
                 inputDevice.close()
@@ -345,7 +345,7 @@ ResSynth.host = (function(document)
             }
 
             inputDevice = inputDeviceSelect.options[inputDeviceSelect.selectedIndex].inputDevice;
-            if(inputDevice)
+            if(inputDevice) // 21.06.2024 (undefined and null are falsy)
             {
                 inputDevice.addEventListener("midimessage", handleInputMessage, false);
                 inputDevice.open()
@@ -354,6 +354,7 @@ ResSynth.host = (function(document)
             }
             else
             {
+                // 21.06.2024 delete the following line
                 throwError("Error: the input device is not set in the device select control.");
                 inputDeviceSelect.disabled = true;
             }
@@ -2944,7 +2945,8 @@ ResSynth.host = (function(document)
                     iDevSelect.options.length = 0; // important when called by midiAccess.onstatechange 
 
                     option = document.createElement("option");
-                    if(midiAccess !== null)
+                    //  21.06.2024 replace the following line by if((midiAccess !== null) && (midiAccess.inputs.size > 0))
+                    if(midiAccess !== null) 
                     {
                         midiAccess.inputs.forEach(function(port)
                         {
