@@ -336,7 +336,8 @@ ResSynth.host = (function(document)
                 }
             }
 
-            if(inputDevice !== null) // 21.06.2024 replace by "if(inputDevice)". (undefined and null are falsy)
+            // if(inputDevice !== null) // 21.06.2024 replace by "if(inputDevice)". (undefined and null are falsy)
+            if(inputDevice) // 29.06.2024: both undefined and null are falsy
             {
                 inputDevice.removeEventListener("midimessage", handleInputMessage, false);
                 inputDevice.close()
@@ -345,7 +346,7 @@ ResSynth.host = (function(document)
             }
 
             inputDevice = inputDeviceSelect.options[inputDeviceSelect.selectedIndex].inputDevice;
-            if(inputDevice) // 21.06.2024 (undefined and null are falsy)
+            if(inputDevice) // 29.06.2024: both undefined and null are falsy
             {
                 inputDevice.addEventListener("midimessage", handleInputMessage, false);
                 inputDevice.open()
@@ -354,8 +355,8 @@ ResSynth.host = (function(document)
             }
             else
             {
-                // 21.06.2024 delete the following line
-                throwError("Error: the input device is not set in the device select control.");
+                // 29.06.2024 deleted the following line
+                // throwError("Error: the input device is not set in the device select control.");
                 inputDeviceSelect.disabled = true;
             }
         },
@@ -2942,11 +2943,14 @@ ResSynth.host = (function(document)
                     let iDevSelect = getElem("inputDeviceSelect"),
                         option;
 
-                    iDevSelect.options.length = 0; // important when called by midiAccess.onstatechange 
+                    if(iDevSelect.options.length > 0) // length is 0 when loading
+                    {   // important when called by midiAccess.onstatechange
+                        iDevSelect.options.length = 0;
+                    }  
 
                     option = document.createElement("option");
-                    //  21.06.2024 replace the following line by if((midiAccess !== null) && (midiAccess.inputs.size > 0))
-                    if(midiAccess !== null) 
+                    //  21.06.2024 replace if(midiAccess !== null) by if((midiAccess !== null) && (midiAccess.inputs.size > 0) 
+                    if((midiAccess !== null) && (midiAccess.inputs.size > 0))
                     {
                         midiAccess.inputs.forEach(function(port)
                         {

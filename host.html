@@ -13,7 +13,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <body>
     <div class="background">
         <!--width 692px-->
-        <div id="topDiv">
+        <div id="topDiv" style="text-align: center">
             <table>
                 <colgroup>
                     <col width="90px" />
@@ -28,21 +28,20 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                     <td style="text-align: center">
                         <span class="boldTitle">ResidentSynth Host</span><br />
                         <span class="subtitle">live performance and recording of the GUI-less ResidentSynth</span>
-                        <div style="padding-top: 3px">
-                            <span id="inputDeviceTitle" class="boldSubtitle">Input Device:</span>
-                            <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
-
-                            <span>
-                                <span id="audioDeviceTitle" class="boldSubtitle">Audio Output:</span>
-                                <select id="audioDeviceSelect" class="audioDeviceSelect" onchange="ResSynth.host.onAudioDeviceSelectChanged()"></select>
-                            </span>
-                        </div>
                     </td>
                     <td style="vertical-align: top; text-align: right;">
                         <span class="subtitle"><a href="https://github.com/notator/ResidentSynthHostTestSite">GitHub</a></span>
                     </td>
                 </tr>
             </table>
+            <div style="padding-top: 3px; text-align: center">
+                <span id="inputDeviceTitle" class="boldSubtitle">Input Device:</span>
+                <select id="inputDeviceSelect" class="inputDeviceSelect" onchange="ResSynth.host.onInputDeviceSelectChanged()"></select>&nbsp;&nbsp;
+                <span>
+                    <span id="audioDeviceTitle" class="boldSubtitle">Audio Output:</span>
+                    <select id="audioDeviceSelect" class="audioDeviceSelect" onchange="ResSynth.host.onAudioDeviceSelectChanged()"></select>
+                </span>
+            </div>
 
         </div>
 
