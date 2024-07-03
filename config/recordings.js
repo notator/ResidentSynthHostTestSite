@@ -26,7 +26,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -72,7 +73,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -112,7 +114,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -148,7 +151,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -198,7 +202,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -234,7 +239,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -288,7 +294,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -443,7 +450,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -688,7 +696,8 @@ ResSynth.recordings =
                             "reverberation": 0,
                             "pitchWheelSensitivity": 2,
                             "velocityPitchSensitivity": 0,
-                            "keyboardOrnamentsArrayIndex": 0
+                            "keyboardOrnamentsArrayIndex": 0,
+                            "expression": 100
                         },
                         "messages":
                             [
@@ -726,7 +735,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "velocityPitchSensitivity": 0,
-                        "keyboardOrnamentsArrayIndex": 0
+                        "keyboardOrnamentsArrayIndex": 0,
+                        "expression": 100
                     },
                     "messages": [
                         "144,65,73,0",
@@ -764,7 +774,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "velocityPitchSensitivity": 0,
-                        "keyboardOrnamentsArrayIndex": 0
+                        "keyboardOrnamentsArrayIndex": 0,
+                        "expression": 100
                     },
                     "messages": [
                         "145,67,101,0",
@@ -792,7 +803,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "velocityPitchSensitivity": 0,
-                        "keyboardOrnamentsArrayIndex": 0
+                        "keyboardOrnamentsArrayIndex": 0,
+                        "expression": 100
                     },
                     "messages": [
                         "147,42,99,1503",
@@ -829,7 +841,8 @@ ResSynth.recordings =
                         "reverberation": 0,
                         "pitchWheelSensitivity": 2,
                         "velocityPitchSensitivity": 0,
-                        "keyboardOrnamentsArrayIndex": 1
+                        "keyboardOrnamentsArrayIndex": 1,
+                        "expression": 100
                     },
                     "messages": [
                         "144,60,68,0",
