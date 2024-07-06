@@ -2940,6 +2940,13 @@ ResSynth.host = (function(document)
             {
                 function setInputDeviceSelect(midiAccess)
                 {
+                    function setInitialDivsDisplay() { 
+                        getElem("loadingMsgDiv").style.display = "none";
+                        getElem("synthSettingsDiv").style.display = "none";
+                        getElem("hostSettingsDiv").style.display = "none";
+                        getElem("continueAtStartButtonDiv").style.display = "block";
+                    }
+
                     let iDevSelect = getElem("inputDeviceSelect"),
                         option;
 
@@ -2971,6 +2978,8 @@ ResSynth.host = (function(document)
 
                     iDevSelect.selectedIndex = iDevSelect.options.length - 1;
                     inputDevice = iDevSelect[iDevSelect.selectedIndex].inputDevice;
+
+                    setInitialDivsDisplay();
                 }
 
                 function onSuccessCallback(midiAccess)
@@ -3205,20 +3214,12 @@ ResSynth.host = (function(document)
                 return returnRecordings;
             }
 
-            function setInitialDivsDisplay()
-            {
-                getElem("loadingMsgDiv").style.display = "none";
-                getElem("synthSettingsDiv").style.display = "none";
-                getElem("hostSettingsDiv").style.display = "none";
-                getElem("continueAtStartButtonDiv").style.display = "block";
-            }
-
-            setupInputDevice();
             setAudioDeviceSelect();
+            setupInputDevice();
+
             getChannelPerKeyArrays(); // loads channelPerKeyArrays using ResSynth.keyboardSplitDefs from keyboardSplitDefs.js
             presetRecordings = getRecordings();  // loads definitions from recordings.js.
             synth = new ResSynth.residentSynth.ResidentSynth(); // loads definitions from files in residentSynth/config.
-            setInitialDivsDisplay();
         },
 
         publicAPI =
