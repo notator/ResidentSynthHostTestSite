@@ -904,6 +904,53 @@ ResSynth.host = (function(document)
             document.body.removeChild(a);
         },
 
+        // not exported, this function is bound internally
+        onTriggerKeyDown = function(event)
+        {
+            // increments or rotates the index if toIndex is less than 0 or out of range.
+            // otherwise sets the index to toIndex.
+            function setSettingsSelectIndex(toIndex)
+            {
+                let settingsSelect = getElem("settingsSelect"),
+                    nOptions = settingsSelect.options.length;
+
+                settingsSelect.previousIndex = settingsSelect.selectedIndex;
+
+                toIndex = (toIndex >= 0 && toIndex < nOptions) ? toIndex : settingsSelect.previousIndex + 1;
+                toIndex = (toIndex === nOptions) ? 0 : toIndex; 
+
+                settingsSelect.selectedIndex = toIndex;
+
+                onSettingsSelectChanged();
+            }
+
+            if(event.repeat)
+            {
+                return; // stops the reaction to a repeating key
+            }
+
+            let keyCode = event.keyCode;
+            if(keyCode === 32)
+            { 
+                // space
+                console.log(event.key);
+                // advance/rotate settings selector
+                setSettingsSelectIndex(-1);
+            }
+            else if(keyCode >= 48 && keyCode <= 57)
+            {
+                // '0'..'9'
+                console.log(event.key);
+                // set the settingsSelect.selectedIndex
+                setSettingsSelectIndex(keyCode - 48);
+            }
+            else if(keyCode >= 65 && keyCode <= 90)
+            {
+                // 'a'..'z'
+                setSettingsSelectIndex(keyCode - 55); // indices 10..35
+            }
+        },
+
         // exported
         onTriggerKeyInputChanged = function()
         {
@@ -3216,6 +3263,8 @@ ResSynth.host = (function(document)
 
             setAudioDeviceSelect();
             setupInputDevice();
+
+            document.addEventListener('keydown', onTriggerKeyDown);
 
             getChannelPerKeyArrays(); // loads channelPerKeyArrays using ResSynth.keyboardSplitDefs from keyboardSplitDefs.js
             presetRecordings = getRecordings();  // loads definitions from recordings.js.
