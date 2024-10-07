@@ -14,14 +14,20 @@ console.log('load synthSettingsDefs.js');
 // the preset settings in the order they will appear in the host's settingsSelect control.
 // The _synthSettingsArray_ contains only the _changes_ of attributes necessary when the
 // settingsSelect's options are selected in sequence, starting from the default state.
-// The settingsSelect implements both sequential selection, using the trigger key, and
-// random selection using the settingsSelect control itself.
+//
+// The settingsSelect implements both sequential selection, using the <space> key on the
+// QUERTY keyboard, and random selection using either keys on the QUERTY keyboard or the
+// settingsSelect control itself:
+//   <space> increments/rotates the settingsSelect.selectedIndex, 
+//   The '0'..'9' keys select settingIndex (key-1) respectively, (key '1' selects the first setting, 
+//       incrementing / rotating if out of range).
+//   The 'a'..'z' keys select settingIndex 10..35 respectively(incrementing / rotating if out of range).
 //
 // The following top-level synthSettingsDefs attributes are arrays containing one value
 // per preset setting:
-//   `names` // arbitrary, descriptive strings that will be used in the settingSelect GUI.
-//   `keyboardSplitIndexes` // integers in range 0..n, default 0, where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
-//   `triggerKeys` // integers in range 0..127, default 0
+//   `name` // an arbitrary, descriptive string that will be used in the settingSelect GUI.
+//   `keyboardSplitIndex` // the index of the keyboardSplitDef. In range 0..n, default 0,
+//        where n is the number of keyboardSplitDefs defined in keyboardSplitDefs.js
 //
 // The `channelSettingsArray` is an array of up to 16 objects, one object per channel, in order
 // of channel. Channels that never change their (default) state are omitted here, but set to
@@ -62,7 +68,6 @@ ResSynth.synthSettingsDefs =
             "settings 2 (ch0 and ch1 changes)"
         ],
     keyboardSplitIndexes: [0, 0, 3], // 0..(keyboardSplitDefs.length - 1), default 0
-    triggerKeys: [36, 36, 36],       // 0..127, default 0
     _comment: "Channels 4..15 are always set to the default settings.",
     channelSettingsArray:
         [

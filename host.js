@@ -22,7 +22,6 @@ ResSynth.host = (function(document)
         currentChannelPerKeyArray,
         globalChannelPressureType = "unused", // set by channelPressureSelect
         globalChannelPressureFactor = 0, // fraction set by channelPressureSensitivityLongControl
-        triggerKey,
         presetRecordings = [], // the recordings in recordings.js, converted
 
         // set by startRecording(), undefined by stopRecording() or discardRecording()
@@ -152,20 +151,6 @@ ResSynth.host = (function(document)
                     let longInputControl = allLongInputControls.find(elem => elem.numberInputElem.cmdIndex === cmdIndex);
 
                     longInputControl.setValue(cmdValue);
-                }
-
-                function doTriggerAction()
-                {
-                    let settingsSelect = getElem("settingsSelect");
-
-                    settingsSelect.previousIndex = settingsSelect.selectedIndex;
-
-                    let nextSettingsIndex = settingsSelect.previousIndex + 1;
-                    nextSettingsIndex = (nextSettingsIndex === settingsSelect.options.length) ? 0 : nextSettingsIndex;
-
-                    settingsSelect.selectedIndex = nextSettingsIndex;
-
-                    onSettingsSelectChanged();
                 }
 
                 function midiValue(arg)
@@ -328,11 +313,6 @@ ResSynth.host = (function(document)
                 else
                 {
                     sendMessage(msg, currentChannel);
-                }
-
-                if(triggerKey !== undefined && command === CMD.NOTE_ON && triggerKey !== 0 && data[1] === triggerKey && data[2] !== 0)
-                {
-                    doTriggerAction();
                 }
             }
 
@@ -636,13 +616,11 @@ ResSynth.host = (function(document)
             {
                 let selectedIndex = settingsSelect.selectedIndex,
                     changedSettings = settingsChangePerSection[selectedIndex],
-                    keyboardSplitIndex = changedSettings.keyboardSplitIndex,
-                    triggerKey = changedSettings.triggerKey;
+                    keyboardSplitIndex = changedSettings.keyboardSplitIndex;
 
                 if(selectedIndex === 0)
                 {
                     console.assert(keyboardSplitIndex !== undefined);
-                    console.assert(triggerKey !== undefined);
                 }
 
                 if(keyboardSplitIndex !== undefined)
@@ -651,14 +629,6 @@ ResSynth.host = (function(document)
 
                     keyboardSplitSelect.selectedIndex = keyboardSplitIndex;
                     onKeyboardSplitSelectChanged();
-                }
-
-                if(triggerKey !== undefined)
-                {
-                    let triggerKeyInput = getElem("triggerKeyInput");
-
-                    triggerKeyInput.value = triggerKey;
-                    onTriggerKeyInputChanged();
                 }
             }
 
@@ -883,13 +853,11 @@ ResSynth.host = (function(document)
 
             let hostChannelOptions = getElem("channelSelect").options,
                 keyboardSplitIndex = getElem("keyboardSplitSelect").selectedIndex,
-                triggerKey = getElem("triggerKeyInput").value,
                 changedChannelSettingsArray = getChangedChannelSettingsArray(hostChannelOptions),
                 exportSettings = {};
 
             exportSettings.name = "exported synth settings";
             exportSettings.keyboardSplitIndex = keyboardSplitIndex;
-            exportSettings.triggerKey = triggerKey;
             if(changedChannelSettingsArray.length < 16)
             {
                 exportSettings._comment = `Channels ${changedChannelSettingsArray.length}..15 contain the default settings`;
@@ -905,7 +873,7 @@ ResSynth.host = (function(document)
         },
 
         // not exported, this function is bound internally
-        onTriggerKeyDown = function(event)
+        onQuertyKeyDown = function(event)
         {
             // increments or rotates the index if toIndex is less than 0 or out of range.
             // otherwise sets the index to toIndex.
@@ -949,15 +917,6 @@ ResSynth.host = (function(document)
                 // 'a'..'z'
                 setSettingsSelectIndex(keyCode - 55); // indices 10..35
             }
-        },
-
-        // exported
-        onTriggerKeyInputChanged = function()
-        {
-            let triggerKeyInput = getElem("triggerKeyInput");
-
-            // set the global triggerKey variable (for convenience, used in handleInputMessage)
-            triggerKey = parseInt(triggerKeyInput.value);
         },
 
         // exported
@@ -2383,7 +2342,7 @@ ResSynth.host = (function(document)
                                 }
                             }
 
-                            function checkTopLevelAttributes(names, keyboardSplitIndexes, triggerKeys)
+                            function checkTopLevelAttributes(names, keyboardSplitIndexes)
                             {
                                 function checkNames(names, arrayLength)
                                 {
@@ -2416,25 +2375,10 @@ ResSynth.host = (function(document)
                                     }
                                 }
 
-                                function checkTriggerKeyValues(triggerKeys, arrayLength)
-                                {
-                                    checkArray("triggerKeys", triggerKeys, arrayLength);
-
-                                    for(let i = 0; i < triggerKeys.length; i++)
-                                    {
-                                        let triggerKey = triggerKeys[i];
-                                        if((triggerKey < 0 || triggerKey > 127))
-                                        {
-                                            throwError("All synthSettingsDefs.triggerKeys must be in range 0..127.");
-                                        }
-                                    }
-                                }
-
                                 let arrayLength = names.length;
 
                                 checkNames(names, arrayLength);
                                 checkKeyboardSplitIndexValues(keyboardSplitIndexes, arrayLength);
-                                checkTriggerKeyValues(triggerKeys, arrayLength);
                             }
 
                             function checkChannelSettingsArray(channelSettingsArray, arrayLength)
@@ -2638,7 +2582,7 @@ ResSynth.host = (function(document)
                             }
 
                             // See the comment on the surrounding function above.
-                            function getSettingsChangePerSect(names, keyboardSplitIndexes, triggerKeys, channelSettingsArray)
+                            function getSettingsChangePerSect(names, keyboardSplitIndexes, channelSettingsArray)
                             {
                                 // returns undefined if the attribute does not need to be set,
                                 // otherwise returns valuesArray[settingsIndex].
@@ -2730,7 +2674,6 @@ ResSynth.host = (function(document)
                                     let sectionSettings = {},
                                         name = names[sectionIndex],
                                         keyboardSplitIndex = getNewAttributeValue(keyboardSplitIndexes, sectionIndex),
-                                        triggerKey = getNewAttributeValue(triggerKeys, sectionIndex),
                                         channelSettings = getChangedChannelSettings(channelSettingsArray, sectionIndex);
 
                                     sectionSettings.name = name;
@@ -2738,11 +2681,6 @@ ResSynth.host = (function(document)
                                     if(keyboardSplitIndex !== undefined)
                                     {
                                         sectionSettings.keyboardSplitIndex = keyboardSplitIndex;
-                                    }
-
-                                    if(triggerKey !== undefined)
-                                    {
-                                        sectionSettings.triggerKey = triggerKey;
                                     }
 
                                     sectionSettings.channelSettings = channelSettings;
@@ -2759,14 +2697,13 @@ ResSynth.host = (function(document)
                             {
                                 let names = synthSettingsDefs.names,
                                     keyboardSplitIndexes = synthSettingsDefs.keyboardSplitIndexes,
-                                    triggerKeys = synthSettingsDefs.triggerKeys,
                                     channelSettingsArray = synthSettingsDefs.channelSettingsArray;
 
-                                checkTopLevelAttributes(names, keyboardSplitIndexes, triggerKeys);
+                                checkTopLevelAttributes(names, keyboardSplitIndexes);
                                 checkChannelSettingsArray(channelSettingsArray, names.length);
                                 checkChannelSettingsValues(channelSettingsArray);
 
-                                settingsChangePerSection = getSettingsChangePerSect(names, keyboardSplitIndexes, triggerKeys, channelSettingsArray);
+                                settingsChangePerSection = getSettingsChangePerSect(names, keyboardSplitIndexes, channelSettingsArray);
                             }
 
                             return settingsChangePerSection;
@@ -3264,7 +3201,7 @@ ResSynth.host = (function(document)
             setAudioDeviceSelect();
             setupInputDevice();
 
-            document.addEventListener('keydown', onTriggerKeyDown);
+            document.addEventListener('keydown', onQuertyKeyDown);
 
             getChannelPerKeyArrays(); // loads channelPerKeyArrays using ResSynth.keyboardSplitDefs from keyboardSplitDefs.js
             presetRecordings = getRecordings();  // loads definitions from recordings.js.
@@ -3292,7 +3229,6 @@ ResSynth.host = (function(document)
 
             onSettingsSelectChanged: onSettingsSelectChanged,
             onExportSettingsButtonClicked: onExportSettingsButtonClicked,
-            onTriggerKeyInputChanged: onTriggerKeyInputChanged,
 
             onplayRecordingButtonInputClicked: onplayRecordingButtonInputClicked,
             oncancelPlaybackButtonInputClicked: oncancelPlaybackButtonInputClicked,

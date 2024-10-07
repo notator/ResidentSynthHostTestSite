@@ -151,18 +151,13 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
             <div id="presetSettingsDiv">
                 <table>
                     <colgroup>
-                        <col style="width:410px" />
-                        <col style="width:124px" />
+                        <col style="width:534px" />
                         <col style="width:126px" />
                     </colgroup>
                     <tr>
                         <td>
                             <span id="settingsTitle" class="boldSubtitle">preset settings:</span>
                             <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
-                        </td>
-                        <td>
-                            <span id="triggerKeyTitle" class="boldSubtitle">trigger key:</span>
-                            <input type="number" id="triggerKeyInput" class="numberInput" value="36" min="0" max="127" onchange="ResSynth.host.onTriggerKeyInputChanged()" />
                         </td>
                         <td>
                             <input type="button" id="exportSettingsButtonInput" class="exportSettingsButtonInput" value="export current settings" onclick="ResSynth.host.onExportSettingsButtonClicked()" />
