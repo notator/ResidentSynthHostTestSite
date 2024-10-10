@@ -22,7 +22,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                 </colgroup>
                 <tr>
                     <td style="vertical-align: top">
-                        <span class="subtitle"><a href="https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html">Documentation</a></span>
+                        <span class="subtitle"><a href="https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html" target="_blank">Documentation</a></span>
 
                     </td>
                     <td style="text-align: center">
@@ -30,7 +30,7 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         <span class="subtitle">live performance and recording of the GUI-less ResidentSynth</span>
                     </td>
                     <td style="vertical-align: top; text-align: right;">
-                        <span class="subtitle"><a href="https://github.com/notator/ResidentSynthHostTestSite">GitHub</a></span>
+                        <span class="subtitle"><a href="https://github.com/notator/ResidentSynthHostTestSite" target="_blank">GitHub</a></span>
                     </td>
                 </tr>
             </table>
@@ -151,20 +151,28 @@ xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
             <div id="presetSettingsDiv">
                 <table>
                     <colgroup>
-                        <col style="width:534px" />
+                        <col style="width:88px" />
+                        <col style="width:446px" />
                         <col style="width:126px" />
                     </colgroup>
                     <tr>
                         <td>
                             <span id="settingsTitle" class="boldSubtitle">preset settings:</span>
+                        </td>
+                        <td>
                             <select id="settingsSelect" class="settingsSelect" onchange="ResSynth.host.onSettingsSelectChanged()" />
                         </td>
                         <td>
                             <input type="button" id="exportSettingsButtonInput" class="exportSettingsButtonInput" value="export current settings" onclick="ResSynth.host.onExportSettingsButtonClicked()" />
                         </td>
                     </tr>
-                </table>
-                <hr class="host" />
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td><span class="subtitle">This selector can also be controlled using <a href="https://james-ingram-act-two.de/open-source/aboutResidentSynthHost.html" target="_blank"><em>trigger keys</em></a></span></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>           
+                <hr class="host" style="margin-top:0" />
             </div>
             <div id="channelPressureDiv">
                 <table>
