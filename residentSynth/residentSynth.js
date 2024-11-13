@@ -1734,9 +1734,16 @@ ResSynth.residentSynth = (function(window)
     };
 
     // WebMIDIAPI §6.4 MIDIOutput interface
-    // This synth does not support timestamps (05.11.2015)
-    ResidentSynth.prototype.send = function(messageData, ignoredTimestamp)
+    ResidentSynth.prototype.send = function(messageData, timestamp = 0)
     {
+        const timeout = timestamp - performance.now();
+
+        if (timeout > 0) {
+            setTimeout(() => this.send(messageData), timeout);
+
+            return;
+        }
+
         var
             command = messageData[0] & 0xF0,
             channel = messageData[0] & 0xF,
