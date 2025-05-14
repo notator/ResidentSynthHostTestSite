@@ -1,0 +1,23 @@
+TODOs for the Resident Synth. To be implemented once the AssistantPerformer changes are complete.
+
+1.Make an OrnamentGroup category, similar to other Groups (e.g. TuningGroup). This involves chages to the
+ResidentsynthHost's GUI.
+
+2. remove DataEntry and RegisteredParam messages. I've decided to nolonger support backwards compatibility with the old
+DataEntry and RegisteredParam messages. I will remove them from the codebase. They are not used in any of the
+examples, and they are not needed for the new AssistantPerformer. I'm intending to create a completely new
+Assistantperformer site (AssistantPerformer2025), keeping the old one as well for archive purposes, migrating as many
+scores as possible to the new site. (Copilot has made some suggestions as to how to make a conversion of existing
+SVG-MIDI files to the new format. If possible, I want to convert at least the old Study 2 score.
+
+3. create a new, non-standard control (LocalPitchBend?) that works exactly like pitchBend, but applies only to the
+following NoteOn message. The following NoteOn will automatically cancel the effect of the LocalPitchBend, so that
+following NoteOns perform normally. The new control will be completely independent of the standard PitchBend state.
+The form will be: [Cmd, CTl, data], where data=64 means no effect, data=0 means bend down 1 semitone, data=127
+means bend up 1 semitone.
+Probably, the LocalPitchBend sensitivity should be fixed at +/- 1 semitone, but I could also implement a
+LocalPitchBendSensitivity control.
+
+4. Implement timestamps. See ResidentSynthChat1.png. The info in that .png may not be entirely accurate
+since I subsequently reverted Sequence.js to its original, earlier state. Use the .png with caution.
+I want to simplify Sequence.js if possible, but not to change the way it reports msPositions to the Cursor!
