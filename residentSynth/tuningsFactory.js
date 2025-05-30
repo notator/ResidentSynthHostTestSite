@@ -75,7 +75,7 @@ ResSynth.tuningsFactory = (function()
  
             for(let i = 0; i < 128; i++)
             {
-                tuning[i] = tuning[i] + semitonesDiff; // will be coerced to 0..<128 later
+                tuning[i] = tuning[i] - semitonesDiff; // will be coerced to 0..<128 later
             }
         },
 
@@ -134,6 +134,7 @@ ResSynth.tuningsFactory = (function()
     // Argument restrictions:
     //     rootKey must be an integer >= 0 and < 12.
     //     factorBase is a floating point number > 1 and !== a power of 2.
+    //     wideOctaves is a boolean that determines whether the tuning will have wide octaves.
     // The rootKey frequency is allocated to the rootKey.
     // Keys are numbered, according to the MIDI convention:
     //     C = 0, C# = 1, D = 2, D# = 3, E = 4, F = 5, F# = 6, G = 7, G# = 8, A = 9, A# = 10, B = 11.
@@ -141,24 +142,42 @@ ResSynth.tuningsFactory = (function()
     //     C0 = 12, C1 = 24, C2 = 36, C3 = 48, C4 = 60, C5 = 72, C6 = 84, C7 = 96, C8 = 108, C9 = 120
     //
     // This function is used for Pythagorean and other mean-tone tunings.
-    // The "wolf fifth" is placed in the interval G#-Eb when the root is C.
-    TuningsFactory.prototype.getTuningFromConstantFifthFactor = function(rootKey, factorBase)
+    // The "wolf fifth", if it exists, is placed in the interval G#-Eb when the root is C.
+    TuningsFactory.prototype.getTuningFromConstantFifthFactor = function (rootKey, factorBase, ignoreOctaves)
     {
+        function getGamutETTuningIgnoringOctaves(rootKey, factorBase)
+        {
+            let tuning = [],
+                factor = Math.pow(factorBase, (1.0 / 7)), // 7 is the number of keys in a perfect fifth
+                semitones = getSemitones(factor, 1), // semitones between neighboring keys
+                pitch = 0;
+
+            console.assert(Number.isInteger(rootKey) && 0 <= rootKey && rootKey < 12);
+            console.assert(factorBase > 1);
+
+            for (let i = 0; i < 128; i++)
+            {
+                tuning.push(pitch);
+                pitch += semitones;
+            }
+
+            return tuning;
+        }
         function getTuningOffsets(rootKey, factorBase)
         {
             let factors = [];
 
-            for(let i = 0; i < 9; i++)
+            for (let i = 0; i < 9; i++)
             {
                 let factor = Math.pow(factorBase, i);
-                while(!(factor < 2))
+                while (!(factor < 2))
                 {
                     factor /= 2;
                 }
                 factors.push(factor);
             }
 
-            for(let i = 1; i < 4; i++)
+            for (let i = 1; i < 4; i++)
             {
                 let factor = 1 / factors[i];
                 factors.push(factor);
@@ -167,7 +186,7 @@ ResSynth.tuningsFactory = (function()
             factors.sort();
 
             // rotate the factors until factor[0] is 1
-            while(factors[0] < 1)
+            while (factors[0] < 1)
             {
                 let fac = factors[0] * 2;
                 factors.splice(0, 1);
@@ -177,7 +196,7 @@ ResSynth.tuningsFactory = (function()
             factors.sort(); // factors[0] is the factor (=1.0) for C0
 
             let tuningOffsets = [];
-            for(let i = 0; i < factors.length; i++)
+            for (let i = 0; i < factors.length; i++)
             {
                 let centsOffset = (getSemitones(factors[i], 1) - i) * 100;
                 tuningOffsets.push(centsOffset);
@@ -185,7 +204,7 @@ ResSynth.tuningsFactory = (function()
 
             // rotate the tuningOffsets until tuningOffsets[0] (=0) is at newTuningOffsets[rootKey].
             let rotatedTuningOffsets = [];
-            for(let i = 0; i < 12; i++)
+            for (let i = 0; i < 12; i++)
             {
                 let newIndex = (i + rootKey) % 12;
                 rotatedTuningOffsets[newIndex] = tuningOffsets[i];
@@ -194,15 +213,26 @@ ResSynth.tuningsFactory = (function()
             return rotatedTuningOffsets;
         }
 
-        while(!(factorBase < 2))
-        {
-            factorBase /= 2;
-        }
-        console.assert(factorBase > 1);
-        console.assert(Number.isInteger(rootKey) && 0 <= rootKey && rootKey < 12);
+        let tuning = [],
+            c0tuningOffsets;
 
-        let c0tuningOffsets = getTuningOffsets(rootKey, factorBase),
+        if (ignoreOctaves === true)
+        {
+            tuning = getGamutETTuningIgnoringOctaves(rootKey, factorBase);
+        }
+        else
+        {
+            while (!(factorBase < 2))
+            {
+                factorBase /= 2;
+            }
+            console.assert(factorBase > 1);
+            console.assert(Number.isInteger(rootKey) && 0 <= rootKey && rootKey < 12);
+
+            c0tuningOffsets = getTuningOffsets(rootKey, factorBase);
+
             tuning = getTuningFromETOffsets(c0tuningOffsets);
+        }
 
         transposeTuningForA4Frequency(tuning, 440);
 

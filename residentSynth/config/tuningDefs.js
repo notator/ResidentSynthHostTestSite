@@ -50,6 +50,12 @@ ResSynth.tuningDefs =
                         factor: 1.498307 // Math.pow(Math.pow(2, (1.0 / 12)), 7) i.e. 7 equal temperament semitones
                     },
                     {
+                        name: "Equal Temperament, exact fifths, wide octaves: factor=((3/2)^(1/7))^7",
+                        root: 0,
+                        factor: 1.5,
+                        ignoreOctaves: true
+                    },
+                    {
                         // The 'wolf fifth' is at G#-Eb for root=0 (C).
                         name: "Pythagorean, factor=(3/2), root=C, wolf fifth:G#-Eb",
                         root: 0,

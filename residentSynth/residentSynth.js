@@ -748,7 +748,8 @@ ResSynth.residentSynth = (function(window)
                                     let tuningDef = tuningDefs[k],
                                         root = tuningDef.root,
                                         factor = tuningDef.factor,
-                                        tuning = tuningsFactory.getTuningFromConstantFifthFactor(root, factor);
+                                        ignoreOctaves = tuningDef.ignoreOctaves,
+                                        tuning = tuningsFactory.getTuningFromConstantFifthFactor(root, factor, ignoreOctaves);
 
                                     tuning.name = tuningDef.name;
                                     tuningGroup.push(tuning);
