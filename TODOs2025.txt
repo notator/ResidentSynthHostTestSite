@@ -21,3 +21,8 @@ LocalPitchBendSensitivity control.
 4. Implement timestamps. See ResidentSynthChat1.png. The info in that .png may not be entirely accurate
 since I subsequently reverted Sequence.js to its original, earlier state. Use the .png with caution.
 I want to simplify Sequence.js if possible, but not to change the way it reports msPositions to the Cursor!
+
+5. Implement a new, equally tempered tuning that has no exact octaves, but with perfect fifths tuned _exactly_, with 7
+equal-sized "semitones" in between. A4=440Hz, the constant factor by which to multiply/divide frequencies is (3/2)^(1/7).
+All "fifths" on the standard keyboard will be perfect fifths, but the "octaves" will be slightly too large (ca 0.4 cents).
+The higher the "octave", the sharper it becomes. The lower the "octave" is, the flatter it gets.
