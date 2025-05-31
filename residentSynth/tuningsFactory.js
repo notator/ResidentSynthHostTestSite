@@ -37,7 +37,9 @@ ResSynth.tuningsFactory = (function()
                     let value = tuning[i];
 
                     value = (value < 0) ? 0 : value;
-                    value = (value >= 128) ? 127.9999 : value;
+                    value = (value >= 128) ? 127.99 : value;
+
+                    value = Math.floor(value * 100) / 100; // floor to 2 decimal places (midi.cents)
 
                     tuning[i] = value;
                 }
@@ -54,7 +56,7 @@ ResSynth.tuningsFactory = (function()
         getSemitones = function(frequency1, frequency2)
         {
             let frequencyRatio = frequency1 / frequency2,
-                equalTemperamentSemitones = 12 * Math.log2(frequencyRatio); // log base 2
+                equalTemperamentSemitones = Math.round(120000000 * Math.log2(frequencyRatio)) / 10000000; // log base 2, rounded to 7 decimal places
 
             return equalTemperamentSemitones; 
         },
@@ -143,26 +145,8 @@ ResSynth.tuningsFactory = (function()
     //
     // This function is used for Pythagorean and other mean-tone tunings.
     // The "wolf fifth", if it exists, is placed in the interval G#-Eb when the root is C.
-    TuningsFactory.prototype.getTuningFromConstantFifthFactor = function (rootKey, factorBase, ignoreOctaves)
+    TuningsFactory.prototype.getTuningFromConstantFifthFactor = function (rootKey, factorBase)
     {
-        function getGamutETTuningIgnoringOctaves(rootKey, factorBase)
-        {
-            let tuning = [],
-                factor = Math.pow(factorBase, (1.0 / 7)), // 7 is the number of keys in a perfect fifth
-                semitones = getSemitones(factor, 1), // semitones between neighboring keys
-                pitch = 0;
-
-            console.assert(Number.isInteger(rootKey) && 0 <= rootKey && rootKey < 12);
-            console.assert(factorBase > 1);
-
-            for (let i = 0; i < 128; i++)
-            {
-                tuning.push(pitch);
-                pitch += semitones;
-            }
-
-            return tuning;
-        }
         function getTuningOffsets(rootKey, factorBase)
         {
             let factors = [];
@@ -216,23 +200,47 @@ ResSynth.tuningsFactory = (function()
         let tuning = [],
             c0tuningOffsets;
 
-        if (ignoreOctaves === true)
+        while (!(factorBase < 2))
         {
-            tuning = getGamutETTuningIgnoringOctaves(rootKey, factorBase);
+            factorBase /= 2;
         }
-        else
+        console.assert(factorBase > 1);
+        console.assert(Number.isInteger(rootKey) && 0 <= rootKey && rootKey < 12);
+
+        c0tuningOffsets = getTuningOffsets(rootKey, factorBase);
+
+        tuning = getTuningFromETOffsets(c0tuningOffsets);
+
+        transposeTuningForA4Frequency(tuning, 440);
+
+        finalizeTuning(tuning);
+
+        return tuning;
+    };
+
+    // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighbouring keys.
+    // Different adjacentKeyFrequencyRatio values result in tunings that contain a particular "perfect" interval.
+    // "Perfect" intervals are those that are derived from (octave transpositions of) the odd natural harmonics.    
+    TuningsFactory.prototype.getTuningFromAdjacentKeyFrequencyRatio = function(adjacentKeyFrequencyRatio)
+    {
+        function getGamutETTuningIgnoringOctaves(adjacentKeyFrequencyRatio)
         {
-            while (!(factorBase < 2))
+            let tuning = [],
+                semitones = getSemitones(adjacentKeyFrequencyRatio, 1), // semitones between neighbouring keys
+                pitch = 0;
+
+            console.assert(adjacentKeyFrequencyRatio > 1);
+
+            for (let i = 0; i < 128; i++)
             {
-                factorBase /= 2;
+                tuning.push(pitch);
+                pitch += semitones;
             }
-            console.assert(factorBase > 1);
-            console.assert(Number.isInteger(rootKey) && 0 <= rootKey && rootKey < 12);
 
-            c0tuningOffsets = getTuningOffsets(rootKey, factorBase);
-
-            tuning = getTuningFromETOffsets(c0tuningOffsets);
+            return tuning;
         }
+
+        let tuning = getGamutETTuningIgnoringOctaves(adjacentKeyFrequencyRatio);
 
         transposeTuningForA4Frequency(tuning, 440);
 

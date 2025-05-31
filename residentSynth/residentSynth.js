@@ -743,13 +743,25 @@ ResSynth.residentSynth = (function(window)
                     {
                         case tuningType.CONSTANT_FIFTH_FACTOR:
                             {
-                                for(let k = 0; k < tuningDefs.length; k++)
+                                for (let k = 0; k < tuningDefs.length; k++)
                                 {
                                     let tuningDef = tuningDefs[k],
                                         root = tuningDef.root,
                                         factor = tuningDef.factor,
-                                        ignoreOctaves = tuningDef.ignoreOctaves,
-                                        tuning = tuningsFactory.getTuningFromConstantFifthFactor(root, factor, ignoreOctaves);
+                                        tuning = tuningsFactory.getTuningFromConstantFifthFactor(root, factor);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        case tuningType.PERFECT_KEYBOARD_INTERVAL:
+                            {
+                                for (let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        adjacentKeyFrequencyRatio = tuningDef.adjacentKeyFrequencyRatio,
+                                        tuning = tuningsFactory.getTuningFromAdjacentKeyFrequencyRatio(adjacentKeyFrequencyRatio);
 
                                     tuning.name = tuningDef.name;
                                     tuningGroup.push(tuning);
