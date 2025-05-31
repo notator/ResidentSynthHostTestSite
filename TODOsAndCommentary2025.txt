@@ -1,0 +1,50 @@
+Resident Synth TODOs and Commentary about the changes being made before the Web Audio conference in Paris, November 2025.
+These are being implemented gradually, in conjunction with changes being made in the AssistantPerformer (2025).
+
+===========================================================================================================================================
+DONE:
+1. Implemented a new, equally tempered tuning group. Each tuning in the group has a single "perfect" interval divided
+into as many equal sized intervals as there are keys between that interval. Each tuning has its own characteristic contant pitch interval
+between adjacent keys. All tunings have A4=440Hz.
+For example:
+If the "perfect" interval is the octave: The frequency ratio between adjacent keys is 2^(1/12), which is standard 12-tone equal temperament.
+If the "perfect" interval is the fifth: The frequency relation for a perect fifth is (3/2), and there are 7 keys in between, so
+the equal frequency ratio between adjacent keys is (3/2)^(1/7).
+Comment:
+These tunings have no exact octaves (except, of course, when the "perfect" interval is the octave). Each tuning has its own degree of drift
+away from standard 12-tone ET in the octaves above and below A4 but, in all tunings, all intervals remain exactly the same for keys that are
+the same distance apart.
+These tunings are different species of Equal Temperament, each having different sonorities, especially as chords become more widely spaced.
+They are deliberately intended for use with standard keyboards: I think its best to build on players' existing keyboard technique rather than
+to expect them to buy, and learn to use, new microtonal keyboards. This is rather like my attitude to notation: its best, if possible, to
+build on years of evolution, rather than to try to invent something completely new. Standard keyboards have evolved for ease of use with human
+hands, which are not going to change overnight. The best way to develop microtonality is to embed it in current performance practice, by
+building on existing techniques -- including classical harmony, couterpoint and keyboard technique. Note that the notation denotes the keys
+that are to be pressed, so complicated accidentals are not required.
+
+===========================================================================================================================================
+TODOs:
+
+2.Make an OrnamentGroup category, similar to other Groups (e.g. TuningGroup). This involves chages to the
+ResidentsynthHost's GUI.
+
+3. remove DataEntry and RegisteredParam messages. I've decided to nolonger support backwards compatibility with the old
+DataEntry and RegisteredParam messages. I will remove them from the codebase. They are not used in any of the
+examples, and they are not needed for the new AssistantPerformer. I'm intending to create a completely new
+Assistantperformer site (AssistantPerformer2025), keeping the old one as well for archive purposes, migrating as many
+scores as possible to the new site. (Copilot has made some suggestions as to how to make a conversion of existing
+SVG-MIDI files to the new format. If possible, I want to convert at least the old Study 2 score.
+
+4. create a new, non-standard control (LocalPitchBend?) that works exactly like pitchBend, but applies only to the
+following NoteOn message. The following NoteOn will automatically cancel the effect of the LocalPitchBend, so that
+following NoteOns perform normally. The new control will be completely independent of the standard PitchBend state.
+The form will be: [Cmd, CTl, data], where data=64 means no effect, data=0 means bend down 1 semitone, data=127
+means bend up 1 semitone.
+Probably, the LocalPitchBend sensitivity should be fixed at +/- 1 semitone, but I could also implement a
+LocalPitchBendSensitivity control.
+
+5. Implement timestamps. See D:\Visual Studio\CoPilotChatLogs\ResidentSynthTiming folder. The info may not be entirely accurate
+since I subsequently reverted Sequence.js to its original, earlier state. Use with caution!
+I want to simplify Sequence.js if possible, but not to change the way it reports msPositions to the Cursor!
+Possibly, the use of PREQUEUE could be changed: Timestamped messages sent _between_the_changes_of_cursor_position_ could be sent 
+all at once to the synth for scheduling. (Only when the synth supports timestamps, of course.) Ask CoPilot how this might be done.
