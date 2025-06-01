@@ -36,9 +36,9 @@ ResSynth.tuningsFactory = (function()
                 {
                     let value = tuning[i];
 
-                    value = Math.round(value * 100) / 100; // round to 2 decimal places (midi.cents)
+                    value = Math.round(value * 10000) / 10000; // round to 4 decimal places (for the cents) -- i.e. to 1/100 cent
                     value = (value < 0) ? 0 : value;
-                    value = (value >= 128) ? 127.99 : value;                    
+                    value = (value >= 128) ? 127.9999 : value;                    
 
                     tuning[i] = value;
                 }

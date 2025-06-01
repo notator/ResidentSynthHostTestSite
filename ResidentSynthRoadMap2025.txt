@@ -6,7 +6,7 @@ into the stable branch.
 
 ===========================================================================================================================================
 DONE:
-1. Implemented a new, equally tempered tuning group. Each tuning in the group has a single "perfect" interval divided
+** Implemented a new, equally tempered tuning group. Each tuning in the group has a single "perfect" interval divided
 into as many equal sized intervals as there are keys between that interval. Each tuning has its own characteristic constant pitch interval
 between adjacent keys. All tunings have A4=440Hz.
 For example:
@@ -29,26 +29,35 @@ to get used to their instrument "transposing"...
 ===========================================================================================================================================
 TODOs (The order is not particularly significant):
 
-2. remove DataEntry and RegisteredParam messages. I've decided to nolonger support backwards compatibility with the old
+** The ResidentSynthHost should both import and export scala files. See https://www.huygens-fokker.org/scala/scl_format.html. I've also added
+a PDF of that page (scala_format.pdf) to this project. Note that scala describes pitches in absolute cents above 0 (the lowest key) with an
+arbitrary number of decimal places.
+To convert a ResidentSynth midi_cents value to absolute cents above 0:
+    absolute_cents = midi_cents * 100;
+Note that pitches in the ResidentSynthHost are currently rounded to the nearest 1/100 cent. (4 decimal places for the cents.), and that the
+pitch of the Residentsynth's 0th key should always be ignored: The pitch of scala's 0th key, never explicit in the file, is always 0.
+I need to investigate how scala treats key mapping. The ResidentSynthHost will always export 127 pitches --> 127 keys, so maybe that's irrelevant...
+
+** remove DataEntry and RegisteredParam messages. I've decided to nolonger support backwards compatibility with the old
 DataEntry and RegisteredParam messages. I will remove them from the codebase. They are not used in any of the
 examples, and they are not needed for the new AssistantPerformer. I'm intending to create a completely new
 Assistantperformer site (AssistantPerformer2025), keeping the old one as well for archive purposes, migrating as many
 scores as possible to the new site.
 
-3. Ask Copilot to help me write an application that would add recordings made by the ResidentSynthHost to an existing SVG-MIDI score.
+** Ask Copilot to help me write an application that would add recordings made by the ResidentSynthHost to an existing SVG-MIDI score.
 This needs to be done in conjunction with changes being made to the Assistant Performer (2025). Possibly, the ResidentSynthHost's
 recording format will need to change. My instinct is that this would best be done in a web application, so probably be developed using Node.js
 
-4.Make an OrnamentGroup category, similar to other Groups (e.g. TuningGroup). This involves chages to the
+** Make an OrnamentGroup category, similar to other Groups (e.g. TuningGroup). This involves chages to the
 ResidentSynthHost's GUI.
 
-5. Implement timestamps in the ResidentSynth. See D:\Visual Studio\CoPilotChatLogs\ResidentSynthTiming folder. The info there may not be
+** Implement timestamps in the ResidentSynth. See D:\Visual Studio\CoPilotChatLogs\ResidentSynthTiming folder. The info there may not be
 entirely accurate since I have subsequently reverted Sequence.js to its original, earlier state. Use with caution!
 When this has been done, I want to simplify The Sequence.js in the AssistantPerformer if possible, but not to change the way it reports
 msPositions to the Cursor! Possibly, the use of PREQUEUE could be changed: Timestamped messages sent _between_the_changes_of_cursor_position_ could be sent 
 all at once to the synth for scheduling. (Only when the synth supports timestamps, of course.) Ask CoPilot how this might be done.
 
-6. create a new, non-standard control (LocalPitchBend?) that works exactly like pitchBend, but applies only to the
+** create a new, non-standard control (LocalPitchBend?) that works exactly like pitchBend, but applies only to the
 following single NoteOn message. The following NoteOn will automatically cancel the effect of the LocalPitchBend, so that
 following NoteOns perform normally. The new control will be completely independent of the standard PitchBend state.
 The form will be: [Cmd, CTl, data], where data=64 means no effect, data=0 means bend down 1 semitone, data=127
