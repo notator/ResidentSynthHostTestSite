@@ -90,65 +90,87 @@ ResSynth.tuningDefs =
         // perfect keyboard interval tunings (A4=440Hz)
         {
             // This tuning group uses the following constructor:
-            //   tuning = getTuningFromAdjacentKeyFrequencyRatio(adjacentKeyFrequencyRatio)
+            //   tuning = getTuningFromAdjacentKeyFrequencyRatio(anchor, adjacentKeyFrequencyRatio)
             //
+            // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
             // The 'adjacentKeyFrequencyRatio' argument is the ratio between the frequencies allocated to adjacent keys.
+            //
+            // These tunings have been ordered by "consonance" (i.e. the absolute difference between the adjacentKeyFrequencyRatio
+            // and the adjacentKeyFrequencyRatio for the perfect octave in 12-tone equal temperament).
             // Compare these tunings to the Odd Harmonic tunings.
             ctor: ResSynth.tuningType.PERFECT_KEYBOARD_INTERVAL,
-            name: "perfect keyboard interval tunings (A4=440Hz)",
+            name: "perfect keyboard interval tunings (constant C4)",
             tunings:
             [
                 {
-                    name: "perfect semitones: adjacentKeyFrequencyRatio=((17/16)^(1))", // A-A#    
-                    adjacentKeyFrequencyRatio: Math.pow(17 / 16, 1) // 1.0625
-                },
-                {
-                    name: "perfect major seconds: adjacentKeyFrequencyRatio=((9/8)^(1/2))", // A-B
-                    adjacentKeyFrequencyRatio: Math.pow(9 / 8, (1.0 / 2)) // 1.0606601717798212866012665431573
-                },
-                {
-                    name: "perfect minor thirds: adjacentKeyFrequencyRatio=((19/16)^(1/3))", // A-C   
-                    adjacentKeyFrequencyRatio: Math.pow(19 / 16, (1.0 / 3)) // 1.0589558960637232909745381060545
-                },
-                {
-                    name: "perfect major thirds: adjacentKeyFrequencyRatio=((5/4)^(1/4))", // A-C#
-                    adjacentKeyFrequencyRatio: Math.pow(5 / 4, (1.0 / 4)) // 1.0573712634405641195350370000286  
-                },
-                {
-                    name: "perfect fourths: adjacentKeyFrequencyRatio=((21/16)^(1/5))", // A-D    
-                    adjacentKeyFrequencyRatio: Math.pow(21 / 16, (1.0 / 5)) // 1.0558928824833769563662836652751
-                },
-                {
-                    name: "perfect tritones: adjacentKeyFrequencyRatio=((11/8)^(1/6))", // A-D#
-                    adjacentKeyFrequencyRatio: Math.pow(11 / 8, (1.0 / 6)) // 1.054509386058112694968134026189
-                },
-                {
-                    name: "perfect fifths: adjacentKeyFrequencyRatio=((3/2)^(1/7))", // A-E
-                    adjacentKeyFrequencyRatio: Math.pow(3 / 2, (1.0 / 7)) // 1.0596340226670483814266089094729  
-                },
-                {
-                    name: "perfect minor sixths: adjacentKeyFrequencyRatio=((25/16)^(1/8))", // A-F
-                    adjacentKeyFrequencyRatio: Math.pow(25 / 16, (1.0 / 8)) // 1.0573712634405641195350370000286
-                },
-                {
-                    name: "perfect major sixths: adjacentKeyFrequencyRatio=((13/8)^(1/9))", // A-F#
-                    adjacentKeyFrequencyRatio: Math.pow(13 / 8, (1.0 / 9)) // 1.0554268823040456867210115180495
-                },
-                {
-                    name: "perfect minor sevenths: adjacentKeyFrequencyRatio=((7/4)^(1/10))", // A-G
-                    adjacentKeyFrequencyRatio: Math.pow(7 / 4, (1.0 / 10)) // 1.0575570503382522810899859251856
-                },
-                {
-                    name: "perfect major sevenths: adjacentKeyFrequencyRatio=((15/8)^(1/11))", // A-G# 
-                    adjacentKeyFrequencyRatio: Math.pow(15 / 8, (1.0 / 11)) // 1.0588106414115541691480015555274
-                },
-                {
-                    name: "perfect octaves: adjacentKeyFrequencyRatio=((2)^(1/12)) (12-tone ET)", // A-A'
+                    name: "perfect octaves: adjacentKeyFrequencyRatio=((2)^(1/12)) (12-tone ET)",
+                    anchor: 60, // C4
                     adjacentKeyFrequencyRatio: Math.pow(2, (1.0 / 12)) // 1.0594630943592952645618252949463
                 },
                 {
-                    name: "perfect minor ninths: adjacentKeyFrequencyRatio=((17/8)^(1/13))", // A-A#'
+                    name: "perfect fifths: adjacentKeyFrequencyRatio=((3/2)^(1/7))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(3 / 2, (1.0 / 7)) // 1.0596340226670483814266089094729  
+                },
+                {
+                    name: "perfect major ninths: adjacentKeyFrequencyRatio=((17/8)^(1/13))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(9 / 4, (1.0 / 14)) // 1.0596963939932648176307185882635
+                },
+                {
+                    name: "perfect minor ninths: adjacentKeyFrequencyRatio=((17/8)^(1/13))",
+                    anchor: 60, // C4
                     adjacentKeyFrequencyRatio: Math.pow(17 / 8, (1.0 / 13)) // 1.0596963939932648176307185882635
+                },
+                {
+                    name: "perfect minor thirds: adjacentKeyFrequencyRatio=((19/16)^(1/3))",  
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(19 / 16, (1.0 / 3)) // 1.0589558960637232909745381060545
+                },
+                {
+                    name: "perfect major sevenths: adjacentKeyFrequencyRatio=((15/8)^(1/11))", 
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(15 / 8, (1.0 / 11)) // 1.0588106414115541691480015555274
+                },
+                {
+                    name: "perfect major seconds: adjacentKeyFrequencyRatio=((9/8)^(1/2))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(9 / 8, (1.0 / 2)) // 1.0606601717798212866012665431573
+                },
+                {
+                    name: "perfect minor sevenths: adjacentKeyFrequencyRatio=((7/4)^(1/10))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(7 / 4, (1.0 / 10)) // 1.0575570503382522810899859251856
+                },
+                {
+                    name: "perfect major thirds: adjacentKeyFrequencyRatio=((5/4)^(1/4))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(5 / 4, (1.0 / 4)) // 1.0573712634405641195350370000286  
+                },
+                {
+                    name: "perfect minor sixths: adjacentKeyFrequencyRatio=((25/16)^(1/8))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(25 / 16, (1.0 / 8)) // 1.0573712634405641195350370000286
+                },
+                {
+                    name: "perfect minor seconds: adjacentKeyFrequencyRatio=((17/16)^(1))", 
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(17 / 16, 1) // 1.0625
+                },
+                {
+                    name: "perfect fourths: adjacentKeyFrequencyRatio=((21/16)^(1/5))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(21 / 16, (1.0 / 5)) // 1.0558928824833769563662836652751
+                },
+                {
+                    name: "perfect major sixths: adjacentKeyFrequencyRatio=((13/8)^(1/9))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(13 / 8, (1.0 / 9)) // 1.0554268823040456867210115180495
+                },
+                {
+                    name: "perfect tritones: adjacentKeyFrequencyRatio=((11/8)^(1/6))",
+                    anchor: 60, // C4
+                    adjacentKeyFrequencyRatio: Math.pow(11 / 8, (1.0 / 6)) // 1.054509386058112694968134026189
                 }
             ]
         },
@@ -167,6 +189,10 @@ ResSynth.tuningDefs =
                     {
                         name: "keys per octave: 36, factor=2^(1/36) [standard ET sixthtones]",
                         keysPerOctave: 36
+                    },
+                    {
+                        name: "keys per octave: 31, factor=2^(1/31)",
+                        keysPerOctave: 31
                     },
                     {
                         name: "keys per octave: 24, factor=2^(1/24) [standard ET quartertones]",

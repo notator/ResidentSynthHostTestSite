@@ -106,7 +106,7 @@ ResSynth.residentSynth = (function(window)
                                     //}
                                 }
 
-                                currentHighKey = zone.keyRangeLow - 1;                                
+                                currentHighKey = zone.keyRangeLow - 1;
                             }
 
                             returnZones[0].keyRangeLow = 0;
@@ -743,7 +743,7 @@ ResSynth.residentSynth = (function(window)
                     {
                         case tuningType.CONSTANT_FIFTH_FACTOR:
                             {
-                                for (let k = 0; k < tuningDefs.length; k++)
+                                for(let k = 0; k < tuningDefs.length; k++)
                                 {
                                     let tuningDef = tuningDefs[k],
                                         root = tuningDef.root,
@@ -757,15 +757,18 @@ ResSynth.residentSynth = (function(window)
                             }
                         case tuningType.PERFECT_KEYBOARD_INTERVAL:
                             {
-                                for (let k = 0; k < tuningDefs.length; k++)
+                                for(let k = 0; k < tuningDefs.length; k++)
                                 {
                                     let tuningDef = tuningDefs[k],
+                                        anchor = tuningDef.anchor,
                                         adjacentKeyFrequencyRatio = tuningDef.adjacentKeyFrequencyRatio,
-                                        tuning = tuningsFactory.getTuningFromAdjacentKeyFrequencyRatio(adjacentKeyFrequencyRatio);
+                                        tuning = tuningsFactory.getTuningFromAdjacentKeyFrequencyRatio(anchor, adjacentKeyFrequencyRatio);
 
                                     tuning.name = tuningDef.name;
                                     tuningGroup.push(tuning);
                                 }
+                                // The return value of this function is ignored. It was used to order the entries in the tuningDefs by "consonance".
+                                tuningsFactory.orderOfConsonanceForPerfectKeyIntervals();
                                 break;
                             }
                         case tuningType.CONSTANT_MIDI_KEY_FACTOR:
@@ -1038,7 +1041,7 @@ ResSynth.residentSynth = (function(window)
         updatePresetIndex = function(channel, presetIndex)
         {
             channelControls[channel].presetIndex = presetIndex;
-        },        
+        },
         // also sets channelPresets[channel] and channelControl.presetIndex to 0.
         updateBankIndex = function(channel, bankIndex)
         {
@@ -1236,7 +1239,7 @@ ResSynth.residentSynth = (function(window)
             // returns a new midiAttributes object 
             function getMidiAttributes(chanPresets, chanControls, inKey, inVelocity)
             {
-                let midi = {}; 
+                let midi = {};
 
                 midi.preset = chanPresets[chanControls.presetIndex];
 
@@ -1347,68 +1350,68 @@ ResSynth.residentSynth = (function(window)
                     switch(msg.type)
                     {
                         case "delay":
-                        {
-                            await wait(msg.delay, cancel);
-                            break;
-                        }
+                            {
+                                await wait(msg.delay, cancel);
+                                break;
+                            }
                         case "chordOn":
-                        {
-                            let noteOns = msg.noteOns;
-
-                            for(let i = 0; i < noteOns.length; i++)
                             {
-                                let noteOnMsg = noteOns[i],
-                                    oMidi = {};
+                                let noteOns = msg.noteOns;
 
-                                oMidi.preset = inMidi.preset;
-                                oMidi.inKey = noteOnMsg.key;
-                                oMidi.midiPitchOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100);
-                                oMidi.midiPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiPitchOffset,
-                                oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
-                                oMidi.velocityFactor = oMidi.inVelocity / 127;
-
-                                let noteOn = masterNote.subNotes[0];
-                                if(noteOn !== undefined)
+                                for(let i = 0; i < noteOns.length; i++)
                                 {
-                                    oMidi.velocityPitchSensitivityFactor = noteOn.velocityPitchSensitivityFactor;
-                                }
-                                else
-                                {
-                                    oMidi.velocityPitchSensitivityFactor = oMidi.velocityFactor;
-                                }
+                                    let noteOnMsg = noteOns[i],
+                                        oMidi = {};
 
-                                let subNote = doIndividualNoteOn(oMidi, masterNote);
+                                    oMidi.preset = inMidi.preset;
+                                    oMidi.inKey = noteOnMsg.key;
+                                    oMidi.midiPitchOffset = chanControls.semitonesOffset + (chanControls.centsOffset / 100);
+                                    oMidi.midiPitch = chanControls.tuning[oMidi.inKey] + oMidi.midiPitchOffset,
+                                        oMidi.inVelocity = midiVal(inMidi.inVelocity + noteOnMsg.velocityIncr);
+                                    oMidi.velocityFactor = oMidi.inVelocity / 127;
 
-                                if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
-                                {
-                                    doMixture(subNote, oMidi, chanControls.mixtureIndex);
+                                    let noteOn = masterNote.subNotes[0];
+                                    if(noteOn !== undefined)
+                                    {
+                                        oMidi.velocityPitchSensitivityFactor = noteOn.velocityPitchSensitivityFactor;
+                                    }
+                                    else
+                                    {
+                                        oMidi.velocityPitchSensitivityFactor = oMidi.velocityFactor;
+                                    }
+
+                                    let subNote = doIndividualNoteOn(oMidi, masterNote);
+
+                                    if(chanControls.mixtureIndex > 0) // 0 is "no mixture"
+                                    {
+                                        doMixture(subNote, oMidi, chanControls.mixtureIndex);
+                                    }
                                 }
+                                break;
                             }
-                            break;
-                        }
                         case "chordOff":
-                        {
-                            let subNotes = masterNote.subNotes;
-                            for(let i = 0; i < subNotes.length; i++)
                             {
-                                let subNote = subNotes[i],
-                                    mixtureNotes = subNote.subNotes;
-
-                                for(var j = 0; j < mixtureNotes.length; j++)
+                                let subNotes = masterNote.subNotes;
+                                for(let i = 0; i < subNotes.length; i++)
                                 {
-                                    mixtureNotes[j].noteOff();
+                                    let subNote = subNotes[i],
+                                        mixtureNotes = subNote.subNotes;
+
+                                    for(var j = 0; j < mixtureNotes.length; j++)
+                                    {
+                                        mixtureNotes[j].noteOff();
+                                    }
+                                    mixtureNotes.length = 0;
+                                    subNote.noteOff();
                                 }
-                                mixtureNotes.length = 0;
-                                subNote.noteOff();
+                                subNotes.length = 0;
+                                break;
                             }
-                            subNotes.length = 0;
-                            break;
-                        }                        
                     }
                 }
 
                 let ornamentMsgs = ornamentDef.msgs,
-                    doRepeats = ornamentDef.repeat; 
+                    doRepeats = ornamentDef.repeat;
 
                 do
                 {
@@ -1487,7 +1490,7 @@ ResSynth.residentSynth = (function(window)
                 return new Promise((resolve, reject) =>
                 {
                     const timeoutMs = 10,
-                        maxTimeoutMs = 500,                        
+                        maxTimeoutMs = 500,
                         startTime = Date.now();
 
                     function checkCondition()
@@ -1599,7 +1602,7 @@ ResSynth.residentSynth = (function(window)
                 // standard 3-byte controllers.
                 CTL.BANK,
                 CTL.MODWHEEL,
-                CTL.VOLUME,                
+                CTL.VOLUME,
                 CTL.PAN,
                 CTL.EXPRESSION,
                 CTL.DATA_ENTRY,
@@ -1611,7 +1614,7 @@ ResSynth.residentSynth = (function(window)
                 // custom controls (see constants.js)
                 CTL.REVERBERATION,
                 CTL.PITCH_WHEEL_SENSITIVITY,
-                CTL.MIXTURE_INDEX, 
+                CTL.MIXTURE_INDEX,
                 CTL.TUNING_GROUP_INDEX,
                 CTL.TUNING_INDEX,
                 CTL.SEMITONES_OFFSET,
@@ -1707,7 +1710,7 @@ ResSynth.residentSynth = (function(window)
 
         for(var channel = 0; channel < 16; channel++)
         {
-            channelAudioNodes.push(audioNodesConfig(audioContext, channelAudioNodes.finalGainNode));  
+            channelAudioNodes.push(audioNodesConfig(audioContext, channelAudioNodes.finalGainNode));
 
             let controlState = {};
             channelControls.push(controlState);
@@ -1716,8 +1719,8 @@ ResSynth.residentSynth = (function(window)
             channelControls[channel].inKeyOrnamentDefs = [];
 
             setFontAndTuningDefaults(channel);
-            setControllerDefaults(channel);            
-        }  
+            setControllerDefaults(channel);
+        }
     };
 
     // WebMIDIAPI §6.2 -- MIDIPort interface
@@ -1817,7 +1820,7 @@ ResSynth.residentSynth = (function(window)
                     break;
                 case CTL.SET_KEYBOARD_ORNAMENT_DEFS:
                     updateInKeyOrnamentDefs(channel, value);
-                    break;                   
+                    break;
                 case CTL.ALL_CONTROLLERS_OFF:
                     allSoundOff();  // all channels (split means we don't know which channels are sounding)
                     setControllerDefaults(channel); // only the current channel

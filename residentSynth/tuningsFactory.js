@@ -38,7 +38,7 @@ ResSynth.tuningsFactory = (function()
 
                     value = Math.round(value * 10000) / 10000; // round to 4 decimal places (for the cents) -- i.e. to 1/100 cent
                     value = (value < 0) ? 0 : value;
-                    value = (value >= 128) ? 127.9999 : value;                    
+                    value = (value >= 128) ? 127.9999 : value;
 
                     tuning[i] = value;
                 }
@@ -57,7 +57,7 @@ ResSynth.tuningsFactory = (function()
             let frequencyRatio = frequency1 / frequency2,
                 equalTemperamentSemitones = Math.round(120000000 * Math.log2(frequencyRatio)) / 10000000; // log base 2, rounded to 7 decimal places
 
-            return equalTemperamentSemitones; 
+            return equalTemperamentSemitones;
         },
 
         getFrequency = function(midiPitch)
@@ -73,7 +73,7 @@ ResSynth.tuningsFactory = (function()
         {
             let currentA4Frequency = getFrequency(tuning[69]),
                 semitonesDiff = getSemitones(currentA4Frequency, a4Frequency);
- 
+
             for(let i = 0; i < 128; i++)
             {
                 tuning[i] = tuning[i] - semitonesDiff; // will be coerced to 0..<128 later
@@ -101,20 +101,20 @@ ResSynth.tuningsFactory = (function()
             return tuning;
         },
 
-		TuningsFactory = function()
-		{
-			if(!(this instanceof TuningsFactory))
-			{
-				return new TuningsFactory();
+        TuningsFactory = function()
+        {
+            if(!(this instanceof TuningsFactory))
+            {
+                return new TuningsFactory();
             }
-		},
+        },
 
-		API =
-		{
+        API =
+        {
             TuningsFactory: TuningsFactory // constructor
         };
 
-	// end let
+    // end let
 
     // Returns a 128-note tuning containing values equal to the index.
     TuningsFactory.prototype.getEqualTemperamentTuning = function()
@@ -144,23 +144,23 @@ ResSynth.tuningsFactory = (function()
     //
     // This function is used for Pythagorean and other mean-tone tunings.
     // The "wolf fifth", if it exists, is placed in the interval G#-Eb when the root is C.
-    TuningsFactory.prototype.getTuningFromConstantFifthFactor = function (rootKey, factorBase)
+    TuningsFactory.prototype.getTuningFromConstantFifthFactor = function(rootKey, factorBase)
     {
         function getTuningOffsets(rootKey, factorBase)
         {
             let factors = [];
 
-            for (let i = 0; i < 9; i++)
+            for(let i = 0; i < 9; i++)
             {
                 let factor = Math.pow(factorBase, i);
-                while (!(factor < 2))
+                while(!(factor < 2))
                 {
                     factor /= 2;
                 }
                 factors.push(factor);
             }
 
-            for (let i = 1; i < 4; i++)
+            for(let i = 1; i < 4; i++)
             {
                 let factor = 1 / factors[i];
                 factors.push(factor);
@@ -169,7 +169,7 @@ ResSynth.tuningsFactory = (function()
             factors.sort();
 
             // rotate the factors until factor[0] is 1
-            while (factors[0] < 1)
+            while(factors[0] < 1)
             {
                 let fac = factors[0] * 2;
                 factors.splice(0, 1);
@@ -179,7 +179,7 @@ ResSynth.tuningsFactory = (function()
             factors.sort(); // factors[0] is the factor (=1.0) for C0
 
             let tuningOffsets = [];
-            for (let i = 0; i < factors.length; i++)
+            for(let i = 0; i < factors.length; i++)
             {
                 let centsOffset = (getSemitones(factors[i], 1) - i) * 100;
                 tuningOffsets.push(centsOffset);
@@ -187,7 +187,7 @@ ResSynth.tuningsFactory = (function()
 
             // rotate the tuningOffsets until tuningOffsets[0] (=0) is at newTuningOffsets[rootKey].
             let rotatedTuningOffsets = [];
-            for (let i = 0; i < 12; i++)
+            for(let i = 0; i < 12; i++)
             {
                 let newIndex = (i + rootKey) % 12;
                 rotatedTuningOffsets[newIndex] = tuningOffsets[i];
@@ -199,7 +199,7 @@ ResSynth.tuningsFactory = (function()
         let tuning = [],
             c0tuningOffsets;
 
-        while (!(factorBase < 2))
+        while(!(factorBase < 2))
         {
             factorBase /= 2;
         }
@@ -220,7 +220,7 @@ ResSynth.tuningsFactory = (function()
     // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighbouring keys.
     // Different adjacentKeyFrequencyRatio values result in tunings that contain a particular "perfect" interval.
     // "Perfect" intervals are those that are derived from (octave transpositions of) the odd natural harmonics.    
-    TuningsFactory.prototype.getTuningFromAdjacentKeyFrequencyRatio = function(adjacentKeyFrequencyRatio)
+    TuningsFactory.prototype.getTuningFromAdjacentKeyFrequencyRatio = function(anchor, adjacentKeyFrequencyRatio)
     {
         function getGamutETTuningIgnoringOctaves(adjacentKeyFrequencyRatio)
         {
@@ -230,7 +230,7 @@ ResSynth.tuningsFactory = (function()
 
             console.assert(adjacentKeyFrequencyRatio > 1);
 
-            for (let i = 0; i < 128; i++)
+            for(let i = 0; i < 128; i++)
             {
                 tuning.push(pitch);
                 pitch += semitones;
@@ -239,13 +239,106 @@ ResSynth.tuningsFactory = (function()
             return tuning;
         }
 
+        function transposeTuningForAnchor(tuning, anchor)
+        {
+            console.assert(Number.isInteger(anchor) && 0 <= anchor && anchor < 128);
+
+            let diff = anchor - tuning[anchor]; // tuning[69] is A4
+            for(let i = 0; i < 128; i++)
+            {
+                tuning[i] += diff; // will be coerced to 0..<128 later
+            }
+        }
+
         let tuning = getGamutETTuningIgnoringOctaves(adjacentKeyFrequencyRatio);
 
-        transposeTuningForA4Frequency(tuning, 440);
+        transposeTuningForAnchor(tuning, anchor);
 
         finalizeTuning(tuning);
 
         return tuning;
+    };
+
+    // Returns an array ordered according to the size of the absolute difference between standard 12-tone equal temperament and
+    // the AdjacentKeyFrequencyRatios defined for the PERFECT_KEYBOARD_INTERVAL tunings.
+    // This function was used while ordering the tunings in the tuningDefs.js file. Its return value is ignored at runtime.
+    TuningsFactory.prototype.orderOfConsonanceForPerfectKeyIntervals = function()
+    {
+        function getAllIndices(arr, val)
+        {
+            var indexes = [], i;
+            for(i = 0; i < arr.length; i++)
+                if(arr[i] === val)
+                    indexes.push(i);
+            return indexes;
+        }
+
+        const octaveSemitone = Math.pow(2, (1.0 / 12)),
+            adjacentKeyRatios = [
+                [Math.pow(17 / 16, 1), "minorSecond"],
+                [Math.pow(9 / 8, (1.0 / 2)), "majorSecond"],
+                [Math.pow(19 / 16, (1.0 / 3)), "minorThird"],
+                [Math.pow(5 / 4, (1.0 / 4)), "majorThird"],
+                [Math.pow(21 / 16, (1.0 / 5)), "fourth"],
+                [Math.pow(11 / 8, (1.0 / 6)), "tritone"],
+                [Math.pow(3 / 2, (1.0 / 7)), "fifth"],
+                [Math.pow(25 / 16, (1.0 / 8)), "minorSixth"],
+                [Math.pow(13 / 8, (1.0 / 9)), "majorSixth"],
+                [Math.pow(7 / 4, (1.0 / 10)), "minorSeventh"],
+                [Math.pow(15 / 8, (1.0 / 11)), "majorSeventh"],
+                [octaveSemitone, "octave"],
+                [Math.pow(17 / 8, (1.0 / 13)), "minorNinth"],
+                [Math.pow(9 / 4, (1.0 / 14)), "majorNinth"]
+            ],
+            localSemitones = [
+                Math.pow(17 / 16, 1),
+                Math.pow(9 / 8, (1.0 / 2)),
+                Math.pow(19 / 16, (1.0 / 3)),
+                Math.pow(5 / 4, (1.0 / 4)),
+                Math.pow(21 / 16, (1.0 / 5)),
+                Math.pow(11 / 8, (1.0 / 6)),
+                Math.pow(3 / 2, (1.0 / 7)),
+                Math.pow(25 / 16, (1.0 / 8)),
+                Math.pow(13 / 8, (1.0 / 9)),
+                Math.pow(7 / 4, (1.0 / 10)),
+                Math.pow(15 / 8, (1.0 / 11)),
+                octaveSemitone,
+                Math.pow(17 / 8, (1.0 / 13)),
+                Math.pow(9 / 4, (1.0 / 14))
+            ];
+
+        let diffs = [];
+        for(let i = 0; i < localSemitones.length; i++)
+        {
+            const localSemitone = localSemitones[i],
+                diff = Math.abs(octaveSemitone - localSemitone);
+
+            diffs.push(diff);
+        }
+        let orderedDiffs = [...diffs];
+        orderedDiffs.sort((a, b) => a - b);
+        let oldIndices = [];
+        for(let i = 0; i < orderedDiffs.length; i++)
+        {
+            const diff = orderedDiffs[i],
+                indices = getAllIndices(diffs, diff);
+
+            if(oldIndices.indexOf(indices[0]) === -1)
+            {
+                for(let i = 0; i < indices.length; ++i)
+                {
+                    oldIndices.push(indices[i]);
+                }
+            }
+        }
+
+        let orderedTunings = [];
+        for(let i = 0; i < diffs.length; i++)
+        {
+            orderedTunings.push(adjacentKeyRatios[oldIndices[i]]);
+        }
+
+        return orderedTunings;
     };
 
     // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighboring keys.
@@ -526,7 +619,7 @@ ResSynth.tuningsFactory = (function()
 
         // Returns tunings in which the midiPitch at tuning[midiKey][midiKey] is equal to midiKey.
         function getRootTunings(tuningDefs, rootCentsDeltas)
-        {            
+        {
             function getRootTuning(rootCentsDeltas, tuningDef)
             {
                 let rootKey = tuningDef.root % 12,
@@ -546,7 +639,7 @@ ResSynth.tuningsFactory = (function()
                 finalizeTuning(tuning);
 
                 return tuning;
-            }  
+            }
 
             let rootTunings = [];
             for(let i = 0; i < tuningDefs.length; i++)
@@ -557,7 +650,7 @@ ResSynth.tuningsFactory = (function()
             }
 
             return rootTunings;
-        }  
+        }
 
         //function logHarmonicTuningsInfos(harmonicTunings, tuningGroupName)
         //{
@@ -745,6 +838,6 @@ ResSynth.tuningsFactory = (function()
         return harmonicTunings;
     };
 
-	return API;
+    return API;
 
 }());
