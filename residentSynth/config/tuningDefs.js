@@ -113,7 +113,7 @@ ResSynth.tuningDefs =
                     adjacentKeyFrequencyRatio: Math.pow(3 / 2, (1.0 / 7)) // 1.0596340226670483814266089094729  
                 },
                 {
-                    name: "perfect major ninths: adjacentKeyFrequencyRatio=((17/8)^(1/13))",
+                    name: "perfect major ninths: adjacentKeyFrequencyRatio=((9/4)^(1/14))",
                     anchor: 60, // C4
                     adjacentKeyFrequencyRatio: Math.pow(9 / 4, (1.0 / 14)) // 1.0596963939932648176307185882635
                 },
