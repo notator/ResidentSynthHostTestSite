@@ -755,14 +755,14 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case tuningType.PERFECT_KEYBOARD_INTERVAL:
+                        case tuningType.CONSTANT_SEMITONE:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
                                     let tuningDef = tuningDefs[k],
                                         anchor = tuningDef.anchor,
-                                        adjacentKeyFrequencyRatio = tuningDef.adjacentKeyFrequencyRatio,
-                                        tuning = tuningsFactory.getTuningFromAdjacentKeyFrequencyRatio(anchor, adjacentKeyFrequencyRatio);
+                                        semitone = tuningDef.semitone,
+                                        tuning = tuningsFactory.getTuningFromSemitone(anchor, semitone);
 
                                     tuning.name = tuningDef.name;
                                     tuningGroup.push(tuning);

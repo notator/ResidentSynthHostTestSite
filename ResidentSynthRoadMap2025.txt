@@ -6,7 +6,7 @@ into the stable branch.
 
 ===========================================================================================================================================
 DONE:
-** Implemented a new, equally tempered tuning group (PERFECT_KEYBOARD_INTERVAL). Each tuning in the group has a single "perfect" interval
+** Implemented a new, equally tempered tuning group (CONSTANT_SEMITONE). Each tuning in the group has a single "perfect" interval
 divided into as many equal sized intervals as there are keys between that interval. Each tuning has its own characteristic constant pitch
 interval between adjacent keys. All the defined tunings have C4=261.63Hz (which gives A4=440Hz in a standard 12-tone ET scale).
 For example:
@@ -17,14 +17,27 @@ Comment:
 Except when the "perfect" interval is the octave, these tunings have _no_ exact octaves. Each tuning has its own degree of drift away from
 standard 12-tone ET as intervals get larger, but, in all tunings, all intervals remain exactly the same for keys that are the same distance
 apart.
-These tunings are different species of Equal Temperament, each having different sonorities, especially as chords become more widely spaced.
+I've made 14 tunings (see tuningDefs.js), with intervals from perfect minor second (frequency relation: 17/16) to the perfect major ninth
+(frequency ratio: (9/4)^(1/14)) based on the "odd harmonic tunings". Note that the following tunings are identical:
+    perfectFifthsET (frequency ratio: (3/2)^(1/7)) == perfectMajorNinthsET (frequency ratio: (9/4)^(1/14)) (= 2x perfect fifth).
+    perfectMajorThirdsET (frequency ratio: (5/3)^(1/7)) == perfectMinorSixthsET (frequency ratio: (25/16)^(1/8)) (= 2x perfect major third).
+The tuningsFactory has a function orderOfConsonanceForPerfectKeyIntervals() that returns an array of tunings in order of consonance.
+This function was purely for use while ordering the 14 tunings in the tuningDefs.js file. Its return value is ignored at runtime.
+Purely out of interest, I have now added the pure interval tunings up to 23 steps, to see if anything interesting can be observed. 
+
+These tunings are a different species of Equal Temperament, each having different sonorities, especially as chords become more widely spaced.
 They are deliberately intended for use with standard keyboards: I think its best to build on players' existing keyboard technique rather than
 to expect them to buy, and learn to use, new microtonal keyboards. This is rather like my attitude to notation: its best, if possible, to
 build on years of evolution, rather than to try to invent something completely new. Standard keyboards have evolved for ease of use with human
 hands, which are not going to change overnight. I think a good way to develop microtonality is to embed it in current performance practice, by
 building on existing techniques -- including classical harmony, couterpoint and keyboard technique. Note that the notation denotes the _keys_
 that are to be pressed, not the way they sound, so complicated accidentals are not required (and don't need to be learned). Pianists just have
-to get used to their instrument "transposing"... 
+to get used to their instrument "transposing"...
+
+These ET tunings diverge more and more from standard 12-tone ET as the keys get further from the middle of the keyboard. But, if the physical
+distances between the keys on the keyboard (fingerings) remain the same, then the internal pitch relationships within the chord will also
+remain _exactly_ the same. This is like working in curved Einsteinian space-time rather than in flat Euclidean space-time (12TET)!
+Duchamp would have loved it! :-) The Pythagorean comma is made irrelevant by distorting the pitch space! :-)
 
 ** Added the tuning for 31 keys per octave to the CONSTANT_MIDI_KEY_FACTOR tuning group.
 

@@ -21,7 +21,7 @@ var ResSynth = ResSynth || {};
 ResSynth.tuningType =
 {
     CONSTANT_FIFTH_FACTOR: 0,
-    PERFECT_KEYBOARD_INTERVAL: 1,
+    CONSTANT_SEMITONE: 1,
     CONSTANT_MIDI_KEY_FACTOR: 2,
     ODD_HARMONIC: 3,
     PRIME_HARMONIC: 4,
@@ -29,7 +29,7 @@ ResSynth.tuningType =
     INVERTED_PRIME_HARMONIC: 6,
     WARPED_OCTAVES: 7,
     WARPED_GAMUT: 8,
-    BAROQUE: 9    
+    BAROQUE: 9
 };
 
 // All tunings are initially related to standard A4=440Hz.
@@ -44,135 +44,170 @@ ResSynth.tuningDefs =
             ctor: ResSynth.tuningType.CONSTANT_FIFTH_FACTOR,
             name: "constant fifths tunings (A4=440Hz)",
             tunings:
-            [
-                {
-                    name: "Equal Temperament, factor=(2^(1/12))^7",
-                    root: 0,
-                    factor: 1.498307 // Math.pow(Math.pow(2, (1.0 / 12)), 7) i.e. 7 equal temperament semitones
-                },
-                {
-                    // The 'wolf fifth' is at G#-Eb for root=0 (C).
-                    name: "Pythagorean, factor=(3/2), root=C, wolf fifth:G#-Eb",
-                    root: 0,
-                    factor: 1.5
-                },
-                {
-                    // According to https://en.xen.wiki/w/1/4_syntonic_comma_meantone
-                    // The 1/4 comma meantone fifth is the ratio 5^(1/4) (= 1.495349)
-                    //
-                    // The 'wolf fifth' is at G#-Eb for root=0 (=C).
-                    name: "1/4 comma meantone, factor=5^(1/4), root=C, wolf fifth:G#-Eb",
-                    root: 0,
-                    factor: 1.495349 // Math.pow(5, (1.0 / 4))
-                },
-                {
-                    // According to https://en.xen.wiki/w/1/3_syntonic_comma_meantone
-                    // The 1/3 comma meantone fifth is 694.786 cents in size, which according to
-                    // http://www.sengpielaudio.com/calculator-centsratio.htm corresponds to a
-                    // frequency ratio (=factor) of 1.493801.
-                    // The 'wolf fifth' is at G#-Eb
-                    name: "1/3 comma meantone, factor=1.493801, root=C, wolf fifth:G#-Eb",
-                    root: 0,
-                    factor: 1.493801
-                },
-                {
-                    // factor is calculated as follows:
-                    // 10 fifths reach the 7th harmonic (Bb from C) 3 octaves above the base pitch,
-                    // so 'factor' is the 10th root of (7 * (2^3)).
-                    // This is very close to the factor for 1/4 comma meantone.
-                    // The 'wolf fifth' is at G#-Eb
-                    name: "Perfect 7th harmonic, factor=(7*8)^(0.1), root=C, wolf fifth:G#-Eb",
-                    root: 0,
-                    factor: 1.495612 // Math.pow((7 * 8), 0.1)
-                }
-            ]
+                [
+                    {
+                        name: "Equal Temperament, factor=(2^(1/12))^7",
+                        root: 0,
+                        factor: 1.498307 // Math.pow(Math.pow(2, (1.0 / 12)), 7) i.e. 7 equal temperament semitones
+                    },
+                    {
+                        // The 'wolf fifth' is at G#-Eb for root=0 (C).
+                        name: "Pythagorean, factor=(3/2), root=C, wolf fifth:G#-Eb",
+                        root: 0,
+                        factor: 1.5
+                    },
+                    {
+                        // According to https://en.xen.wiki/w/1/4_syntonic_comma_meantone
+                        // The 1/4 comma meantone fifth is the ratio 5^(1/4) (= 1.495349)
+                        //
+                        // The 'wolf fifth' is at G#-Eb for root=0 (=C).
+                        name: "1/4 comma meantone, factor=5^(1/4), root=C, wolf fifth:G#-Eb",
+                        root: 0,
+                        factor: 1.495349 // Math.pow(5, (1.0 / 4))
+                    },
+                    {
+                        // According to https://en.xen.wiki/w/1/3_syntonic_comma_meantone
+                        // The 1/3 comma meantone fifth is 694.786 cents in size, which according to
+                        // http://www.sengpielaudio.com/calculator-centsratio.htm corresponds to a
+                        // frequency ratio (=factor) of 1.493801.
+                        // The 'wolf fifth' is at G#-Eb
+                        name: "1/3 comma meantone, factor=1.493801, root=C, wolf fifth:G#-Eb",
+                        root: 0,
+                        factor: 1.493801
+                    },
+                    {
+                        // factor is calculated as follows:
+                        // 10 fifths reach the 7th harmonic (Bb from C) 3 octaves above the base pitch,
+                        // so 'factor' is the 10th root of (7 * (2^3)).
+                        // This is very close to the factor for 1/4 comma meantone.
+                        // The 'wolf fifth' is at G#-Eb
+                        name: "Perfect 7th harmonic, factor=(7*8)^(0.1), root=C, wolf fifth:G#-Eb",
+                        root: 0,
+                        factor: 1.495612 // Math.pow((7 * 8), 0.1)
+                    }
+                ]
         },
-        // perfect keyboard interval tunings (A4=440Hz)
+        // constant semitone tunings 1 (constant C4)
         {
             // This tuning group uses the following constructor:
-            //   tuning = getTuningFromAdjacentKeyFrequencyRatio(anchor, adjacentKeyFrequencyRatio)
+            //   tuning = getTuningFromSemitone(anchor, semitone)
             //
             // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
-            // The 'adjacentKeyFrequencyRatio' argument is the ratio between the frequencies allocated to adjacent keys.
+            // The 'semitone' argument is the ratio between the frequencies allocated to adjacent keys.
             //
-            // These tunings have been ordered by "consonance" (i.e. the absolute difference between the adjacentKeyFrequencyRatio
-            // and the adjacentKeyFrequencyRatio for the perfect octave in 12-tone equal temperament).
-            // Compare these tunings to the Odd Harmonic tunings.
-            ctor: ResSynth.tuningType.PERFECT_KEYBOARD_INTERVAL,
-            name: "perfect keyboard interval tunings (constant C4)",
+            // Each of these tunings contains one harmonically perfect relation between two frequencies at a particular key distance.
+            // These tunings have been ordered by "consonance"
+            // (i.e. the absolute difference, in cents, between the sound of the fingered octave and the true octave.)
+            ctor: ResSynth.tuningType.CONSTANT_SEMITONE,
+            name: "constant semitone tunings (constant C4)",
             tunings:
-            [
-                {
-                    name: "perfect octaves: adjacentKeyFrequencyRatio=((2)^(1/12)) (12-tone ET)",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(2, (1.0 / 12)) // 1.0594630943592952645618252949463
-                },
-                {
-                    name: "perfect fifths: adjacentKeyFrequencyRatio=((3/2)^(1/7))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(3 / 2, (1.0 / 7)) // 1.0596340226670483814266089094729  
-                },
-                {
-                    name: "perfect major ninths: adjacentKeyFrequencyRatio=((9/4)^(1/14))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(9 / 4, (1.0 / 14)) // 1.0596963939932648176307185882635
-                },
-                {
-                    name: "perfect minor ninths: adjacentKeyFrequencyRatio=((17/8)^(1/13))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(17 / 8, (1.0 / 13)) // 1.0596963939932648176307185882635
-                },
-                {
-                    name: "perfect minor thirds: adjacentKeyFrequencyRatio=((19/16)^(1/3))",  
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(19 / 16, (1.0 / 3)) // 1.0589558960637232909745381060545
-                },
-                {
-                    name: "perfect major sevenths: adjacentKeyFrequencyRatio=((15/8)^(1/11))", 
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(15 / 8, (1.0 / 11)) // 1.0588106414115541691480015555274
-                },
-                {
-                    name: "perfect major seconds: adjacentKeyFrequencyRatio=((9/8)^(1/2))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(9 / 8, (1.0 / 2)) // 1.0606601717798212866012665431573
-                },
-                {
-                    name: "perfect minor sevenths: adjacentKeyFrequencyRatio=((7/4)^(1/10))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(7 / 4, (1.0 / 10)) // 1.0575570503382522810899859251856
-                },
-                {
-                    name: "perfect major thirds: adjacentKeyFrequencyRatio=((5/4)^(1/4))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(5 / 4, (1.0 / 4)) // 1.0573712634405641195350370000286  
-                },
-                {
-                    name: "perfect minor sixths: adjacentKeyFrequencyRatio=((25/16)^(1/8))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(25 / 16, (1.0 / 8)) // 1.0573712634405641195350370000286
-                },
-                {
-                    name: "perfect minor seconds: adjacentKeyFrequencyRatio=((17/16)^(1))", 
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(17 / 16, 1) // 1.0625
-                },
-                {
-                    name: "perfect fourths: adjacentKeyFrequencyRatio=((21/16)^(1/5))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(21 / 16, (1.0 / 5)) // 1.0558928824833769563662836652751
-                },
-                {
-                    name: "perfect major sixths: adjacentKeyFrequencyRatio=((13/8)^(1/9))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(13 / 8, (1.0 / 9)) // 1.0554268823040456867210115180495
-                },
-                {
-                    name: "perfect tritones: adjacentKeyFrequencyRatio=((11/8)^(1/6))",
-                    anchor: 60, // C4
-                    adjacentKeyFrequencyRatio: Math.pow(11 / 8, (1.0 / 6)) // 1.054509386058112694968134026189
-                }
-            ]
+                [
+                    {
+                        name: "consonantKeyDiff: 12, semitone: (2)^(1/12), octaveDiff: 0 [12-tone ET]",
+                        anchor: 60, // C4
+                        semitone: Math.pow((2), (1.0 / 12))
+                    },
+                    {
+                        name: "consonantKeyDiff: 19, semitone: (3)^(1/19), octaveDiff: +1.23cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((3), (1.0 / 19)) 
+                    },
+                    {
+                        name: "consonantKeyDiff: 15, semitone: (19/8)^(1/15), octaveDiff: -1.99cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((19 / 8), (1.0 / 15))
+                    },
+                    {
+                        name: "consonantKeyDiff: 7, semitone: (3/2)^(1/7), octaveDiff: +3.35cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((3 / 2), (1.0 / 7))
+                    },
+                    {
+                        name: "consonantKeyDiff: 13, semitone: (17/8)^(1/13), octaveDiff: +4.57cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((17 / 8), (1.0 / 13))
+                    },
+                    {
+                        name: "consonantKeyDiff: 23, semitone: (15/4)^(1/23), octaveDiff: -6.12cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((15 / 4), (1.0 / 23))
+                    },
+                    {
+                        name: "consonantKeyDiff: 3, semitone: (19/16)^(1/3), octaveDiff: -9.95cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((19 / 16), (1.0 / 3))
+                    },
+                    {
+                        name: "consonantKeyDiff: 16, semitone: (5/2)^(1/16), octaveDiff: -10.26cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((5 / 2), (1.0 / 16))
+                    },
+                    {
+                        name: "consonantKeyDiff: 11, semitone: (15/8)^(1/11), octaveDiff: -12.8cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((15 / 8), (1.0 / 11))
+                    },
+                    {
+                        name: "consonantKeyDiff: 20, semitone: (25/8)^(1/20), octaveDiff: -16.42cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((25 / 8), (1, 0 / 20))
+                    },
+                    {
+                        name: "consonantKeyDiff: 22, semitone: (7/2)^(1/22), octaveDiff: -17cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((7 / 2), (1.0 / 22))
+                    },
+                    {
+                        name: "consonantKeyDiff: 17, semitone: (21/8)^(1/17), octaveDiff: -20.63cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((21 / 8), (1.0 / 17))
+                    },
+                    {
+                        name: "consonantKeyDiff: 2, semitone: (9/8)^(1/2), octaveDiff: +23.46cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((9 / 8), (1.0 / 2))
+                    },
+                    {
+                        name: "consonantKeyDiff: 18, semitone: (11/4)^(1/18), octaveDiff: -32.45cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((11 / 4), (1.0 / 18))
+                    },
+                    {
+                        name: "consonantKeyDiff: 21, semitone: (13/4)^(1/21), octaveDiff: -33.98cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((13 / 4), (1.0 / 21))
+                    },
+                    {
+                        name: "consonantKeyDiff: 10, semitone: (7/4)^(1/10), octaveDiff: -37.41cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((7 / 4), (1.0 / 10))
+                    },
+                    {
+                        name: "consonantKeyDiff: 4, semitone: (5/4)^(1/4), octaveDiff: -41.06cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((5 / 4), (1.0 / 4))
+                    },
+                    {
+                        name: "consonantKeyDiff: 1, semitone: (17/16)^1, octaveDiff: +59.46cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((17 / 16), 1)
+                    },
+                    {
+                        name: "consonantKeyDiff: 5, semitone: (21/16)^(1/5), octaveDiff: -70.13cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((21 / 16), (1.0 / 5))
+                    },
+                    {
+                        name: "consonantKeyDiff: 9, semitone: (13/8)^(1/9), octaveDiff: -79.3cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((13 / 8), (1.0 / 9))
+                    },
+                    {
+                        name: "consonantKeyDiff: 6, semitone: (11/8)^(1/6), octaveDiff: -97.36cents",
+                        anchor: 60, // C4
+                        semitone: Math.pow((11 / 8), (1.0 / 6))
+                    }
+                ]
         },
         // constant midi key interval tunings (A4=440Hz)
         {

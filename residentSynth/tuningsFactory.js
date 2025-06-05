@@ -52,7 +52,7 @@ ResSynth.tuningsFactory = (function()
         // between the two frequencies.
         // The result will be positive if frequency1 >= frequency2,
         // and negative if frequency1 < frequency2.
-        getSemitones = function(frequency1, frequency2)
+        numberOf12TETSemitones = function(frequency1, frequency2)
         {
             let frequencyRatio = frequency1 / frequency2,
                 equalTemperamentSemitones = Math.round(120000000 * Math.log2(frequencyRatio)) / 10000000; // log base 2, rounded to 7 decimal places
@@ -72,7 +72,7 @@ ResSynth.tuningsFactory = (function()
         transposeTuningForA4Frequency = function(tuning, a4Frequency)
         {
             let currentA4Frequency = getFrequency(tuning[69]),
-                semitonesDiff = getSemitones(currentA4Frequency, a4Frequency);
+                semitonesDiff = numberOf12TETSemitones(currentA4Frequency, a4Frequency);
 
             for(let i = 0; i < 128; i++)
             {
@@ -181,7 +181,7 @@ ResSynth.tuningsFactory = (function()
             let tuningOffsets = [];
             for(let i = 0; i < factors.length; i++)
             {
-                let centsOffset = (getSemitones(factors[i], 1) - i) * 100;
+                let centsOffset = (numberOf12TETSemitones(factors[i], 1) - i) * 100;
                 tuningOffsets.push(centsOffset);
             }
 
@@ -218,22 +218,20 @@ ResSynth.tuningsFactory = (function()
     };
 
     // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighbouring keys.
-    // Different adjacentKeyFrequencyRatio values result in tunings that contain a particular "perfect" interval.
+    // Different semitone values result in tunings that contain a particular "perfect" interval.
     // "Perfect" intervals are those that are derived from (octave transpositions of) the odd natural harmonics.    
-    TuningsFactory.prototype.getTuningFromAdjacentKeyFrequencyRatio = function(anchor, adjacentKeyFrequencyRatio)
+    TuningsFactory.prototype.getTuningFromSemitone = function(anchor, semitone)
     {
-        function getGamutETTuningIgnoringOctaves(adjacentKeyFrequencyRatio)
+        function getGamutETTuningIgnoringOctaves(semitone)
         {
             let tuning = [],
-                semitones = getSemitones(adjacentKeyFrequencyRatio, 1), // semitones between neighbouring keys
+                semitoneSize = numberOf12TETSemitones(semitone, 1), // number of 12TET semitones between neighbouring keys
                 pitch = 0;
-
-            console.assert(adjacentKeyFrequencyRatio > 1);
 
             for(let i = 0; i < 128; i++)
             {
                 tuning.push(pitch);
-                pitch += semitones;
+                pitch += semitoneSize;
             }
 
             return tuning;
@@ -250,7 +248,7 @@ ResSynth.tuningsFactory = (function()
             }
         }
 
-        let tuning = getGamutETTuningIgnoringOctaves(adjacentKeyFrequencyRatio);
+        let tuning = getGamutETTuningIgnoringOctaves(semitone);
 
         transposeTuningForAnchor(tuning, anchor);
 
@@ -260,7 +258,7 @@ ResSynth.tuningsFactory = (function()
     };
 
     // Returns an array ordered according to the size of the absolute difference between standard 12-tone equal temperament and
-    // the AdjacentKeyFrequencyRatios defined for the PERFECT_KEYBOARD_INTERVAL tunings.
+    // the AdjacentKeyFrequencyRatios defined for the CONSTANT_SEMITONE tunings.
     // This function was used while ordering the tunings in the tuningDefs.js file. Its return value is ignored at runtime.
     TuningsFactory.prototype.orderOfConsonanceForPerfectKeyIntervals = function()
     {
@@ -275,20 +273,29 @@ ResSynth.tuningsFactory = (function()
 
         const octaveSemitone = Math.pow(2, (1.0 / 12)),
             adjacentKeyRatios = [
-                [Math.pow(17 / 16, 1), "minorSecond"],
-                [Math.pow(9 / 8, (1.0 / 2)), "majorSecond"],
-                [Math.pow(19 / 16, (1.0 / 3)), "minorThird"],
-                [Math.pow(5 / 4, (1.0 / 4)), "majorThird"],
-                [Math.pow(21 / 16, (1.0 / 5)), "fourth"],
-                [Math.pow(11 / 8, (1.0 / 6)), "tritone"],
-                [Math.pow(3 / 2, (1.0 / 7)), "fifth"],
-                [Math.pow(25 / 16, (1.0 / 8)), "minorSixth"],
-                [Math.pow(13 / 8, (1.0 / 9)), "majorSixth"],
-                [Math.pow(7 / 4, (1.0 / 10)), "minorSeventh"],
-                [Math.pow(15 / 8, (1.0 / 11)), "majorSeventh"],
-                [octaveSemitone, "octave"],
-                [Math.pow(17 / 8, (1.0 / 13)), "minorNinth"],
-                [Math.pow(9 / 4, (1.0 / 14)), "majorNinth"]
+                [Math.pow(17 / 16, 1), "1", "17/16", "(17/16)^1"], 
+                [Math.pow(9 / 8, (1.0 / 2)), "2", "9/8", "(9/8)^(1/2)"],
+                [Math.pow(19 / 16, (1.0 / 3)), "3", "19/16", "(19/16)^(1/3)"],
+                [Math.pow(5 / 4, (1.0 / 4)), "4", "5/4", "(5/4)^(1/4)"],
+                [Math.pow(21 / 16, (1.0 / 5)), "5", "21/16", "(21/16)^(1/5)"],
+                [Math.pow(11 / 8, (1.0 / 6)), "6", "11/8", "(11/8)^(1/6)"],
+                [Math.pow(3 / 2, (1.0 / 7)), "7", "3/2", "(3/2)^(1/7)"],
+                [Math.pow(25 / 16, (1.0 / 8)), "8", "25/16", "(25/16)^(1/8)"],
+                [Math.pow(13 / 8, (1.0 / 9)), "9", "13/8", "(13/8)^(1/9)"],    
+                [Math.pow(7 / 4, (1.0 / 10)), "10", "7/4", "(7/4)^(1/10)"],
+                [Math.pow(15 / 8, (1.0 / 11)), "11", "15/8", "(15/8)^(1/11)"],
+                [octaveSemitone, "12", "2", "(2)^(1/12)"],
+                [Math.pow(17 / 8, (1.0 / 13)), "13", "17/8", "(17/8)^(1/13)"],
+                [Math.pow(9 / 4, (1.0 / 14)), "14", "9/4", "(9/4)^(1/14)"],
+                [Math.pow(19 / 8, (1.0 / 15)), "15", "19/8", "(19/8)^(1/15)"],
+                [Math.pow(5 / 2, (1.0 / 16)), "16", "5/2", "(5/2)^(1/16)"],
+                [Math.pow(21 / 8, (1.0 / 17)), "17", "21/8", "(21/8)^(1/17)"],
+                [Math.pow(11 / 4, (1.0 / 18)), "18", "11/4", "(11/4)^(1/18)"],
+                [Math.pow(3, (1.0 / 19)), "19", "3", "(3)^(1/19)"],
+                [Math.pow(25 / 8, (1.0 / 20)), "20", "25/8", "(25/8)^(1/20)"],
+                [Math.pow(13 / 4, (1.0 / 21)), "21", "13/4", "(13/4)^(1/21)"],
+                [Math.pow(7 / 2, (1.0 / 22)), "22", "7/2", "(7/2)^(1/22)"],
+                [Math.pow(15 / 4, (1.0 / 23)), "23", "15/4", "(15/4)^(1/23)"]
             ],
             localSemitones = [
                 Math.pow(17 / 16, 1),
@@ -304,7 +311,16 @@ ResSynth.tuningsFactory = (function()
                 Math.pow(15 / 8, (1.0 / 11)),
                 octaveSemitone,
                 Math.pow(17 / 8, (1.0 / 13)),
-                Math.pow(9 / 4, (1.0 / 14))
+                Math.pow(9 / 4, (1.0 / 14)),
+                Math.pow(19 / 8, (1.0 / 15)),
+                Math.pow(5 / 2, (1.0 / 16)),
+                Math.pow(21 / 8, (1.0 / 17)),
+                Math.pow(11 / 4, (1.0 / 18)),
+                Math.pow(3, (1.0 / 19)),
+                Math.pow(25 / 8, (1.0 / 20)),
+                Math.pow(13 / 4, (1.0 / 21)),
+                Math.pow(7 / 2, (1.0 / 22)),
+                Math.pow(15 / 4, (1.0 / 23))
             ];
 
         let diffs = [];
@@ -332,10 +348,31 @@ ResSynth.tuningsFactory = (function()
             }
         }
 
-        let orderedTunings = [];
+        let orderedTunings = [],
+            prevAdjacentKeyRatio0 = 0;
         for(let i = 0; i < diffs.length; i++)
         {
-            orderedTunings.push(adjacentKeyRatios[oldIndices[i]]);
+            let adjacentKeyRatio = adjacentKeyRatios[oldIndices[i]],
+                qOctave = Math.pow(adjacentKeyRatio[0], 12), // the effective octave ratio
+                centsDiff = numberOf12TETSemitones(qOctave, 2) * 100, // the cents difference from the pure octave
+                msg = "";
+
+            centsDiff = Math.round(centsDiff * 100) / 100; // round to 2 decimal places
+
+            msg = msg + `consonance: ${adjacentKeyRatio[2]}`;
+            msg = msg.padEnd(20, " ");
+            msg = msg + `keyDiff=${adjacentKeyRatio[1]}, `;
+            msg = msg + `semitone=${adjacentKeyRatio[3]}`;
+            msg = msg.padEnd(65, " ");
+            msg = msg + `octaveDiff: ${centsDiff} cents`;
+            if(i > 0 && adjacentKeyRatio[0] === prevAdjacentKeyRatio0)
+                msg = msg + " -- same";
+
+            prevAdjacentKeyRatio0 = adjacentKeyRatio[0];        
+
+            console.log(msg);
+
+            orderedTunings.push(adjacentKeyRatio);
         }
 
         return orderedTunings;
@@ -377,7 +414,7 @@ ResSynth.tuningsFactory = (function()
             let tuning = [];
             for(let i = 0; i < frequencies.length; i++)
             {
-                tuning.push(midiA4 + getSemitones(frequencies[i], 440));
+                tuning.push(midiA4 + numberOf12TETSemitones(frequencies[i], 440));
             }
 
             return tuning;
@@ -594,7 +631,7 @@ ResSynth.tuningsFactory = (function()
                 let keyFactor = keyFactorArray[i],
                     key = keyFactor[0],
                     factor = keyFactor[1],
-                    semitonesAboveRoot = getSemitones(factor, 1),
+                    semitonesAboveRoot = numberOf12TETSemitones(factor, 1),
                     floorSemitonesAboveRoot = Math.floor(semitonesAboveRoot),
                     centsDelta = semitonesAboveRoot - floorSemitonesAboveRoot;
 
