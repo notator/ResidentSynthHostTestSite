@@ -771,6 +771,20 @@ ResSynth.residentSynth = (function(window)
                                 tuningsFactory.orderOfConsonanceForPerfectKeyIntervals();
                                 break;
                             }
+                        case tuningType.CONSTANT_SEMITONE_SIZE:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        anchor = tuningDef.anchor,
+                                        semitoneSizeInCents = tuningDef.semitoneSize,
+                                        tuning = tuningsFactory.getTuningFromSemitoneSize(anchor, semitoneSizeInCents);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
                         case tuningType.CONSTANT_MIDI_KEY_FACTOR:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)

@@ -377,6 +377,45 @@ ResSynth.tuningsFactory = (function()
         return orderedTunings;
     };
 
+    // Returns a 128-note tuning having equidistant intervals between neighbouring keys,
+    // and in which the 'anchor' key has the same pitch as in 12-tone equal temperament.
+    TuningsFactory.prototype.getTuningFromSemitoneSize = function(anchor, semitoneSizeInCents)
+    {
+        function getGamutETTuningIgnoringOctaves(semitoneSizeInCents)
+        {
+            let tuning = [],
+                midiCentSize = semitoneSizeInCents / 100, // number of 12TET semitones between neighbouring keys
+                pitch = 0;
+
+            for(let i = 0; i < 128; i++)
+            {
+                tuning.push(pitch);
+                pitch += midiCentSize;
+            }
+
+            return tuning;
+        }
+
+        function transposeTuningForAnchor(tuning, anchor)
+        {
+            console.assert(Number.isInteger(anchor) && 0 <= anchor && anchor < 128);
+
+            let diff = anchor - tuning[anchor]; // tuning[69] is A4
+            for(let i = 0; i < 128; i++)
+            {
+                tuning[i] += diff; // will be coerced to 0..<128 later
+            }
+        }
+
+        let tuning = getGamutETTuningIgnoringOctaves(semitoneSizeInCents);
+
+        transposeTuningForAnchor(tuning, anchor);
+
+        finalizeTuning(tuning);
+
+        return tuning;
+    };
+
     // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighboring keys.
     // Keys that are keysPerOctave apart, sound an octave apart. 
     // Argument restrictions:
