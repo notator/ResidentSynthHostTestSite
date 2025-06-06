@@ -6,7 +6,7 @@ into the stable branch.
 
 ===========================================================================================================================================
 DONE:
-** Implemented a new, equally tempered tuning group (CONSTANT_SEMITONE). Each tuning in the group has a single "perfect" interval
+** Implemented a new, equally tempered tuning group (CONSTANT_SEMITONE_FACTOR). Each tuning in the group has a single "perfect" interval
 divided into as many equal sized intervals as there are keys between that interval. Each tuning has its own characteristic constant pitch
 interval between adjacent keys. All the defined tunings have C4=261.63Hz (which gives A4=440Hz in a standard 12-tone ET scale).
 For example:

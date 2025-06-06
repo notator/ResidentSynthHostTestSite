@@ -52,7 +52,7 @@ ResSynth.tuningsFactory = (function()
         // between the two frequencies.
         // The result will be positive if frequency1 >= frequency2,
         // and negative if frequency1 < frequency2.
-        numberOf12TETSemitones = function(frequency1, frequency2)
+        sizeIn12TETSemitones = function(frequency1, frequency2)
         {
             let frequencyRatio = frequency1 / frequency2,
                 equalTemperamentSemitones = Math.round(120000000 * Math.log2(frequencyRatio)) / 10000000; // log base 2, rounded to 7 decimal places
@@ -72,7 +72,7 @@ ResSynth.tuningsFactory = (function()
         transposeTuningForA4Frequency = function(tuning, a4Frequency)
         {
             let currentA4Frequency = getFrequency(tuning[69]),
-                semitonesDiff = numberOf12TETSemitones(currentA4Frequency, a4Frequency);
+                semitonesDiff = sizeIn12TETSemitones(currentA4Frequency, a4Frequency);
 
             for(let i = 0; i < 128; i++)
             {
@@ -181,7 +181,7 @@ ResSynth.tuningsFactory = (function()
             let tuningOffsets = [];
             for(let i = 0; i < factors.length; i++)
             {
-                let centsOffset = (numberOf12TETSemitones(factors[i], 1) - i) * 100;
+                let centsOffset = (sizeIn12TETSemitones(factors[i], 1) - i) * 100;
                 tuningOffsets.push(centsOffset);
             }
 
@@ -217,15 +217,14 @@ ResSynth.tuningsFactory = (function()
         return tuning;
     };
 
-    // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighbouring keys.
-    // Different semitone values result in tunings that contain a particular "perfect" interval.
-    // "Perfect" intervals are those that are derived from (octave transpositions of) the odd natural harmonics.    
-    TuningsFactory.prototype.getTuningFromSemitone = function(anchor, semitone)
+    // Returns a 128-note tuning having equidistant intervals between neighbouring keys,
+    // and in which the 'anchor' key has the same pitch as in 12-tone equal temperament.
+    TuningsFactory.prototype.getTuningFromSemitoneFactor = function(anchor, semitoneFactor)
     {
-        function getGamutETTuningIgnoringOctaves(semitone)
+        function getGamutETTuningIgnoringOctaves(semitoneFactor)
         {
             let tuning = [],
-                semitoneSize = numberOf12TETSemitones(semitone, 1), // number of 12TET semitones between neighbouring keys
+                semitoneSize = sizeIn12TETSemitones(semitoneFactor, 1), // number of 12TET semitones between neighbouring keys
                 pitch = 0;
 
             for(let i = 0; i < 128; i++)
@@ -248,7 +247,7 @@ ResSynth.tuningsFactory = (function()
             }
         }
 
-        let tuning = getGamutETTuningIgnoringOctaves(semitone);
+        let tuning = getGamutETTuningIgnoringOctaves(semitoneFactor);
 
         transposeTuningForAnchor(tuning, anchor);
 
@@ -258,7 +257,7 @@ ResSynth.tuningsFactory = (function()
     };
 
     // Returns an array ordered according to the size of the absolute difference between standard 12-tone equal temperament and
-    // the AdjacentKeyFrequencyRatios defined for the CONSTANT_SEMITONE tunings.
+    // the AdjacentKeyFrequencyRatios defined for the CONSTANT_SEMITONE_FACTOR tunings.
     // This function was used while ordering the tunings in the tuningDefs.js file. Its return value is ignored at runtime.
     TuningsFactory.prototype.orderOfConsonanceForPerfectKeyIntervals = function()
     {
@@ -354,7 +353,7 @@ ResSynth.tuningsFactory = (function()
         {
             let adjacentKeyRatio = adjacentKeyRatios[oldIndices[i]],
                 qOctave = Math.pow(adjacentKeyRatio[0], 12), // the effective octave ratio
-                centsDiff = numberOf12TETSemitones(qOctave, 2) * 100, // the cents difference from the pure octave
+                centsDiff = sizeIn12TETSemitones(qOctave, 2) * 100, // the cents difference from the pure octave
                 msg = "";
 
             centsDiff = Math.round(centsDiff * 100) / 100; // round to 2 decimal places
@@ -362,7 +361,7 @@ ResSynth.tuningsFactory = (function()
             msg = msg + `consonance: ${adjacentKeyRatio[2]}`;
             msg = msg.padEnd(20, " ");
             msg = msg + `keyDiff=${adjacentKeyRatio[1]}, `;
-            msg = msg + `semitone=${adjacentKeyRatio[3]}`;
+            msg = msg + `semitoneFactor=${adjacentKeyRatio[3]}`;
             msg = msg.padEnd(65, " ");
             msg = msg + `octaveDiff: ${centsDiff} cents`;
             if(i > 0 && adjacentKeyRatio[0] === prevAdjacentKeyRatio0)
@@ -414,7 +413,7 @@ ResSynth.tuningsFactory = (function()
             let tuning = [];
             for(let i = 0; i < frequencies.length; i++)
             {
-                tuning.push(midiA4 + numberOf12TETSemitones(frequencies[i], 440));
+                tuning.push(midiA4 + sizeIn12TETSemitones(frequencies[i], 440));
             }
 
             return tuning;
@@ -631,7 +630,7 @@ ResSynth.tuningsFactory = (function()
                 let keyFactor = keyFactorArray[i],
                     key = keyFactor[0],
                     factor = keyFactor[1],
-                    semitonesAboveRoot = numberOf12TETSemitones(factor, 1),
+                    semitonesAboveRoot = sizeIn12TETSemitones(factor, 1),
                     floorSemitonesAboveRoot = Math.floor(semitonesAboveRoot),
                     centsDelta = semitonesAboveRoot - floorSemitonesAboveRoot;
 

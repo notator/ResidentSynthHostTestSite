@@ -21,7 +21,7 @@ var ResSynth = ResSynth || {};
 ResSynth.tuningType =
 {
     CONSTANT_FIFTH_FACTOR: 0,
-    CONSTANT_SEMITONE: 1,
+    CONSTANT_SEMITONE_FACTOR: 1,
     CONSTANT_MIDI_KEY_FACTOR: 2,
     ODD_HARMONIC: 3,
     PRIME_HARMONIC: 4,
@@ -90,122 +90,122 @@ ResSynth.tuningDefs =
         // constant semitone tunings 1 (constant C4)
         {
             // This tuning group uses the following constructor:
-            //   tuning = getTuningFromSemitone(anchor, semitone)
+            //   tuning = getTuningFromSemitoneFactor(anchor, semitoneFactor)
             //
             // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
-            // The 'semitone' argument is the ratio between the frequencies allocated to adjacent keys.
+            // The 'semitoneFactor' argument is the ratio between the frequencies allocated to adjacent keys.
             //
             // Each of these tunings contains one harmonically perfect relation between two frequencies at a particular key distance.
             // These tunings have been ordered by "consonance"
             // (i.e. the absolute difference, in cents, between the sound of the fingered octave and the true octave.)
-            ctor: ResSynth.tuningType.CONSTANT_SEMITONE,
-            name: "constant semitone tunings (constant C4)",
+            ctor: ResSynth.tuningType.CONSTANT_SEMITONE_FACTOR,
+            name: "constant semitoneFactor tunings (constant C4)",
             tunings:
                 [
                     {
-                        name: "consonantKeyDiff: 12, semitone: (2)^(1/12), octaveDiff: 0 [12-tone ET]",
+                        name: "consonantKeyDiff: 12, semitoneFactor: (2)^(1/12), octaveDiff: 0 [12-tone ET]",
                         anchor: 60, // C4
-                        semitone: Math.pow((2), (1.0 / 12))
+                        semitoneFactor: Math.pow((2), (1.0 / 12))
                     },
                     {
-                        name: "consonantKeyDiff: 19, semitone: (3)^(1/19), octaveDiff: +1.23cents",
+                        name: "consonantKeyDiff: 19, semitoneFactor: (3)^(1/19), octaveDiff: +1.23cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((3), (1.0 / 19)) 
+                        semitoneFactor: Math.pow((3), (1.0 / 19)) 
                     },
                     {
-                        name: "consonantKeyDiff: 15, semitone: (19/8)^(1/15), octaveDiff: -1.99cents",
+                        name: "consonantKeyDiff: 15, semitoneFactor: (19/8)^(1/15), octaveDiff: -1.99cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((19 / 8), (1.0 / 15))
+                        semitoneFactor: Math.pow((19 / 8), (1.0 / 15))
                     },
                     {
-                        name: "consonantKeyDiff: 7, semitone: (3/2)^(1/7), octaveDiff: +3.35cents",
+                        name: "consonantKeyDiff: 7, semitoneFactor: (3/2)^(1/7), octaveDiff: +3.35cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((3 / 2), (1.0 / 7))
+                        semitoneFactor: Math.pow((3 / 2), (1.0 / 7))
                     },
                     {
-                        name: "consonantKeyDiff: 13, semitone: (17/8)^(1/13), octaveDiff: +4.57cents",
+                        name: "consonantKeyDiff: 13, semitoneFactor: (17/8)^(1/13), octaveDiff: +4.57cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((17 / 8), (1.0 / 13))
+                        semitoneFactor: Math.pow((17 / 8), (1.0 / 13))
                     },
                     {
-                        name: "consonantKeyDiff: 23, semitone: (15/4)^(1/23), octaveDiff: -6.12cents",
+                        name: "consonantKeyDiff: 23, semitoneFactor: (15/4)^(1/23), octaveDiff: -6.12cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((15 / 4), (1.0 / 23))
+                        semitoneFactor: Math.pow((15 / 4), (1.0 / 23))
                     },
                     {
-                        name: "consonantKeyDiff: 3, semitone: (19/16)^(1/3), octaveDiff: -9.95cents",
+                        name: "consonantKeyDiff: 3, semitoneFactor: (19/16)^(1/3), octaveDiff: -9.95cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((19 / 16), (1.0 / 3))
+                        semitoneFactor: Math.pow((19 / 16), (1.0 / 3))
                     },
                     {
-                        name: "consonantKeyDiff: 16, semitone: (5/2)^(1/16), octaveDiff: -10.26cents",
+                        name: "consonantKeyDiff: 16, semitoneFactor: (5/2)^(1/16), octaveDiff: -10.26cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((5 / 2), (1.0 / 16))
+                        semitoneFactor: Math.pow((5 / 2), (1.0 / 16))
                     },
                     {
-                        name: "consonantKeyDiff: 11, semitone: (15/8)^(1/11), octaveDiff: -12.8cents",
+                        name: "consonantKeyDiff: 11, semitoneFactor: (15/8)^(1/11), octaveDiff: -12.8cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((15 / 8), (1.0 / 11))
+                        semitoneFactor: Math.pow((15 / 8), (1.0 / 11))
                     },
                     {
-                        name: "consonantKeyDiff: 20, semitone: (25/8)^(1/20), octaveDiff: -16.42cents",
+                        name: "consonantKeyDiff: 20, semitoneFactor: (25/8)^(1/20), octaveDiff: -16.42cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((25 / 8), (1, 0 / 20))
+                        semitoneFactor: Math.pow((25 / 8), (1, 0 / 20))
                     },
                     {
-                        name: "consonantKeyDiff: 22, semitone: (7/2)^(1/22), octaveDiff: -17cents",
+                        name: "consonantKeyDiff: 22, semitoneFactor: (7/2)^(1/22), octaveDiff: -17cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((7 / 2), (1.0 / 22))
+                        semitoneFactor: Math.pow((7 / 2), (1.0 / 22))
                     },
                     {
-                        name: "consonantKeyDiff: 17, semitone: (21/8)^(1/17), octaveDiff: -20.63cents",
+                        name: "consonantKeyDiff: 17, semitoneFactor: (21/8)^(1/17), octaveDiff: -20.63cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((21 / 8), (1.0 / 17))
+                        semitoneFactor: Math.pow((21 / 8), (1.0 / 17))
                     },
                     {
-                        name: "consonantKeyDiff: 2, semitone: (9/8)^(1/2), octaveDiff: +23.46cents",
+                        name: "consonantKeyDiff: 2, semitoneFactor: (9/8)^(1/2), octaveDiff: +23.46cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((9 / 8), (1.0 / 2))
+                        semitoneFactor: Math.pow((9 / 8), (1.0 / 2))
                     },
                     {
-                        name: "consonantKeyDiff: 18, semitone: (11/4)^(1/18), octaveDiff: -32.45cents",
+                        name: "consonantKeyDiff: 18, semitoneFactor: (11/4)^(1/18), octaveDiff: -32.45cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((11 / 4), (1.0 / 18))
+                        semitoneFactor: Math.pow((11 / 4), (1.0 / 18))
                     },
                     {
-                        name: "consonantKeyDiff: 21, semitone: (13/4)^(1/21), octaveDiff: -33.98cents",
+                        name: "consonantKeyDiff: 21, semitoneFactor: (13/4)^(1/21), octaveDiff: -33.98cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((13 / 4), (1.0 / 21))
+                        semitoneFactor: Math.pow((13 / 4), (1.0 / 21))
                     },
                     {
-                        name: "consonantKeyDiff: 10, semitone: (7/4)^(1/10), octaveDiff: -37.41cents",
+                        name: "consonantKeyDiff: 10, semitoneFactor: (7/4)^(1/10), octaveDiff: -37.41cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((7 / 4), (1.0 / 10))
+                        semitoneFactor: Math.pow((7 / 4), (1.0 / 10))
                     },
                     {
-                        name: "consonantKeyDiff: 4, semitone: (5/4)^(1/4), octaveDiff: -41.06cents",
+                        name: "consonantKeyDiff: 4, semitoneFactor: (5/4)^(1/4), octaveDiff: -41.06cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((5 / 4), (1.0 / 4))
+                        semitoneFactor: Math.pow((5 / 4), (1.0 / 4))
                     },
                     {
-                        name: "consonantKeyDiff: 1, semitone: (17/16)^1, octaveDiff: +59.46cents",
+                        name: "consonantKeyDiff: 1, semitoneFactor: (17/16)^1, octaveDiff: +59.46cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((17 / 16), 1)
+                        semitoneFactor: Math.pow((17 / 16), 1)
                     },
                     {
-                        name: "consonantKeyDiff: 5, semitone: (21/16)^(1/5), octaveDiff: -70.13cents",
+                        name: "consonantKeyDiff: 5, semitoneFactor: (21/16)^(1/5), octaveDiff: -70.13cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((21 / 16), (1.0 / 5))
+                        semitoneFactor: Math.pow((21 / 16), (1.0 / 5))
                     },
                     {
-                        name: "consonantKeyDiff: 9, semitone: (13/8)^(1/9), octaveDiff: -79.3cents",
+                        name: "consonantKeyDiff: 9, semitoneFactor: (13/8)^(1/9), octaveDiff: -79.3cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((13 / 8), (1.0 / 9))
+                        semitoneFactor: Math.pow((13 / 8), (1.0 / 9))
                     },
                     {
-                        name: "consonantKeyDiff: 6, semitone: (11/8)^(1/6), octaveDiff: -97.36cents",
+                        name: "consonantKeyDiff: 6, semitoneFactor: (11/8)^(1/6), octaveDiff: -97.36cents",
                         anchor: 60, // C4
-                        semitone: Math.pow((11 / 8), (1.0 / 6))
+                        semitoneFactor: Math.pow((11 / 8), (1.0 / 6))
                     }
                 ]
         },

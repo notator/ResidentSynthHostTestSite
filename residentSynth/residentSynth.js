@@ -755,14 +755,14 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
-                        case tuningType.CONSTANT_SEMITONE:
+                        case tuningType.CONSTANT_SEMITONE_FACTOR:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
                                 {
                                     let tuningDef = tuningDefs[k],
                                         anchor = tuningDef.anchor,
-                                        semitone = tuningDef.semitone,
-                                        tuning = tuningsFactory.getTuningFromSemitone(anchor, semitone);
+                                        semitoneFactor = tuningDef.semitoneFactor,
+                                        tuning = tuningsFactory.getTuningFromSemitoneFactor(anchor, semitoneFactor);
 
                                     tuning.name = tuningDef.name;
                                     tuningGroup.push(tuning);
