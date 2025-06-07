@@ -151,7 +151,7 @@ ResSynth.tuningDefs =
                     {
                         name: "consonantKeyDiff: 20, semitoneFactor: (25/8)^(1/20), octaveDiff: -16.42cents",
                         anchor: 60, // C4
-                        semitoneFactor: Math.pow((25 / 8), (1, 0 / 20))
+                        semitoneFactor: Math.pow((25 / 8), (1.0 / 20))
                     },
                     {
                         name: "consonantKeyDiff: 22, semitoneFactor: (7/2)^(1/22), octaveDiff: -17cents",
