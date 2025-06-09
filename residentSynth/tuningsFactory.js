@@ -48,6 +48,18 @@ ResSynth.tuningsFactory = (function()
             coerce(tuning);
         },
 
+        // Transpose the tuning so that the 'anchor' key has the same pitch as in 12-tone equal temperament.
+        transposeTuningForAnchor = function(tuning, anchor)
+        {
+            console.assert(Number.isInteger(anchor) && 0 <= anchor && anchor < 128);
+
+            let diff = anchor - tuning[anchor]; // tuning[69] is A4
+            for(let i = 0; i < 128; i++)
+            {
+                tuning[i] += diff; // will be coerced to 0..<128 in finalizeTuning() later
+            }
+        },
+
         // Returns the (floating point) number of Equal Temperament semitones
         // between the two frequencies.
         // The result will be positive if frequency1 >= frequency2,
@@ -377,8 +389,8 @@ ResSynth.tuningsFactory = (function()
         return orderedTunings;
     };
 
-    // Returns a 128-note tuning having equidistant intervals between neighbouring keys,
-    // and in which the 'anchor' key has the same pitch as in 12-tone equal temperament.
+    // Returns a 128-note tuning in which the 'anchor' key has the same pitch as in 12-tone equal temperament
+    // and the pitch interval between adjacent keys is constant.
     TuningsFactory.prototype.getTuningFromSemitoneSize = function(anchor, semitoneSizeInCents)
     {
         function getGamutETTuningIgnoringOctaves(semitoneSizeInCents)
@@ -396,17 +408,6 @@ ResSynth.tuningsFactory = (function()
             return tuning;
         }
 
-        function transposeTuningForAnchor(tuning, anchor)
-        {
-            console.assert(Number.isInteger(anchor) && 0 <= anchor && anchor < 128);
-
-            let diff = anchor - tuning[anchor]; // tuning[69] is A4
-            for(let i = 0; i < 128; i++)
-            {
-                tuning[i] += diff; // will be coerced to 0..<128 later
-            }
-        }
-
         let tuning = getGamutETTuningIgnoringOctaves(semitoneSizeInCents);
 
         transposeTuningForAnchor(tuning, anchor);
@@ -414,6 +415,42 @@ ResSynth.tuningsFactory = (function()
         finalizeTuning(tuning);
 
         return tuning;
+    };
+
+    // Returns a 128-note tuning in which the size of the interval between adjacent keys varies linearly across the keyboard
+    // and the size of the interval between adjacent keys is closest to 100cents near the 'origin' key.
+    TuningsFactory.prototype.getSlidingSemitoneSizeTuning = function(anchor, origin, centsDelta)
+    {
+        function getSlidingTuning(origin, centsDeltaArg)
+        {
+            console.assert(Number.isInteger(origin) && 0 <= origin && origin < 128);
+
+            let tuning = [],
+                semitone = 1 + centsDeltaArg;
+
+            tuning[origin] = origin;
+            for(let i = origin + 1; i < 128; i++)
+            {
+                tuning[i] = tuning[i - 1] + semitone;
+                semitone += centsDeltaArg;
+            }
+            semitone = 1 + centsDeltaArg;
+            for(let i = origin - 1; i >= 0; i--)
+            {
+                tuning[i] = tuning[i + 1] - semitone;
+                semitone += centsDeltaArg;
+            }
+            return tuning;
+        }
+
+        let tuning = getSlidingTuning(origin, centsDelta);
+
+        transposeTuningForAnchor(tuning, anchor);
+
+        finalizeTuning(tuning);
+
+        return tuning;
+
     };
 
     // Returns a 128-note tuning having A4 (key 69) tuned to 440Hz, and equidistant intervals between neighboring keys.

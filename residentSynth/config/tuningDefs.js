@@ -21,16 +21,18 @@ var ResSynth = ResSynth || {};
 ResSynth.tuningType =
 {
     CONSTANT_FIFTH_FACTOR: 0,
-    CONSTANT_SEMITONE_FACTOR: 1,
-    CONSTANT_SEMITONE_SIZE: 2,
-    CONSTANT_MIDI_KEY_FACTOR: 3,
-    ODD_HARMONIC: 4,
-    PRIME_HARMONIC: 5,
-    INVERTED_ODD_HARMONIC: 6,
-    INVERTED_PRIME_HARMONIC: 7,
-    WARPED_OCTAVES: 8,
-    WARPED_GAMUT: 9,
-    BAROQUE: 10
+    CONSTANT_MIDI_KEY_FACTOR: 1,
+    ODD_HARMONIC: 2,
+    PRIME_HARMONIC: 3,
+    INVERTED_ODD_HARMONIC: 4,
+    INVERTED_PRIME_HARMONIC: 5,
+    WARPED_OCTAVES: 6,
+    WARPED_GAMUT: 7,
+    BAROQUE: 8,
+    // 2025 Tunings
+    CONSTANT_SEMITONE_FACTOR: 9,
+    CONSTANT_SEMITONE_SIZE: 10,
+    SLIDING_SEMITONE_SIZE: 11
 };
 
 // All tunings are initially related to standard A4=440Hz.
@@ -111,7 +113,7 @@ ResSynth.tuningDefs =
                     {
                         name: "consonantKeyDiff: 19, semitoneFactor: (3)^(1/19), octaveDiff: +1.23cents",
                         anchor: 60, // C4
-                        semitoneFactor: Math.pow((3), (1.0 / 19)) 
+                        semitoneFactor: Math.pow((3), (1.0 / 19))
                     },
                     {
                         name: "consonantKeyDiff: 15, semitoneFactor: (19/8)^(1/15), octaveDiff: -1.99cents",
@@ -209,129 +211,277 @@ ResSynth.tuningDefs =
                         semitoneFactor: Math.pow((11 / 8), (1.0 / 6))
                     }
                 ]
-    },
-    // constant semitone size tunings (onstant C4)
-    {
-        // This tuning group uses the following constructor:
-        //   tuning = getTuningFromSemitoneSize(anchor, cents) // a cent is 1/100 of a 12TET semitone
-        //
-        // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
-        // The 'cents' argument is the simple difference between the pitches allocated to adjacent keys.
-        //
-        // These tunings have been ordered by "consonance"
-        // (i.e. the absolute difference, in cents, between the sound of the fingered octave and the true octave.)
-        ctor: ResSynth.tuningType.CONSTANT_SEMITONE_SIZE,
-        name: "constant semitoneSize tunings (constant C4)",
-        tunings:
-            [
-                {
-                    name: "semitoneSize: 100cents, octaveDiff: 0 [12-tone ET]",
-                    anchor: 60, // C4
-                    semitoneSize: 100
-                },
-                {
-                    name: "semitoneSize: 100.42cents, octaveDiff: +5cents",
-                    anchor: 60, // C4
-                    semitoneSize: 100.4167
-                },
-                {
-                    name: "semitoneSize: 99.58cents, octaveDiff: -5cents",
-                    anchor: 60, // C4
-                    semitoneSize: 99.5833
-                },
-                {
-                    name: "semitoneSize: 100.83cents, octaveDiff: +10cents",
-                    anchor: 60, // C4
-                    semitoneSize: 100.8333
-                },
-                {
-                    name: "semitoneSize: 99.17cents, octaveDiff: -10cents",
-                    anchor: 60, // C4
-                    semitoneSize: 99.1667
-                },
-                {
-                    name: "semitoneSize: 101.25cents, octaveDiff: +15cents",
-                    anchor: 60, // C4
-                    semitoneSize: 101.2500
-                },
-                {
-                    name: "semitoneSize: 98.75, octaveDiff: -15cents",
-                    anchor: 60, // C4
-                    semitoneSize: 98.7500
-                },
-                {
-                    name: "semitoneSize: 101.67cents, octaveDiff: +20cents",
-                    anchor: 60, // C4
-                    semitoneSize: 101.6667
-                },
-                {
-                    name: "semitoneSize: 98.33, octaveDiff: -20cents",
-                    anchor: 60, // C4
-                    semitoneSize: 98.3333
-                },
-                {
-                    name: "semitoneSize: 102.08cents, octaveDiff: +25cents",
-                    anchor: 60, // C4
-                    semitoneSize: 102.0833
-                },
-                {
-                    name: "semitoneSize: 97.92cents, octaveDiff: -25cents",
-                    anchor: 60, // C4
-                    semitoneSize: 97.9167
-                },
-                {
-                    name: "semitoneSize: 102.5cents, octaveDiff: +30cents",
-                    anchor: 60, // C4
-                    semitoneSize: 102.5000
-                },
-                {
-                    name: "semitoneSize: 97.5cents, octaveDiff: -30cents",
-                    anchor: 60, // C4
-                    semitoneSize: 97.5000
-                },
-                {
-                    name: "semitoneSize: 102.92cents, octaveDiff: +35cents",
-                    anchor: 60, // C4
-                    semitoneSize: 102.9167
-                },
-                {
-                    name: "semitoneSize: 97.08cents, octaveDiff: -35cents",
-                    anchor: 60, // C4
-                    semitoneSize: 97.0833
-                },
-                {
-                    name: "semitoneSize: 103.33cents, octaveDiff: +40cents",
-                    anchor: 60, // C4
-                    semitoneSize: 103.3333
-                },
-                {
-                    name: "semitoneSize: 96.67cents, octaveDiff: -40cents",
-                    anchor: 60, // C4
-                    semitoneSize: 96.6667
-                },
-                {
-                    name: "semitoneSize: 104.17cents, octaveDiff: +45cents",
-                    anchor: 60, // C4
-                    semitoneSize: 103.7500
-                },
-                {
-                    name: "semitoneSize: 96.25cents, octaveDiff: -45cents",
-                    anchor: 60, // C4
-                    semitoneSize: 96.2500
-                },
-                {
-                    name: "semitoneSize: 104.17cents, octaveDiff: +50cents",
-                    anchor: 60, // C4
-                    semitoneSize: 104.1667
-                },
-                {
-                    name: "semitoneSize: 95.83cents, octaveDiff: -50cents",
-                    anchor: 60, // C4
-                    semitoneSize: 95.8333
-                } 
-            ]
-    },
-    // constant midi key interval tunings (A4=440Hz)
+        },
+        // constant semitone size tunings (constant C4)
+        {
+            // This tuning group uses the following constructor:
+            //   tuning = getTuningFromSemitoneSize(anchor, cents) // a cent is 1/100 of a 12TET semitone
+            //
+            // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
+            // The 'cents' argument is the simple difference between the pitches allocated to adjacent keys.
+            //
+            // These tunings have been ordered by "consonance"
+            // (i.e. the absolute difference, in cents, between the sound of the fingered octave and the true octave.)
+            ctor: ResSynth.tuningType.CONSTANT_SEMITONE_SIZE,
+            name: "constant semitoneSize tunings (constant C4)",
+            tunings:
+                [
+                    {
+                        name: "semitoneSize: 100cents, octaveDiff: 0 [12-tone ET]",
+                        anchor: 60, // C4
+                        semitoneSize: 100
+                    },
+                    {
+                        name: "semitoneSize: 100.42cents, octaveDiff: +5cents",
+                        anchor: 60, // C4
+                        semitoneSize: 100.4167
+                    },
+                    {
+                        name: "semitoneSize: 99.58cents, octaveDiff: -5cents",
+                        anchor: 60, // C4
+                        semitoneSize: 99.5833
+                    },
+                    {
+                        name: "semitoneSize: 100.83cents, octaveDiff: +10cents",
+                        anchor: 60, // C4
+                        semitoneSize: 100.8333
+                    },
+                    {
+                        name: "semitoneSize: 99.17cents, octaveDiff: -10cents",
+                        anchor: 60, // C4
+                        semitoneSize: 99.1667
+                    },
+                    {
+                        name: "semitoneSize: 101.25cents, octaveDiff: +15cents",
+                        anchor: 60, // C4
+                        semitoneSize: 101.2500
+                    },
+                    {
+                        name: "semitoneSize: 98.75, octaveDiff: -15cents",
+                        anchor: 60, // C4
+                        semitoneSize: 98.7500
+                    },
+                    {
+                        name: "semitoneSize: 101.67cents, octaveDiff: +20cents",
+                        anchor: 60, // C4
+                        semitoneSize: 101.6667
+                    },
+                    {
+                        name: "semitoneSize: 98.33, octaveDiff: -20cents",
+                        anchor: 60, // C4
+                        semitoneSize: 98.3333
+                    },
+                    {
+                        name: "semitoneSize: 102.08cents, octaveDiff: +25cents",
+                        anchor: 60, // C4
+                        semitoneSize: 102.0833
+                    },
+                    {
+                        name: "semitoneSize: 97.92cents, octaveDiff: -25cents",
+                        anchor: 60, // C4
+                        semitoneSize: 97.9167
+                    },
+                    {
+                        name: "semitoneSize: 102.5cents, octaveDiff: +30cents",
+                        anchor: 60, // C4
+                        semitoneSize: 102.5000
+                    },
+                    {
+                        name: "semitoneSize: 97.5cents, octaveDiff: -30cents",
+                        anchor: 60, // C4
+                        semitoneSize: 97.5000
+                    },
+                    {
+                        name: "semitoneSize: 102.92cents, octaveDiff: +35cents",
+                        anchor: 60, // C4
+                        semitoneSize: 102.9167
+                    },
+                    {
+                        name: "semitoneSize: 97.08cents, octaveDiff: -35cents",
+                        anchor: 60, // C4
+                        semitoneSize: 97.0833
+                    },
+                    {
+                        name: "semitoneSize: 103.33cents, octaveDiff: +40cents",
+                        anchor: 60, // C4
+                        semitoneSize: 103.3333
+                    },
+                    {
+                        name: "semitoneSize: 96.67cents, octaveDiff: -40cents",
+                        anchor: 60, // C4
+                        semitoneSize: 96.6667
+                    },
+                    {
+                        name: "semitoneSize: 104.17cents, octaveDiff: +45cents",
+                        anchor: 60, // C4
+                        semitoneSize: 103.7500
+                    },
+                    {
+                        name: "semitoneSize: 96.25cents, octaveDiff: -45cents",
+                        anchor: 60, // C4
+                        semitoneSize: 96.2500
+                    },
+                    {
+                        name: "semitoneSize: 104.17cents, octaveDiff: +50cents",
+                        anchor: 60, // C4
+                        semitoneSize: 104.1667
+                    },
+                    {
+                        name: "semitoneSize: 95.83cents, octaveDiff: -50cents",
+                        anchor: 60, // C4
+                        semitoneSize: 95.8333
+                    }
+                ]
+        },
+        // sliding semitone size tunings
+        {
+            // This tuning group uses the following constructor:
+            //   tuning = getSlidingSemitoneSizeTuning(anchor, origin, centsDelta) // a cent is 1/100 of a 12TET semitone
+            //
+            // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
+            // The 'origin' argument is the key from which the semitone size begins to deviate from 100cents.  
+            //   The first pitch above the origin is (origin pitch + 100 + centsDelta).
+            //   The first pitch below the origin is (origin pitch - 100 - centsDelta), etc.
+            // In other words, the size of a "semitone" increases or decreases linearly across the keyboard.
+            ctor: ResSynth.tuningType.SLIDING_SEMITONE_SIZE,
+            name: "sliding semitoneSize tunings",
+            tunings:
+                [
+                    {
+                        name: "centsDelta: 0,  anchor: 60 (C4), origin: 60, octaveDiffAtOrigin=0 [12-tone ET]",
+                        anchor: 60, // C4
+                        origin: 60, // C4
+                        centsDelta: 0
+                    },
+                    {
+                        // approximately corrrect for maximum range on a grand piano with keys 21-108 (C1 to C8)
+                        name: "centsDelta: 0.0208, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                        anchor: 60, // C4
+                        origin: 60, // C4
+                        centsDelta: 0.0208
+                    },
+                    {
+                        name: "centsDelta: 0.04, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                        anchor: 60, // C4
+                        origin: 60, // C4
+                        centsDelta: 0.04
+                    },
+                    {
+                        name: "centsDelta: 0.01, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                        anchor: 60, // C4
+                        origin: 60, // C4
+                        centsDelta: 0.01
+                    },
+                    {
+                        name: "centsDelta: 0.005, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                        anchor: 60, // C4
+                        origin: 60, // C4
+                        centsDelta: 0.005
+                    },
+                    {
+                        name: "centsDelta: 0.0025, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                        anchor: 60, // C4
+                        origin: 60, // C4
+                        centsDelta: 0.0025
+                    }
+                    //{
+                    //    name: "centsDelta: 99.58cents, octaveDiff: -5cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 99.5833
+                    //},
+                    //{
+                    //    name: "centsDelta: 100.83cents, octaveDiff: +10cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 100.8333
+                    //},
+                    //{
+                    //    name: "centsDelta: 99.17cents, octaveDiff: -10cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 99.1667
+                    //},
+                    //{
+                    //    name: "centsDelta: 101.25cents, octaveDiff: +15cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 101.2500
+                    //},
+                    //{
+                    //    name: "centsDelta: 98.75, octaveDiff: -15cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 98.7500
+                    //},
+                    //{
+                    //    name: "centsDelta: 101.67cents, octaveDiff: +20cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 101.6667
+                    //},
+                    //{
+                    //    name: "centsDelta: 98.33, octaveDiff: -20cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 98.3333
+                    //},
+                    //{
+                    //    name: "centsDelta: 102.08cents, octaveDiff: +25cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 102.0833
+                    //},
+                    //{
+                    //    name: "centsDelta: 97.92cents, octaveDiff: -25cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 97.9167
+                    //},
+                    //{
+                    //    name: "centsDelta: 102.5cents, octaveDiff: +30cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 102.5000
+                    //},
+                    //{
+                    //    name: "centsDelta: 97.5cents, octaveDiff: -30cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 97.5000
+                    //},
+                    //{
+                    //    name: "centsDelta: 102.92cents, octaveDiff: +35cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 102.9167
+                    //},
+                    //{
+                    //    name: "centsDelta: 97.08cents, octaveDiff: -35cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 97.0833
+                    //},
+                    //{
+                    //    name: "centsDelta: 103.33cents, octaveDiff: +40cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 103.3333
+                    //},
+                    //{
+                    //    name: "centsDelta: 96.67cents, octaveDiff: -40cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 96.6667
+                    //},
+                    //{
+                    //    name: "centsDelta: 104.17cents, octaveDiff: +45cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 103.7500
+                    //},
+                    //{
+                    //    name: "centsDelta: 96.25cents, octaveDiff: -45cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 96.2500
+                    //},
+                    //{
+                    //    name: "centsDelta: 104.17cents, octaveDiff: +50cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 104.1667
+                    //},
+                    //{
+                    //    name: "centsDelta: 95.83cents, octaveDiff: -50cents",
+                    //    anchor: 60, // C4
+                    //    centsDelta: 95.8333
+                    //}
+                ]
+        },
+        // constant midi key interval tunings (A4=440Hz)
         {
             // This tuning group uses the following constructor:
             //   tuning = getTuningFromKeysPerOctave(keysPerOctave);

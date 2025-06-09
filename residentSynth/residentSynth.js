@@ -785,6 +785,21 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
+                        case tuningType.SLIDING_SEMITONE_SIZE:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        anchor = tuningDef.anchor,
+                                        origin = tuningDef.origin,
+                                        centsDelta = tuningDef.centsDelta,
+                                        tuning = tuningsFactory.getSlidingSemitoneSizeTuning(anchor, origin, centsDelta);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
                         case tuningType.CONSTANT_MIDI_KEY_FACTOR:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
