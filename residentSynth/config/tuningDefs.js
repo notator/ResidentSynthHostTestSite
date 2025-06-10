@@ -458,150 +458,104 @@ ResSynth.tuningDefs =
     },
     // sliding semitone size tunings
     {
-        // This tuning group uses the following constructor:
-        //   tuning = getSlidingSemitoneSizeTuning(anchor, origin, centsDelta) // a cent is 1/100 of a 12TET semitone
+        // In this tuning group, the size of the interval between neighbouring keys increases or decreases linearly towards the edges of the keyboard.
+        // The group uses the following constructor:
+        //   tuning = getSlidingSemitoneSizeTuning(anchor, origin, pureRatio, pureKey)
         //
         // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
-        // The 'origin' argument is the key from which the semitone size begins to deviate from 100cents.  
-        //   The first pitch above the origin is (origin pitch + 100 + centsDelta).
-        //   The first pitch below the origin is (origin pitch - 100 - centsDelta), etc.
-        // In other words, the size of a "semitone" increases or decreases linearly across the keyboard.
+        // The 'origin' argument is the key from which the semitone size begins to deviate from 100cents.
+        // The pureRatio argument is one of the odd-harmonic ratios.
+        // The pureKey is the key, relative to the origin that will have the pureRatio frequency.
+        // The amount by which the semitone size changes is calculated automatically by the tuning's constructor
+        // The octave1Diff value in each tuning's name was found by observation in the Chrome debugger.        
         ctor: ResSynth.tuningType.SLIDING_SEMITONE_SIZE,
         name: "sliding semitoneSize tunings",
         tunings:
             [
                 {
-                    name: "centsDelta: 0,  anchor: 60 (C4), origin: 60, octaveDiffAtOrigin=0 [12-tone ET]",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 2/1, pureKey: 12, octave1Diff: 0",
                     anchor: 60, // C4
                     origin: 60, // C4
-                    centsDelta: 0
+                    pureRatio: 2.0,
+                    pureKey: 12
                 },
                 {
-                    // approximately corrrect for maximum range on a grand piano with keys 21-108 (C1 to C8)
-                    name: "centsDelta: 0.0208, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 17/16, pureKey: 1, octave1Diff: +3.87",
                     anchor: 60, // C4
                     origin: 60, // C4
-                    centsDelta: 0.0208
+                    pureRatio: (17 / 16),
+                    pureKey: 1
                 },
                 {
-                    name: "centsDelta: 0.04, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 9/8, pureKey: 2, octave1Diff: +1.02",
                     anchor: 60, // C4
                     origin: 60, // C4
-                    centsDelta: 0.04
+                    pureRatio: (9 / 8),
+                    pureKey: 2
                 },
                 {
-                    name: "centsDelta: 0.01, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 19/16, pureKey: 3, octave1Diff: -0.32",
                     anchor: 60, // C4
                     origin: 60, // C4
-                    centsDelta: 0.01
+                    pureRatio: (19 / 16),
+                    pureKey: 3
                 },
                 {
-                    name: "centsDelta: 0.005, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 5/4, pureKey: 4, octave1Diff: -1.07",
                     anchor: 60, // C4
                     origin: 60, // C4
-                    centsDelta: 0.005
+                    pureRatio: (5 / 4),
+                    pureKey: 4
                 },
                 {
-                    name: "centsDelta: 0.0025, anchor: 60 (C4), origin:60 octaveDiffAtOrigin=?",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 21/16, pureKey: 5, octave1Diff: -1.52",
                     anchor: 60, // C4
                     origin: 60, // C4
-                    centsDelta: 0.0025
+                    pureRatio: (21 / 16),
+                    pureKey: 5
+                },
+                {
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 11/8, pureKey: 6, octave1Diff: -1.81",
+                    anchor: 60, // C4
+                    origin: 60, // C4
+                    pureRatio: (11 / 8),
+                    pureKey: 6
+                },
+                {
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 3/2, pureKey: 7, octave1Diff: +0.06",
+                    anchor: 60, // C4
+                    origin: 60, // C4
+                    pureRatio: (3/2),
+                    pureKey: 7
+                },
+                {
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 25/16, pureKey: 8, octave1Diff: -0.59",
+                    anchor: 60, // C4
+                    origin: 60, // C4
+                    pureRatio: (25 / 16),
+                    pureKey: 8
+                },
+                {
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 13/8, pureKey: 9, octave1Diff: -1.03",
+                    anchor: 60, // C4
+                    origin: 60, // C4
+                    pureRatio: (13/8),
+                    pureKey: 9
+                },
+                {
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 7/4, pureKey: 10, octave1Diff: -0.44",
+                    anchor: 60, // C4
+                    origin: 60, // C4
+                    pureRatio: (7 / 4),
+                    pureKey: 10
+                },
+                {
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 15/8, pureKey: 11, octave1Diff: -0.14",
+                    anchor: 60, // C4
+                    origin: 60, // C4
+                    pureRatio: (15/8),
+                    pureKey: 11
                 }
-                //{
-                //    name: "centsDelta: 99.58cents, octaveDiff: -5cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 99.5833
-                //},
-                //{
-                //    name: "centsDelta: 100.83cents, octaveDiff: +10cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 100.8333
-                //},
-                //{
-                //    name: "centsDelta: 99.17cents, octaveDiff: -10cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 99.1667
-                //},
-                //{
-                //    name: "centsDelta: 101.25cents, octaveDiff: +15cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 101.2500
-                //},
-                //{
-                //    name: "centsDelta: 98.75, octaveDiff: -15cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 98.7500
-                //},
-                //{
-                //    name: "centsDelta: 101.67cents, octaveDiff: +20cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 101.6667
-                //},
-                //{
-                //    name: "centsDelta: 98.33, octaveDiff: -20cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 98.3333
-                //},
-                //{
-                //    name: "centsDelta: 102.08cents, octaveDiff: +25cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 102.0833
-                //},
-                //{
-                //    name: "centsDelta: 97.92cents, octaveDiff: -25cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 97.9167
-                //},
-                //{
-                //    name: "centsDelta: 102.5cents, octaveDiff: +30cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 102.5000
-                //},
-                //{
-                //    name: "centsDelta: 97.5cents, octaveDiff: -30cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 97.5000
-                //},
-                //{
-                //    name: "centsDelta: 102.92cents, octaveDiff: +35cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 102.9167
-                //},
-                //{
-                //    name: "centsDelta: 97.08cents, octaveDiff: -35cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 97.0833
-                //},
-                //{
-                //    name: "centsDelta: 103.33cents, octaveDiff: +40cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 103.3333
-                //},
-                //{
-                //    name: "centsDelta: 96.67cents, octaveDiff: -40cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 96.6667
-                //},
-                //{
-                //    name: "centsDelta: 104.17cents, octaveDiff: +45cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 103.7500
-                //},
-                //{
-                //    name: "centsDelta: 96.25cents, octaveDiff: -45cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 96.2500
-                //},
-                //{
-                //    name: "centsDelta: 104.17cents, octaveDiff: +50cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 104.1667
-                //},
-                //{
-                //    name: "centsDelta: 95.83cents, octaveDiff: -50cents",
-                //    anchor: 60, // C4
-                //    centsDelta: 95.8333
-                //}
             ]
     },
         // constant midi key interval tunings (A4=440Hz)

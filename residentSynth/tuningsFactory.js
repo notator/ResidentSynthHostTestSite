@@ -462,31 +462,48 @@ ResSynth.tuningsFactory = (function()
 
     // Returns a 128-note tuning in which the size of the interval between adjacent keys varies linearly across the keyboard
     // and the size of the interval between adjacent keys is closest to 100cents near the 'origin' key.
-    TuningsFactory.prototype.getSlidingSemitoneSizeTuning = function(anchor, origin, centsDelta)
+    TuningsFactory.prototype.getSlidingSemitoneSizeTuning = function(anchor, origin, pureRatio, pureKey)
     {
-        function getSlidingTuning(origin, centsDeltaArg)
+        function getSlidingTuning(origin, pureRatio, pureKey)
         {
+            function getNDeltas(pureKey)
+            {
+                let nDeltas = 0;
+                for(let i = 1; i <= pureKey; i++)
+                {
+                    nDeltas += i;
+                }
+                return nDeltas;
+            }
+
             console.assert(Number.isInteger(origin) && 0 <= origin && origin < 128);
 
             let tuning = [],
-                semitone = 1 + centsDeltaArg;
+                ratioSemitones = sizeIn12TETSemitones(pureRatio, 1),
+                nDeltas = getNDeltas(pureKey),
+                semitonesDeltaConst = (ratioSemitones - pureKey) / nDeltas,
+                runningSemitonesDelta = semitonesDeltaConst;
 
-            tuning[origin] = origin;
+            for(let i = 0; i < 128; i++)
+            {
+                tuning[i] = i;
+            }
+
             for(let i = origin + 1; i < 128; i++)
             {
-                tuning[i] = tuning[i - 1] + semitone;
-                semitone += centsDeltaArg;
+                tuning[i] = tuning[i-1] + 1 + runningSemitonesDelta;
+                runningSemitonesDelta += semitonesDeltaConst;
             }
-            semitone = 1 + centsDeltaArg;
+            runningSemitonesDelta = semitonesDeltaConst;
             for(let i = origin - 1; i >= 0; i--)
             {
-                tuning[i] = tuning[i + 1] - semitone;
-                semitone += centsDeltaArg;
+                tuning[i] = tuning[i+1] - 1 - runningSemitonesDelta;
+                runningSemitonesDelta += semitonesDeltaConst;
             }
             return tuning;
         }
 
-        let tuning = getSlidingTuning(origin, centsDelta);
+        let tuning = getSlidingTuning(origin, pureRatio, pureKey);
 
         transposeTuningForAnchor(tuning, anchor);
 

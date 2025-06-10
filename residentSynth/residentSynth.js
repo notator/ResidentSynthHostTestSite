@@ -806,8 +806,9 @@ ResSynth.residentSynth = (function(window)
                                     let tuningDef = tuningDefs[k],
                                         anchor = tuningDef.anchor,
                                         origin = tuningDef.origin,
-                                        centsDelta = tuningDef.centsDelta,
-                                        tuning = tuningsFactory.getSlidingSemitoneSizeTuning(anchor, origin, centsDelta);
+                                        pureRatio = tuningDef.pureRatio,
+                                        pureKey = tuningDef.pureKey,
+                                        tuning = tuningsFactory.getSlidingSemitoneSizeTuning(anchor, origin, pureRatio, pureKey);
 
                                     tuning.name = tuningDef.name;
                                     tuningGroup.push(tuning);
