@@ -785,6 +785,20 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
+                        case tuningType.INTERLOCKING_WHOLETONE_SCALES:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        anchor = tuningDef.anchor,
+                                        wholetoneSizeInCents = tuningDef.wholetoneSize,
+                                        tuning = tuningsFactory.getInterlockingWholetoneScalesTuning(anchor, wholetoneSizeInCents);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
                         case tuningType.SLIDING_SEMITONE_SIZE:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)

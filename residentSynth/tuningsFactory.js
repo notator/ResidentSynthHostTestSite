@@ -417,6 +417,49 @@ ResSynth.tuningsFactory = (function()
         return tuning;
     };
 
+    // Returns a 128-note tuning in which
+    // 1. The 'anchor' key has the same pitch as in 12-tone equal temperament
+    // 2. There are two interlocking wholetone scales separated by a perfect fifth.
+    // 3. The wholetone size is set by the wholetoneSizeInCents argument.
+    TuningsFactory.prototype.getInterlockingWholetoneScalesTuning = function(anchor, wholetoneSizeInCents)
+    {
+        function getIWTTuning(wholetoneSizeInCents)
+        {
+            let tuning = [],
+                midiCentSize = (wholetoneSizeInCents / 2) / 100, // number of 12TET semitones between neighbouring keys
+                pitch = 0;
+
+            for(let i = 0; i < 128; i++)
+            {
+                tuning.push(pitch);
+                pitch += midiCentSize;
+            }
+
+            for(let i = 0; i < 128; i++) 
+            {
+                // The even numbered keys and keys 1, 3 and 5 remain unchanged.
+                if(i > 6 && (i % 2 === 1))
+                {
+                    let frequency = getFrequency(tuning[i - 7]),
+                        quint = frequency * (3 / 2), // the perfect fifth above the current key
+                        semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
+
+                    tuning[i] =  tuning[i - 7] + semitoneSize;
+                }
+            }
+
+            return tuning;
+        }
+
+        let tuning = getIWTTuning(wholetoneSizeInCents);
+
+        transposeTuningForAnchor(tuning, anchor);
+
+        finalizeTuning(tuning);
+
+        return tuning;
+    };
+
     // Returns a 128-note tuning in which the size of the interval between adjacent keys varies linearly across the keyboard
     // and the size of the interval between adjacent keys is closest to 100cents near the 'origin' key.
     TuningsFactory.prototype.getSlidingSemitoneSizeTuning = function(anchor, origin, centsDelta)
