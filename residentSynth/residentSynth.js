@@ -799,6 +799,34 @@ ResSynth.residentSynth = (function(window)
                                 }
                                 break;
                             }
+                        case tuningType.INTERLOCKING_MINORTHIRDS_SCALES:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        anchor = tuningDef.anchor,
+                                        minorThirdSizeInCents = tuningDef.minorThirdSize,
+                                        tuning = tuningsFactory.getInterlockingMinorThirdsTuning(anchor, minorThirdSizeInCents);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
+                        case tuningType.INTERLOCKING_MAJORTHIRDS_SCALES:
+                            {
+                                for(let k = 0; k < tuningDefs.length; k++)
+                                {
+                                    let tuningDef = tuningDefs[k],
+                                        anchor = tuningDef.anchor,
+                                        majorThirdSizeInCents = tuningDef.majorThirdSize,
+                                        tuning = tuningsFactory.getInterlockingMajorThirdsTuning(anchor, majorThirdSizeInCents);
+
+                                    tuning.name = tuningDef.name;
+                                    tuningGroup.push(tuning);
+                                }
+                                break;
+                            }
                         case tuningType.SLIDING_SEMITONE_SIZE:
                             {
                                 for(let k = 0; k < tuningDefs.length; k++)
