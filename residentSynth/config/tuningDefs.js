@@ -606,7 +606,7 @@ ResSynth.tuningDefs =
         // The fourth scale is transposed so that it always contains the pitch exactly a perfect fifth above the third scale.
         // (i.e. if the anchor is C, then F#-C# and A#-F are perfect fifths).
         // So tunings in this tuning group always contain 6 perfect fifths per octave.
-        // The "wolf fifths" are C#-G#, D-A, D#-A#, F-C, G#-C# and A-E.
+        // The "wolf fifths" are C#-G#, D-A, D#-A#, F-C, G#-D# and A-E.
         ctor: ResSynth.tuningType.INTERLOCKING_MAJORTHIRDS_SCALES,
         name: "interlocking major thirds tunings (constant C4)",
         tunings:

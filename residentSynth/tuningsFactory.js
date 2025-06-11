@@ -60,6 +60,23 @@ ResSynth.tuningsFactory = (function()
             }
         },
 
+        // Sets the pitches in the tuning so that the keys at scaleIndex, scaleIndex + scaleInterval,
+        // scaleIndex + (2 * scaleInterval), etc. are a perfect fifth above the key 7 keys below.
+        setSubScaleToPerfectFifthTransposition = function (tuning, scaleOriginKey, scaleInterval)
+        {
+            for(let i = scaleOriginKey; i < 128; i += scaleInterval) 
+            {
+                if(i > 6)
+                {
+                    let frequency = getFrequency(tuning[i - 7]),
+                        quint = frequency * (3 / 2), // the perfect fifth above the current key
+                        semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
+
+                    tuning[i] = tuning[i - 7] + semitoneSize;
+                }
+            }
+        },
+
         // Returns the (floating point) number of Equal Temperament semitones
         // between the two frequencies.
         // The result will be positive if frequency1 >= frequency2,
@@ -423,7 +440,7 @@ ResSynth.tuningsFactory = (function()
     // 3. The wholetone size is set by the wholetoneSizeInCents argument.
     TuningsFactory.prototype.getInterlockingWholetoneScalesTuning = function(anchor, wholetoneSizeInCents)
     {
-        function getIWTTuning(wholetoneSizeInCents)
+        function getIinterockingWTTuning(wholetoneSizeInCents)
         {
             let tuning = [],
                 midiCentSize = (wholetoneSizeInCents / 2) / 100, // number of 12TET semitones between neighbouring keys
@@ -435,23 +452,12 @@ ResSynth.tuningsFactory = (function()
                 pitch += midiCentSize;
             }
 
-            for(let i = 0; i < 128; i++) 
-            {
-                // The even numbered keys and keys 1, 3 and 5 remain unchanged.
-                if(i > 6 && (i % 2 === 1))
-                {
-                    let frequency = getFrequency(tuning[i - 7]),
-                        quint = frequency * (3 / 2), // the perfect fifth above the current key
-                        semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
-
-                    tuning[i] = tuning[i - 7] + semitoneSize;
-                }
-            }
+            setSubScaleToPerfectFifthTransposition(tuning, 1, 2); // the wholetone scale on C#
 
             return tuning;
         }
 
-        let tuning = getIWTTuning(wholetoneSizeInCents);
+        let tuning = getIinterockingWTTuning(wholetoneSizeInCents);
 
         transposeTuningForAnchor(tuning, anchor);
 
@@ -469,7 +475,7 @@ ResSynth.tuningsFactory = (function()
     // 3. The size of a "minor third"" is set by the minorThirdsSizeInCents argument.
     TuningsFactory.prototype.getInterlockingMinorThirdsTuning = function(anchor, minorThirdsSizeInCents)
     {
-        function getMinorThirdsTTuning(minorThirdsSizeInCents)
+        function getMinorThirdsTuning(minorThirdsSizeInCents)
         {
             let tuning = [],
                 midiCentSize = (minorThirdsSizeInCents / 3) / 100, // number of 12TET semitones between neighbouring keys
@@ -481,24 +487,13 @@ ResSynth.tuningsFactory = (function()
                 pitch += midiCentSize;
             }
 
-            // adapt this old code to the new tuning scheme
-            //for(let i = 0; i < 128; i++) 
-            //{
-            //    // The even numbered keys and keys 1, 3 and 5 remain unchanged.
-            //    if(i > 6 && (i % 2 === 1))
-            //    {
-            //        let frequency = getFrequency(tuning[i - 7]),
-            //            quint = frequency * (3 / 2), // the perfect fifth above the current key
-            //            semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
-
-            //        tuning[i] = tuning[i - 7] + semitoneSize;
-            //    }
-            //}
+            setSubScaleToPerfectFifthTransposition(tuning, 1, 3); // the minor thirds scale on C#
+            setSubScaleToPerfectFifthTransposition(tuning, 2, 3); // the minor thirds scale on D
 
             return tuning;
         }
 
-        let tuning = getMinorThirdsTTuning(minorThirdsSizeInCents);
+        let tuning = getMinorThirdsTuning(minorThirdsSizeInCents);
 
         transposeTuningForAnchor(tuning, anchor);
 
@@ -508,15 +503,23 @@ ResSynth.tuningsFactory = (function()
     };
 
     // Returns a 128-note tuning in which
-    // 1. The 'anchor' key has the same pitch as in 12-tone equal temperament
-    // 2. There will be three interlocking minor thirds "scales", starting on C, C# and D respectively.
-    //    The C# scale will be transposed so that its G is tuned a perfect fifth above C,
-    //    The D scale will be transposed so that its D is a perfect fifth above G.
-    //    This leads to there being 8 perfect fifths in the tuning.
+    // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
+    // The 'majorThirdSize' argument is the size of the interval between keys separated by 4 places on the keyboard.
+    //
+    // These tunings consist of four interlocked "major third scales": C-E-G#, D#-G-B, D-F#-A#, C#-F-A.
+    // The 'anchor' key defines the pitch level of the first scale.
+    // The second scale is transposed so that it always contains the pitch exactly a perfect fifth above the anchor
+    // (i.e. if the anchor is C, then C-G and E-B are perfect fifths).
+    // The third scale is transposed so that it always contains the pitch exactly a perfect fifth above the second scale.
+    // (i.e. if the anchor is C, then G-D and B-F# are perfect fifths).
+    // The fourth scale is transposed so that it always contains the pitch exactly a perfect fifth above the third scale.
+    // (i.e. if the anchor is C, then F#-C# and A#-F are perfect fifths).
+    // So tunings in this tuning group always contain 6 perfect fifths per octave.
+    // The "wolf fifths" are C#-G#, D-A, D#-A#, F-C, G#-C# and A-E.
     // 3. The size of a "minor third"" is set by the minorThirdsSizeInCents argument.
     TuningsFactory.prototype.getInterlockingMajorThirdsTuning = function(anchor, majorThirdsSizeInCents)
     {
-        function getMajorThirdsTTuning(majorThirdsSizeInCents)
+        function getMajorThirdsTuning(majorThirdsSizeInCents)
         {
             let tuning = [],
                 midiCentSize = (majorThirdsSizeInCents / 4) / 100, // number of 12TET semitones between neighbouring keys
@@ -528,24 +531,14 @@ ResSynth.tuningsFactory = (function()
                 pitch += midiCentSize;
             }
 
-            // adapt this old code to the new tuning scheme
-            //for(let i = 0; i < 128; i++) 
-            //{
-            //    // The even numbered keys and keys 1, 3 and 5 remain unchanged.
-            //    if(i > 6 && (i % 2 === 1))
-            //    {
-            //        let frequency = getFrequency(tuning[i - 7]),
-            //            quint = frequency * (3 / 2), // the perfect fifth above the current key
-            //            semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
-
-            //        tuning[i] = tuning[i - 7] + semitoneSize;
-            //    }
-            //}
+            setSubScaleToPerfectFifthTransposition(tuning, 3, 4); // the majorThirds scale on D#
+            setSubScaleToPerfectFifthTransposition(tuning, 2, 4); // the majorThirds scale on D
+            setSubScaleToPerfectFifthTransposition(tuning, 1, 4); // the majorThirds scale on C#
 
             return tuning;
         }
 
-        let tuning = getMajorThirdsTTuning(majorThirdsSizeInCents);
+        let tuning = getMajorThirdsTuning(majorThirdsSizeInCents);
 
         transposeTuningForAnchor(tuning, anchor);
 
