@@ -33,7 +33,8 @@ ResSynth.tuningType =
     CONSTANT_SEMITONE_FACTOR: 9,
     CONSTANT_SEMITONE_SIZE: 10,
     INTERLOCKING_WHOLETONE_SCALES: 11,
-    SLIDING_SEMITONE_SIZE: 12
+    INTERLOCKING_MINORTHIRDS_SCALES: 12,
+    SLIDING_SEMITONE_SIZE: 13
 };
 
 // All tunings are initially related to standard A4=440Hz.
@@ -334,7 +335,7 @@ ResSynth.tuningDefs =
                 }
             ]
     },
-    // interlocking wholetone tunings (constant C4, the wholetone scales are exactly a perfect fifth apart)
+    // interlocking wholetone tunings (constant C4, all fifths are perfect)
     {
         // This tuning group uses the following constructor:
         //   tuning = getInterlockingWholeToneTuning(anchor, wholetoneSize)
@@ -344,115 +345,245 @@ ResSynth.tuningDefs =
         //
         // These tunings consist of two interlocked "wholetone" scales.
         // The 'anchor' key defines the pitch level of the first scale.
-        // The second scale is transposed so that it always contains the pitch exactly a perfect fifth above the anchor.
+        // If the anchor is C, the first scale consists of the keys C-D-E-F#-G#-A#-C.
+        // The second scale (C#-D#-F-G-A-B) is transposed so that it contains pitches exactly a perfect fifth above the first scale. anchor
+        // So tunings in this tuning group always contain 6 perfect fifths per octave:
+        // If the anchor is C, then C-G, D-A, E-B, F#-C#, G#-D# and A#-F are all perfect fifths.
         ctor: ResSynth.tuningType.INTERLOCKING_WHOLETONE_SCALES,
         name: "interlocking wholetone tunings (constant C4)",
         tunings:
             [
                 {
-                    name: "wholetoneSize: 200cents, octaveDiff: 0",
+                    name: "wholetoneSize: 200cents, root: C, octaveDiff: 0",
                     anchor: 60, // C4
                     wholetoneSize: 200  // wholetoneSize:  // semitoneSize: 100
                 },
                 {
-                    name: "wholetoneSize: 200.83cents, octaveDiff: +5cents",
+                    name: "wholetoneSize: 200.83cents, root: C, octaveDiff: +5cents",
                     anchor: 60, // C4
                     wholetoneSize: 200.8334  // semitoneSize: 100.4167
                 },
                 {
-                    name: "wholetoneSize: 199.17cents, octaveDiff: -5cents",
+                    name: "wholetoneSize: 199.17cents, root: C, octaveDiff: -5cents",
                     anchor: 60, // C4
                     wholetoneSize: 199.1666 // semitoneSize: 99.5833                
                 },
                 {
-                    name: "wholetoneSize: 201.67cents, octaveDiff: +10cents",
+                    name: "wholetoneSize: 201.67cents, root: C, octaveDiff: +10cents",
                     anchor: 60, // C4
                     wholetoneSize: 201.6666  // semitoneSize: 100.8333
                 },
                 {
-                    name: "wholetoneSize: 198.33cents, octaveDiff: -10cents",
+                    name: "wholetoneSize: 198.33cents, root: C, octaveDiff: -10cents",
                     anchor: 60, // C4
                     wholetoneSize: 198.3334  // semitoneSize: 99.1667
                 },
                 {
-                    name: "wholetoneSize: 202.50cents, octaveDiff: +15cents",
+                    name: "wholetoneSize: 202.50cents, root: C, octaveDiff: +15cents",
                     anchor: 60, // C4
                     wholetoneSize: 202.5000  // semitoneSize: 101.2500
                 },
                 {
-                    name: "wholetoneSize: 197.50cents, octaveDiff: -15cents",
+                    name: "wholetoneSize: 197.50cents, root: C, octaveDiff: -15cents",
                     anchor: 60, // C4
                     wholetoneSize: 197.5000  // semitoneSize: 98.7500
                 },
                 {
-                    name: "wholetoneSize: 203.33cents, octaveDiff: +20cents",
+                    name: "wholetoneSize: 203.33cents, root: C, octaveDiff: +20cents",
                     anchor: 60, // C4
                     wholetoneSize: 203.3334  // semitoneSize: 101.6667
                 },
                 {
-                    name: "wholetoneSize: 196.67cents, octaveDiff: -20cents",
+                    name: "wholetoneSize: 196.67cents, root: C, octaveDiff: -20cents",
                     anchor: 60, // C4
                     wholetoneSize: 196.6666  // semitoneSize: 98.3333
                 },
                 {
-                    name: "wholetoneSize: 204.17cents, octaveDiff: +25cents",
+                    name: "wholetoneSize: 204.17cents, root: C, octaveDiff: +25cents",
                     anchor: 60, // C4
                     wholetoneSize: 204.1666 // semitoneSize: 102.0833
                 },
                 {
-                    name: "wholetoneSize: 195.83cents, octaveDiff: -25cents",
+                    name: "wholetoneSize: 195.83cents, root: C, octaveDiff: -25cents",
                     anchor: 60, // C4
                     wholetoneSize: 195.8334 // semitoneSize: 97.9167
                 },
                 {
-                    name: "wholetoneSize: 205.00cents, octaveDiff: +30cents",
+                    name: "wholetoneSize: 205.00cents, root: C, octaveDiff: +30cents",
                     anchor: 60, // C4
                     wholetoneSize: 205.0000 // semitoneSize: 102.5000
                 },
                 {
-                    name: "wholetoneSize: 195.00cents, octaveDiff: -30cents",
+                    name: "wholetoneSize: 195.00cents, root: C, octaveDiff: -30cents",
                     anchor: 60, // C4
                     wholetoneSize: 195.0000 // semitoneSize: 97.5000
                 },
                 {
-                    name: "wholetoneSize: 205.83cents, octaveDiff: +35cents",
+                    name: "wholetoneSize: 205.83cents, root: C, octaveDiff: +35cents",
                     anchor: 60, // C4
                     wholetoneSize: 205.8334 // semitoneSize: 102.9167
-                 },
+                },
                 {
-                    name: "wholetoneSize: 194.17cents, octaveDiff: -35cents",
+                    name: "wholetoneSize: 194.17cents, root: C, octaveDiff: -35cents",
                     anchor: 60, // C4
                     wholetoneSize: 194.1666 // semitoneSize: 97.0833
                 },
                 {
-                    name: "wholetoneSize: 206.67cents, octaveDiff: +40cents",
+                    name: "wholetoneSize: 206.67cents, root: C, octaveDiff: +40cents",
                     anchor: 60, // C4
                     wholetoneSize: 206.6666 // semitoneSize: 103.3333
                 },
                 {
-                    name: "wholetoneSize: 193.33cents, octaveDiff: -40cents",
+                    name: "wholetoneSize: 193.33cents, root: C, octaveDiff: -40cents",
                     anchor: 60, // C4
                     wholetoneSize: 193.3334 // semitoneSize: 96.6667
                 },
                 {
-                    name: "wholetoneSize: 207.50cents, octaveDiff: +45cents",
+                    name: "wholetoneSize: 207.50cents, root: C, octaveDiff: +45cents",
                     anchor: 60, // C4
                     wholetoneSize: 207.5000 // semitoneSize: 103.7500
                 },
                 {
-                    name: "wholetoneSize: 192.50cents, octaveDiff: -45cents",
+                    name: "wholetoneSize: 192.50cents, root: C, octaveDiff: -45cents",
                     anchor: 60, // C4
                     wholetoneSize: 192.5000  // semitoneSize: 96.2500
                 },
                 {
-                    name: "wholetoneSize: 208.33cents, octaveDiff: +50cents",
+                    name: "wholetoneSize: 208.33cents, root: C, octaveDiff: +50cents",
                     anchor: 60, // C4
                     wholetoneSize: 208.3334 // semitoneSize: 104.1667
                 },
                 {
-                    name: "wholetoneSize: 191.67cents, octaveDiff: -50cents",
+                    name: "wholetoneSize: 191.67cents, root: C, octaveDiff: -50cents",
                     anchor: 60, // C4
                     wholetoneSize: 191.6666 // semitoneSize: 95.8333
+                }
+            ]
+    },
+    // interlocking minor third tunings (constant C4, all fifths are perfect)
+    {
+        // This tuning group uses the following constructor:
+        //   tuning = getInterlockingMinorThirdsTuning(anchor, wholetoneSize)
+        //
+        // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
+        // The 'minorThirdSize' argument is the size of the interval between keys separated by 3 places on the keyboard.
+        //
+        // These tunings consist of two interlocked "minor third scales": C-D#-F#-A, C#-E-G-A# and D-F-G#-B.
+        // The 'anchor' key defines the pitch level of the first scale.
+        // The second scale is transposed so that it always contains the pitch exactly a perfect fifth above the anchor
+        // (i.e. if the anchor is C, then C-G, D#-A#, F#-C# and A-E are all perfect fifths).
+        // The third scale is transposed so that it always contains the pitch exactly a perfect fifth above the second scale.
+        // (i.e. if the anchor is C, then C#-G#, E-B, G-D and A#-F are all perfect fifths).
+        // So tunings in this tuning group always contain 8 perfect fifths per octave.
+        // The "wolf fifths" are F-C, G#-D#, B-F# and D-A:
+        ctor: ResSynth.tuningType.INTERLOCKING_MINORTHIRDS_SCALES,
+        name: "interlocking minor thirds tunings (constant C4)",
+        tunings:
+            [
+                {
+                    name: "minorThirdSize: 300cents, root: C, octaveDiff: 0",
+                    anchor: 60, // C4
+                    minorThirdSize: 300  // minorThirdSize:  // semitoneSize: 100
+                },
+                {
+                    name: "minorThirdSize: 301.25cents, root: C, octaveDiff: +5cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 301.2500  // semitoneSize: 100.4167
+                },
+                {
+                    name: "minorThirdSize: 298.75cents, root: C, octaveDiff: -5cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 298.7500 // semitoneSize: 99.5833                
+                },
+                {
+                    name: "minorThirdSize: 302.50cents, root: C, octaveDiff: +10cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 302.5000  // semitoneSize: 100.8333
+                },
+                {
+                    name: "minorThirdSize: 297.50cents, root: C, octaveDiff: -10cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 297.5001 // semitoneSize: 99.1667
+                },
+                {
+                    name: "minorThirdSize: 303.75cents, root: C, octaveDiff: +15cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 303.7500  // semitoneSize: 101.2500
+                },
+                {
+                    name: "minorThirdSize: 296.25cents, root: C, octaveDiff: -15cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 296.2500  // semitoneSize: 98.7500
+                },
+                {
+                    name: "minorThirdSize: 305.00cents, root: C, octaveDiff: +20cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 305.0000  // semitoneSize: 101.6667
+                },
+                {
+                    name: "minorThirdSize: 295.00cents, root: C, octaveDiff: -20cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 295.0000  // semitoneSize: 98.3333
+                },
+                {
+                    name: "minorThirdSize: 306.25cents, root: C, octaveDiff: +25cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 306.2500 // semitoneSize: 102.0833
+                },
+                {
+                    name: "minorThirdSize: 293.75cents, root: C, octaveDiff: -25cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 293.7500 // semitoneSize: 97.9167
+                },
+                {
+                    name: "minorThirdSize: cents, root: C, octaveDiff: +30cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 307.5000 // semitoneSize: 102.5000
+                },
+                {
+                    name: "minorThirdSize: 292.50cents, root: C, octaveDiff: -30cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 292.5000 // semitoneSize: 97.5000
+                },
+                {
+                    name: "minorThirdSize: 308.75cents, root: C, octaveDiff: +35cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 308.7500 // semitoneSize: 102.9167
+                },
+                {
+                    name: "minorThirdSize: cents, root: C, octaveDiff: -35cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 291.2499 // semitoneSize: 97.0833
+                },
+                {
+                    name: "minorThirdSize: 310.00cents, root: C, octaveDiff: +40cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 310.0000 // semitoneSize: 103.3333
+                },
+                {
+                    name: "minorThirdSize: 290.00cents, root: C, octaveDiff: -40cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 290.0000 // semitoneSize: 96.6667
+                },
+                {
+                    name: "minorThirdSize: 311.25cents, root: C, octaveDiff: +45cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 311.25 // semitoneSize: 103.7500
+                },
+                {
+                    name: "minorThirdSize: cents, root: C, octaveDiff: -45cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 288.75  // semitoneSize: 96.2500
+                },
+                {
+                    name: "minorThirdSize: 312.50cents, root: C, octaveDiff: +50cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 312.5000 // semitoneSize: 104.1667
+                },
+                {
+                    name: "minorThirdSize: 287.50cents, root: C, octaveDiff: -50cents",
+                    anchor: 60, // C4
+                    minorThirdSize: 287.5000 // semitoneSize: 95.8333
                 }
             ]
     },
