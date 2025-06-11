@@ -444,7 +444,7 @@ ResSynth.tuningsFactory = (function()
                         quint = frequency * (3 / 2), // the perfect fifth above the current key
                         semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
 
-                    tuning[i] =  tuning[i - 7] + semitoneSize;
+                    tuning[i] = tuning[i - 7] + semitoneSize;
                 }
             }
 
@@ -452,6 +452,100 @@ ResSynth.tuningsFactory = (function()
         }
 
         let tuning = getIWTTuning(wholetoneSizeInCents);
+
+        transposeTuningForAnchor(tuning, anchor);
+
+        finalizeTuning(tuning);
+
+        return tuning;
+    };
+
+    // Returns a 128-note tuning in which
+    // 1. The 'anchor' key has the same pitch as in 12-tone equal temperament
+    // 2. There will be three interlocking minor thirds "scales", starting on C, C# and D respectively.
+    //    The C# scale will be transposed so that its G is tuned a perfect fifth above C,
+    //    The D scale will be transposed so that its D is a perfect fifth above G.
+    //    This leads to there being 8 perfect fifths in the tuning.
+    // 3. The size of a "minor third"" is set by the minorThirdsSizeInCents argument.
+    TuningsFactory.prototype.getInterlockingMinorThirdsTuning = function(anchor, minorThirdsSizeInCents)
+    {
+        function getMinorThirdsTTuning(minorThirdsSizeInCents)
+        {
+            let tuning = [],
+                midiCentSize = (minorThirdsSizeInCents / 3) / 100, // number of 12TET semitones between neighbouring keys
+                pitch = 0;
+
+            for(let i = 0; i < 128; i++)
+            {
+                tuning.push(pitch);
+                pitch += midiCentSize;
+            }
+
+            // adapt this old code to the new tuning scheme
+            //for(let i = 0; i < 128; i++) 
+            //{
+            //    // The even numbered keys and keys 1, 3 and 5 remain unchanged.
+            //    if(i > 6 && (i % 2 === 1))
+            //    {
+            //        let frequency = getFrequency(tuning[i - 7]),
+            //            quint = frequency * (3 / 2), // the perfect fifth above the current key
+            //            semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
+
+            //        tuning[i] = tuning[i - 7] + semitoneSize;
+            //    }
+            //}
+
+            return tuning;
+        }
+
+        let tuning = getMinorThirdsTTuning(minorThirdsSizeInCents);
+
+        transposeTuningForAnchor(tuning, anchor);
+
+        finalizeTuning(tuning);
+
+        return tuning;
+    };
+
+    // Returns a 128-note tuning in which
+    // 1. The 'anchor' key has the same pitch as in 12-tone equal temperament
+    // 2. There will be three interlocking minor thirds "scales", starting on C, C# and D respectively.
+    //    The C# scale will be transposed so that its G is tuned a perfect fifth above C,
+    //    The D scale will be transposed so that its D is a perfect fifth above G.
+    //    This leads to there being 8 perfect fifths in the tuning.
+    // 3. The size of a "minor third"" is set by the minorThirdsSizeInCents argument.
+    TuningsFactory.prototype.getInterlockingMajorThirdsTuning = function(anchor, majorThirdsSizeInCents)
+    {
+        function getMajorThirdsTTuning(majorThirdsSizeInCents)
+        {
+            let tuning = [],
+                midiCentSize = (majorThirdsSizeInCents / 4) / 100, // number of 12TET semitones between neighbouring keys
+                pitch = 0;
+
+            for(let i = 0; i < 128; i++)
+            {
+                tuning.push(pitch);
+                pitch += midiCentSize;
+            }
+
+            // adapt this old code to the new tuning scheme
+            //for(let i = 0; i < 128; i++) 
+            //{
+            //    // The even numbered keys and keys 1, 3 and 5 remain unchanged.
+            //    if(i > 6 && (i % 2 === 1))
+            //    {
+            //        let frequency = getFrequency(tuning[i - 7]),
+            //            quint = frequency * (3 / 2), // the perfect fifth above the current key
+            //            semitoneSize = sizeIn12TETSemitones(quint, frequency); // the number of 12TET semitones between the two frequencies
+
+            //        tuning[i] = tuning[i - 7] + semitoneSize;
+            //    }
+            //}
+
+            return tuning;
+        }
+
+        let tuning = getMajorThirdsTTuning(majorThirdsSizeInCents);
 
         transposeTuningForAnchor(tuning, anchor);
 
