@@ -34,7 +34,8 @@ ResSynth.tuningType =
     CONSTANT_SEMITONE_SIZE: 10,
     INTERLOCKING_WHOLETONE_SCALES: 11,
     INTERLOCKING_MINORTHIRDS_SCALES: 12,
-    SLIDING_SEMITONE_SIZE: 13
+    INTERLOCKING_MAJORTHIRDS_SCALES: 13,
+    SLIDING_SEMITONE_SIZE: 14
 };
 
 // All tunings are initially related to standard A4=440Hz.
@@ -335,7 +336,7 @@ ResSynth.tuningDefs =
                 }
             ]
     },
-    // interlocking wholetone tunings (constant C4, all fifths are perfect)
+    // interlocking wholetone tunings (constant C4, 6 perfect fifths)
     {
         // This tuning group uses the following constructor:
         //   tuning = getInterlockingWholeToneTuning(anchor, wholetoneSize)
@@ -349,6 +350,7 @@ ResSynth.tuningDefs =
         // The second scale (C#-D#-F-G-A-B) is transposed so that it contains pitches exactly a perfect fifth above the first scale. anchor
         // So tunings in this tuning group always contain 6 perfect fifths per octave:
         // If the anchor is C, then C-G, D-A, E-B, F#-C#, G#-D# and A#-F are all perfect fifths.
+        // The "wolf fifths" are C#-G#, D#-A#, F-C, G-D, A-E, and B-F#.
         ctor: ResSynth.tuningType.INTERLOCKING_WHOLETONE_SCALES,
         name: "interlocking wholetone tunings (constant C4)",
         tunings:
@@ -460,15 +462,15 @@ ResSynth.tuningDefs =
                 }
             ]
     },
-    // interlocking minor third tunings (constant C4, all fifths are perfect)
+    // interlocking minor third tunings (constant C4, 8 perfect fifths per octave)
     {
         // This tuning group uses the following constructor:
-        //   tuning = getInterlockingMinorThirdsTuning(anchor, wholetoneSize)
+        //   tuning = getInterlockingMinorThirdsTuning(anchor, minorThirdSize)
         //
         // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
         // The 'minorThirdSize' argument is the size of the interval between keys separated by 3 places on the keyboard.
         //
-        // These tunings consist of two interlocked "minor third scales": C-D#-F#-A, C#-E-G-A# and D-F-G#-B.
+        // These tunings consist of three interlocked "minor third scales": C-D#-F#-A, C#-E-G-A# and D-F-G#-B.
         // The 'anchor' key defines the pitch level of the first scale.
         // The second scale is transposed so that it always contains the pitch exactly a perfect fifth above the anchor
         // (i.e. if the anchor is C, then C-G, D#-A#, F#-C# and A-E are all perfect fifths).
@@ -503,7 +505,7 @@ ResSynth.tuningDefs =
                 {
                     name: "minorThirdSize: 297.50cents, root: C, octaveDiff: -10cents",
                     anchor: 60, // C4
-                    minorThirdSize: 297.5001 // semitoneSize: 99.1667
+                    minorThirdSize: 297.5000 // semitoneSize: 99.1667
                 },
                 {
                     name: "minorThirdSize: 303.75cents, root: C, octaveDiff: +15cents",
@@ -536,7 +538,7 @@ ResSynth.tuningDefs =
                     minorThirdSize: 293.7500 // semitoneSize: 97.9167
                 },
                 {
-                    name: "minorThirdSize: cents, root: C, octaveDiff: +30cents",
+                    name: "minorThirdSize: 307.50cents, root: C, octaveDiff: +30cents",
                     anchor: 60, // C4
                     minorThirdSize: 307.5000 // semitoneSize: 102.5000
                 },
@@ -551,9 +553,9 @@ ResSynth.tuningDefs =
                     minorThirdSize: 308.7500 // semitoneSize: 102.9167
                 },
                 {
-                    name: "minorThirdSize: cents, root: C, octaveDiff: -35cents",
+                    name: "minorThirdSize: 291.25cents, root: C, octaveDiff: -35cents",
                     anchor: 60, // C4
-                    minorThirdSize: 291.2499 // semitoneSize: 97.0833
+                    minorThirdSize: 291.2500 // semitoneSize: 97.0833
                 },
                 {
                     name: "minorThirdSize: 310.00cents, root: C, octaveDiff: +40cents",
@@ -571,9 +573,9 @@ ResSynth.tuningDefs =
                     minorThirdSize: 311.25 // semitoneSize: 103.7500
                 },
                 {
-                    name: "minorThirdSize: cents, root: C, octaveDiff: -45cents",
+                    name: "minorThirdSize: 288.75cents, root: C, octaveDiff: -45cents",
                     anchor: 60, // C4
-                    minorThirdSize: 288.75  // semitoneSize: 96.2500
+                    minorThirdSize: 288.7500  // semitoneSize: 96.2500
                 },
                 {
                     name: "minorThirdSize: 312.50cents, root: C, octaveDiff: +50cents",
@@ -584,6 +586,135 @@ ResSynth.tuningDefs =
                     name: "minorThirdSize: 287.50cents, root: C, octaveDiff: -50cents",
                     anchor: 60, // C4
                     minorThirdSize: 287.5000 // semitoneSize: 95.8333
+                }
+            ]
+    },
+    // interlocking major third tunings (constant C4, 6 perfect fifths per octave)
+    {
+        // This tuning group uses the following constructor:
+        //   tuning = getInterlockingMajorThirdsTuning(anchor, majorThirdSize)
+        //
+        // The 'anchor' argument is the key whose frequency is the same as in standard 12-tone equal temperament (which has A4=440Hz).
+        // The 'majorThirdSize' argument is the size of the interval between keys separated by 4 places on the keyboard.
+        //
+        // These tunings consist of four interlocked "major third scales": C-E-G#, D#-G-B, D-F#-A#, C#-F-A.
+        // The 'anchor' key defines the pitch level of the first scale.
+        // The second scale is transposed so that it always contains the pitch exactly a perfect fifth above the anchor
+        // (i.e. if the anchor is C, then C-G and E-B are perfect fifths).
+        // The third scale is transposed so that it always contains the pitch exactly a perfect fifth above the second scale.
+        // (i.e. if the anchor is C, then G-D and B-F# are perfect fifths).
+        // The fourth scale is transposed so that it always contains the pitch exactly a perfect fifth above the third scale.
+        // (i.e. if the anchor is C, then F#-C# and A#-F are perfect fifths).
+        // So tunings in this tuning group always contain 6 perfect fifths per octave.
+        // The "wolf fifths" are C#-G#, D-A, D#-A#, F-C, G#-C# and A-E.
+        ctor: ResSynth.tuningType.INTERLOCKING_MAJORTHIRDS_SCALES,
+        name: "interlocking major thirds tunings (constant C4)",
+        tunings:
+            [
+                {
+                    name: "majorThirdSize: 400cents, root: C, octaveDiff: 0",
+                    anchor: 60, // C4
+                    majorThirdSize: 400  // semitoneSize: 100
+                },
+                {
+                    name: "majorThirdSize: 401.67cents, root: C, octaveDiff: +5cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 401.6667  // semitoneSize: 100.4167
+                },
+                {
+                    name: "majorThirdSize: 398.33cents, root: C, octaveDiff: -5cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 398.3333 // semitoneSize: 99.5833                
+                },
+                {
+                    name: "majorThirdSize: 403.33cents, root: C, octaveDiff: +10cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 403.3333  // semitoneSize: 100.8333
+                },
+                {
+                    name: "majorThirdSize: 396.67cents, root: C, octaveDiff: -10cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 396.6667 // semitoneSize: 99.1667
+                },
+                {
+                    name: "majorThirdSize: 405.00cents, root: C, octaveDiff: +15cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 405.0000  // semitoneSize: 101.2500
+                },
+                {
+                    name: "majorThirdSize: 395.00cents, root: C, octaveDiff: -15cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 395.0000  // semitoneSize: 98.7500
+                },
+                {
+                    name: "majorThirdSize: 406.67cents, root: C, octaveDiff: +20cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 406.6667  // semitoneSize: 101.6667
+                },
+                {
+                    name: "majorThirdSize: 393.33cents, root: C, octaveDiff: -20cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 393.3333  // semitoneSize: 98.3333
+                },
+                {
+                    name: "majorThirdSize: 408.33cents, root: C, octaveDiff: +25cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 408.3333 // semitoneSize: 102.0833
+                },
+                {
+                    name: "majorThirdSize: 391.67cents, root: C, octaveDiff: -25cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 391.6667 // semitoneSize: 97.9167
+                },
+                {
+                    name: "majorThirdSize: 410.00cents, root: C, octaveDiff: +30cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 410.0000 // semitoneSize: 102.5000
+                },
+                {
+                    name: "majorThirdSize: 390.00cents, root: C, octaveDiff: -30cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 390.0000 // semitoneSize: 97.5000
+                },
+                {
+                    name: "majorThirdSize: 411.67cents, root: C, octaveDiff: +35cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 411.6667 // semitoneSize: 102.9167
+                },
+                {
+                    name: "majorThirdSize: 388.33cents, root: C, octaveDiff: -35cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 388.3333 // semitoneSize: 97.0833
+                },
+                {
+                    name: "majorThirdSize: 413.33cents, root: C, octaveDiff: +40cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 413.3333 // semitoneSize: 103.3333
+                },
+                {
+                    name: "majorThirdSize: 386.67cents, root: C, octaveDiff: -40cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 386.6667 // semitoneSize: 96.6667
+                },
+                {
+                    name: "majorThirdSize: 415.00cents, root: C, octaveDiff: +45cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 415.0000 // semitoneSize: 103.7500
+                },
+                {
+                    name: "majorThirdSize: 385.00cents, root: C, octaveDiff: -45cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 385.0000  // semitoneSize: 96.2500
+                },
+                {
+                    name: "majorThirdSize: 416.67cents, root: C, octaveDiff: +50cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 416.6667 // semitoneSize: 104.1667
+                },
+                {
+                    name: "majorThirdSize: 383.33cents, root: C, octaveDiff: -50cents",
+                    anchor: 60, // C4
+                    majorThirdSize: 383.3333 // semitoneSize: 95.8333
                 }
             ]
     },
