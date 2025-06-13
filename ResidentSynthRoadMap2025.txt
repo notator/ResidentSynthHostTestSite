@@ -6,14 +6,60 @@ into the stable branch.
 
 ===========================================================================================================================================
 DONE:
-** Implemented a new, equally tempered tuning group (CONSTANT_SEMITONE_FACTOR). Each tuning in the group has a single "perfect" interval
-divided into as many equal sized intervals as there are keys between that interval. Each tuning has its own characteristic constant pitch
-interval between adjacent keys. All the defined tunings have C4=261.63Hz (which gives A4=440Hz in a standard 12-tone ET scale).
+** Added the tuning for 31 keys per octave to the CONSTANT_MIDI_KEY_FACTOR tuning group.
+
+** Implemented new tuning groups:
+    CONSTANT_SEMITONE_FACTOR
+    CONSTANT_SEMITONE_SIZE
+    INTERLOCKING_WHOLETONE_SCALES
+    INTERLOCKING_MINORTHIRDS_SCALES
+    INTERLOCKING_MAJORTHIRDS_SCALES
+    SLIDING_SEMITONE_SIZE
+A description of the algorithm for each of these can be found in their definition in tuningDefs.js.
+
+These tuning groups are constructed, rather like 12-tone equal temperament, by algorithmically setting the sizes of semitones.
+The introduction of equal temperament, during the Baroque period, was a _radical_ departure from the abstract reliance on mathematical proportions.
+It removes unduly "sour" intervals in order to cater to the requirements of contemporary composers.
+Tuning was no longer justified by physics, but on perception, taste, and the desire to develop the rules of perceived harmony.
+I would like to take that idea further, and build on that tradition. The language of mathematics is necessary when talking to machines, but music
+is ultimately about _perception_, not abstractions...
+
+These are, of course, not the only possible tunings. It would be perfectly possible, for example, to create tunings that are _selections_
+from tunings like 31-tones per octave. Note that the ResidentSynth can change tunings instantly, so its quite possible to arrange to play
+different "selections" quasi at the same time... I think composers could, for example, decide on a particular tuning for a particular piece, and
+investigate new rules of "harmony" that apply to that tuning. As in the past, they would rely on their taste when selecting apropriate harmonies
+(maybe avoiding "sour" ones).
+
+See also my email to George Mowat-Brown 8th June 2025, about the CONSTANT_SEMITONE_FACTOR and CONSTANT_SEMITONE_SIZE tuning groups.
+
+This is like working in curved Einsteinian space-time rather than in flat Euclidean space-time (12TET)!
+Duchamp would have loved it! :-) The Pythagorean comma is irrelevant in curved pitch space! :-)
+
+On Keyboards:
+The tunings are deliberately intended for use with standard keyboards: I think its best to build on players' existing keyboard technique rather than
+to expect them to buy, and learn to use, new microtonal keyboards. This is rather like my attitude to notation: its best, if possible, to
+build on years of evolution, rather than to try to invent something completely new. Standard keyboards have evolved for ease of use with human
+hands, which are not going to change overnight. I think a good way to develop microtonality is to embed it in current performance practice, by
+building on existing techniques -- including classical harmony, couterpoint and keyboard technique. Note that the notation denotes the _keys_
+that are to be pressed, not the way they sound, so complicated accidentals are not required (and don't need to be learned). Pianists just have
+to get used to their instrument "transposing"...
+
+Many of the new tunings prioritize the perfect fifth. Note that the existing "Warped Octave" tuning algorithm could be used to assign the
+perfect fifth (3/2) to each key avove the root in turn...
+
+The CONSTANT_SEMITONE_FACTOR group:
+Each tuning in the CONSTANT_SEMITONE_FACTOR group has a single "perfect" interval divided into as many equal sized intervals as there are
+keys between that interval. Each tuning has its own characteristic constant pitch interval between adjacent keys. All the defined tunings
+have C4=261.63Hz (which gives A4=440Hz in a standard 12-tone ET scale).
+Each tuning provides different sonorities, especially as chords become more widely spaced.
 For example:
 If the "perfect" interval is the octave: The frequency ratio between adjacent keys is 2^(1/12), which is standard 12-tone equal temperament.
 If the "perfect" interval is the fifth: The frequency relation for a perect fifth is (3/2), and there are 7 keys in between, so
 the equal frequency ratio between all adjacent keys is (3/2)^(1/7).
 Comment:
+These tunings diverge more and more from standard 12-tone ET as the keys get further from the middle of the keyboard. But, if the physical
+distances between the keys on the keyboard (fingerings) remain the same, then the internal pitch relationships within the chord will also
+remain _exactly_ the same. 
 Except when the "perfect" interval is the octave, these tunings have _no_ exact octaves. Each tuning has its own degree of drift away from
 standard 12-tone ET as intervals get larger, but, in all tunings, all intervals remain exactly the same for keys that are the same distance
 apart.
@@ -25,24 +71,13 @@ The tuningsFactory has a function orderOfConsonanceForPerfectKeyIntervals() that
 This function was purely for use while ordering the 14 tunings in the tuningDefs.js file. Its return value is ignored at runtime.
 Purely out of interest, I have now added the pure interval tunings up to 23 steps, to see if anything interesting can be observed. 
 
-These tunings are a different species of Equal Temperament, each having different sonorities, especially as chords become more widely spaced.
-They are deliberately intended for use with standard keyboards: I think its best to build on players' existing keyboard technique rather than
-to expect them to buy, and learn to use, new microtonal keyboards. This is rather like my attitude to notation: its best, if possible, to
-build on years of evolution, rather than to try to invent something completely new. Standard keyboards have evolved for ease of use with human
-hands, which are not going to change overnight. I think a good way to develop microtonality is to embed it in current performance practice, by
-building on existing techniques -- including classical harmony, couterpoint and keyboard technique. Note that the notation denotes the _keys_
-that are to be pressed, not the way they sound, so complicated accidentals are not required (and don't need to be learned). Pianists just have
-to get used to their instrument "transposing"...
-
-These ET tunings diverge more and more from standard 12-tone ET as the keys get further from the middle of the keyboard. But, if the physical
-distances between the keys on the keyboard (fingerings) remain the same, then the internal pitch relationships within the chord will also
-remain _exactly_ the same. This is like working in curved Einsteinian space-time rather than in flat Euclidean space-time (12TET)!
-Duchamp would have loved it! :-) The Pythagorean comma is made irrelevant by distorting the pitch space! :-)
-
-** Added the tuning for 31 keys per octave to the CONSTANT_MIDI_KEY_FACTOR tuning group.
-
 ===========================================================================================================================================
-TODOs (The order is not particularly significant):
+
+TODOs (The order is not particularly significant here, but think carefully before proceding!):
+
+** Note that I sent George demo MP4 files made with the Flashback Recorder. This is a fairly simple process. I should make similar recordings
+of all the tuning groups, illustrating their more interesting hamonies. It would be a good idea to have a few scores that I could play in the
+AssistantPerformer at the WAC2025. Or am I being too ambitious? :-)
 
 ** The ResidentSynthHost should both import and export scala files. See https://www.huygens-fokker.org/scala/scl_format.html. I've also added
 a PDF of that page (scala_format.pdf) to this project. Note that scala describes pitches in absolute cents above 0 (the lowest key) with an
