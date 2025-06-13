@@ -735,84 +735,84 @@ ResSynth.tuningDefs =
         tunings:
             [
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 2/1, pureKey: 12, octave1Diff: 0",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 2/1, pureKey: 12, octave1Diff: 0cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: 2.0,
                     pureKey: 12
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 17/16, pureKey: 1, octave1Diff: +3.87",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 17/16, pureKey: 1, octave1Diff: +387cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (17 / 16),
                     pureKey: 1
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 9/8, pureKey: 2, octave1Diff: +1.02",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 9/8, pureKey: 2, octave1Diff: +102cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (9 / 8),
                     pureKey: 2
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 19/16, pureKey: 3, octave1Diff: -0.32",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 19/16, pureKey: 3, octave1Diff: -32cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (19 / 16),
                     pureKey: 3
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 5/4, pureKey: 4, octave1Diff: -1.07",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 5/4, pureKey: 4, octave1Diff: -107cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (5 / 4),
                     pureKey: 4
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 21/16, pureKey: 5, octave1Diff: -1.52",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 21/16, pureKey: 5, octave1Diff: -152cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (21 / 16),
                     pureKey: 5
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 11/8, pureKey: 6, octave1Diff: -1.81",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 11/8, pureKey: 6, octave1Diff: -111cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (11 / 8),
                     pureKey: 6
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 3/2, pureKey: 7, octave1Diff: +0.06",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 3/2, pureKey: 7, octave1Diff: +1cent",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (3/2),
                     pureKey: 7
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 25/16, pureKey: 8, octave1Diff: -0.59",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 25/16, pureKey: 8, octave1Diff: -59cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (25 / 16),
                     pureKey: 8
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 13/8, pureKey: 9, octave1Diff: -1.03",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 13/8, pureKey: 9, octave1Diff: -103cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (13/8),
                     pureKey: 9
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 7/4, pureKey: 10, octave1Diff: -0.44",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 7/4, pureKey: 10, octave1Diff: -44cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (7 / 4),
                     pureKey: 10
                 },
                 {
-                    name: "anchor: 60 (C4), origin: 60, pureRatio: 15/8, pureKey: 11, octave1Diff: -0.14",
+                    name: "anchor: 60 (C4), origin: 60, pureRatio: 15/8, pureKey: 11, octave1Diff: -14cents",
                     anchor: 60, // C4
                     origin: 60, // C4
                     pureRatio: (15/8),
