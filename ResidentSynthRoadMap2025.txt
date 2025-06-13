@@ -3,6 +3,7 @@ TODOs and Commentary about the changes being made before the Web Audio conferenc
 These are being implemented gradually, in conjunction with changes being made in the AssistantPerformer (2025).
 This file is intended to be a help when revising the main documentation for the ResidentSynth(Host) when the TODOS2025 branch is merged
 into the stable branch.
+Note the connection, when revising the docs, to Neo-Riemannian theory of chord transformations by step-wise motion (which I've just discovered).
 
 ===========================================================================================================================================
 DONE:
