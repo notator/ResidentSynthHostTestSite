@@ -43,7 +43,9 @@ build on years of evolution, rather than to try to invent something completely n
 hands, which are not going to change overnight. I think a good way to develop microtonality is to embed it in current performance practice, by
 building on existing techniques -- including classical harmony, couterpoint and keyboard technique. Note that the notation denotes the _keys_
 that are to be pressed, not the way they sound, so complicated accidentals are not required (and don't need to be learned). Pianists just have
-to get used to their instrument "transposing"...
+to get used to their instrument "transposing".
+Note that, as with church organs, its perfectly possible to have multiple keyboards (on different input channels). And its perfectly possible to use
+a pedal to switch channels/keyboards to different tunings.
 
 Many of the new tunings prioritize the perfect fifth. Note that the existing "Warped Octave" tuning algorithm could be used to assign the
 perfect fifth (3/2) to each key avove the root in turn...
