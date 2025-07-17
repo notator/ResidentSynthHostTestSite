@@ -48,7 +48,7 @@ Note that, as with church organs, its perfectly possible to have multiple keyboa
 a pedal to switch channels/keyboards to different tunings.
 
 Many of the new tunings prioritize the perfect fifth. Note that the existing "Warped Octave" tuning algorithm could be used to assign the
-perfect fifth (3/2) to each key avove the root in turn...
+perfect fifth (3/2) to each key above the root in turn...
 
 The CONSTANT_SEMITONE_FACTOR group:
 Each tuning in the CONSTANT_SEMITONE_FACTOR group has a single "perfect" interval divided into as many equal sized intervals as there are
@@ -91,7 +91,7 @@ Note that pitches in the ResidentSynthHost are currently rounded to the nearest 
 pitch of the Residentsynth's 0th key should always be ignored: The pitch of scala's 0th key, never explicit in the file, is always 0.
 I need to investigate how scala treats key mapping. The ResidentSynthHost will always export 127 pitches --> 127 keys, so maybe that's irrelevant...
 
-** remove DataEntry and RegisteredParam messages. I've decided to nolonger support backwards compatibility with the old
+** remove DataEntry and RegisteredParam messages. I've decided no longer to support backwards compatibility with the old
 DataEntry and RegisteredParam messages. I will remove them from the codebase. They are not used in any of the
 examples, and they are not needed for the new AssistantPerformer. I'm intending to create a completely new
 Assistantperformer site (AssistantPerformer2025), keeping the old one as well for archive purposes, migrating as many
